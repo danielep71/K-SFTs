@@ -73,3 +73,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/labels-sync.mjs --policy .github/label-policy.json --mode reconcile --repository "${GITHUB_REPOSITORY}"
+
+      - name: Read setup milestone for issue planning (temporary)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/milestones?state=all&per_page=100" --jq '.[] | {number,title,state,html_url}'
