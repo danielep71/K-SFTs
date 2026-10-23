@@ -98,6 +98,11 @@
       "description": "Regression coverage, test harnesses, fixtures, or manual validation"
     },
     {
+      "name": "unblocked",
+      "color": "0E8A16",
+      "description": "Ready to start; no unresolved prerequisite prevents work"
+    },
+    {
       "name": "wontfix",
       "color": "6E7781",
       "description": "Maintainers have decided not to implement or continue this work"
