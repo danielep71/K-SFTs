@@ -30,7 +30,7 @@ bypass branch rules.
 | Branch | Role |
 | --- | --- |
 | `main` | Integrated source. Receives the active release branch through a merge commit after maintainer approval. No task branches or task pull requests target it. |
-| `release/0.1.0` | **Active setup integration branch** for v0.1.0 - Repo setup. Base for task branches and target of task pull requests. Created from `main` at `85b2b3b` on 2026-10-23 by maintainer decision. |
+| `release/0.1.0` | **Active setup integration branch** for v0.1.0 - Repo setup. Base for task branches and target of task and sync pull requests. Created from `main` at `85b2b3b` on 2026-10-23 by maintainer decision. |
 | Other `release/X.Y.Z` | Opened only by maintainer decision, without a `v` prefix. Do not infer a new target from a version number or from this document. |
 | `fix/<issue>-<slug>`, `docs/<slug>`, `test/<slug>` | Short-lived task branches, created from the active release branch and deleted after merge. |
 
@@ -50,16 +50,24 @@ release will be published (see [Releases](#-releases)).
    issue reference.
 4. Integrate the release branch into `main` through a pull request merged with
    a merge commit, only after maintainer approval.
-5. After the integration commit passes its checks on `main`, fast-forward the
-   release branch to it, so both branches start level again.
-6. When `main` receives commits that are not on the release branch,
-   fast-forward the release branch to the checked `main` commit if possible.
-   If the branches diverge, open a pull request from `main` to the release
-   branch and verify its checks.
+5. After the integration commit passes its checks on `main`, bring the
+   release branch level with `main` through a sync pull request from `main`
+   into the release branch, merged with a merge commit once its checks pass.
+6. `main` receives commits only through these integration pull requests. If
+   it receives any other commit while the release branch has commits of its
+   own, the sync pull request cannot meet the up-to-date rule; stop and
+   record a maintainer decision before integrating further.
+
+`main` and the release branches change only through pull requests, as the
+[protection policy](#-protection-policy) requires. The release branch is
+therefore not fast-forwarded by a direct push, and GitHub's *Update branch*
+action, which pushes to the head branch, is not used when that branch is
+`main` or a release branch. After an integration, the sync merge commit
+changes no files: it gives the release branch the integration commit, so the
+next release-to-`main` pull request meets the up-to-date rule.
 
 Never rebase, amend or force-push a commit that has been pushed to a shared
-branch, and do not push an unchecked merge commit directly to `main` or a
-release branch. History is corrected with new commits.
+branch. History is corrected with new commits.
 
 ## 🔎 Review
 
