@@ -1,0 +1,52 @@
+name: Bootstrap repo setup milestone
+# Temporary one-off setup; removed after successful verification.
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/bootstrap-milestone.yml]
+permissions:
+  issues: write
+concurrency:
+  group: bootstrap-repo-setup-milestone
+  cancel-in-progress: false
+jobs:
+  create:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Create requested milestone if absent and verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base = "https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/milestones"
+          title = "v0.1.0 - Repo setup"
+          def request(url, data=None):
+              payload = None if data is None else json.dumps(data).encode()
+              req = urllib.request.Request(url, data=payload, headers={
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "Content-Type": "application/json"
+              })
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+          matches = []
+          for page in range(1, 101):
+              batch = request(base + "?state=all&per_page=100&page=" + str(page))
+              matches.extend(m for m in batch if m["title"] == title)
+              if len(batch) < 100:
+                  break
+          else:
+              raise RuntimeError("Pagination limit exceeded")
+          if len(matches) > 1:
+              raise RuntimeError("Multiple matching milestones; no mutation performed")
+          milestone = matches[0] if matches else request(base, {"title": title, "state": "open"})
+          verified = request(base + "/" + str(milestone["number"]))
+          assert verified["title"] == title
+          evidence = {key: verified[key] for key in ("number", "title", "state", "html_url", "due_on")}
+          print("VERIFIED_MILESTONE " + json.dumps(evidence))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("Verified milestone: [" + title + "](" + verified["html_url"] + ")\n")
+          PY
