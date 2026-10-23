@@ -1,0 +1,29 @@
+# Proposes updates to the SHA-pinned GitHub Actions used by the workflows.
+# Every update arrives as a pull request for maintainer review; nothing merges
+# automatically. See tools/README.md, "Dependency updates".
+# target-branch and milestone must name the active release branch and its
+# milestone in docs/GOVERNANCE.md; update both when a new one is opened.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: release/0.1.0
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Rome
+    open-pull-requests-limit: 5
+    labels:
+      - ci
+      - P3
+    assignees:
+      - danielep71
+    # v0.1.0 - Repo setup
+    milestone: 1
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns:
+          - "*"

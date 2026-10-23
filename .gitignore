@@ -1,0 +1,7 @@
+# Reports and logs written by tools/check.py
+test-results/
+
+# Python and quality-tool caches
+__pycache__/
+.mypy_cache/
+.ruff_cache/
