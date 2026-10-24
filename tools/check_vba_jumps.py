@@ -34,7 +34,9 @@ PROC_OPEN = re.compile(
     r"(Sub|Function|Property\s+(?:Get|Let|Set))\s+([A-Za-z_]\w*)\b", re.IGNORECASE)
 PROC_CLOSE = re.compile(r"^\s*End\s+(Sub|Function|Property)\b", re.IGNORECASE)
 NAMED_LABEL = re.compile(r"^\s*([A-Za-z_]\w*|\d+):")
-NUMBERED_LABEL = re.compile(r"^\s*(\d+)(?=\s+\S)")
+# A line number, followed by a statement or by nothing once a comment such
+# as "100 Rem target" or "100 ' target" has been stripped.
+NUMBERED_LABEL = re.compile(r"^\s*(\d+)(?=\s|$)")
 JUMP = re.compile(r"\b(GoTo|GoSub|Resume)\b(?:\s+([A-Za-z_]\w*|\d+|-1))?", re.IGNORECASE)
 ON_ERROR = re.compile(r"\bon\s+error\s*$", re.IGNORECASE)
 # Statements that can stand alone before a colon, as in "Else: x = 1"; a

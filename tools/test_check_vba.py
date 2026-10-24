@@ -458,6 +458,13 @@ Private Sub Second(): Debug.Print 2: End Sub
         Exit Sub
 End Sub
 ''',
+    "numbered-comment-line-as-target": '''Private Sub First()
+        GoTo 100
+100 Rem target
+        GoTo 200
+200 ' target
+End Sub
+''',
     "colons-in-a-date-literal": '''Private Sub First()
         Debug.Print #12:30:00 PM#: GoTo Done
 Done:
