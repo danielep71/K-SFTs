@@ -145,6 +145,7 @@ configured, read back and exercised in [#12](https://github.com/danielep71/CCR-K
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
 | Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
 | Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, so it is active only after integration. |
+| Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/CCR-K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
 | Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
 | Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
 
@@ -256,7 +257,14 @@ no release, tag or workbook is published. Closing a milestone or integrating a
 release branch into `main` does not publish a release; publication happens
 only on an explicit maintainer decision.
 
-## 🔐 Security
+## 🔐 Security and licensing
 
 Never include tokens, credentials or confidential client data in issues,
-examples or commits. The security policy is defined in [#3](https://github.com/danielep71/CCR-K-SFTs/issues/3).
+examples or commits. Report suspected vulnerabilities privately as
+[SECURITY.md](../SECURITY.md) describes; it also records the security features
+in use.
+
+The repository is licensed under the Mozilla Public License 2.0
+([LICENSE](../LICENSE)). [NOTICE.md](../NOTICE.md) holds the copyright notice
+and the provenance register of files adapted from other repositories: add an
+entry in the change that adapts a file.
