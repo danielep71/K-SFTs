@@ -127,6 +127,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
 - `Rem` recognized after a `:` separator and after a numeric line label as
   well as at the line start, and `vba-jumps` reading each statement of a
   line separated by `:`, so that `Private Sub F(): ...: End Sub` closes;
+- an apostrophe or a colon inside `[...]`, as in `['Sheet 1'!A1]` or
+  `[A1:B2]`, read as part of the expression, and every target of
+  `On <expression> GoTo` and `GoSub` checked, not only the first;
 - `VBA6` true under VBA7, as Microsoft documents it (false there in
   K-SACCR), and no `Declare` keyword test on procedure lines, which also
   matched text inside string literals;

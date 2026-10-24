@@ -465,6 +465,25 @@ End Sub
 200 ' target
 End Sub
 ''',
+    "bracketed-sheet-name": '''Private Sub First(): Debug.Print ['Sheet 1'!A1]: End Sub
+
+Private Sub Second()
+        Debug.Print [A1:B2]: GoTo Done
+Done:
+End Sub
+''',
+    "jump-keyword-in-a-sheet-name": '''Private Sub First()
+        Debug.Print ['GoTo Missing'!A1], [GoSub!B2]: GoTo Done
+Done:
+End Sub
+''',
+    "computed-jump": '''Private Sub First(ByVal Choice As Long)
+        On Choice GoTo One, Two
+        On Choice GoSub One, Two
+One:
+Two:
+End Sub
+''',
     "colons-in-a-date-literal": '''Private Sub First()
         Debug.Print #12:30:00 PM#: GoTo Done
 Done:
@@ -520,6 +539,12 @@ End Sub
     "procedure-opened-twice": ("Private Sub First()\nPrivate Sub Second()\nEnd Sub\n",
                                "is not closed before Second"),
     "stray-end": ("End Sub\n", "End statement outside any procedure"),
+    "computed-jump-missing-target": ("Private Sub First(ByVal Choice As Long)\n"
+                                     "        On Choice GoTo Present, Missing\nPresent:\nEnd Sub\n",
+                                     "GoTo target 'Missing'"),
+    "jump-after-bracketed-sheet-name": ("Private Sub First()\n"
+                                        "        Debug.Print ['Sheet 1'!A1]: GoTo Lost\nEnd Sub\n",
+                                        "GoTo target 'Lost'"),
     "one-line-procedure-missing-label": ("Private Sub First(): GoTo Lost: End Sub\n",
                                          "GoTo target 'Lost'"),
 }
@@ -762,6 +787,8 @@ class LexerTest(unittest.TestCase):
             "100 Rem GoTo Missing": "100",
             "  10 x = 1 ' note": "  10 x = 1",
             "10: Rem note": "10:",
+            "x = ['Sheet 1'!A1] ' note": "x = ['Sheet 1'!A1]",
+            "x = [A1] ' note": "x = [A1]",
             "x = 1: Remark = 2": "x = 1: Remark = 2",
             '"it\'s": GoTo Label': '"it\'s": GoTo Label',
         }
@@ -770,6 +797,8 @@ class LexerTest(unittest.TestCase):
                 self.assertEqual(strip_code(raw), expected)
         self.assertEqual(strip_code('Debug.Print "GoTo x": GoTo y', blank_strings=True),
                          "Debug.Print         : GoTo y")
+        self.assertEqual(strip_code("x = ['GoTo z'!A1]: GoTo y", blank_strings=True),
+                         "x = [" + " " * len("'GoTo z'!A1") + "]: GoTo y")
 
 
 class MainTest(unittest.TestCase):

@@ -39,6 +39,10 @@ NAMED_LABEL = re.compile(r"^\s*([A-Za-z_]\w*|\d+):")
 NUMBERED_LABEL = re.compile(r"^\s*(\d+)(?=\s|$)")
 JUMP = re.compile(r"\b(GoTo|GoSub|Resume)\b(?:\s+([A-Za-z_]\w*|\d+|-1))?", re.IGNORECASE)
 ON_ERROR = re.compile(r"\bon\s+error\s*$", re.IGNORECASE)
+# On <expression> GoTo|GoSub <label>, <label>, ...: every listed target.
+LABEL = r"(?:[A-Za-z_]\w*|\d+)"
+COMPUTED_JUMP = re.compile(rf"\bOn\b(?!\s+Error\b).*?\b(GoTo|GoSub)\s+({LABEL}(?:\s*,\s*{LABEL})*)",
+                           re.IGNORECASE)
 # Statements that can stand alone before a colon, as in "Else: x = 1"; a
 # keyword is never a label.
 KEYWORDS = frozenset({"beep", "do", "else", "end", "loop", "next", "resume", "return", "stop",
@@ -67,9 +71,16 @@ def label_at_start(code: str) -> str | None:
 def statement_jumps(code: str) -> list[tuple[str, str]]:
     """``(operation, target)`` for each jump to a label in one statement.
 
-    ``Resume``, ``Resume Next`` and ``On Error GoTo 0`` or ``-1`` name no label.
+    ``Resume``, ``Resume Next`` and ``On Error GoTo 0`` or ``-1`` name no label;
+    ``On <expression> GoTo`` and ``GoSub`` name every target of their list.
     """
     jumps: list[tuple[str, str]] = []
+    computed = COMPUTED_JUMP.search(code)
+    if computed:
+        jumps.extend((computed.group(1), target.strip())
+                     for target in computed.group(2).split(","))
+        code = code[:computed.start()] + " " * (computed.end() - computed.start()) + \
+            code[computed.end():]
     for match in JUMP.finditer(code):
         operation, target = match.group(1), match.group(2)
         if target is None or (operation.casefold() == "resume" and target.casefold() == "next"):
