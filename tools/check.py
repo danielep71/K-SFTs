@@ -59,7 +59,7 @@ def run(command: Sequence[str], root: Path, stdin: str | None = None) -> tuple[i
 
 
 def ruff_complexity_probe(root: Path, scratch: Path) -> tuple[int, str]:
-    """Prove the complexity ceiling is active: 15 branches pass and 16 fail."""
+    """Prove the complexity ceiling is active: complexity 15 passes and 16 fails."""
 
     def source(branches: int) -> str:
         body = "".join(f"    if x == {i}:\n        return {i}\n" for i in range(branches - 1))

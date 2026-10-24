@@ -14,7 +14,7 @@ parameters apply here.
 every component. The `vba-*` gates of `python tools/check.py` enforce the
 mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
-and the public API inventory. Everything else is enforced by review
+of whatever VBA would otherwise make public, and the public API inventory. Everything else is enforced by review
 ([what the checks cannot see](../tools/README.md#vba-static-checks)).
 
 <a id="naming"></a>
@@ -297,7 +297,8 @@ generated, names the generator and says it must not be edited by hand.
   imported ([INSTALLATION.md](../INSTALLATION.md#importing-vba-into-excel)).
 - **Forms:** a `.frm` and its `.frx` are one component, kept side by side in
   `src/forms/`. The `.frx` is binary and never edited as text.
-- **Workbooks and other Office files** are build outputs, ignored by Git. One
+- **Workbooks, Access databases and macro-enabled Office files** are build
+  outputs, ignored by Git. One
   may be committed only at an exact path re-included in `.gitignore` and
   approved in an issue; the only intended one is the macro-free template in
   `src/workbook/`. No such path is approved yet.

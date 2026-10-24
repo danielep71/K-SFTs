@@ -2,8 +2,12 @@
 
 The harness runs only in Excel. These tests check, without Excel, what its
 source can show: that the example suite's expected counts equal the cases and
-assertions it contains, that every case runs once with a well-formed unique
-identifier, and that the documented passing RESULT line matches the counts.
+assertions it contains, that every case runs once, in order, with a
+well-formed unique identifier, that each case's stated assertion count is
+right, and that the documented passing RESULT line and skipped-case counts
+match. For the harness: that every record of the tests/README.md log table
+is written, that error values are compared as text and that the documented
+failure identifiers exist.
 """
 
 from __future__ import annotations
@@ -43,7 +47,7 @@ class ExampleSuiteTest(unittest.TestCase):
     def test_runner_calls_every_case_once_in_order(self) -> None:
         runner = self.bodies["RunSuite"]
         called = re.findall(r"^\s+(Case\w+)$", runner, re.M)
-        self.assertEqual(sorted(called), sorted(self.cases))
+        self.assertEqual(called, list(self.cases))
         self.assertEqual(len(called), len(set(called)))
 
     def test_each_case_begins_once_with_a_unique_identifier(self) -> None:

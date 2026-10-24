@@ -45,7 +45,7 @@ versions; each gate also writes `<gate>.log`.
 | `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
 | `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
 | `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
-| `vba-public-api` | Every procedure and module-level declaration states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
+| `vba-public-api` | Every procedure, and every module-level declaration that VBA would otherwise make public (`Enum`, `Type`, `Event`, `Declare`), states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
 | `mypy` | `mypy --strict` over `tools/`, tests included. |
@@ -53,7 +53,7 @@ versions; each gate also writes `<gate>.log`.
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 
 The label gates run on every pull request here, although the label workflows
-themselves only run when label files change. Live label reconciliation and
+run on a pull request only when it changes label files. Live label reconciliation and
 drift detection stay in those workflows.
 
 <a id="vba-static-checks"></a>

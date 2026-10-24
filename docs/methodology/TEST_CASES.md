@@ -13,8 +13,9 @@ structure is adapted from K-SACCR's `docs/methodology/TEST_CASES.md` (see
 > value. The transaction, collateral and output fields of real cases are
 > fixed with the input and output contract (`docs/contracts/`, not yet
 > written) once D4, D6 and D7 are decided.
-> `python tools/check_test_cases.py` enforces everything below that a file
-> can show; it never runs a calculation.
+> `python tools/check_test_cases.py` enforces the format rules below; what
+> it does not check is listed under [Checking](#checking). It never runs a
+> calculation.
 
 ## 📁 Files
 
@@ -271,7 +272,10 @@ tolerances, the `illustrative-` naming rule and that each expected file of an
 It does not check:
 
 - whether an input key or a quantity name belongs to the input and output
-  contract, which does not exist yet;
+  contract, which does not exist yet, nor that only `illustrative-` cases
+  exist before it;
+- that a tolerance of `0` and `0` is used only for a whole number, or that
+  the bounds follow the table under [Tolerance](#tolerance);
 - that an `invalid` case has no numeric output for what it rejects;
 - any value: nothing is computed or compared. Running cases in Excel belongs
   to the regression harness

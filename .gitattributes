@@ -10,8 +10,10 @@
 #   - Office packages, UserForm binaries, archives, and media remain binary.
 #   - Binary payloads never receive text normalization or line-based merges.
 #   - GitHub Linguist reports exported modules as VBA.
-#   - Rules depend on file type, except for the copies of regulatory sources
-#     in docs/methodology/sources/, which are stored byte for byte (#8).
+#   - Text and binary handling depends on file type, except for the copies of
+#     regulatory sources in docs/methodology/sources/, which are stored byte
+#     for byte (#8); the only other path rules are the archive exclusions
+#     under ARCHIVE HYGIENE.
 #     Every other location in docs/REPOSITORY_STRUCTURE.md holds files whose
 #     type alone fixes their handling; Linguist already treats docs/ and
 #     examples/ as documentation. Add a path rule only with a layout change
@@ -27,9 +29,13 @@
 #   Attribute changes do not rewrite existing blobs automatically. Inspect any
 #   normalization separately:
 #
-#       git add --renormalize --dry-run .
 #       git add --renormalize .
+#       git status --short
+#       git diff --cached --stat
 #       git diff --cached --check
+#
+#   (`--renormalize --dry-run` lists every tracked file, not only changed
+#   ones; `git restore --staged .` unstages an unwanted result.)
 #
 #   Commit a required normalization as its own mechanical change.
 #

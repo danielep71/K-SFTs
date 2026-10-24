@@ -31,9 +31,10 @@ is created with its first real file.
 ## 🧰 VBA harness
 
 `TEST_Harness` runs one suite at a time. A suite calls `BeginRun` with its
-name and its expected case and assertion counts, `BeginCase` with a
-lower-case kebab-case identifier for each case, the assertions, and
-`EndRun`. Each case has its own error handler that calls `RecordCaseError`,
+name, its mode (`NORMAL` or a deliberate failure mode) and its expected case
+and assertion counts, `BeginCase` with a lower-case kebab-case identifier for
+each case, the assertions, and `EndRun` with the error that escaped its
+runner (0 and empty strings for none). Each case has its own error handler that calls `RecordCaseError`,
 so that one failing case does not stop the others.
 
 | Assertion | Passes when |
@@ -68,18 +69,19 @@ of the table:
 | `RUN=<suite>` | `mode` (`NORMAL` or a deliberate failure mode), `expected_cases`, `expected_assertions`, `started` |
 | `ENVIRONMENT=` | `host`, `version`, `os`, `office` (`64-bit` or `32-bit`), `runtime` (`VBA7` or `VBA6`) |
 | `CASE=<case-id>` | One per case, in run order |
-| `ASSERT=<case-id>/<name>` | `status` (`PASS` or `FAIL`); on failure, the expected and actual values |
+| `ASSERT=<case-id>/<name>` | `status` (`PASS` or `FAIL`); on failure, the assertion's detail: the expected and actual values (and the tolerances, for `AssertNear`), or the suite's text for `AssertTrue` |
 | `FAILURE=<id>` | One per failure: an assertion, `<case-id>.unexpected-error`, `runner.unexpected-error`, `harness.case-id`, `harness.no-case` or `harness.completeness`, with its detail |
 | `ERROR=<case-id>` or `ERROR=run` | `number`, `source`, `description` of an unexpected error |
 | `CASES=<n>`, `ASSERTIONS=<n>` | `expected` |
 | `FAILURES=<n>` | `errors` |
 | `PRIMARY_FAILURE=<id>` | The first failure of the run, when there is one |
-| `CLEANUP=PASS` or `FAIL` | `detail`: the settings compared, or those that changed |
+| `CLEANUP=PASS` or `FAIL` | `detail`: the settings compared, those that changed, or why they could not be compared |
 | `RECOVERY=NONE` or `REQUIRED` | `reason`, `action`, when required |
 | `RESULT=PASS` or `FAIL` | `suite`; `operation`, what ran: `PASS`, `FAIL` (an assertion or a case identifier failed) or `ERROR` (an unexpected error); `completeness` (`COMPLETE` or `INCOMPLETE`); `cases`, `assertions`, `failures`; `cleanup`; `recovery` |
 
-`RESULT` is always the last record of a run. A refused start writes a
-`RESULT=FAIL` with `operation=NOT_RUN` and a `RECOVERY=REQUIRED` record, and
-`ResetTests` writes `RESET=DONE`. Case identifiers and assertion names are
+`RESULT` is the last record of every run that started. A refused start
+writes a `RESULT=FAIL` with `operation=NOT_RUN` and `cleanup=NOT_RUN`,
+followed by a `RECOVERY=REQUIRED` record, both appended to the log kept from
+the previous run; `ResetTests` writes `RESET=DONE`. Case identifiers and assertion names are
 fixed in the suite's source, so two logs of the same commit can be compared
 line by line, apart from `started` and `ENVIRONMENT`.

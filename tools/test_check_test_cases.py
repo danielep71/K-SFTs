@@ -149,7 +149,7 @@ class CheckTestCasesTests(unittest.TestCase):
         self.assertIn("tests/expected/illustrative-case.bcbs.json: is not an object", findings)
 
     def test_non_finite_numbers_are_rejected_in_every_category(self) -> None:
-        for category in ("nominal", "invalid"):
+        for category in ("nominal", "boundary", "invalid"):
             with self.subTest(category=category):
                 data = fixture()
                 data["category"] = category
@@ -163,7 +163,7 @@ class CheckTestCasesTests(unittest.TestCase):
         self.assertFinding("not valid UTF-8 JSON (non-standard number -Infinity)")
 
     def test_overflowing_numbers_are_rejected_in_every_category(self) -> None:
-        for category in ("nominal", "invalid"):
+        for category in ("nominal", "boundary", "invalid"):
             with self.subTest(category=category):
                 data = fixture()
                 data["category"] = category
