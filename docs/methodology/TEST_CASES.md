@@ -101,9 +101,12 @@ A case is one input file and one expected-result file per calculation regime:
 | `_code` | Text code; one ending `currency_code` is three upper-case letters (ISO 4217) |
 | `_id` | Text identifier |
 
-`null` means not applicable. Numbers are finite; JSON cannot hold NaN or
-infinity, so such inputs are tested in a VBA test module
-([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)).
+`null` means not applicable. Files are strict JSON and numbers are finite, in
+every category: `NaN`, `Infinity` and a number that overflows to infinity
+(such as `1e400`) are rejected. A non-finite input is tested in a VBA test
+module instead ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)). A
+file holding only `null`, or anything other than an object, is rejected,
+never skipped.
 
 <a id="expected-format"></a>
 
