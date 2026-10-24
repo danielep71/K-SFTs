@@ -7,7 +7,8 @@ only in their homes, each with its role's name prefix and a VB_Name equal to
 its file name; ASCII only; Option Explicit, and Option Private Module where
 required; no Option Base 1, tab or trailing white space; string literals
 closed; forms beside their .frx; LF storage with CRLF checkout; no workbook
-committed. Adapted from K-SACCR; see NOTICE.md.
+committed but the approved template, which must hold no macros. Adapted from
+K-SACCR; see NOTICE.md.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ import argparse
 import re
 import subprocess
 import sys
+import zipfile
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -42,11 +44,11 @@ HOMES = tuple(sorted({home for home, _ in NAMING}))
 PRIVATE_MODULE_HOMES = ("src/core/", "tests/modules/")
 MAX_NAME = 31  # the VBE rejects a longer component name
 # Workbooks are build outputs. One may be committed only at an exact path
-# approved in an issue and re-included in .gitignore; none is approved yet
-# (docs/REPOSITORY_STRUCTURE.md, Placement rules).
+# approved in an issue and re-included in .gitignore: today only the
+# macro-free template of #102 (docs/REPOSITORY_STRUCTURE.md, Placement rules).
 WORKBOOK_SUFFIXES = frozenset({".xls", ".xlsx", ".xlsm", ".xlsb", ".xlt", ".xltx", ".xltm",
                                ".xlam", ".xla", ".xlw"})
-APPROVED_WORKBOOKS: frozenset[str] = frozenset()
+APPROVED_WORKBOOKS = frozenset({"src/workbook/SFT_Template.xlsx"})
 
 VB_NAME = re.compile(r'^Attribute VB_Name = "([^"]*)"[ \t]*$', re.M)
 OPTION_EXPLICIT = re.compile(r"^[ \t]*Option[ \t]+Explicit[ \t]*(?:'.*)?$", re.M | re.I)
@@ -209,6 +211,22 @@ def storage(root: Path, paths: list[str]) -> list[Finding]:
     return findings
 
 
+def template_problems(root: Path, path: str) -> list[Finding]:
+    """The approved template is a macro-free Office Open XML workbook."""
+    if absent := missing(root, path):
+        return [absent]
+    try:
+        with zipfile.ZipFile(root / path) as package:
+            names = package.namelist()
+    except zipfile.BadZipFile:
+        return [Finding(path, None, "the template is not an Office Open XML package")]
+    if "xl/workbook.xml" not in names:
+        return [Finding(path, None, "the template holds no xl/workbook.xml")]
+    if any(Path(name).name.lower() == "vbaproject.bin" for name in names):
+        return [Finding(path, None, "the template holds a VBA project; it must be macro-free")]
+    return []
+
+
 def check(root: Path) -> tuple[list[Finding], int]:
     tracked = tracked_files(root)
     tracked_set = set(tracked)
@@ -220,7 +238,9 @@ def check(root: Path) -> tuple[list[Finding], int]:
             findings.extend(placement(path))
         if suffix in WORKBOOK_SUFFIXES and path not in APPROVED_WORKBOOKS:
             findings.append(Finding(path, None, "workbook committed; workbooks are built from "
-                                                "source and no committed path is approved"))
+                                                "source and only the template path is approved"))
+        elif path in APPROVED_WORKBOOKS:
+            findings.extend(template_problems(root, path))
     names: dict[str, str] = {}
     for path in components:
         if absent := missing(root, path):

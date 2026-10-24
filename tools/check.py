@@ -106,6 +106,7 @@ def default_gates() -> list[Gate]:
         Gate("vba-conditionals", "python", (python, "tools/check_vba_conditionals.py")),
         Gate("vba-jumps", "python", (python, "tools/check_vba_jumps.py")),
         Gate("vba-public-api", "python", (python, "tools/check_vba_public_api.py")),
+        Gate("vba-manifest", "python", (python, "tools/check_vba_manifest.py")),
         Gate("ruff", "ruff", ("ruff", "check", "--no-cache", "tools")),
         Gate("ruff-complexity-probe", "ruff", probe=ruff_complexity_probe),
         Gate("mypy", "mypy", ("mypy", "--no-incremental")),

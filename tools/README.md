@@ -46,6 +46,7 @@ versions; each gate also writes `<gate>.log`.
 | `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
 | `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
 | `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
+| `vba-manifest` | `tools/vba-projects.json` lists every tracked component of each workbook, once and in sorted order: the document modules of `src/workbook/`, the other `src/` components for production, and those plus `tests/modules/` for development; examples never (`check_vba_manifest.py`). |
 | `vba-public-api` | Every procedure, and every module-level declaration that VBA would otherwise make public (`Enum`, `Type`, `Event`, `Declare`), states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
@@ -170,6 +171,24 @@ evidence folder copied across. Its positive and negative fixtures, built
 from the commit's own source, are in `test_check_excel_run.py`, run by
 `tool-tests`. The fixture logs are synthetic: they follow the documented
 log format, not a recorded run.
+
+<a id="vba-synchronization"></a>
+
+## 🔄 VBA synchronization
+
+`Sync-KSFT-VBA.ps1` imports the repository's VBA into a workbook built from
+`src/workbook/SFT_Template.xlsx`, by Excel's VBA object model, in the mode
+and with the components that `vba-projects.json` lists. The `.cmd` files
+run it for a workbook dragged onto them. It is optional and needs *Trust
+access to the VBA project object model*; the procedure and its safeguards
+are in [INSTALLATION.md](../INSTALLATION.md#synchronizing-vba).
+
+It is adapted from K-SACCR's `Sync-SACCR-VBA.ps1` ([NOTICE.md](../NOTICE.md)):
+this repository's prefixes and homes, homes that do not exist yet skipped,
+a stop without saving when a mode lists nothing, forms imported from the
+repository only, and no retired-component list. No test runs it: it needs
+Windows Excel, and K-SACCR's PowerShell tests were not adopted. It is
+validated by running it on a host ([#102](https://github.com/danielep71/CCR-K-SFTs/issues/102)).
 
 ## 🗂️ Issue triage
 

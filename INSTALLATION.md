@@ -140,11 +140,13 @@ The gates and modes are described in [tools/README.md](tools/README.md).
 
 1. **Start from one exact commit** of a Git checkout. Never mix components
    from different commits.
-2. **Create the workbook.** Once the macro-free template exists in
-   `src/workbook/`, open it and save it with **File → Save As** as **Excel
-   Macro-Enabled Workbook (`.xlsm`)**. Until then, start from a new blank
-   workbook. Save it outside the checkout or in the ignored `test-results/`
-   directory; built workbooks are never committed.
+2. **Create the workbook.** Open the macro-free template
+   `src/workbook/SFT_Template.xlsx` and save it with **File → Save As** as
+   **Excel Macro-Enabled Workbook (`.xlsm`)**, outside the checkout or in
+   the ignored `test-results/` directory. Built workbooks are never
+   committed, and nothing is ever saved over the template. Today the
+   template holds only a Readme sheet; sheets come with the input and output
+   contract.
 3. **Check the references.** Open the VBE (**Alt+F11**) and check that
    **Tools → References** shows only the four listed under
    [supported hosts](#supported-hosts).
@@ -177,6 +179,38 @@ allows.
 
 Do not paste source into arbitrarily named modules: the component name
 (`VB_Name`) is part of the contract and must equal the file name.
+
+<a id="synchronizing-vba"></a>
+
+### Synchronizing VBA into a workbook (optional)
+
+`tools/Sync-KSFT-VBA.ps1` does step 4 (import) and, on request, step 5
+(document modules) for you, in a workbook built from the template. It is a
+convenience, not a requirement:
+
+- It needs Excel's **Trust access to the VBA project object model**
+  (**File → Options → Trust Center → Trust Center Settings → Macro
+  Settings**), which the manual steps above do not. Switch it on only as
+  your organization's policy allows.
+- The manual import stays the route for
+  [recording an Excel run](#recording-an-excel-run): the evidence of an
+  Excel run never depends on it.
+
+With the workbook closed, drag the `.xlsm` onto `tools/Sync-KSFT-VBA.cmd`,
+or run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -Mode Development
+```
+
+| It does | Details |
+| --- | --- |
+| Imports the components of one workbook | `-Mode Production`: those under `src/`; `-Mode Development`: those and `tests/modules/`. Without `-Mode` it asks. The lists are in `tools/vba-projects.json`, which the `vba-manifest` gate keeps equal to the tracked components. |
+| Replaces document-module code, if you agree | It asks, unless `-IncludeSheets` or `-SkipSheets` answers; the workbook's sheet objects are kept. |
+| Imports from a folder | `-SourceDir` (or `tools/Sync-KSFT-VBA-Downloads.cmd`, which asks for one and defaults to `Downloads`) takes only the `.bas` and `.cls` files found there, by their `Attribute VB_Name`, after listing them for confirmation. |
+| Protects the workbook | A backup copy first, removed after a successful save; no change to cells, formulas, names, formatting or sheets, checked before saving; the workbook is closed unsaved on any error. |
+
+It never writes to the repository. After it, compile as in step 6.
 
 <a id="exporting-changes-back"></a>
 

@@ -79,6 +79,11 @@ SFT calculation, public API or workbook.
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
   and a procedure and checker for recording an Excel run against its commit
   ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9).
+- The macro-free workbook template `src/workbook/SFT_Template.xlsx` (a Readme
+  sheet only), and an optional script that imports the repository's VBA into
+  a workbook built from it, with its component manifest and the
+  `vba-manifest` gate
+  ([INSTALLATION.md](INSTALLATION.md#synchronizing-vba); #102).
 - The regulatory basis (the EU CRR, with the Basel Framework as reference),
   registered copies of the texts relied on, and the test-case file format
   ([docs/methodology/](docs/methodology/README.md); #8).
