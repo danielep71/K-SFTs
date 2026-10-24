@@ -1,2 +1,26 @@
-# K-SFTs
-Counterparty risk for security financing transactions
+# CCR-K-SFTs
+
+Counterparty credit risk for securities financing transactions (SFTs):
+repurchase agreements, securities lending and borrowing, and margin lending.
+CCR-K-SFTs is intended to become an Excel/VBA application that calculates SFT
+exposure from transactions, collateral and netting sets.
+
+> [!IMPORTANT]
+> **Status: repository setup only.** There is no calculation engine, public
+> API, workbook or validated method yet. Nothing here should be used to
+> compute exposure. The regulatory framework and approach are still open
+> decisions.
+
+This is an independent personal project.
+
+| Document | Purpose |
+| --- | --- |
+| [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md) | Scope, profile, layout, dependency direction, public API boundary, open decisions |
+| [docs/GOVERNANCE.md](docs/GOVERNANCE.md) | Branches, integration, review, protection, issues, releases |
+| [docs/TRAFFIC.md](docs/TRAFFIC.md) | Repository traffic history |
+| [tools/README.md](tools/README.md) | Repository checks: `python tools/check.py` |
+| [SECURITY.md](SECURITY.md) | Reporting vulnerabilities; synthetic data only |
+| [NOTICE.md](NOTICE.md), [LICENSE](LICENSE) | Copyright, provenance and the MPL-2.0 licence |
+
+Installation and contributor onboarding are completed in
+[#10](https://github.com/danielep71/CCR-K-SFTs/issues/10).
