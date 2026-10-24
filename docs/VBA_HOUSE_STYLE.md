@@ -9,8 +9,9 @@ structure is adapted from K-SACCR's `docs/VBA_HOUSE_STYLE.md` (see
 [NOTICE.md](../NOTICE.md)); none of K-SACCR's components, formulas or
 parameters apply here.
 
-**Status on 2026-10-24:** no VBA component exists yet. These rules apply from
-the first one. The `vba-*` gates of `python tools/check.py` enforce the
+**Status on 2026-10-24:** the only VBA components are the test modules in
+`tests/modules/`; no production component exists yet. These rules apply to
+every component. The `vba-*` gates of `python tools/check.py` enforce the
 mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 and the public API inventory. Everything else is enforced by review
@@ -120,7 +121,9 @@ signature. Omit sections that are empty.
 
 - **Error numbers** are named `ERR_` constants in the range
   `vbObjectError + 2048` to `vbObjectError + 4095`, defined once in a core
-  module and re-exposed by the facade when callers need them.
+  module and re-exposed by the facade when callers need them. The test
+  modules use `vbObjectError + 4064` to `vbObjectError + 4095`; production
+  code leaves those free.
 - **Raise** with `Err.Raise number, source, description`. The source names
   the component and procedure (`"CORE_Validation.ValidateCollateral"`); the
   description states what was invalid and the offending value.
@@ -173,9 +176,10 @@ it.
    caller, also when the primary error is re-raised. When only cleanup
    failed, the procedure raises `ERR_CLEANUP_FAILED`, never success.
 
-No reference implementation exists yet; the regression scaffold of
-[#7](https://github.com/danielep71/CCR-K-SFTs/issues/7) is to provide one.
-The sketch below shows the pattern.
+The reference implementation is `RunExampleOperation` in
+[tests/modules/TEST_Examples.bas](../tests/modules/TEST_Examples.bas), with
+cases for the success path, a primary error with failed cleanup, and a
+cleanup-only failure. The sketch below shows the pattern.
 
 ```vb
 'In a standard module named M_Example
