@@ -69,11 +69,10 @@
 *.mde
 *.ade
 
-# The only intended exception is the macro-free workbook template in
-# src/workbook/ (docs/REPOSITORY_STRUCTURE.md). No workbook is approved yet.
-# Approve one only by its exact rooted path, in the issue that introduces it,
-# for example:
-# !/src/workbook/Example_Template.xlsx
+# The only exception is the macro-free workbook template, approved by its
+# exact rooted path in #102 (docs/REPOSITORY_STRUCTURE.md). Approve any other
+# only the same way, in the issue that introduces it.
+!/src/workbook/SFT_Template.xlsx
 #
 # Built workbooks are saved outside the checkout or under /test-results/
 # (INSTALLATION.md) and are never re-included.

@@ -301,8 +301,11 @@ generated, names the generator and says it must not be edited by hand.
 - **Workbooks, Access databases and macro-enabled Office files** are build
   outputs, ignored by Git. One
   may be committed only at an exact path re-included in `.gitignore` and
-  approved in an issue; the only intended one is the macro-free template in
-  `src/workbook/`. No such path is approved yet.
+  approved in an issue. The only one is the macro-free template
+  `src/workbook/SFT_Template.xlsx`, approved in
+  [#102](https://github.com/danielep71/CCR-K-SFTs/issues/102); the
+  `vba-source` gate rejects any other workbook and a template that holds a
+  VBA project.
 
 ## 🔎 Review and validation
 

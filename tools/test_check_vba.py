@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import zipfile
 from collections.abc import Callable, Iterator, Mapping
 from pathlib import Path
 
@@ -168,6 +169,15 @@ def run_check(check: Callable[[Path], tuple[list[Finding], *tuple[int, ...]]],
         return [str(finding) for finding in check(root)[0]]
 
 
+def package(*names: str) -> bytes:
+    """A ZIP package holding empty members with these names."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        for name in names:
+            archive.writestr(name, "")
+    return buffer.getvalue()
+
+
 def changed(path: str, old: str, new: str, files: Mapping[str, str | bytes] = VALID
             ) -> dict[str, str | bytes]:
     text = files[path]
@@ -288,6 +298,20 @@ class SourceTest(unittest.TestCase):
 
     def test_workbooks_are_not_committed(self) -> None:
         self.assertFinding({"src/workbook/CCR-K-SFTs.xlsm": b"PK\x03\x04"}, "workbook committed")
+
+    def test_only_the_approved_template_may_be_committed(self) -> None:
+        template = "src/workbook/SFT_Template.xlsx"
+        self.assertEqual(self.findings({template: package("xl/workbook.xml")}), [])
+        self.assertFinding({"src/workbook/Other_Template.xlsx": package("xl/workbook.xml")},
+                           "workbook committed")
+        self.assertFinding({template: package("xl/workbook.xml", "xl/vbaProject.bin")},
+                           "holds a VBA project")
+        self.assertFinding({template: b"not a zip"}, "not an Office Open XML package")
+        self.assertFinding({template: package("word/document.xml")}, "no xl/workbook.xml")
+
+    def test_the_repository_template_is_macro_free(self) -> None:
+        self.assertEqual(check_vba_source.template_problems(ROOT, "src/workbook/SFT_Template.xlsx"),
+                         [])
 
     def test_main_exit_codes(self) -> None:
         for files, expected in ((VALID, 0), ({"src/Stray.bas": CORE}, 1)):
