@@ -223,6 +223,12 @@ Each fixture declares one `category`:
 - An `invalid` case is expected to be **rejected**, never calculated: each of
   its expected files holds at least one `_status` text output, and no numeric
   output for a transaction or netting set it rejects.
+- In an `invalid` case the checker still enforces the structure (envelope,
+  identifiers, keys, unit suffixes, links between items), but not the domain
+  of the values: an unknown product, a value of the wrong type for its suffix,
+  a malformed currency code or an amount without `currency_code` are allowed,
+  because they are what the case tests. In every other category they are
+  rejected.
 - The status texts are fixed with the output contract. A rejection never
   substitutes a default value
   ([VBA_HOUSE_STYLE.md](../VBA_HOUSE_STYLE.md#errors)).

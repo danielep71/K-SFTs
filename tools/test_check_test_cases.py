@@ -293,6 +293,39 @@ class CheckTestCasesTests(unittest.TestCase):
         self.ws.case(data, ("crr", expected("illustrative-case", "CRR", status)))
         self.assertEqual(self.ws.findings(), [])
 
+    def test_invalid_case_may_hold_out_of_domain_values(self) -> None:
+        data = fixture()
+        data["category"] = "invalid"
+        netting_set = data["netting_sets"][0]
+        netting_set["transactions"][0]["product"] = "swap"
+        netting_set["transactions"][0]["inputs"].update(currency_code="eur", start_date="soon",
+                                                        haircut_rate="high")
+        del netting_set["collateral"][0]["inputs"]["currency_code"]
+        status = number_output(quantity="transaction_status", transaction="T1", text="REJECTED")
+        for key in ("value", "unit", "tolerance"):
+            del status[key]
+        self.ws.case(data, ("crr", expected("illustrative-case", "CRR", status)))
+        self.assertEqual(self.ws.findings(), [])
+        data["category"] = "nominal"
+        self.ws.case(data, ("crr", expected("illustrative-case", "CRR", status)))
+        for text in ("unknown product 'swap'", "'currency_code' has an invalid value",
+                     "'start_date' has an invalid value", "'haircut_rate' has an invalid value",
+                     "inputs hold an amount but no currency_code"):
+            self.assertFinding(text)
+
+    def test_invalid_case_still_checks_structure(self) -> None:
+        data = fixture()
+        data["category"] = "invalid"
+        netting_set = data["netting_sets"][0]
+        netting_set["transactions"][0]["product"] = 7
+        netting_set["transactions"][0]["inputs"]["cash"] = 1
+        netting_set["collateral"][0]["transaction_id"] = "T9"
+        self.ws.case(data)
+        for text in ("unknown product 7", "input 'cash' has no unit suffix",
+                     "transaction_id 'T9' is not in this netting set",
+                     "an invalid case needs a _status text output"):
+            self.assertFinding(text)
+
     def test_main_reports_and_exit_code(self) -> None:
         self.ws.case(fixture())
         out = io.StringIO()

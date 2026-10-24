@@ -131,11 +131,12 @@ def register_ids(root: Path) -> set[str]:
     return ids
 
 
-def input_value_problem(key: str, value: object) -> str | None:
+def input_value_problem(key: str, value: object, invalid: bool) -> str | None:
+    """Check a key's unit suffix and, outside an invalid case, its value's domain."""
     suffix = next((s for s in SUFFIXES if key.endswith(s)), None)
     if suffix is None:
         return f"input {key!r} has no unit suffix"
-    if value is None:
+    if value is None or invalid:
         return None
     if suffix in ("_amount", "_rate", "_factor", "_years"):
         valid = is_number(value)
@@ -152,7 +153,7 @@ def input_value_problem(key: str, value: object) -> str | None:
     return None if valid else f"input {key!r} has an invalid value for its suffix {suffix}"
 
 
-def check_inputs(inputs: object, where: str, report: Report) -> None:
+def check_inputs(inputs: object, where: str, invalid: bool, report: Report) -> None:
     if not isinstance(inputs, dict):
         report.add(where, "inputs is not an object")
         return
@@ -160,14 +161,15 @@ def check_inputs(inputs: object, where: str, report: Report) -> None:
         if not SNAKE.match(key):
             report.add(where, f"input {key!r} is not lower snake case")
             continue
-        if problem := input_value_problem(key, value):
+        if problem := input_value_problem(key, value, invalid):
             report.add(where, problem)
-    if any(k.endswith("_amount") for k in inputs) and inputs.get("currency_code") is None:
+    if (not invalid and any(k.endswith("_amount") for k in inputs)
+            and inputs.get("currency_code") is None):
         report.add(where, "inputs hold an amount but no currency_code")
 
 
 def check_items(items: object, allowed: frozenset[str], where: str, seen: set[str],
-                report: Report) -> list[dict[str, Any]]:
+                invalid: bool, report: Report) -> list[dict[str, Any]]:
     """Check a list of transactions or collateral items; return the valid objects."""
     if not isinstance(items, list):
         report.add(where, "is not a list")
@@ -187,25 +189,31 @@ def check_items(items: object, allowed: frozenset[str], where: str, seen: set[st
             report.add(at, f"id {item['id']!r} is not unique in the fixture")
         else:
             seen.add(item["id"])
-        check_inputs(item["inputs"], at, report)
+        check_inputs(item["inputs"], at, invalid, report)
         valid.append(item)
     return valid
 
 
-def check_netting_set(item: dict[str, Any], at: str, seen: set[str], report: Report) -> set[str]:
-    """Check one netting set; return its transaction IDs."""
+def check_netting_set(item: dict[str, Any], at: str, seen: set[str], invalid: bool,
+                      report: Report) -> set[str]:
+    """Check one netting set; return its transaction IDs.
+
+    In an invalid case the structure is still checked, but not the domain of the
+    values: an unknown product or an out-of-domain input is what such a case tests.
+    """
     if not is_text(item["counterparty_id"]):
         report.add(at, "counterparty_id is not a text")
-    check_inputs(item["inputs"], at, report)
+    check_inputs(item["inputs"], at, invalid, report)
     transactions = check_items(item["transactions"], TRANSACTION_KEYS, f"{at}.transactions",
-                               seen, report)
+                               seen, invalid, report)
     ids = {str(t["id"]) for t in transactions}
     for index, transaction in enumerate(transactions):
-        if transaction["product"] not in PRODUCTS:
+        product = transaction["product"]
+        if not is_text(product) or (not invalid and product not in PRODUCTS):
             report.add(f"{at}.transactions[{index}]",
                        f"unknown product {transaction['product']!r}")
     collateral = check_items(item["collateral"], COLLATERAL_KEYS, f"{at}.collateral", seen,
-                             report)
+                             invalid, report)
     for index, entry in enumerate(collateral):
         if entry["transaction_id"] is not None and entry["transaction_id"] not in ids:
             report.add(f"{at}.collateral[{index}]",
@@ -250,6 +258,7 @@ def check_fixture(path: Path, root: Path, report: Report) -> Case | None:
         report.add(where, problem)
     netting_sets: dict[str, set[str]] = {}
     seen: set[str] = set()
+    invalid = data["category"] == "invalid"
     sets = data["netting_sets"]
     if not isinstance(sets, list) or not sets:
         report.add(where, "netting_sets is not a non-empty list")
@@ -262,7 +271,7 @@ def check_fixture(path: Path, root: Path, report: Report) -> Case | None:
         if not is_text(item["id"]) or item["id"] in netting_sets:
             report.add(at, "id is not a unique text")
             continue
-        netting_sets[item["id"]] = check_netting_set(item, at, seen, report)
+        netting_sets[item["id"]] = check_netting_set(item, at, seen, invalid, report)
     return Case(str(data["category"]), netting_sets)
 
 
