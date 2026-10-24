@@ -30,14 +30,16 @@ Resolves #
 
 <!-- After a push, wait for any earlier review to finish, then post
 @codex review as a top-level comment and compare the completed review's SHA
-with the current head (docs/GOVERNANCE.md, Review). For a bot-authored PR,
+with the current head (docs/GOVERNANCE.md, Review). Write the reviewed SHA
+and the result here as text: the Codex summary comment is edited in place, so
+its link later shows another commit. For a bot-authored PR,
 record the maintainer's review of the final head and that Codex was skipped.
 A sync PR whose diff is empty needs CI only: record the empty diff instead of a
 review. -->
 
 - Final PR head SHA:
 - Review type (Codex / maintainer review of a bot-authored PR / not required: empty-diff sync PR):
-- Reviewed commit SHA and review permalink:
+- Reviewed commit SHA, result (as text) and review link:
 - `Repository integrity` result and run link:
 
 - [ ] Review covers the current PR head; all findings are fixed or answered and applicable threads resolved.
