@@ -55,10 +55,11 @@ every open issue and reports findings; it never changes an issue. The
 `Issue triage` workflow runs it on issue events with a read-only token.
 Pull requests are not audited, but their numbers are loaded so that a
 dependency section may name one as a reference; it never counts as a
-prerequisite.
+prerequisite. The token therefore needs `pull-requests: read` as well:
+without it the issues API omits pull requests.
 
 ```sh
-GITHUB_TOKEN=<token with issues:read> python tools/check_issues.py --repository danielep71/CCR-K-SFTs
+GITHUB_TOKEN=<token with issues:read and pull-requests:read> python tools/check_issues.py --repository danielep71/CCR-K-SFTs
 python tools/check_issues.py --input issues.json   # issues exported as GitHub REST JSON
 python tools/check_issues.py --check-config        # forms and label catalogue only
 ```
