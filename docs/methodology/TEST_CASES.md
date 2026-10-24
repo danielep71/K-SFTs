@@ -12,18 +12,18 @@ structure is adapted from K-SACCR's `docs/methodology/TEST_CASES.md` (see
 > `illustrative-format-example`, shows the format and holds no regulatory
 > value. The transaction, collateral and output fields of real cases are
 > fixed with the input and output contract (`docs/contracts/`, not yet
-> written) once D3 to D7 are decided.
+> written) once D4, D6 and D7 are decided.
 > `python tools/check_test_cases.py` enforces everything below that a file
 > can show; it never runs a calculation.
 
 ## 📁 Files
 
-A case is one input file and one expected-result file per regime:
+A case is one input file and one expected-result file per calculation regime:
 
 | File | Holds |
 | --- | --- |
 | `tests/fixtures/<case-id>.json` | Synthetic inputs: netting sets, transactions, collateral |
-| `tests/expected/<case-id>.<regime>.json` | Expected results for one regime, `crr` or `bcbs`, each with its provenance |
+| `tests/expected/<case-id>.<regime>.json` | Expected results for one regime, each with its provenance. The only regime is `crr` ([version applicability](README.md#version-applicability)) |
 | `tests/derivations/<name>.py` | Optional: a script that computes expected values from the documented method, separately from the code under test |
 
 - Case IDs are lowercase kebab-case, equal to the fixture's file name and
@@ -141,12 +141,13 @@ infinity, so such inputs are tested in a VBA test module
 
 | Rule | Detail |
 | --- | --- |
-| Envelope | `schema_version` (1), `kind` (`sft-expected`), `fixture` (an existing case ID), `regime` (`CRR` or `BCBS`, matching the file name) and a non-empty `outputs` list are required |
+| Envelope | `schema_version` (1), `kind` (`sft-expected`), `fixture` (an existing case ID), `regime` (a regime of the [version applicability](README.md#version-applicability) table, `CRR`, matching the lower-case file-name suffix) and a non-empty `outputs` list are required |
+| Calculation date | The fixture's `valuation_date` selects the version of the controlling text: it must fall within the dates of a row of the version applicability table for the file's regime. A case dated before 1 January 2025 is rejected, because the pre-CRR3 text is not registered |
 | Output scope | `netting_set` names a netting set of the fixture; `transaction`, when not `null`, names a transaction of that netting set. A netting-set output has `transaction: null` |
 | Quantity | Lower snake case. The quantity names of real cases are fixed with the output contract (D7); an `illustrative-` case may use a name that starts with `illustrative_` for a format-only value |
 | Number | `value`, `unit` and `tolerance`. `unit` is a currency code for an amount, `1` for a rate or factor, `years` or `business_days` |
 | Text | `text`, compared exactly, with no `unit` or `tolerance`. A rejection is a text output whose quantity ends in `_status` |
-| Rule | A rule ID under the [traceability](README.md#traceability) convention, `CRR.<article>[.<paragraph>]` or `CRE22.<paragraph>`, of the file's regime. It may be `null` only for an `illustrative` value |
+| Rule | A rule ID under the [traceability](README.md#traceability) convention, `CRR.<article>[.<paragraph>]`. A Basel paragraph is never a rule ID: Basel is a methodological reference, not a calculation regime. It may be `null` only for an `illustrative` value |
 | Reference | One per output; see [reference classes](#reference-classes) |
 
 <a id="reference-classes"></a>
@@ -214,7 +215,6 @@ Each fixture declares one `category`:
 | `nominal` | Typical inputs within the domain |
 | `boundary` | Values on a domain edge: zero amounts, results that must be exactly zero, a haircut or holding period at a regulatory floor, a single transaction, a single security issue |
 | `invalid` | Inputs that must be rejected: missing or unknown fields, negative amounts where not allowed, a maturity before the start, an unknown product or currency |
-| `regime` | Inputs chosen to show a recorded [regime difference](README.md#regime-differences), normally with a `crr` and a `bcbs` expected file |
 
 <a id="invalid-inputs"></a>
 
@@ -240,15 +240,15 @@ Each fixture declares one `category`:
 ## ✅ Completeness policy
 
 - A rule in the [traceability](README.md#traceability) table is **validated**
-  for a regime only when at least one `published` or `independent` case
-  passes for it in that regime. `illustrative` cases never count.
+  only when at least one `published` or `independent` case passes for it.
+  `illustrative` cases never count.
 - Each implemented rule also needs at least one `boundary` case, and each
   public input domain at least one `invalid` case, as a fixture or a VBA test.
-- Every recorded regime difference has a case that shows it.
 - A run of the test harness that does not execute every expected case and
   assertion is **incomplete, not a pass**
   ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)).
-- A release states which rules are validated, for which regime, and lists
+- A release states which rules are validated, under which version of the
+  controlling text, and lists
   every rule that is implemented but not validated.
 
 <a id="checking"></a>
@@ -258,8 +258,10 @@ Each fixture declares one `category`:
 `tools/check_test_cases.py` runs in `python tools/check.py` and checks the
 files under `tests/fixtures/` and `tests/expected/`: envelopes, identifiers
 and references between them, products, unit suffixes and value types,
-currencies, output forms and units, rule IDs, reference classes and their
-fields, sources against the [register](README.md#source-register), scripts,
+currencies, output forms and units, rule IDs, the regime and the
+calculation date against the [version applicability](README.md#version-applicability)
+table, reference classes and their fields, sources against the
+[register](README.md#source-register), scripts,
 tolerances, the `illustrative-` naming rule and that each expected file of an
 `invalid` case holds a `_status` text output.
 

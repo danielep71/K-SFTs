@@ -29,11 +29,12 @@ SNAKE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
 CURRENCY = re.compile(r"^[A-Z]{3}$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REGISTER_ROW = re.compile(r"^\|\s*`([^`]+)`\s*\|")
+# Rule-ID pattern of each regime that can be declared. A regime is in use only
+# when the methodology's Version applicability table lists it (today: CRR).
 RULES = {"CRR": re.compile(r"^CRR\.\d+[a-z]*(?:\.\d+)?$"), "BCBS": re.compile(r"^CRE22\.\d+$")}
-REGIMES = {"crr": "CRR", "bcbs": "BCBS"}
 PRODUCTS = frozenset({"repo", "reverse_repo", "securities_lending", "securities_borrowing",
                       "margin_lending"})
-CATEGORIES = frozenset({"nominal", "boundary", "invalid", "regime"})
+CATEGORIES = frozenset({"nominal", "boundary", "invalid"})
 CLASSES = frozenset({"published", "independent", "illustrative"})
 UNITS = frozenset({"1", "years", "business_days"})
 SUFFIXES = ("_business_days", "_amount", "_factor", "_years", "_count", "_rate", "_date",
@@ -58,9 +59,18 @@ class Case:
     """What an expected file needs to know about its fixture."""
 
     category: str
+    valuation_date: str
     netting_sets: dict[str, set[str]]
     classes: set[str] = field(default_factory=set)
     expected_files: int = 0
+
+
+@dataclass
+class Methodology:
+    """What the methodology README declares: register IDs and version windows."""
+
+    sources: set[str]
+    windows: dict[str, list[tuple[str, str | None]]]
 
 
 @dataclass
@@ -129,6 +139,37 @@ def register_ids(root: Path) -> set[str]:
         elif in_register and (match := REGISTER_ROW.match(line)):
             ids.add(match.group(1))
     return ids
+
+
+def section_rows(root: Path, title: str) -> list[list[str]]:
+    """Cells of the table rows that start with a code span, in one README section."""
+    rows = []
+    inside = False
+    for line in (root / REGISTER).read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            inside = title in line
+        elif inside and REGISTER_ROW.match(line):
+            rows.append([cell.strip().strip("`") for cell in line.strip().strip("|").split("|")])
+    return rows
+
+
+def read_methodology(root: Path, report: Report) -> Methodology:
+    """Read the register IDs and the version applicability table."""
+    sources = register_ids(root)
+    windows: dict[str, list[tuple[str, str | None]]] = {}
+    for cells in section_rows(root, "Version applicability"):
+        if len(cells) != 4:
+            report.add(REGISTER.as_posix(), f"applicability row {cells} does not have 4 cells")
+            continue
+        regime, source, start, end = cells
+        if (source not in sources or not RULES.get(regime) or not is_date(start)
+                or (end and not is_date(end)) or (end and end < start)):
+            report.add(REGISTER.as_posix(),
+                       f"applicability row for {regime!r} needs a known regime, a register "
+                       "source and valid dates")
+            continue
+        windows.setdefault(regime, []).append((start, end or None))
+    return Methodology(sources, windows)
 
 
 def input_value_problem(key: str, value: object, invalid: bool) -> str | None:
@@ -272,7 +313,7 @@ def check_fixture(path: Path, root: Path, report: Report) -> Case | None:
             report.add(at, "id is not a unique text")
             continue
         netting_sets[item["id"]] = check_netting_set(item, at, seen, invalid, report)
-    return Case(str(data["category"]), netting_sets)
+    return Case(str(data["category"]), str(data["valuation_date"]), netting_sets)
 
 
 def tolerance_problem(tolerance: object) -> str | None:
@@ -370,13 +411,14 @@ def check_output(output: object, case_id: str, case: Case, regime: str,
     return problems
 
 
-def check_expected(path: Path, root: Path, cases: Mapping[str, Case], sources: set[str],
+def check_expected(path: Path, root: Path, cases: Mapping[str, Case], method: Methodology,
                    report: Report) -> None:
     where = rel(path, root)
     case_id, _, regime_name = path.name.removesuffix(".json").rpartition(".")
-    regime = REGIMES.get(regime_name)
-    if regime is None or case_id not in cases:
-        report.add(where, "is not named <case-id>.<crr|bcbs>.json for an existing fixture")
+    regime = regime_name.upper()
+    if not regime_name.islower() or regime not in method.windows or case_id not in cases:
+        names = "|".join(sorted(r.lower() for r in method.windows))
+        report.add(where, f"is not named <case-id>.<{names}>.json for an existing fixture")
         return
     data = load_json(path, root, report)
     if not isinstance(data, dict):
@@ -392,11 +434,15 @@ def check_expected(path: Path, root: Path, cases: Mapping[str, Case], sources: s
                           "fixture and regime as in the file name")
     case = cases[case_id]
     case.expected_files += 1
+    if not any(start <= case.valuation_date and (end is None or case.valuation_date <= end)
+               for start, end in method.windows[regime]):
+        report.add(where, f"valuation_date {case.valuation_date} is outside every registered "
+                          f"{regime} version (methodology README, Version applicability)")
     outputs = data["outputs"] if isinstance(data["outputs"], list) else []
     if not outputs:
         report.add(where, "outputs is not a non-empty list")
     for index, output in enumerate(outputs):
-        for problem in check_output(output, case_id, case, regime, sources, root):
+        for problem in check_output(output, case_id, case, regime, method.sources, root):
             report.add(f"{where}: outputs[{index}]", problem)
     statuses = [o for o in outputs if isinstance(o, dict) and "text" in o
                 and str(o.get("quantity", "")).endswith("_status")]
@@ -419,7 +465,7 @@ def check_cases(cases: Mapping[str, Case], report: Report) -> None:
 def check(root: Path) -> tuple[list[str], int, int]:
     """Return the findings and the numbers of fixtures and expected files checked."""
     report = Report()
-    sources = register_ids(root)
+    method = read_methodology(root, report)
     fixtures = sorted((root / FIXTURES).glob("*.json"))
     expected = sorted((root / EXPECTED).glob("*.json"))
     cases: dict[str, Case] = {}
@@ -427,7 +473,7 @@ def check(root: Path) -> tuple[list[str], int, int]:
         if (case := check_fixture(path, root, report)) is not None:
             cases[path.stem] = case
     for path in expected:
-        check_expected(path, root, cases, sources, report)
+        check_expected(path, root, cases, method, report)
     check_cases(cases, report)
     return report.findings, len(fixtures), len(expected)
 

@@ -10,11 +10,12 @@
 #   - Office packages, UserForm binaries, archives, and media remain binary.
 #   - Binary payloads never receive text normalization or line-based merges.
 #   - GitHub Linguist reports exported modules as VBA.
-#   - Rules depend on file type only. Every location in
-#     docs/REPOSITORY_STRUCTURE.md (src/, tests/, examples/, docs/, tools/)
-#     holds files whose type alone fixes their handling, so no path-specific
-#     rule is needed; Linguist already treats docs/ and examples/ as
-#     documentation. Add a path rule only with a layout change that needs it.
+#   - Rules depend on file type, except for the copies of regulatory sources
+#     in docs/methodology/sources/, which are stored byte for byte (#8).
+#     Every other location in docs/REPOSITORY_STRUCTURE.md holds files whose
+#     type alone fixes their handling; Linguist already treats docs/ and
+#     examples/ as documentation. Add a path rule only with a layout change
+#     that needs it.
 #   - VBA source is ASCII only (docs/VBA_HOUSE_STYLE.md), so no
 #     working-tree encoding is configured.
 #
@@ -231,6 +232,16 @@ Makefile        text eol=lf
 *.woff  opaque
 *.woff2 opaque
 *.eot   opaque
+
+
+#------------------------------------------------------------------------------
+# REGULATORY SOURCE COPIES
+#------------------------------------------------------------------------------
+# Copies whose SHA-256 is registered in docs/methodology/sources/README.md.
+# Never normalized, so the checked-out bytes keep the registered hash; the
+# README itself is ordinary documentation.
+docs/methodology/sources/**             -text
+docs/methodology/sources/README.md      text eol=lf
 
 
 #------------------------------------------------------------------------------

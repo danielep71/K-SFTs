@@ -24,6 +24,13 @@ REGISTER = """# Methodology
 | `BCBS` | CRE22 |
 | `IMPL-EXAMPLE` | An external implementation |
 
+## 📅 Version applicability
+
+| Regime | Source ID | From | To |
+| --- | --- | --- | --- |
+| `CRR` | `CRR` | 2025-01-01 | |
+| `BCBS` | `BCBS` | 2023-01-01 | 2028-10-31 |
+
 ## 🧭 Assumptions
 
 | `NOT-A-SOURCE` | outside the register section |
@@ -325,6 +332,44 @@ class CheckTestCasesTests(unittest.TestCase):
                      "transaction_id 'T9' is not in this netting set",
                      "an invalid case needs a _status text output"):
             self.assertFinding(text)
+
+    def test_methodology_tables_are_read(self) -> None:
+        report = check_test_cases.Report()
+        method = check_test_cases.read_methodology(self.ws.root, report)
+        self.assertEqual(report.findings, [])
+        self.assertEqual(method.windows, {"CRR": [("2025-01-01", None)],
+                                          "BCBS": [("2023-01-01", "2028-10-31")]})
+
+    def test_valuation_date_must_fall_in_a_registered_version(self) -> None:
+        data = fixture()
+        data["valuation_date"] = "2024-12-31"
+        self.ws.case(data, ("crr", expected()), ("bcbs", expected(regime="BCBS")))
+        findings = [f for f in self.ws.findings() if "outside every registered" in f]
+        self.assertEqual(len(findings), 1)
+        self.assertIn("illustrative-case.crr.json: valuation_date 2024-12-31", findings[0])
+        data["valuation_date"] = "2028-11-01"
+        self.ws.case(data, ("bcbs", expected(regime="BCBS")))
+        self.assertFinding("valuation_date 2028-11-01 is outside every registered BCBS version")
+
+    def test_regime_must_be_in_the_applicability_table(self) -> None:
+        register = self.ws.root / "docs/methodology/README.md"
+        register.write_text(register.read_text(encoding="utf-8").replace(
+            "| `BCBS` | `BCBS` | 2023-01-01 | 2028-10-31 |\n", ""), encoding="utf-8")
+        self.ws.case(fixture(), ("bcbs", expected(regime="BCBS")))
+        self.ws.write("tests/expected/illustrative-case.CRR.json", expected())
+        findings = self.ws.findings()
+        self.assertTrue(any("illustrative-case.bcbs.json: is not named <case-id>.<crr>.json"
+                            in f for f in findings), findings)
+        self.assertTrue(any("illustrative-case.CRR.json: is not named" in f for f in findings))
+
+    def test_malformed_applicability_rows_are_reported(self) -> None:
+        register = self.ws.root / "docs/methodology/README.md"
+        register.write_text(register.read_text(encoding="utf-8").replace(
+            "| `BCBS` | `BCBS` | 2023-01-01 | 2028-10-31 |",
+            "| `BCBS` | `NOT-REGISTERED` | 2023-01-01 | 2022-01-01 |\n| `XYZ` | `CRR` | 2025-01-01 | |"
+            "\n| `CRR` | `CRR` |"), encoding="utf-8")
+        findings = self.ws.findings()
+        self.assertEqual(len([f for f in findings if "applicability row" in f]), 3, findings)
 
     def test_main_reports_and_exit_code(self) -> None:
         self.ws.case(fixture())
