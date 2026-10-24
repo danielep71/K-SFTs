@@ -34,8 +34,9 @@ is created with its first real file.
 name, its mode (`NORMAL` or a deliberate failure mode) and its expected case
 and assertion counts, `BeginCase` with a lower-case kebab-case identifier for
 each case, the assertions, and `EndRun` with the error that escaped its
-runner (0 and empty strings for none). Each case has its own error handler that calls `RecordCaseError`,
-so that one failing case does not stop the others.
+runner (0 and empty strings for none). Each case has its own error handler
+that calls `RecordCaseError`, so that one failing case does not stop the
+others.
 
 | Assertion | Passes when |
 | --- | --- |
@@ -82,6 +83,6 @@ of the table:
 `RESULT` is the last record of every run that started. A refused start
 writes a `RESULT=FAIL` with `operation=NOT_RUN` and `cleanup=NOT_RUN`,
 followed by a `RECOVERY=REQUIRED` record, both appended to the log kept from
-the previous run; `ResetTests` writes `RESET=DONE`. Case identifiers and assertion names are
-fixed in the suite's source, so two logs of the same commit can be compared
-line by line, apart from `started` and `ENVIRONMENT`.
+the previous run; `ResetTests` writes `RESET=DONE`. Case identifiers and
+assertion names are fixed in the suite's source, so two logs of the same
+commit can be compared line by line, apart from `started` and `ENVIRONMENT`.

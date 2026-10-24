@@ -7,10 +7,13 @@ against the candidate commit, without Excel:
 
 - source identity: the modules exported back from the workbook equal, line
   for line, the commit's VBA components, and none is missing or extra;
-- the three logs saved with TEST_Harness.SaveLog: the normal run passes,
-  complete, with every case and assertion of the commit's suite in order,
-  cleanup PASS and no recovery; the injected-failure and skipped-case runs
-  end as documented; all three come from one host;
+- the three logs saved with TEST_Harness.SaveLog: each holds, record for
+  record, what the commit's suite writes in its mode (no record missing,
+  extra or out of order, no ERROR), with cleanup PASS and no recovery: the
+  normal run passes with every case and assertion; the injected-failure run
+  fails only its designated assertion; the skipped-case run lacks only the
+  last case and fails only harness.completeness; all three come from one
+  64-bit host;
 - host.txt: the Windows build, the references (exactly the four supported
   ones) and that Debug > Compile VBAProject completed.
 
