@@ -317,8 +317,8 @@ generated, names the generator and says it must not be edited by hand.
 - From the first recorded host run
   ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)) on, changed VBA is
   merged only after it has been imported, compiled and tested in Excel on a
-  [supported host](../INSTALLATION.md#supported-hosts); #9 defines how that
-  run is recorded. Until then, VBA may be merged on a static PASS only if
+  [supported host](../INSTALLATION.md#supported-hosts), and the run is
+  recorded as in [recording an Excel run](../INSTALLATION.md#recording-an-excel-run). Until then, VBA may be merged on a static PASS only if
   the pull request states that it was not compiled or run, as the harness
   was ([#76](https://github.com/danielep71/CCR-K-SFTs/pull/76)).
 
