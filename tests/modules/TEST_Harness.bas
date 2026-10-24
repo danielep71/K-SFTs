@@ -566,12 +566,14 @@ Public Sub AssertErrorValue( _
 '   2026-10-24
 '==============================================================================
 '
-    'Check the type first: comparing a number with an error value raises.
+    'Check the type first, then compare the error values as text
+    '("Error 2007"): comparing a value with an error value by "=" raises
+    'error 13, Type mismatch.
         If Not IsError(Actual) Then
             LogAssertion AssertionName, False, _
                 "expected error " & CStr(ExpectedCode) & "; actual type=" & TypeName(Actual)
         Else
-            LogAssertion AssertionName, (Actual = CVErr(ExpectedCode)), _
+            LogAssertion AssertionName, (CStr(Actual) = CStr(CVErr(ExpectedCode))), _
                 "expected error " & CStr(ExpectedCode) & "; actual=" & CStr(Actual)
         End If
 
