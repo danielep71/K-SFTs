@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "kind": "sft-expected",
+  "fixture": "illustrative-format-example",
+  "regime": "CRR",
+  "outputs": [
+    {
+      "quantity": "illustrative_total_cash_amount",
+      "netting_set": "NS1",
+      "transaction": null,
+      "rule": null,
+      "value": 1000000,
+      "unit": "EUR",
+      "tolerance": {"absolute": 0.000001, "relative": 0.000000001},
+      "reference": {
+        "class": "illustrative",
+        "source": null,
+        "locator": null,
+        "derivation": "Format example only: the sum of the cash_amount inputs of NS1. It is not a regulatory quantity, applies no rule and validates nothing.",
+        "script": null,
+        "derived_by": "Daniele Penza",
+        "reviewed_by": null,
+        "date": "2026-10-24"
+      }
+    },
+    {
+      "quantity": "illustrative_case_status",
+      "netting_set": "NS1",
+      "transaction": "T1",
+      "rule": null,
+      "text": "FORMAT EXAMPLE",
+      "reference": {
+        "class": "illustrative",
+        "source": null,
+        "locator": null,
+        "derivation": "Format example of a text output, compared exactly; the real status texts are fixed with the output contract.",
+        "script": null,
+        "derived_by": "Daniele Penza",
+        "reviewed_by": null,
+        "date": "2026-10-24"
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "kind": "sft-fixture",
+  "id": "illustrative-format-example",
+  "synthetic": true,
+  "description": "Format example only: one repo with one collateral item; holds no regulatory input or value",
+  "category": "nominal",
+  "calculation_currency_code": "EUR",
+  "valuation_date": "2026-01-02",
+  "netting_sets": [
+    {
+      "id": "NS1",
+      "counterparty_id": "CP1",
+      "inputs": {
+        "master_netting_agreement_flag": true
+      },
+      "transactions": [
+        {
+          "id": "T1",
+          "product": "repo",
+          "inputs": {
+            "currency_code": "EUR",
+            "cash_amount": 1000000,
+            "start_date": "2026-01-02",
+            "maturity_date": "2026-04-02"
+          }
+        }
+      ],
+      "collateral": [
+        {
+          "id": "C1",
+          "transaction_id": "T1",
+          "inputs": {
+            "currency_code": "EUR",
+            "market_value_amount": 1020000
+          }
+        }
+      ]
+    }
+  ]
+}

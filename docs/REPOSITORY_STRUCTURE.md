@@ -12,9 +12,13 @@ Governance is in [GOVERNANCE.md](GOVERNANCE.md).
 **Scope.** CCR-K-SFTs is intended to calculate counterparty credit risk
 exposure for **securities financing transactions** (SFTs): repurchase and
 reverse repurchase agreements, securities lending and borrowing, and margin
-lending, together with the collateral exchanged under them. Which regulatory
-framework, approach and products it supports is not decided yet; those
-choices are recorded as [open decisions](#-open-product-and-methodology-decisions).
+lending, together with the collateral exchanged under them. The regulatory
+basis is the EU CRR as the controlling source, with the Basel Framework as
+the methodological reference ([methodology](methodology/README.md#regulatory-basis)).
+The first scope is bilateral SFTs under the Financial Collateral
+Comprehensive Method with supervisory volatility adjustments; products,
+collateral and outputs are still
+[open decisions](#-open-product-and-methodology-decisions).
 
 **Out of scope:** derivatives exposure, which K-SACCR covers with SA-CCR;
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
@@ -73,7 +77,8 @@ second implementation to be kept in step.
 .github/            workflows, issue and pull-request templates, label catalogue
                     and its scripts, Dependabot
 docs/               governance, architecture, contracts, methodology
-  methodology/      regulatory basis, decisions, provenance, fixture contract
+  methodology/      regulatory basis, decisions, provenance, fixture contract,
+    sources/        copies of the regulatory texts relied on
 src/                production VBA source: the only input to the workbook
 tests/              verification source, synthetic fixtures, expected values
 tools/              repository checks and automation (Python)
@@ -114,11 +119,11 @@ committed.
 | `tests/modules/` | The VBA test harness, case runner and suites |
 | `tests/fixtures/` | Synthetic inputs: transactions, collateral, netting sets |
 | `tests/expected/` | Expected results with their provenance |
-| `tests/derivations/` | Python reference derivations that compute expected results, cited by each case |
+| `tests/derivations/` | Python reference derivations that compute expected results, cited by the cases that use them |
 | `examples/modules/` | Example modules calling the public facade only |
 
 The fixture schema, tolerances and provenance rules are defined in
-[#8](https://github.com/danielep71/CCR-K-SFTs/issues/8).
+[methodology/TEST_CASES.md](methodology/TEST_CASES.md).
 
 ## 🔀 Dependency direction
 
@@ -189,7 +194,7 @@ at least:
   calculation is reported.
 
 The contract follows the [open decisions](#-open-product-and-methodology-decisions):
-it cannot be fixed before the regulatory framework and approach are chosen.
+it cannot be fixed before the approach, products and outputs are chosen.
 
 ## ❓ Open product and methodology decisions
 
@@ -201,14 +206,14 @@ apply to SFTs** and are never imported as defaults.
 
 | # | Decision | Why it matters | Where it is made |
 | --- | --- | --- | --- |
-| D1 | Regulatory framework and jurisdiction. Candidates to confirm against the source text: the Basel Framework's credit risk mitigation standard (CRE22: comprehensive approach for collateralised transactions and SFTs under master netting agreements), and the EU CRR's financial collateral comprehensive method (Articles 220 to 223) | Fixes every formula, parameter and term, and the citation format | [#8](https://github.com/danielep71/CCR-K-SFTs/issues/8) |
-| D2 | Rule version and effective date | Results must be reproducible against one dated text | #8 |
-| D3 | Approach: supervisory haircuts, own-estimate haircuts, or a model-based approach | Determines inputs, parameters and validation | Later methodology issue |
+| D1 | Regulatory framework and jurisdiction. **Decided 2026-10-24 ([#8](https://github.com/danielep71/CCR-K-SFTs/issues/8)):** the EU CRR (Regulation (EU) No 575/2013 with Regulation (EU) 2024/1623) is the controlling source and the only calculation regime; the Basel Framework is the methodological reference and EBA Q&As are used for interpretation ([regulatory basis](methodology/README.md#regulatory-basis)) | Fixes every formula, parameter and term, and the citation format | #8 |
+| D2 | Rule version and effective date. **Decided 2026-10-24 (#8):** the version that applies on the calculation date; registered: the CRR consolidated text of 26.06.2026 for calculation dates from 1 January 2025, and CRE22 as in force from 1 January 2023 ([version applicability](methodology/README.md#version-applicability)) | Results must be reproducible against one dated text | #8 |
+| D3 | Approach. **Decided 2026-10-24 (#8):** the Financial Collateral Comprehensive Method (CRR Article 223) with supervisory volatility adjustments (Articles 224, 226, 227); internal models, the Simple Method, CCP treatment and the CRE56 floors are separate scope decisions ([first scope](methodology/README.md#scope)) | Determines inputs, parameters and validation | #8 |
 | D4 | Products in scope: repo and reverse repo, securities lending and borrowing, margin lending | Fixes the transaction record and its validation | Later methodology issue |
-| D5 | Netting: transactions under a master netting agreement versus single transactions | Fixes the netting-set record and aggregation | Later methodology issue |
+| D5 | Netting. **Decided 2026-10-24 (#8):** bilateral SFTs, as single transactions or under an eligible master netting agreement (CRR Articles 206 and 220) | Fixes the netting-set record and aggregation | #8 |
 | D6 | Collateral: eligibility, haircut source, currency mismatch, holding period and remargining frequency | Fixes the collateral record and the haircut arithmetic | Later methodology issue |
 | D7 | Output measures: exposure only, or exposure with intermediate amounts for audit | Fixes the result sheets and the output contract | Later methodology issue |
-| D8 | Numeric conventions: precision, rounding and tolerances | Fixes test tolerances and comparison rules | #8 |
+| D8 | Numeric conventions: precision, rounding and tolerances. **Decided 2026-10-24 (#8):** `Double` arithmetic without intermediate rounding, and explicit absolute and relative tolerances on every expected value ([tolerance](methodology/TEST_CASES.md#tolerance)) | Fixes test tolerances and comparison rules | #8 |
 
 A decision is closed only by a reviewed change that records it, with its
 primary source, in `docs/methodology/` and updates this table.

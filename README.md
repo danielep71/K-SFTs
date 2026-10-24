@@ -8,14 +8,19 @@ exposure from transactions, collateral and netting sets.
 > [!IMPORTANT]
 > **Status: repository setup only.** There is no calculation engine, public
 > API, workbook or validated method yet. Nothing here should be used to
-> compute exposure. The regulatory framework and approach are still open
-> decisions.
+> compute exposure. The regulatory basis is chosen: the EU CRR controls,
+> with the Basel Framework as the methodological reference. The first scope
+> is bilateral SFTs under the Financial Collateral Comprehensive Method;
+> products, collateral and outputs are still open decisions.
 
 This is an independent personal project.
 
 | Document | Purpose |
 | --- | --- |
 | [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md) | Scope, profile, layout, dependency direction, public API boundary, open decisions |
+| [docs/methodology/README.md](docs/methodology/README.md) | Regulatory basis, first scope, version applicability, source register, traceability |
+| [docs/methodology/sources/README.md](docs/methodology/sources/README.md) | Copies of the regulatory texts relied on, with hashes and terms of use |
+| [docs/methodology/TEST_CASES.md](docs/methodology/TEST_CASES.md) | Test-case files, tolerances, reference classes, completeness |
 | [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md) | VBA naming, contracts, errors, cleanup, encoding |
 | [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; importing and exporting the VBA source |
 | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) | Branches, integration, review, protection, issues, releases |
