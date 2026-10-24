@@ -60,11 +60,14 @@ class Record:
 
 @dataclass
 class Suite:
-    """What the commit's example suite runs: case and assertion identifiers in order."""
+    """What the commit's example suite runs: case and assertion identifiers in order,
+    the identifiers of the last case (skipped in SKIPPED_CASE) and the assertions of
+    the case whose expected value INJECTED_FAILURE changes."""
 
     cases: list[str]
     assertions: list[str]
     last_case: list[str]
+    injected: list[str]
     expected_cases: int
     expected_assertions: int
 
@@ -119,6 +122,8 @@ def read_log(path: Path, problems: list[str]) -> list[Record]:
             problems.append(f"{path.name}:{number}: not a KEY=value record")
         else:
             records.append(record)
+    if not records:
+        problems.append(f"{path.name}: incomplete log: no record")
     return records
 
 
@@ -129,6 +134,7 @@ def read_suite(source: bytes) -> Suite:
     cases: list[str] = []
     assertions: list[str] = []
     last_case: list[str] = []
+    injected: list[str] = []
     for name in CALL.findall(bodies.get("RunSuite", "")):
         body = bodies.get(name, "")
         case = BEGIN_CASE.findall(body)
@@ -136,7 +142,9 @@ def read_suite(source: bytes) -> Suite:
         cases += case
         assertions += names
         last_case = case + names
-    return Suite(cases, assertions, last_case, constants.get("EXPECTED_CASES", -1),
+        if 'mMode = "INJECTED_FAILURE"' in body:
+            injected += names
+    return Suite(cases, assertions, last_case, injected, constants.get("EXPECTED_CASES", -1),
                  constants.get("EXPECTED_ASSERTIONS", -1))
 
 
@@ -218,13 +226,26 @@ def expect(name: str, record: Record | None, wanted: dict[str, str],
                             f"expected {value}")
 
 
+def check_failures(name: str, records: list[Record], failing: list[str],
+                   problems: list[str]) -> None:
+    """Exactly the ``failing`` assertions or failure identifiers fail, each once."""
+    failed = [record.value for record in records
+              if record.key == "ASSERT" and record.fields.get("status") != "PASS"]
+    asserted = [item for item in failing if "/" in item]
+    if failed != asserted:
+        problems.append(f"{name}: failed assertions {failed}, expected {asserted}")
+    recorded = [record.value for record in records if record.key == "FAILURE"]
+    if recorded != failing:
+        problems.append(f"{name}: FAILURE records {recorded}, expected {failing}")
+    for record in records:
+        if record.key == "ERROR":
+            problems.append(f"{name}:{record.line}: ERROR={record.value}")
+
+
 def check_normal(records: list[Record], suite: Suite, problems: list[str]) -> None:
     name = LOGS["NORMAL"]
     check_order(name, records, suite.cases, suite.assertions, problems)
-    failed = [record for record in records if record.key in {"FAILURE", "ERROR"} or
-              (record.key == "ASSERT" and record.fields.get("status") != "PASS")]
-    for record in failed:
-        problems.append(f"{name}:{record.line}: {record.key}={record.value}")
+    check_failures(name, records, [], problems)
     expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
     expect(name, summary(records, "RECOVERY"), {"RECOVERY": "NONE"}, problems)
     expect(name, summary(records, "RESULT"), {
@@ -236,6 +257,7 @@ def check_normal(records: list[Record], suite: Suite, problems: list[str]) -> No
 def check_injected(records: list[Record], suite: Suite, problems: list[str]) -> None:
     name = LOGS["INJECTED_FAILURE"]
     check_order(name, records, suite.cases, suite.assertions, problems)
+    check_failures(name, records, suite.injected, problems)
     expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
     expect(name, summary(records, "RESULT"), {
         "RESULT": "FAIL", "operation": "FAIL", "completeness": "COMPLETE",
@@ -249,7 +271,7 @@ def check_skipped(records: list[Record], suite: Suite, problems: list[str]) -> N
     cases = [case for case in suite.cases if case not in skipped]
     assertions = [item for item in suite.assertions if item not in skipped]
     check_order(name, records, cases, assertions, problems)
-    expect(name, summary(records, "FAILURE"), {"FAILURE": "harness.completeness"}, problems)
+    check_failures(name, records, ["harness.completeness"], problems)
     expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
     expect(name, summary(records, "RESULT"), {
         "RESULT": "FAIL", "operation": "PASS", "completeness": "INCOMPLETE",
@@ -308,6 +330,9 @@ def check(root: Path, commit: str, folder: Path) -> Evidence:
     suite = read_suite(sources.get(Path(EXAMPLES).name, b""))
     if not suite.cases:
         evidence.findings.append(f"no example suite in {EXAMPLES} at {commit[:12]}")
+    if len(suite.injected) != 1:
+        evidence.findings.append(f"{EXAMPLES} at {commit[:12]}: INJECTED_FAILURE must change "
+                                 f"exactly one assertion, found {suite.injected}")
     check_logs(folder, suite, evidence)
     check_host(folder, evidence)
     return evidence

@@ -54,7 +54,7 @@ def run_log(mode: str) -> list[str]:
         cases += 1
         for name in (item for item in examples.assertions if item.startswith(f"{case}/")):
             assertions += 1
-            if mode == "INJECTED_FAILURE" and not failures:
+            if mode == "INJECTED_FAILURE" and name in examples.injected:
                 detail = "expected=1; actual=0.75"
                 lines.append(f"ASSERT={name}; status=FAIL; {detail}")
                 lines.append(f"FAILURE={name}; {detail}")
@@ -148,12 +148,19 @@ class EvidenceTest(unittest.TestCase):
             (folder / "examples.log").write_bytes(b"\r\n".join(lines[:-1]))
         self.assertFinding(truncate, "examples.log: incomplete log")
         self.assertFinding(lambda folder: (folder / "skipped.log").unlink(), "skipped.log: missing")
+        def empty(folder: Path) -> None:
+            for filename in check_excel_run.LOGS.values():
+                (folder / filename).write_bytes(b"")
+        found = findings(empty)
+        for filename in check_excel_run.LOGS.values():
+            self.assertIn(f"{filename}: incomplete log: no record", found)
         self.assertFinding(edit("examples.log", "CASE=text-exact\r\n", ""), "examples.log: cases")
         self.assertFinding(edit("examples.log", "RESULT=PASS", "stray line\r\nRESULT=PASS"),
                            "not a KEY=value record")
 
     def test_a_run_that_did_not_pass(self) -> None:
-        self.assertFinding(edit("examples.log", "status=PASS", "status=FAIL"), "ASSERT=")
+        self.assertFinding(edit("examples.log", "status=PASS", "status=FAIL"),
+                           "examples.log: failed assertions")
         self.assertFinding(edit("examples.log", "RESULT=PASS", "RESULT=FAIL"), "RESULT=FAIL")
         self.assertFinding(edit("examples.log", "mode=NORMAL", "mode=SKIPPED_CASE"),
                            "RUN is not suite examples in mode NORMAL")
@@ -178,7 +185,22 @@ class EvidenceTest(unittest.TestCase):
         self.assertFinding(edit("skipped.log", "completeness=INCOMPLETE", "completeness=COMPLETE"),
                            "skipped.log")
         self.assertFinding(edit("skipped.log", "FAILURE=harness.completeness", "FAILURE=other"),
-                           "FAILURE FAILURE=other")
+                           "skipped.log: FAILURE records ['other'")
+        self.assertFinding(edit("skipped.log", "status=PASS", "status=FAIL; x"),
+                           "skipped.log: failed assertions")
+
+    def test_the_injected_failure_must_be_the_designated_assertion(self) -> None:
+        designated = suite().injected[0]
+        other = next(item for item in suite().assertions if item != designated)
+        def moved(folder: Path) -> None:
+            edit("injected.log", f"ASSERT={designated}; status=FAIL; expected=1; actual=0.75",
+                 f"ASSERT={designated}; status=PASS")(folder)
+            edit("injected.log", f"ASSERT={other}; status=PASS",
+                 f"ASSERT={other}; status=FAIL; expected=1; actual=0.75")(folder)
+            edit("injected.log", f"FAILURE={designated}", f"FAILURE={other}")(folder)
+        found = findings(moved)
+        self.assertTrue(any("injected.log: failed assertions" in item for item in found), found)
+        self.assertTrue(any("injected.log: FAILURE records" in item for item in found), found)
 
     def test_environment(self) -> None:
         self.assertFinding(edit("injected.log", "build=17928", "build=18000"),
@@ -205,6 +227,7 @@ class SuiteTest(unittest.TestCase):
         self.assertEqual(len(examples.cases), examples.expected_cases)
         self.assertEqual(len(examples.assertions), examples.expected_assertions)
         self.assertEqual(examples.last_case[0], examples.cases[-1])
+        self.assertEqual(len(examples.injected), 1)
 
     def test_the_entry_point_saves_the_logs_the_checker_reads(self) -> None:
         source = (ROOT / EXAMPLES).read_text(encoding="ascii")

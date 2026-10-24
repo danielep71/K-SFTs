@@ -305,10 +305,10 @@ access to the VBA project object model*.
 | It fails when | Because |
 | --- | --- |
 | An exported module differs from the commit's file, or one is missing or extra | The workbook was not built from that commit |
-| A log is missing, does not end with `RESULT`, holds more than one run, or a line is not a `KEY=value` record | The log is incomplete |
+| A log is missing or empty, does not end with `RESULT`, holds more than one run, or a line is not a `KEY=value` record | The log is incomplete |
 | The normal run is not `RESULT=PASS`, or its cases and assertions differ from the commit's suite in name or order | The run did not pass as written |
 | `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
-| The two failure runs do not end as [documented](#running-the-harness) | The failure paths did not behave |
+| The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |
 | `ENVIRONMENT` lacks a field, differs between the logs, or Office is not 64-bit | The host is unknown or not the supported target |
 | `host.txt` lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
 
