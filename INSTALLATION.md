@@ -129,9 +129,10 @@ Do not paste source into arbitrarily named modules: the component name
    identifier everywhere it appears when one declaration changes case; revert
    case-only changes you did not intend. Check that no non-ASCII character
    was introduced ([export compatibility](docs/VBA_HOUSE_STYLE.md#export-compatibility)).
-3. Run `python tools/check.py`. It is static and does not yet check VBA
-   source; those checks are planned in
-   [#6](https://github.com/danielep71/CCR-K-SFTs/issues/6).
+3. Run `python tools/check.py`. Its `vba-*` gates check the exported files
+   statically (names, options, ASCII, white space, jumps, visibility and the
+   public API inventory); they do not replace compiling in Excel
+   ([tools/README.md](tools/README.md#vba-static-checks)).
 4. Commit. Git stores the files with LF; nothing is converted by hand.
 
 Exported files keep the VBE's header lines (`VERSION`, `BEGIN … END`,

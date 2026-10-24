@@ -3,9 +3,9 @@
 `check.py` is the single entry point for the repository's checks. The same
 command runs locally and in the `Repository integrity` workflow. It checks the
 repository tooling, the label and issue-form configuration and the workflows.
-It also checks the format of the numerical test-case files. It does not check
-VBA source, compile anything in Excel or validate SFT calculations; no such
-gates exist until the code they check exists.
+It also checks the format of the numerical test-case files and, statically,
+the exported VBA source. It never compiles or runs VBA in Excel and never
+validates an SFT calculation ([VBA static checks](#vba-static-checks)).
 
 ## ▶️ Running the checks
 
@@ -40,6 +40,10 @@ versions; each gate also writes `<gate>.log`.
 | `labels-drift-self-test` | The read-only drift detector's fixtures. |
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |
+| `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
+| `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
+| `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
+| `vba-public-api` | Every procedure and module-level declaration states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
 | `mypy` | `mypy --strict` over `tools/`, tests included. |
@@ -49,6 +53,84 @@ versions; each gate also writes `<gate>.log`.
 The label gates run on every pull request here, although the label workflows
 themselves only run when label files change. Live label reconciliation and
 drift detection stay in those workflows.
+
+<a id="vba-static-checks"></a>
+
+## 🔤 VBA static checks
+
+The four `vba-*` gates apply the mechanical rules of
+[VBA_HOUSE_STYLE.md](../docs/VBA_HOUSE_STYLE.md) and the placement and API
+rules of [REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md) to the
+`.bas`, `.cls` and `.frm` files that Git tracks, staged ones included; a new
+file is checked once it is added. They share the reading and lexing in
+`vba_lexer.py`, and each prints how many components it examined. No VBA
+component exists yet, so today they pass over nothing: the count is 0, and a
+PASS says only that nothing tracked breaks a rule.
+
+**Three different checks.** A static PASS is not a compilation and not a
+validation:
+
+| Check | Where | What it proves |
+| --- | --- | --- |
+| Static checks | `python tools/check.py`, locally and in CI | The source files follow the rules above |
+| Compilation | Excel: **Debug → Compile VBAProject** on a [supported host](../INSTALLATION.md#supported-hosts) | The project compiles: names, calls, types, arguments |
+| Numerical validation | The regression harness ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)) against [published or independent cases](../docs/methodology/TEST_CASES.md#completeness-policy) | A rule computes the documented result |
+
+**Modeled hosts.** `vba-conditionals`, `vba-jumps` and `vba-public-api` read
+each component once per compilation environment, with the branches of every
+`#If` that environment would compile: `vba7-win64`, the supported 64-bit
+Excel, plus `vba7-win32` and the pre-VBA7 `vba6-win32`, so that a branch
+written for them is still checked. `Win32` is true in all three, as in VBA.
+The symbols are `VBA6`, `VBA7`, `Win32` and `Win64`; `Mac`, any other symbol
+and a project `#Const` fail closed, because their value cannot be known.
+
+**Not checked, left to review and to compiling in Excel:**
+
+- module and procedure banners, contracts, units and `UPDATED` dates;
+- names of procedures, variables, constants and enumerations, and the
+  component prefixes' subject words;
+- `ByVal`, `Variant` use, alignment, indentation depth and line length;
+- that `src/core/` never touches the Excel object model and holds no
+  module-level state, and that the facade holds no formulas;
+- the error-handling and cleanup patterns, including the scope of
+  `On Error Resume Next`;
+- calls: whether a called procedure exists, is visible and gets the right
+  arguments. Compiling in Excel checks direct calls.
+- **Dynamic calls**: no check resolves a target named in a string or chosen
+  at run time, such as `Application.Run`, `CallByName`, `Application.OnTime`,
+  `Application.OnKey`, a control's `OnAction` or `Evaluate`, or one passed
+  with `AddressOf`. Compiling does not check them either: a misspelled or
+  missing target fails only when the call runs, so each needs a test that
+  runs it. `Option Private Module` and `Private` do not stop
+  `Application.Run` from reaching a procedure; the
+  [public API boundary](../docs/REPOSITORY_STRUCTURE.md#-public-api-boundary)
+  is a contract, not an access control.
+- a comment continued with ` _` onto the next line is read as code by the
+  three environment-aware checks; avoid continuing comments.
+
+**Source and adaptations.** The checks are adapted from K-SACCR
+([NOTICE.md](../NOTICE.md)), which took the jump, conditional-compilation
+and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
+
+- one shared lexer and this repository's finding and exit format instead of
+  K-SACCR's report library, JSON reports and `--self-test` fixtures; the
+  valid and invalid fixtures are in `test_check_vba.py`, run by `tool-tests`;
+- ASCII only instead of the Windows-1252 code page;
+- this repository's homes, role prefixes (`CORE_`, `SFT_`, `C`, `ThisWorkbook`
+  or `sh`, `M_`, `frm`, `TEST_`, `Example`), component kinds per home and the
+  31-character name limit; `Option Private Module` in `tests/modules/` too;
+  `Option Base 1`, tabs and trailing white space rejected; no workbook may be
+  committed;
+- signatures in the inventory without white space just inside parentheses;
+- none of K-SACCR's module names, component counts, workbook template or
+  synchronizer checks, changelog and version checks, and no financial
+  assertion.
+
+Not adopted: K-SACCR's advisory call checker (`check_vba_calls.py`), which is
+not a gate there, does not resolve dynamic calls and depends on a project
+manifest of K-SACCR's modules; its committed-whitespace check, since
+`vba-source` covers VBA source and `.editorconfig` the other files; and its
+CSV, Excel-evidence and case-generation tools, which serve K-SACCR's engine.
 
 ## 🗂️ Issue triage
 

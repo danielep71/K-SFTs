@@ -171,11 +171,14 @@ entries yet. Each supported declaration gets two lines:
 ```
 
 `kind` is `Function`, `Sub`, `Property Get`, `Property Let`, `Property Set`,
-`Const`, `Enum` or `Type`. The signature is the declaration with whitespace
-normalized to single spaces. Lines starting with `#` and blank lines are
-comments, except `# SIG` lines. A check that compares the inventory with the
-exported source is planned with the static checks in
-[#6](https://github.com/danielep71/CCR-K-SFTs/issues/6).
+`Const`, `Variable`, `Declare Function`, `Declare Sub`, `Enum` or `Type`.
+The signature is the declaration with its continuation lines joined, white
+space reduced to single spaces and none just inside parentheses; for an
+`Enum` or `Type` it is its statements joined by ` | `. A declaration that
+differs between `#If` branches has one `# SIG` line per variant. Lines
+starting with `#` and blank lines are comments, except `# SIG` lines. The
+`vba-public-api` gate compares the inventory with the exported source
+([tools/README.md](../tools/README.md#vba-static-checks)).
 
 ### Input and output contract
 
@@ -221,8 +224,9 @@ primary source, in `docs/methodology/` and updates this table.
 ## 🚦 Placement rules
 
 1. VBA components (`.bas`, `.cls`, `.frm`, `.frx`) live only in `src/core/`,
-   `src/modules/`, `src/classes/`, `src/workbook/`, `src/forms/`, `tests/`
-   or `examples/`.
+   `src/modules/`, `src/classes/`, `src/workbook/`, `src/forms/`,
+   `tests/modules/` or `examples/modules/`, without subdirectories, and only
+   as the kinds the [naming table](VBA_HOUSE_STYLE.md#naming) gives each.
 2. Every standard module in `src/core/` declares `Option Private Module`.
 3. Test and example modules never go into the production import set.
 4. Fixtures and examples are synthetic. Never commit real transactions,
@@ -233,9 +237,10 @@ primary source, in `docs/methodology/` and updates this table.
    contractual only when this document, the directory README and the checks
    are updated together.
 
-Rules 1 to 3 and 5 are to be enforced by the static checks of
-[#6](https://github.com/danielep71/CCR-K-SFTs/issues/6); until then they are
-enforced by review. Naming, contracts and encoding are set in
+Rules 1, 2 and 5 are enforced by the `vba-source` gate, and rule 3 by
+rule 1: test and example modules live outside `src/`. Rules 4 and 6 are
+enforced by review ([tools/README.md](../tools/README.md#vba-static-checks)).
+Naming, contracts and encoding are set in
 [VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md), and the import and export steps in
 [INSTALLATION.md](../INSTALLATION.md#importing-vba-into-excel).
 
