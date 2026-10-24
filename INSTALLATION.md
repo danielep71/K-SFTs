@@ -130,7 +130,7 @@ The gates and modes are described in [tools/README.md](tools/README.md).
 | Local check reports | `test-results/repository-integrity.md` and `.json`, and one `<gate>.log` per gate. The directory is ignored by Git. |
 | Hosted check results | The `Repository integrity` run of the pull request: its job summary, and the artifact `repository-integrity-<sha>-<run>-<attempt>`, kept 30 days. |
 | Harness log | The Immediate window; the complete log through `TEST_Harness.SaveLog`, saved outside the checkout or in `test-results/` ([running the harness](#running-the-harness)). |
-| Evidence cited by an issue or pull request | Copied into its body: the run link, the SHA checked and the decisive lines, since logs and artifacts expire ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#accepted-limitations)). Excel run evidence is defined in [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). |
+| Evidence cited by an issue or pull request | Copied into its body: the run link, the SHA checked and the decisive lines, since logs and artifacts expire ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#accepted-limitations)). Excel run evidence: [recording an Excel run](#recording-an-excel-run). |
 
 <a id="importing-vba-into-excel"></a>
 
@@ -241,8 +241,80 @@ more entry points show the failure paths and are expected to fail:
   tolerances, error values, raised errors, completeness and the cleanup
   pattern. It contains no SFT calculation, and a passing run validates
   none. The log format is in [tests/README.md](tests/README.md#log-format);
-  recording a run as evidence is defined in
-  [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9).
+  recording a run as evidence is described below.
+
+<a id="recording-an-excel-run"></a>
+
+## 🧾 Recording an Excel run
+
+The evidence that a commit's VBA was imported, compiled and run on a host,
+for [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9) and for every
+later issue or pull request that cites an Excel run. It needs no
+self-hosted runner, no change to the macro-security level and no *Trust
+access to the VBA project object model*.
+
+1. **Fix the candidate.** In a clone with no local changes
+   (`git status --short` prints nothing), type `git switch --detach <commit>`,
+   then `git rev-parse HEAD` for the full SHA.
+2. **Make the evidence folder**, for example `test-results\excel-run\` in the
+   checkout (ignored by Git), with an empty `exported\` folder inside.
+3. **Build a development workbook** from that checkout as in
+   [building a workbook from source](#building-a-workbook-from-source),
+   with the modules of `tests/modules/`.
+4. **Compile** with **Debug → Compile VBAProject**.
+5. **Run.** In the Immediate window type, with the full path of the folder
+   and no trailing backslash:
+
+   ```text
+   TEST_Examples.SaveExampleEvidence "C:\path\to\test-results\excel-run"
+   ```
+
+   It runs the suite normally, with the injected failure and with the
+   skipped case, and saves each complete log as `examples.log`,
+   `injected.log` and `skipped.log`. Each run prints a `SAVED=` line: the
+   normal run with `error=0`, the two failure runs with the error *Suite
+   examples did not pass*. The errors are printed, not raised, so that all
+   three logs are written.
+6. **Export the modules back.** In the VBE, right-click each module →
+   **Export File**, into `exported\`, under its own name
+   (`TEST_Examples.bas`, `TEST_Harness.bas`). Do not edit the exported files.
+7. **Write `host.txt`** in the folder:
+
+   ```text
+   windows=Windows 11 Pro, version 24H2, OS build 26100.4061
+   references=Visual Basic For Applications; Microsoft Excel 16.0 Object Library; OLE Automation; Microsoft Office 16.0 Object Library
+   compile=PASS
+   ```
+
+   `windows` is what `winver` shows. `references` lists the boxes ticked
+   in **Tools → References**, separated by `; `. Write `compile=PASS` only if
+   step 4 completed with no error; otherwise write what it reported.
+8. **Check** the folder against the commit, with Python 3.12 or later and Git:
+
+   ```sh
+   python tools/check_excel_run.py test-results/excel-run --commit <commit>
+   ```
+
+   It must end with `excel-run: PASS`. It prints the commit, the host and
+   the Git blob id of every imported component.
+9. **Record.** Copy the report into the issue or pull request and add a row
+   to [tested environments](#tested-environments). The logs stay outside Git.
+
+`check_excel_run.py` reads only the folder and the commit:
+
+| It fails when | Because |
+| --- | --- |
+| An exported module differs from the commit's file, or one is missing or extra | The workbook was not built from that commit |
+| A log is missing or empty, does not end with `RESULT`, holds more than one run, or a line is not a `KEY=value` record | The log is incomplete |
+| The normal run is not `RESULT=PASS`, or its cases and assertions differ from the commit's suite in name or order | The run did not pass as written |
+| `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
+| The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |
+| `ENVIRONMENT` lacks a field, differs between the logs, or Office is not 64-bit | The host is unknown or not the supported target |
+| `host.txt` lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
+
+It cannot see Excel: the compile result, the references and the Windows
+build are the runner's own record. A PASS says the evidence is consistent
+with the commit; it validates no SFT calculation.
 
 ## 📚 Related documents
 

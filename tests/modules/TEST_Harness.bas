@@ -1050,7 +1050,8 @@ Private Function EnvironmentSummary() _
         Runtime = "VBA6"
 #End If
         EnvironmentSummary = "host=" & Application.Name & "; version=" & Application.Version & _
-            "; os=" & Application.OperatingSystem & "; office=" & Bitness & "; runtime=" & Runtime
+            "; build=" & CStr(Application.Build) & "; os=" & Application.OperatingSystem & _
+            "; office=" & Bitness & "; runtime=" & Runtime
 
 End Function
 
