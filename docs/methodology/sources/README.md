@@ -16,56 +16,54 @@ are registered below, and a changed byte breaks the record. A newer version
 is added as a new file next to the old one, with its own row.
 `.gitattributes` keeps them out of line-ending normalization.
 
+On 2026-10-24 the first copies of the CRR and CRE22, an XHTML extract and an
+HTML page with its formula images, were replaced by the PDFs below, which
+hold the same versions, by maintainer decision: a PDF can be cited by page
+and shows each formula in place. They are in the Git history.
+
 ## 📄 Files
 
 | File | Source ID | Document | Version | Retrieved from | Retrieved | SHA-256 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `CRR_575-2013_consolidated_2026-06-26_extract_art192-227.xhtml` | `CRR` | Regulation (EU) No 575/2013, consolidated text: Articles 192 to 197, 205 to 207 and 220 to 227 (Article 225 is deleted), with their formula images | 26.06.2026, version 021.001 | <https://publications.europa.eu/resource/celex/02013R0575-20260626> (XHTML) | 2026-10-24 | `06b88b993dd905781d09bfaa4572a7ac0975edc33aa531344ffa9bc32f97db17` |
-| `BCBS_CRE22_inforce_2023-01-01.html` | `CRE22` | Basel Framework, CRE22, the chapter page as served | In force 1 January 2023, published 26 November 2020 | <https://www.bis.org/committees/bcbs/basel-framework/standard/cre/22/inforce/2023-01-01/published/2020-11-26> | 2026-10-24 | `0d82986f3e9fca12d3b4a94f7f17cbc0cfbe12e704491f30704899f30bc699e1` |
-| `BCBS_CRE22_inforce_2023-01-01_images/CRE22_20220101_1.svg` | `CRE22` | Formula image of CRE22.13 (maturity mismatch) | As above | <https://www.bis.org/sites/default/files/committees/bcbs/basel-framework-images/CRE22_20220101_1.svg> | 2026-10-24 | `5ff33d8084e2411b6b034013bdee29c80b56fb591928240f3be207d803c405dd` |
-| `…/CRE22_20220101_2.svg` | `CRE22` | Formula image of CRE22.46 (exposure after risk mitigation) | As above | Same folder on bis.org | 2026-10-24 | `c8aa893eb33edb46ded02f0672b9bdad95054a49bb1d6543efd81d51d8b5bc6c` |
-| `…/CRE22_20220101_3.svg` | `CRE22` | Formula image of CRE22.55 | As above | Same folder | 2026-10-24 | `eb87921b5cfd6d6b84fd1693d632de870fae35def1d47e3d76ef0f9f48d9f3c6` |
-| `…/CRE22_20220101_4.svg` | `CRE22` | Formula image of CRE22.59 (scaling of haircuts) | As above | Same folder | 2026-10-24 | `04eda4380ec717ea41a565b0d6e82baf2eb7e7359b77cfa395c320992c7c2f90` |
-| `…/CRE22_20220101_5.svg` | `CRE22` | Formula image of CRE22.65 (SFTs under a master netting agreement), first of three | As above | Same folder | 2026-10-24 | `de4874f36d554e9e0df9afea681b6e515ad2e1092b1c2c5533ebed0bdc8660ce` |
-| `…/CRE22_20220101_6.svg` | `CRE22` | Formula image of CRE22.65, second of three | As above | Same folder | 2026-10-24 | `45246c60fa4f007af25311611228c59aea2d3b9de2959025f4a9ddbd664c1715` |
-| `…/CRE22_20220101_7.svg` | `CRE22` | Formula image of CRE22.65, third of three | As above | Same folder | 2026-10-24 | `567f77299e5779174d79fb2b5250bb63bf871b2dc4235cbb355597cf1e5c1a6f` |
-| `…/CRE22_20220101_8.svg` | `CRE22` | Formula image of CRE22.66 (SA-CCR for collateralised OTC transactions; context only) | As above | Same folder | 2026-10-24 | `5cf6cdf085cd11bb4e3bcf24d8b9b89eb8b38ecebcd568764626f2a8c067ed91` |
-| `…/CRE22_20220101_9.svg` | `CRE22` | Formula image of CRE22.82 | As above | Same folder | 2026-10-24 | `5a399cc8cc8ee60b5898ca8e24e950b114c2bc141299afe45d5f9cfb723822fe` |
+| `CRR_575-2013_consolidated_2026-06-26_extract.pdf` | `CRR` | Regulation (EU) No 575/2013, consolidated text: page 1 and pages 281 to 323 (Part Three, Title II, Chapter 4: Articles 192 to 227 and the start of Article 228), 44 pages | 26.06.2026, version 021.001 | <https://publications.europa.eu/resource/celex/02013R0575-20260626> (PDF/A-2a) | 2026-10-24 | `8f740a0f717c32c5874f5ce40b8f9cf722265cd1fec94f9bdb8a410c03863e05` |
+| `BCBS_CRE22_effective_2023-01-01.pdf` | `CRE22` | Basel Framework, CRE22 *Standardised approach: credit risk mitigation*, with FAQs, 26 pages | Effective 1 January 2023 (last updated 26 November 2020) | <https://www.bis.org/committees/bcbs/basel-framework/81416/chapter.pdf?version=2023-01-01> | 2026-10-24 | `c1a8c52455e2a1613162632cd007109227d0d1bac71dc1ac9f210cb7728f4b25` |
 | `EBA_QA_2017_3375.md` | `EBA-QA-2017_3375` | EBA Q&A 2017_3375, maturity mismatch under master netting agreements | Final, published 24/07/2020 | <https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2017_3375> | 2026-10-24 | `8a86ae397ee915c61a1f95d4d6ba5a70ea3647ae501f24a32ee9c24e506f6b80` |
 | `EBA_QA_2015_2010.md` | `EBA-QA-2015_2010` | EBA Q&A 2015_2010, EAD of over-collateralised SFTs under the FCCM | Final, published 26/11/2021 | <https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2015_2010> | 2026-10-24 | `321399a1d08cd78ec3e99ea04992133efca163232d41a7ed035b0a7d51d1aeb8` |
 | `EBA_QA_2017_3590.md` | `EBA-QA-2017_3590` | EBA Q&A 2017_3590, original exposure value of SFTs under Article 220 | Final, published 04/10/2019 | <https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2017_3590> | 2026-10-24 | `7754b71031139adeae39ca76b8caf0f213a5a5416107b9ea217ca6b73146ead7` |
 | `EBA_QA_2022_6630.md` | `EBA-QA-2022_6630` | EBA Q&A 2022_6630, notional and current market value of SFTs (C 34.02) | Final, published 28/04/2023 | <https://www.eba.europa.eu/single-rule-book-qa/qna/view/publicId/2022_6630> | 2026-10-24 | `8b92f1406b45e0324ae7610fdcfdc4555b9cd1932af57b4f935536a869a06e73` |
 
-The paragraph of each CRE22 image is the paragraph that precedes it on the
-chapter page. A newer download need not give the same hashes: the publishers
-generate these files on request.
+Page numbers cited for the CRR are those printed on its pages (for example
+*02013R0575 — EN — 26.06.2026 — 021.001 — 309*), not the position in the
+extract.
 
 ## ✂️ How the copies were made
 
-- **CRR extract.** The full consolidated text was retrieved as XHTML (13.2
-  MB, SHA-256 `2d041b5b32d4020fa1decb3bb64e835d6fcb747c5274a61f785b195a9dc9e6ad`;
-  EUR-Lex PDFs could not be retrieved from the environment used). The
-  extract keeps that file's head, reference line and disclaimer unchanged,
-  then each selected article element (`<div class="eli-subdivision"
-  id="art_NNN">` and its content) copied character for character. A comment
-  before each element gives its character offsets in the full file. The
-  formula images are embedded in the article elements as data URIs. Markers
-  outside an article element, such as the one recording the deletion of
-  Article 225, are not part of the extract.
-- **CRE22.** The chapter page and its nine formula images, as served,
-  unchanged. The PDF that bis.org serves for this chapter is the future
-  version in force 1 November 2028 (`CRE22-2028`), so no PDF of the version
-  in force is available.
+- **CRR extract.** The full consolidated text was retrieved as PDF/A-2a from
+  the Publications Office: 895 pages, SHA-256
+  `6796302ed4213bcba4d4b9b17dc48aefcaf7ef586b875c30c8c71a7689288ecf`, the
+  same file as the EUR-Lex PDF of this version (EUR-Lex itself could not be
+  reached from the environment used). Page 1 and pages 281 to 323 were cut
+  from it with pypdf 6.2.1, which copies pages without changing their
+  content and keeps shared fonts shared. Checked: the text of every page
+  (`pdftotext -layout`) equals the same page of the full file; rendered at
+  50 dpi, the pages differ only in anti-aliasing (at most 16 of 255 grey
+  levels), and the formulas of Article 220(3) are present.
+  The same file was retrieved as XHTML first (SHA-256
+  `2d041b5b32d4020fa1decb3bb64e835d6fcb747c5274a61f785b195a9dc9e6ad`).
+- **CRE22.** The chapter PDF as served, unchanged. Its first page reads
+  *Version effective as of 01 January 2023*. bis.org serves the future
+  version (`CRE22-2028`) unless `version=2023-01-01` is asked for, and it
+  generates the PDF on each download, with the download time as its creation
+  date, so a new download does not give the registered hash; the version
+  line is what identifies it.
 - **EBA Q&As.** Text copied from each page's HTML; only the layout and white
   space differ: list items are one line each, and the submitter's name and
   country are omitted. The HTML pages are not committed.
 
-To check that every article of the CRR extract equals the full file, with
-the full file saved as `full.xhtml` next to the repository root; it prints
-the number of articles (16) and `True`:
+To check the files against the hashes above, from the repository root:
 
 ```sh
-python -c "import re;f=open('full.xhtml',encoding='utf-8').read();x=open('docs/methodology/sources/CRR_575-2013_consolidated_2026-06-26_extract_art192-227.xhtml',encoding='utf-8').read();m=[(int(c[1]),int(c[2]),c.end()) for c in re.finditer(r'<!-- art_\d+: characters (\d+) to (\d+) -->\n',x)];print(len(m),all(f[s:e]==x[p:p+e-s] for s,e,p in m))"
+python -c "import glob,hashlib;[print(hashlib.sha256(open(f,'rb').read()).hexdigest(),f) for f in sorted(glob.glob('docs/methodology/sources/*')) if not f.endswith('README.md')]"
 ```
 
 ## ⚖️ Terms of use
