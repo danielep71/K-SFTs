@@ -226,9 +226,11 @@ reports on every pull request and can be made a required check.
 grouped into one pull request against the active release branch, with the
 `ci` and `P3` labels and danielep71 as assignee, with no PR milestone.
 During triage, link each PR to an appropriate issue carrying the milestone.
-Dependabot reads this file from the default branch, so it takes effect once
-it is integrated into `main`. When a new release branch is opened, update its
-`target-branch`. Milestones remain assigned only to issues.
+Dependabot reads this file from the default branch, `main`, where it is
+active ([docs/GOVERNANCE.md](../docs/GOVERNANCE.md#configured-controls)). A
+change to it takes effect once it is integrated into `main`. When a new release
+branch is opened, update its `target-branch`. Milestones remain assigned only
+to issues.
 
 Nothing merges automatically. Before merging an update:
 
