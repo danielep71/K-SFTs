@@ -106,7 +106,7 @@ Applies to `main` and every `release/**` branch:
 | Rule | Policy |
 | --- | --- |
 | Pull request required | Yes; 0 approving reviews (sole owner). |
-| Required status check | `Repository integrity`, once it exists ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)). |
+| Required status check | `Repository integrity`, the job of `.github/workflows/repository-integrity.yml` ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)). |
 | Branch up to date before merge | Required. |
 | Conversations resolved before merge | Required. |
 | Force pushes | Blocked. |
@@ -129,11 +129,11 @@ configured, read back and exercised in [#12](https://github.com/danielep71/CCR-K
 | Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection are available on private repositories under this plan; no upgrade is required. |
 | `main` and `release/0.1.0` branches | Verified: both exist and point at `85b2b3b`. |
 | Rulesets for `main` and `release/**` | Pending: not read back; configuration and verification in [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12). |
-| `Repository integrity` check | Pending: does not exist yet ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)). |
+| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Not yet required by a ruleset ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
 | Squash merging available | Pending: not verified ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
-| Codex code review | Enabled (maintainer-reported); not yet observed on a pull request in this repository. |
-| Dependency updates | Pending: none configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)). |
+| Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
+| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, so it is active only after integration. |
 
 ### Accepted limitations
 
