@@ -61,8 +61,8 @@ SFT calculation, public API or workbook.
 
 ### Added
 
-- A K_SFTs banner in the root README, with a reusable 1280 x 640 image
-  in `docs/assets/` (#113).
+- A K-SFTs banner in the root README, with a reusable 1280 x 640 image
+  in `docs/assets/` (#113, #117).
 
 - Governance: the branch model, integration and sync pull requests, review
   of the final head, rulesets on `main`, `release/**` and `v*` tags, and the

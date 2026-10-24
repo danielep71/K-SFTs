@@ -1,6 +1,6 @@
 # K-SFTs
 
-![K_SFTs - securities financing counterparty credit risk; research and development](docs/assets/K_SFTs-social-preview.jpg)
+![K-SFTs - securities financing counterparty credit risk; research and development](docs/assets/K-SFTs-social-preview.jpg)
 
 Counterparty credit risk for securities financing transactions (SFTs):
 repurchase agreements, securities lending and borrowing, and margin lending.

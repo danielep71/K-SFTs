@@ -78,11 +78,11 @@ records.
 
 ## Artwork
 
-`docs/assets/K_SFTs-social-preview.jpg` was generated with OpenAI image generation
+`docs/assets/K-SFTs-social-preview.jpg` was generated with OpenAI image generation
 on 2026-10-24 at the maintainer's request. The maintainer's K-SACCR and
 K-IRRBB social-preview images supplied the visual references (navy background,
-mint accents and dashboard composition). The approved artwork uses `K_SFTs`;
-the GitHub repository remains `K-SFTs`. The panels are conceptual illustrations,
+mint accents and dashboard composition). The title and footer were corrected to `K-SFTs`
+on the same date to match the repository name (#117). The panels are conceptual illustrations,
 not screenshots of an implemented application or evidence of validated calculations.
 The generated image was exported as a 1280 x 640 JPEG for README and
 social-preview use (#113).
