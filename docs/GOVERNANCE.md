@@ -183,8 +183,15 @@ Every issue has:
   from [.github/labels.json](../.github/labels.json);
 - the milestone of the work it belongs to.
 
-Pull requests into the active release branch carry the release milestone and
-the labels of the work they deliver.
+Milestones belong only to issues, so milestone progress counts tasks rather
+than counting their implementation pull requests again. All pull requests
+(task, integration, sync and bot-authored) have **no milestone** and keep the
+labels appropriate to the work they deliver.
+
+Task pull requests link the issues they resolve; integration and sync pull
+requests reference the issues and preceding pull requests they carry. Bot
+pull requests are linked to an existing relevant issue or a new tracking issue
+during triage. Assign the milestone to that issue, never to the pull request.
 
 ### Priorities
 

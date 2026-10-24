@@ -8,6 +8,9 @@
 
 ## 🔗 Linked issues
 
+<!-- Link task issues with Resolves #; integration and sync PRs use Refs #
+for the issues and preceding PRs they carry. Milestones belong to issues only. -->
+
 Resolves #
 
 ## 🧾 Changes
@@ -48,7 +51,7 @@ review. -->
 ## ☑️ Checklist
 
 - [ ] The base follows docs/GOVERNANCE.md: active release branch for tasks; main only for an approved integration.
-- [ ] Each linked issue has the assignee, exactly one priority label and a milestone; this PR carries the release milestone and labels.
+- [ ] Each linked issue has the assignee, exactly one priority label and a milestone; this PR has no milestone, links the relevant issues and carries appropriate labels.
 - [ ] Scope is focused: no unrelated changes, local artifacts or generated output.
 - [ ] Documentation affected by the change is updated.
 - [ ] No tokens, credentials, real portfolio or client data.

@@ -127,10 +127,11 @@ reports on every pull request and can be made a required check.
 
 `.github/dependabot.yml` proposes weekly updates to the pinned GitHub Actions,
 grouped into one pull request against the active release branch, with the
-`ci` and `P3` labels, the release milestone and danielep71 as assignee.
+`ci` and `P3` labels and danielep71 as assignee, with no PR milestone.
+During triage, link each PR to an appropriate issue carrying the milestone.
 Dependabot reads this file from the default branch, so it takes effect once
 it is integrated into `main`. When a new release branch is opened, update its
-`target-branch` and `milestone`.
+`target-branch`. Milestones remain assigned only to issues.
 
 Nothing merges automatically. Before merging an update:
 
