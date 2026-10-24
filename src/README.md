@@ -13,7 +13,8 @@ or workbook exists ([docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.
 | `forms/` | UserForms, `.frm` beside its `.frx` | Only if a form is needed |
 
 Each subdirectory is created with its first real file. Test and example
-modules never belong here. Naming, encoding and import/export conventions are
-set in [#4](https://github.com/danielep71/CCR-K-SFTs/issues/4); the dependency
-direction and placement rules in
+modules never belong here. Naming, contracts and encoding are set in
+[docs/VBA_HOUSE_STYLE.md](../docs/VBA_HOUSE_STYLE.md), the import and export
+steps in [INSTALLATION.md](../INSTALLATION.md#importing-vba-into-excel), and
+the dependency direction and placement rules in
 [docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md).

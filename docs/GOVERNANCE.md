@@ -17,7 +17,10 @@ transactions. The current milestone, **v0.1.0 - Repo setup**, prepares the
 repository infrastructure only. Production SFT calculations, numerical
 certification and workbook packaging belong to later milestones; the project
 boundary and architecture are defined in
-[REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/CCR-K-SFTs/issues/2)).
+[REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/CCR-K-SFTs/issues/2)), and the
+VBA conventions, supported hosts and import steps in
+[VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md) and
+[INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/CCR-K-SFTs/issues/4)).
 
 Commits may be authored by Daniele Penza or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
