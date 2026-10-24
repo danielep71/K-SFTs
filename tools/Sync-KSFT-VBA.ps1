@@ -787,7 +787,9 @@ try {
     Write-Host "SUCCESS: VBA synchronized. Workbook sheets were not removed or recreated."
 }
 catch {
-    Write-Error $_
+    # Under $ErrorActionPreference = "Stop" a plain Write-Error would itself
+    # stop the script here, before the warnings below and exit 1.
+    Write-Error -ErrorRecord $_ -ErrorAction Continue
     if ($null -ne $workbook -and -not $saved) {
         Write-Warning "Synchronization failed. Workbook will close without saving."
     }
