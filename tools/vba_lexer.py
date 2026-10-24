@@ -1,9 +1,10 @@
 """Shared reading and lexing of exported VBA source for the VBA checks.
 
-Statically splits VBA into logical statements: comments removed, line
-continuations joined, string literals kept or blanked. It is not a VBA
-parser or compiler; docs/VBA_HOUSE_STYLE.md is the rule set the checks
-enforce and tools/README.md lists what they cannot see.
+Statically splits VBA into logical statements: comments removed (a comment
+ending in " _" continues on the next line), line continuations joined,
+string literals kept or blanked. It is not a VBA parser or compiler;
+docs/VBA_HOUSE_STYLE.md is the rule set the checks enforce and
+tools/README.md lists what they cannot see.
 """
 
 from __future__ import annotations
@@ -69,11 +70,17 @@ def read_component(root: Path, path: str) -> str:
 
 
 def strip_code(raw: str, *, blank_strings: bool = False) -> str:
-    """One physical line without its comment: from a ' outside a string and
-    outside [...] (where it quotes a sheet name, as in ['Sheet 1'!A1]), or
-    from Rem where a statement starts (at the line start, after a numeric line
-    label such as ``100``, or after a ``:`` separator, not after a ``:=``
-    named argument). With ``blank_strings`` the content of string literals
+    """One physical line without its comment; see ``split_comment``."""
+    return split_comment(raw, blank_strings=blank_strings)[0]
+
+
+def split_comment(raw: str, *, blank_strings: bool = False) -> tuple[str, bool]:
+    """One physical line without its comment, and whether a comment begins on
+    it. A comment runs from a ' outside a string and outside [...] (where it
+    quotes a sheet name, as in ['Sheet 1'!A1]), or from Rem where a statement
+    starts (at the line start, after a numeric line label such as ``100``, or
+    after a ``:`` separator, not after a ``:=`` named argument), to the end of
+    the line. With ``blank_strings`` the content of string literals
     and of [...] expressions becomes spaces, so that keywords quoted in a
     string or a sheet name are not read as code; the brackets stay, and
     columns are preserved either way."""
@@ -94,7 +101,7 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
             result.append(" " if blank_strings else char)
         elif not in_string and ((char == "'" and not brackets)
                                 or (statement_start and REM.match(raw, index))):
-            break
+            return "".join(result).rstrip(), True
         else:
             hidden = in_string or (brackets and char not in "[]")
             result.append(" " if blank_strings and hidden else char)
@@ -107,7 +114,7 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
         elif not char.isspace():
             statement_start = False
         index += 1
-    return "".join(result).rstrip()
+    return "".join(result).rstrip(), False
 
 
 def date_delimiter(code: str, index: int, in_date: bool) -> bool:
@@ -156,13 +163,20 @@ def logical_units(lines: list[str], *, blank_strings: bool = False
     """``(first line, last line, kind, code)`` per logical line, numbered from 1.
 
     ``kind`` is ``"directive"`` for a conditional-compilation line (starting
-    with ``#``) and ``"code"`` otherwise; continuation lines are joined.
+    with ``#``) and ``"code"`` otherwise; continuation lines are joined. A
+    comment ending in " _" continues on the next line, as in VBA, so that line
+    holds no code.
     """
     units: list[tuple[int, int, str, str]] = []
     buffer: list[str] = []
     start = 0
+    in_comment = False
     for number, raw in enumerate(lines, start=1):
-        code = strip_code(raw, blank_strings=blank_strings)
+        if in_comment:
+            code, commented = "", True
+        else:
+            code, commented = split_comment(raw, blank_strings=blank_strings)
+        in_comment = commented and bool(CONTINUATION.search(raw))
         if not buffer and code.strip().startswith("#"):
             units.append((number, number, "directive", code.strip()))
             continue
