@@ -13,7 +13,7 @@ from pathlib import Path
 
 import check
 
-MISSING_TOOL = "ccr-k-sfts-tool-that-does-not-exist"
+MISSING_TOOL = "k-sfts-tool-that-does-not-exist"
 
 
 def gate(name: str, code: int) -> check.Gate:

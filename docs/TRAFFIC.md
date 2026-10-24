@@ -25,7 +25,7 @@ fine-grained personal access token is used.
    missing environment creates it without that restriction.
 2. **Settings → Developer settings → Fine-grained tokens → Generate new
    token**: resource owner `danielep71`, *Only select repositories*:
-   `CCR-K-SFTs`, repository permission **Administration: Read-only**, nothing
+   `K-SFTs`, repository permission **Administration: Read-only**, nothing
    else. Set an expiry of at most 90 days.
 3. In the `analytics` environment, add the secret **TRAFFIC_TOKEN** with that
    token. Never put the token in a file, issue, comment or chat.
