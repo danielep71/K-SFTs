@@ -449,6 +449,27 @@ End Sub
         Debug.Print 2:Rem GoSub Lost
 End Sub
 ''',
+    "one-line-procedure": '''Private Sub First(): Debug.Print 1: End Sub
+
+Private Sub Second(): Debug.Print 2: End Sub
+''',
+    "rem-after-line-number": '''Private Sub First()
+100 Rem GoTo Missing
+        Exit Sub
+End Sub
+''',
+    "numbered-comment-line-as-target": '''Private Sub First()
+        GoTo 100
+100 Rem target
+        GoTo 200
+200 ' target
+End Sub
+''',
+    "colons-in-a-date-literal": '''Private Sub First()
+        Debug.Print #12:30:00 PM#: GoTo Done
+Done:
+End Sub
+''',
     "exclusive-branches": '''Private Sub First()
 #If VBA7 Then
         GoTo Modern
@@ -499,6 +520,8 @@ End Sub
     "procedure-opened-twice": ("Private Sub First()\nPrivate Sub Second()\nEnd Sub\n",
                                "is not closed before Second"),
     "stray-end": ("End Sub\n", "End statement outside any procedure"),
+    "one-line-procedure-missing-label": ("Private Sub First(): GoTo Lost: End Sub\n",
+                                         "GoTo target 'Lost'"),
 }
 
 
@@ -736,6 +759,9 @@ class LexerTest(unittest.TestCase):
             "Call Run(Remainder:=1)": "Call Run(Remainder:=1)",
             "Report Name:= Rem": "Report Name:= Rem",
             "Remove 1": "Remove 1",
+            "100 Rem GoTo Missing": "100",
+            "  10 x = 1 ' note": "  10 x = 1",
+            "10: Rem note": "10:",
             "x = 1: Remark = 2": "x = 1: Remark = 2",
             '"it\'s": GoTo Label': '"it\'s": GoTo Label',
         }

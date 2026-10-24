@@ -19,7 +19,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from check_vba_conditionals import reachable_sources
-from vba_lexer import Finding, logical_units, read_component, report, tracked_components
+from vba_lexer import (
+    Finding,
+    logical_units,
+    read_component,
+    report,
+    split_statements,
+    tracked_components,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = "docs/PUBLIC_API.txt"
@@ -78,42 +85,6 @@ def norm(text: str) -> str:
         parts += [code(text[position:literal.start()]), literal.group()]
         position = literal.end()
     return ("".join(parts) + code(text[position:])).strip()
-
-
-def date_delimiter(code: str, index: int, in_date: bool) -> bool:
-    """Whether the # at ``index`` opens or closes a date literal such as #1/2/2026#."""
-    if in_date:
-        return True
-    previous = code[index - 1] if index else ""
-    if previous and (previous.isalnum() or previous in "_.)]"):
-        return False  # a type suffix, as in Total#
-    return "#" in code[index + 1:]  # a literal needs its closing #; Print #1 has none
-
-
-def split_statements(code: str) -> list[str]:
-    """Split one logical line at colons outside strings and date literals; a
-    ``:=`` named argument is not a separator, and a Rem statement ends the line."""
-    statements: list[str] = []
-    start = 0
-    in_string = in_date = False
-    index = 0
-    while index < len(code):
-        char = code[index]
-        if char == '"' and not in_date:
-            if in_string and code[index:index + 2] == '""':
-                index += 2
-                continue
-            in_string = not in_string
-        elif char == "#" and not in_string and date_delimiter(code, index, in_date):
-            in_date = not in_date
-        elif char == ":" and not (in_string or in_date) and code[index:index + 2] != ":=":
-            statements.append(code[start:index].strip())
-            start = index + 1
-        index += 1
-    statements.append(code[start:].strip())
-    rem = next((i for i, item in enumerate(statements) if re.match(r"^Rem(?:\s|$)", item, re.I)),
-               len(statements))
-    return statements[:rem]
 
 
 def statements(text: str) -> list[tuple[int, str]]:

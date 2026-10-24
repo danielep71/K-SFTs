@@ -19,7 +19,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from check_vba_conditionals import reachable_sources
-from vba_lexer import Finding, logical_units, read_component, report, tracked_components
+from vba_lexer import (
+    Finding,
+    logical_units,
+    read_component,
+    report,
+    split_statements,
+    tracked_components,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 PROC_OPEN = re.compile(
@@ -27,7 +34,9 @@ PROC_OPEN = re.compile(
     r"(Sub|Function|Property\s+(?:Get|Let|Set))\s+([A-Za-z_]\w*)\b", re.IGNORECASE)
 PROC_CLOSE = re.compile(r"^\s*End\s+(Sub|Function|Property)\b", re.IGNORECASE)
 NAMED_LABEL = re.compile(r"^\s*([A-Za-z_]\w*|\d+):")
-NUMBERED_LABEL = re.compile(r"^\s*(\d+)(?=\s+\S)")
+# A line number, followed by a statement or by nothing once a comment such
+# as "100 Rem target" or "100 ' target" has been stripped.
+NUMBERED_LABEL = re.compile(r"^\s*(\d+)(?=\s|$)")
 JUMP = re.compile(r"\b(GoTo|GoSub|Resume)\b(?:\s+([A-Za-z_]\w*|\d+|-1))?", re.IGNORECASE)
 ON_ERROR = re.compile(r"\bon\s+error\s*$", re.IGNORECASE)
 # Statements that can stand alone before a colon, as in "Else: x = 1"; a
@@ -78,31 +87,42 @@ def scan(path: str, text: str) -> tuple[list[Procedure], list[Finding]]:
     findings: list[Finding] = []
     current: Procedure | None = None
     for line, _, _, code in logical_units(text.split("\n"), blank_strings=True):
-        opener = is_procedure(code)
-        if opener:
-            if current is not None:
-                findings.append(Finding(path, line, f"procedure {current.name} opened at line "
-                                                    f"{current.line} is not closed before "
-                                                    f"{opener.group(2)}"))
-            current = Procedure(opener.group(2), line)
-            procedures.append(current)
-        elif PROC_CLOSE.match(code):
-            if current is None:
-                findings.append(Finding(path, line, "End statement outside any procedure"))
-            current = None
-        elif current is not None:
-            label = label_at_start(code)
-            if label is not None and label.casefold() in current.labels:
+        # A label starts the logical line; the statements after it, split at
+        # ":" separators, may open or close a procedure and may jump.
+        label = label_at_start(code) if current is not None else None
+        if current is not None and label is not None:
+            if label.casefold() in current.labels:
                 findings.append(Finding(path, line, f"duplicate label {label!r} in procedure "
                                                     f"{current.name}; first defined at line "
                                                     f"{current.labels[label.casefold()]}"))
-            elif label is not None:
+            else:
                 current.labels[label.casefold()] = line
-            current.jumps.extend((line, operation, target)
-                                 for operation, target in statement_jumps(code))
+        for statement in split_statements(code):
+            current = scan_statement(path, line, statement, current, procedures, findings)
     if current is not None:
         findings.append(Finding(path, current.line, f"procedure {current.name} is not closed"))
     return procedures, findings
+
+
+def scan_statement(path: str, line: int, statement: str, current: Procedure | None,
+                   procedures: list[Procedure], findings: list[Finding]) -> Procedure | None:
+    """Apply one statement; return the procedure open after it."""
+    opener = is_procedure(statement)
+    if opener:
+        if current is not None:
+            findings.append(Finding(path, line, f"procedure {current.name} opened at line "
+                                                f"{current.line} is not closed before "
+                                                f"{opener.group(2)}"))
+        current = Procedure(opener.group(2), line)
+        procedures.append(current)
+    elif PROC_CLOSE.match(statement):
+        if current is None:
+            findings.append(Finding(path, line, "End statement outside any procedure"))
+        current = None
+    elif current is not None:
+        current.jumps.extend((line, operation, target)
+                             for operation, target in statement_jumps(statement))
+    return current
 
 
 def analyze_source(path: str, text: str) -> list[Finding]:
@@ -134,8 +154,9 @@ def check(root: Path) -> tuple[list[Finding], int, int]:
     for path in components:
         text = read_component(root, path)
         findings.extend(analyze(path, text))
-        procedures += sum(bool(is_procedure(code)) for _, _, _, code
-                          in logical_units(text.split("\n"), blank_strings=True))
+        procedures += sum(bool(is_procedure(statement)) for _, _, _, code
+                          in logical_units(text.split("\n"), blank_strings=True)
+                          for statement in split_statements(code))
     return findings, len(components), procedures
 
 
