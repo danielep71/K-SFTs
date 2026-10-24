@@ -23,6 +23,7 @@ from check_vba_conditionals import reachable_sources
 from vba_lexer import (
     Finding,
     logical_units,
+    missing,
     read_component,
     report,
     split_statements,
@@ -318,6 +319,9 @@ def check(root: Path) -> tuple[list[Finding], int, int]:
     declarations: dict[Declaration, list[str]] = {}
     findings: list[Finding] = []
     for path in components:
+        if absent := missing(root, path):
+            findings.append(absent)
+            continue
         found, errors = scan_component(path, read_component(root, path))
         declarations.update(found)
         findings.extend(errors)
