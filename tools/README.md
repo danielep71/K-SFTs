@@ -165,9 +165,10 @@ python tools/check_excel_run.py <evidence-folder> --commit <commit>
 ```
 
 Exit code 0 means PASS, 1 a finding. It needs only the standard library and
-Git. Like the other tools it has been run only on Linux; on Windows it is
-untested, so run it from WSL or a Linux checkout if it fails there, with the
-evidence folder copied across. Its positive and negative fixtures, built
+Git. It has been run on Linux and, for #9's evidence, on Windows 11 in
+PowerShell; the other tools are run on Linux only. If it fails on another
+host, run it from WSL or a Linux checkout with the evidence folder copied
+across. Its positive and negative fixtures, built
 from the commit's own source, are in `test_check_excel_run.py`, run by
 `tool-tests`. The fixture logs are synthetic: they follow the documented
 log format, not a recorded run.
