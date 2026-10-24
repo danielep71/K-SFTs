@@ -84,9 +84,10 @@ tests/              verification source, synthetic fixtures, expected values
 tools/              repository checks and automation (Python)
 ```
 
-The root holds the project documents (`README.md`, `SECURITY.md`,
-`NOTICE.md`, `LICENSE`) and the repository configuration (`.editorconfig`,
-`.gitattributes`, `.gitignore`, `pyproject.toml`).
+The root holds the project documents (`README.md`, `INSTALLATION.md`,
+`CONTRIBUTING.md`, `SECURITY.md`, `NOTICE.md`, `LICENSE`) and the repository
+configuration (`.editorconfig`, `.gitattributes`, `.gitignore`,
+`pyproject.toml`).
 
 | Directory | Owns | Must not own |
 | --- | --- | --- |

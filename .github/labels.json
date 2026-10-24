@@ -100,7 +100,7 @@
     {
       "name": "wontfix",
       "color": "6E7781",
-      "description": "Maintainers have decided not to implement or continue this work"
+      "description": "The maintainer has decided not to implement or continue this work"
     }
   ],
   "overlays": {

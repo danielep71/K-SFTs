@@ -22,7 +22,7 @@ VBA conventions, supported hosts and import steps in
 [VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md) and
 [INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/CCR-K-SFTs/issues/4)).
 
-Commits may be authored by Daniele Penza or by bots acting within authorized
+Commits may be authored by the maintainer or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
 is not recreated under the maintainer's name only to change its authorship.
 Bot-authored pull requests remain subject to the applicable checks and
