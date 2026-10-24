@@ -76,6 +76,12 @@ them only as 14-day totals, never per day.
 - **Same-day runs:** a second collection on the same UTC day replaces that
   day's snapshot, referrers and paths, and only if their values changed.
   Running the workflow twice with the same data changes nothing.
+- **Order:** "newest" means the latest collection time. Merging an older
+  collection after a newer one, when a saved collection is replayed or a run
+  is rebuilt on a newer branch tip, never replaces what the newer one stored;
+  it can only fill dates nothing newer reported. A row keeps the time of the
+  collection that last *changed* it; a day's counts only grow until the day
+  ends, so an older collection replayed later cannot hold different values.
 
 ### Zero or unavailable
 

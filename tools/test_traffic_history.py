@@ -137,6 +137,29 @@ class MergeTests(unittest.TestCase):
             self.assertEqual([(row["snapshot_date"], row["referrer"]) for row in referrers],
                              [("2026-10-13", "github.com"), ("2026-10-14", "example.org")])
 
+    def test_replaying_an_older_collection_keeps_newer_values(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(1, 1)] * 13 + [(2, 1)]))
+            ws.raw.rename(ws.raw.parent / "morning")
+            ws.raw.mkdir()
+            ws.collect(window("2026-10-14", [(1, 1)] * 13 + [(5, 2)]),
+                       referrers=[{"referrer": "example.org", "count": 5, "uniques": 2}])
+            ws.merge("2026-10-14T18:00:00")
+            evening = ws.snapshot()
+            # The 06:00 collection is merged after the 18:00 one, as when a
+            # saved collection is replayed or rebuilt on a newer branch tip.
+            report = traffic_history.merge(ws.raw.parent / "morning", ws.data,
+                                           at("2026-10-14T06:00:00"))
+            self.assertEqual(report.changed, {})
+            self.assertEqual(ws.snapshot(), evening)
+            self.assertEqual(ws.daily()["2026-10-14"], ("5", "5", "2026-10-14T18:00:00Z"))
+            # An older collection still fills dates the newer one never reported.
+            (ws.raw.parent / "morning" / "views.json").write_text(json.dumps(
+                series("views", window("2026-10-13", [(1, 1)] * 14))), encoding="utf-8")
+            traffic_history.merge(ws.raw.parent / "morning", ws.data, at("2026-10-14T06:00:00"))
+            self.assertEqual(ws.daily()["2026-09-30"][0], "1")
+            self.assertEqual(ws.daily()["2026-10-14"][:2], ("5", "5"))
+
     def test_zero_activity_is_stored_and_uncollected_dates_are_unavailable(self) -> None:
         with workspace() as ws:
             ws.collect(window("2026-10-14", [(0, 0)] * 14))
@@ -199,7 +222,9 @@ class FailureTests(unittest.TestCase):
                                  (traffic_history.render(DAILY, []) + "yesterday,1,1,1,1,t\n",
                                   "invalid date"),
                                  (traffic_history.render(DAILY, []) + "2026-10-01,1\n",
-                                  "number of fields")]:
+                                  "number of fields"),
+                                 (traffic_history.render(DAILY, []) + "2026-10-01,1,1,1,1,t\n",
+                                  "invalid collected_at")]:
             with self.subTest(message=message), workspace() as ws:
                 ws.data.mkdir()
                 (ws.data / DAILY).write_text(content, encoding="utf-8")
