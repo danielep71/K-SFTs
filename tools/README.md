@@ -63,9 +63,9 @@ The four `vba-*` gates apply the mechanical rules of
 rules of [REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md) to the
 `.bas`, `.cls` and `.frm` files that Git tracks, staged ones included; a new
 file is checked once it is added. They share the reading and lexing in
-`vba_lexer.py`, and each prints how many components it examined. No VBA
-component exists yet, so today they pass over nothing: the count is 0, and a
-PASS says only that nothing tracked breaks a rule.
+`vba_lexer.py`, and each prints how many components it examined. Today the
+only components are the test modules in `tests/modules/`; a PASS says only
+that nothing tracked breaks a rule.
 
 **Three different checks.** A static PASS is not a compilation and not a
 validation:
