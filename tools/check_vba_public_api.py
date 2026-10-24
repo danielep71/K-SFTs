@@ -19,8 +19,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from check_vba_conditionals import reachable_sources
-from vba_lexer import (Finding, logical_units, read_component, report, split_statements,
-                       tracked_components)
+from vba_lexer import (
+    Finding,
+    logical_units,
+    read_component,
+    report,
+    split_statements,
+    tracked_components,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = "docs/PUBLIC_API.txt"
