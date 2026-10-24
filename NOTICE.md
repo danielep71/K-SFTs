@@ -75,3 +75,14 @@ Basel Framework chapters, EBA Q&As) are third-party documents. They are not
 covered by MPL-2.0 and stay under their publishers' terms, which
 [docs/methodology/sources/README.md](docs/methodology/sources/README.md)
 records.
+
+## Artwork
+
+`docs/assets/K_SFTs-social-preview.jpg` was generated with OpenAI image generation
+on 2026-10-24 at the maintainer's request. The maintainer's K-SACCR and
+K-IRRBB social-preview images supplied the visual references (navy background,
+mint accents and dashboard composition). The approved artwork uses `K_SFTs`;
+the GitHub repository remains `K-SFTs`. The panels are conceptual illustrations,
+not screenshots of an implemented application or evidence of validated calculations.
+The generated image was exported as a 1280 x 640 JPEG for README and
+social-preview use (#113).
