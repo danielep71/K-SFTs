@@ -24,8 +24,8 @@ This is an independent personal project.
   calculation.
 - **A VBA regression harness** with a neutral example suite in
   `tests/modules/`. It exercises the harness itself and contains no SFT
-  calculation. It has not yet been compiled or run in Excel
-  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)).
+  calculation. It has been compiled and run in 64-bit Excel on Windows 11
+  ([tested environments](INSTALLATION.md#tested-environments), #9).
 - **Methodology and test-case documents**: the regulatory basis, the copies
   of the texts relied on, and the format of future test cases.
 

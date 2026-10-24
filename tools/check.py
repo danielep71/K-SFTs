@@ -16,8 +16,8 @@ from typing import Any
 
 SCOPE = (
     "Repository tooling, label and issue-form configuration, test-case and changelog format, "
-    "static VBA source and workflow checks only; no VBA has been compiled or run in Excel and no SFT "
-    "calculation has been checked."
+    "static VBA source and workflow checks only; these checks compile and run no VBA in Excel and "
+    "check no SFT calculation."
 )
 LABEL_POLICY = ".github/label-policy.json"
 
@@ -106,6 +106,7 @@ def default_gates() -> list[Gate]:
         Gate("vba-conditionals", "python", (python, "tools/check_vba_conditionals.py")),
         Gate("vba-jumps", "python", (python, "tools/check_vba_jumps.py")),
         Gate("vba-public-api", "python", (python, "tools/check_vba_public_api.py")),
+        Gate("vba-manifest", "python", (python, "tools/check_vba_manifest.py")),
         Gate("ruff", "ruff", ("ruff", "check", "--no-cache", "tools")),
         Gate("ruff-complexity-probe", "ruff", probe=ruff_complexity_probe),
         Gate("mypy", "mypy", ("mypy", "--no-incremental")),

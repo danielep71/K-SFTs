@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "description": "The VBA components of each workbook that tools/Sync-KSFT-VBA.ps1 builds from the template; checked by the vba-manifest gate (tools/check_vba_manifest.py).",
+  "document_modules": [],
+  "configurations": {
+    "production": {
+      "description": "A workbook that calculates: the components under src/, never tests or examples.",
+      "modules": []
+    },
+    "development": {
+      "description": "A workbook that runs the test suites: the production components and every module of tests/modules/.",
+      "modules": [
+        "tests/modules/TEST_Examples.bas",
+        "tests/modules/TEST_Harness.bas"
+      ]
+    }
+  }
+}

@@ -79,9 +79,9 @@ second implementation to be kept in step.
 docs/               governance, architecture, contracts, methodology
   methodology/      regulatory basis, decisions, provenance, fixture contract,
     sources/        copies of the regulatory texts relied on
-src/                production VBA source: the only input to the workbook
+src/                production VBA source and the workbook template: the only inputs to the workbook
 tests/              verification source, synthetic fixtures, expected values
-tools/              repository checks and automation (Python)
+tools/              repository checks and automation (Python; the VBA sync script in PowerShell)
 ```
 
 The root holds the project documents (`README.md`, `INSTALLATION.md`,
