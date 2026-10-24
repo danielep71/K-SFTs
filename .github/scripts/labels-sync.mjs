@@ -387,15 +387,17 @@ function renderSummary({
   changes = [],
   verified = null,
   dryRun = false,
-  error = null
+  error = null,
+  partial = false
 }) {
   const coreLabels = manifest?.core ?? [];
   const profileLabels = profile === null ? [] : manifest?.overlays?.profile?.[profile] ?? [];
   const domainLabels = domains.flatMap(domain => manifest?.overlays?.domain?.[domain] ?? []);
   const resolvedLabels = desiredLabels ?? [];
+  const planned = changes !== null;
   const counts = Object.fromEntries(["create", "update", "delete"].map(action => [
     action,
-    changes.filter(change => change.action === action).length
+    planned ? changes.filter(change => change.action === action).length : "n/a"
   ]));
   const lines = [
     "# Repository label synchronization",
@@ -407,8 +409,8 @@ function renderSummary({
     `- Core / selected labels: **${coreLabels.length} / ${resolvedLabels.length}**`,
     `- Profile overlay: **${profile ?? "none"}**`,
     `- Domain overlays: **${domains.length > 0 ? domains.join(", ") : "none"}**`,
-    `- Prune: **${manifest?.prune ? "enabled" : "disabled"}**`,
-    `- Planned changes: **${changes.length}**`,
+    `- Prune: **${manifest ? (manifest.prune ? "enabled" : "disabled") : "unavailable"}**`,
+    `- Planned changes: **${planned ? changes.length : "not computed (live labels not read)"}**`,
     `- Create / update / delete: **${counts.create} / ${counts.update} / ${counts.delete}**`
   ];
   if (verified !== null) lines.push(`- Post-run exact match: **${verified ? "yes" : "no"}**`);
@@ -423,6 +425,11 @@ function renderSummary({
   );
   if (error) {
     lines.push("", "## Failure", "", `\`${markdownEscape(error)}\``);
+    if (partial) {
+      lines.push("", "The failure happened during or after reconciliation: some changes may already be applied. Compare the live labels with the manifest.");
+    }
+  } else if (!planned) {
+    lines.push("", "Live labels were not read; no changes were planned.");
   } else if (changes.length === 0) {
     lines.push("", "No label changes are required.");
   } else {
@@ -588,12 +595,43 @@ async function runSelfTest(manifestPath, policyPath) {
   assert.match(summary, /Policy source: `fixture-policy\.json`/);
   assert.match(summary, /Label manifest: `fixture-labels\.json`/);
   assert.match(summary, /Profile labels \(library; 1\): "library"/);
+  const validateSummary = renderSummary({
+    mode: "validate",
+    manifest: selectedOverlay,
+    manifestPath: "fixture-labels.json",
+    policyPath: "fixture-policy.json",
+    desiredLabels: selectedLabels,
+    profile: "library",
+    domains: ["example"],
+    changes: null
+  });
+  assert.match(validateSummary, /Planned changes: \*\*not computed \(live labels not read\)\*\*/);
+  assert.match(validateSummary, /Live labels were not read; no changes were planned\./);
+  assert.doesNotMatch(validateSummary, /No label changes are required/);
+  const failureSummary = renderSummary({
+    mode: "failed",
+    manifest: null,
+    manifestPath: null,
+    policyPath: null,
+    desiredLabels: [],
+    profile: null,
+    domains: [],
+    changes: [{ action: "create", name: "new" }],
+    partial: true,
+    error: "write failed"
+  });
+  assert.match(failureSummary, /Prune: \*\*unavailable\*\*/);
+  assert.match(failureSummary, /Planned changes: \*\*1\*\*/);
+  assert.match(failureSummary, /some changes may already be applied/);
   assert.match(summary, /Domain labels \(example; 1\): "example"/);
   assert.match(summary, new RegExp(`Complete resolved set \\(${selectedLabels.length}\\):`));
   for (const label of selectedLabels) assert.match(summary, new RegExp(`"${label.name}"`));
 
   process.stdout.write("SELF-TEST PASS: retry delays, validation, policy, overlay, and reconciliation fixtures\n");
 }
+
+// What the run knew before a failure, so that the failure summary reports it.
+const runState = { summaryBase: null, changes: null, applying: false };
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
@@ -613,9 +651,10 @@ async function main() {
     profile: selection.profile,
     domains: selection.domains
   };
+  runState.summaryBase = summaryBase;
 
   if (options.mode === "validate") {
-    await publishSummary(renderSummary({ mode: "validate", ...summaryBase }));
+    await publishSummary(renderSummary({ mode: "validate", ...summaryBase, changes: null }));
     return;
   }
 
@@ -634,11 +673,13 @@ async function main() {
   }
 
   const changes = planChanges(desired, live, { prune: manifest.prune });
+  runState.changes = changes;
   if (options.mode === "plan" || options.dryRun) {
     await publishSummary(renderSummary({ mode: options.mode, ...summaryBase, changes, dryRun: options.dryRun }));
     return;
   }
 
+  runState.applying = true;
   await applyChanges(options.repository, process.env.GITHUB_TOKEN, changes);
   const after = await listLiveLabels(options.repository, process.env.GITHUB_TOKEN);
   const remaining = planChanges(desired, after, { prune: manifest.prune });
@@ -652,12 +693,16 @@ main().catch(async error => {
   try {
     await publishSummary(renderSummary({
       mode: "failed",
-      manifest: null,
-      manifestPath: null,
-      policyPath: null,
-      desiredLabels: [],
-      profile: null,
-      domains: [],
+      ...(runState.summaryBase ?? {
+        manifest: null,
+        manifestPath: null,
+        policyPath: null,
+        desiredLabels: [],
+        profile: null,
+        domains: []
+      }),
+      changes: runState.changes,
+      partial: runState.applying,
       error: message
     }));
   } finally {
