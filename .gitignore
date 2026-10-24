@@ -9,7 +9,8 @@
 #
 # REPOSITORY POLICY
 #   - Exported VBA source and UserForm companions are version-controlled.
-#   - Generated Office packages are ignored unless an exact path is approved.
+#   - Workbooks, Access databases and macro-enabled Office files are ignored
+#     unless an exact path is approved.
 #   - Repository configuration, documentation, tests, tools, and visual assets are source.
 #   - Python and Node development caches are excluded without hiding manifests.
 #
@@ -40,7 +41,8 @@
 #------------------------------------------------------------------------------
 # GENERATED OFFICE PACKAGES
 #------------------------------------------------------------------------------
-# Office packages are generated or release artifacts by default. These global
+# Workbooks, Access databases and macro-enabled Word and PowerPoint files are
+# generated or release artifacts by default. These global
 # rules prevent an accidental workbook saved anywhere in the tree from becoming
 # source. Re-include an intentional package only by its exact rooted path.
 *.xls
@@ -137,7 +139,8 @@ nul
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon?
+# A custom folder icon is a file named Icon plus a carriage return.
+Icon[[:cntrl:]]
 ._*
 .Trashes
 .Spotlight-V100
@@ -169,7 +172,8 @@ Icon?
 *~
 
 *.nppBackup
-session.xml
+# Notepad++ session file, rooted so that a fixture of that name stays visible.
+/session.xml
 
 
 

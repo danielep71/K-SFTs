@@ -24,7 +24,8 @@ Attribute VB_Name = "TEST_Examples"
 '
 ' ERROR POLICY
 '   As TEST_Harness.EndRun: a run that does not pass raises ERR_TEST_FAILED,
-'   or the unexpected error that escaped the runner.
+'   or the unexpected error that escaped the runner. A refused start raises
+'   TEST_Harness.ERR_TEST_DIRTY_START.
 '
 ' USAGE
 '   In a development workbook holding the modules of tests/modules/, type

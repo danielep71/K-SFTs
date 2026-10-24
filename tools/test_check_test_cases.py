@@ -149,7 +149,7 @@ class CheckTestCasesTests(unittest.TestCase):
         self.assertIn("tests/expected/illustrative-case.bcbs.json: is not an object", findings)
 
     def test_non_finite_numbers_are_rejected_in_every_category(self) -> None:
-        for category in ("nominal", "invalid"):
+        for category in ("nominal", "boundary", "invalid"):
             with self.subTest(category=category):
                 data = fixture()
                 data["category"] = category
@@ -163,13 +163,27 @@ class CheckTestCasesTests(unittest.TestCase):
         self.assertFinding("not valid UTF-8 JSON (non-standard number -Infinity)")
 
     def test_overflowing_numbers_are_rejected_in_every_category(self) -> None:
-        for category in ("nominal", "invalid"):
+        for category in ("nominal", "boundary", "invalid"):
             with self.subTest(category=category):
                 data = fixture()
                 data["category"] = category
                 text = json.dumps(data).replace('"cash_amount": 100', '"cash_amount": 1e400')
                 self.ws.write("tests/fixtures/illustrative-case.json", text)
-                self.assertFinding("input 'cash_amount' is not a finite number")
+                self.assertFinding("not valid UTF-8 JSON (number 1e400 overflows to infinity)")
+
+    def test_overflowing_numbers_are_rejected_anywhere(self) -> None:
+        data = fixture()
+        data["category"] = "invalid"
+        text = json.dumps(data).replace('"cash_amount": 100', '"cash_amount": [1e400]')
+        self.ws.write("tests/fixtures/illustrative-case.json", text)
+        self.assertFinding("number 1e400 overflows to infinity")
+        self.ws.write("tests/fixtures/illustrative-case.json", fixture())
+        self.ws.write("tests/expected/illustrative-case.crr.json",
+                      json.dumps(expected()).replace('"locator": null', '"locator": 1e400'))
+        self.assertFinding("number 1e400 overflows to infinity")
+        self.ws.write("tests/expected/illustrative-case.crr.json",
+                      json.dumps(expected()).replace('"value": 100', '"value": 1' + "0" * 400))
+        self.assertFinding("overflows to infinity")
 
     def test_envelope_rules(self) -> None:
         data = fixture()
@@ -319,6 +333,27 @@ class CheckTestCasesTests(unittest.TestCase):
         self.ws.case(fixture("plain-case"), ("crr", expected(
             "plain-case", "CRR", number_output(rule="CRR.220.3", reference=published))))
         self.assertFinding("an illustrative_ quantity outside an illustrative- case")
+
+    def test_exact_tolerance_needs_a_whole_number(self) -> None:
+        exact = {"absolute": 0, "relative": 0}
+        self.ws.case(fixture(), ("crr", expected("illustrative-case", "CRR",
+                                                 number_output(value=0.5, tolerance=exact))))
+        self.assertFinding("an exact tolerance (absolute and relative 0) needs a whole-number "
+                           "value")
+        self.ws.case(fixture(), ("crr", expected("illustrative-case", "CRR",
+                                                 number_output(value=2.0, tolerance=exact))))
+        self.assertEqual(self.ws.findings(), [])
+
+    def test_only_illustrative_cases_before_the_contract(self) -> None:
+        published = reference("published")
+        published.update(source="CRR", locator="Article 223(1)")
+        self.ws.case(fixture("repo-case"), ("crr", expected(
+            "repo-case", "CRR", number_output(quantity="total", rule="CRR.223.1",
+                                              reference=published))))
+        self.assertFinding("only illustrative- cases may exist until the input contract")
+        (self.ws.root / "docs/contracts").mkdir()
+        self.ws.write("docs/contracts/README.md", "# Contracts\n")
+        self.assertEqual(self.ws.findings(), [])
 
     def test_invalid_case_needs_a_status(self) -> None:
         data = fixture()

@@ -2,8 +2,9 @@
 
 Each fixture is a throw-away Git repository holding synthetic VBA components,
 written with CRLF as the VBE exports them and stored under this repository's
-.gitattributes. The components are fixtures for the checks only: no
-calculation, product or regulatory value is implied by them.
+.gitattributes (one storage test deliberately omits it). The components are
+fixtures for the checks only: no calculation, product or regulatory value is
+implied by them.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import check_vba_conditionals
 import check_vba_jumps
 import check_vba_public_api
 import check_vba_source
-from vba_lexer import Finding, strip_code
+from vba_lexer import Finding, logical_units, strip_code
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -142,7 +143,8 @@ VALID: dict[str, str | bytes] = {
 
 @contextlib.contextmanager
 def repository(files: Mapping[str, str | bytes], *, attributes: bool = True) -> Iterator[Path]:
-    """A Git repository holding ``files``: text written with CRLF, then staged."""
+    """A Git repository holding ``files``: VBA components written with CRLF, other
+    text as given, then staged."""
     with tempfile.TemporaryDirectory(prefix="vba-check-") as temporary:
         root = Path(temporary)
         subprocess.run(["git", "init", "-q", str(root)], check=True)
@@ -360,6 +362,7 @@ CONDITIONAL_INVALID = {
     "stray-end-if": ("#End If\n", "#End If without #If"),
     "unsupported-directive": ("#Region Main\n", "unsupported conditional-compilation directive"),
 }
+CONDITIONAL_VALID["continued-comment-hides-directive"] = "' retired guard _\n#If Mac Then\n"
 
 
 def module(body: str) -> str:
@@ -499,6 +502,29 @@ Legacy:
 #End If
 End Sub
 ''',
+    "continued-comment-hides-jump": '''Private Sub First()
+        ' a comment continued _
+        GoTo Missing
+End Sub
+''',
+    "continued-rem-hides-jump": '''Private Sub First()
+        Rem a remark continued _
+        GoTo Missing
+End Sub
+''',
+    "comment-continued-twice": '''Private Sub First()
+        ' first line _
+          second line _
+        GoTo Missing
+End Sub
+''',
+    "continued-comment-after-label-and-separator": '''Private Sub First()
+100     Debug.Print 1: ' note _
+        GoTo Missing
+        Debug.Print 2: Rem note _
+        GoSub Lost
+End Sub
+''',
 }
 JUMPS_INVALID = {
     "cross-procedure": ('''Private Sub First()
@@ -547,6 +573,16 @@ End Sub
                                         "GoTo target 'Lost'"),
     "one-line-procedure-missing-label": ("Private Sub First(): GoTo Lost: End Sub\n",
                                          "GoTo target 'Lost'"),
+    "continued-comment-hides-label": ("Private Sub First()\n        GoTo Missing\n"
+                                      "        ' a comment continued _\nMissing:\nEnd Sub\n",
+                                      "GoTo target 'Missing'"),
+    "continued-comment-ends": ("Private Sub First()\n        ' a comment continued _\n"
+                               "          on this line\n        GoTo Missing\nEnd Sub\n",
+                               "GoTo target 'Missing'"),
+    "continuation-mark-in-a-string": ("Private Sub First()\n        Debug.Print \"ends _\"\n"
+                                      "        GoTo Missing\nEnd Sub\n", "GoTo target 'Missing'"),
+    "continuation-mark-in-brackets": ("Private Sub First()\n        Debug.Print ['a _'!A1]\n"
+                                      "        GoTo Missing\nEnd Sub\n", "GoTo target 'Missing'"),
 }
 
 
@@ -772,6 +808,11 @@ class PublicApiTest(unittest.TestCase):
                                    "Private Const START_DATE As Date = #1/2/2026#: Rem : Public x")
         self.assertEqual(self.findings(api_files(dated)), [])
 
+    def test_continued_comment_is_not_a_declaration(self) -> None:
+        retired = API_FACADE.replace("Private mHidden As Long",
+                                     "Private mHidden As Long ' retired: _\nPublic gRetired As Long")
+        self.assertEqual(self.findings(api_files(retired)), [])
+
 
 class LexerTest(unittest.TestCase):
     def test_comments_end_the_code(self) -> None:
@@ -800,6 +841,11 @@ class LexerTest(unittest.TestCase):
         self.assertEqual(strip_code("x = ['GoTo z'!A1]: GoTo y", blank_strings=True),
                          "x = [" + " " * len("'GoTo z'!A1") + "]: GoTo y")
 
+    def test_a_comment_ending_in_a_continuation_continues(self) -> None:
+        lines = ["x = 1 ' a _", "GoTo y _", "  z", "Rem b _", "w", "s = \"t _\"", "v = 2"]
+        self.assertEqual([code for _, _, _, code in logical_units(lines)],
+                         ["x = 1", "", "", "", "", 's = "t _"', "v = 2"])
+
 
 class MainTest(unittest.TestCase):
     def test_every_gate_exits_0_when_valid_and_1_when_invalid(self) -> None:
@@ -820,6 +866,24 @@ class MainTest(unittest.TestCase):
                         verdict = output.getvalue().splitlines()[-1]
                         self.assertIn("PASS" if expected == 0 else "FAIL", verdict)
                         self.assertIn("static check, nothing compiled or run", verdict)
+
+    def test_a_tracked_file_missing_from_the_working_tree_is_a_finding(self) -> None:
+        def run_check_without(check: Callable[[Path], tuple[list[Finding], *tuple[int, ...]]],
+                              deleted: str) -> list[str]:
+            # Deleted after staging, so the file stays tracked.
+            with repository(VALID) as root:
+                (root / deleted).unlink()
+                return [str(finding) for finding in check(root)[0]]
+
+        checks = (check_vba_source.check, check_vba_conditionals.check, check_vba_jumps.check,
+                  check_vba_public_api.check)
+        missing = "src/modules/SFT_Functions.bas: tracked in Git but missing from the working tree"
+        for check in checks:
+            with self.subTest(check=check.__module__):
+                self.assertIn(missing, run_check_without(check, "src/modules/SFT_Functions.bas"))
+        self.assertIn("src/forms/frmRunOptions.frx: tracked in Git but missing from the "
+                      "working tree",
+                      run_check_without(check_vba_source.check, "src/forms/frmRunOptions.frx"))
 
 
 if __name__ == "__main__":

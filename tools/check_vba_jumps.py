@@ -22,6 +22,7 @@ from check_vba_conditionals import reachable_sources
 from vba_lexer import (
     Finding,
     logical_units,
+    missing,
     read_component,
     report,
     split_statements,
@@ -163,6 +164,9 @@ def check(root: Path) -> tuple[list[Finding], int, int]:
     findings: list[Finding] = []
     procedures = 0
     for path in components:
+        if absent := missing(root, path):
+            findings.append(absent)
+            continue
         text = read_component(root, path)
         findings.extend(analyze(path, text))
         procedures += sum(bool(is_procedure(statement)) for _, _, _, code

@@ -18,7 +18,14 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-from vba_lexer import Finding, logical_units, read_component, report, tracked_components
+from vba_lexer import (
+    Finding,
+    logical_units,
+    missing,
+    read_component,
+    report,
+    tracked_components,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DECLARE = re.compile(
@@ -283,6 +290,9 @@ def check(root: Path) -> tuple[list[Finding], int]:
     components = tracked_components(root)
     findings: list[Finding] = []
     for path in components:
+        if absent := missing(root, path):
+            findings.append(absent)
+            continue
         findings.extend(analyze(path, read_component(root, path)))
     return findings, len(components)
 

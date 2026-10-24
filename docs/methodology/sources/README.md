@@ -70,8 +70,9 @@ extract.
 - **Cross-check of the six chapters added later.** The text of CRE32, CRE50,
   CRE51, CRE53, CRE54 and CRE56 equals, apart from the cover page and page
   footers, the same chapters in an independent extract from the full Basel
-  Framework PDF that the maintainer prepared on 2026-10-24 (branch
-  `docs/sft-primary-source-extracts`, commit `380df17`, not merged).
+  Framework PDF that the maintainer prepared on 2026-10-24 (commit
+  `380df17` on a branch deleted unmerged the same day; the extract is not
+  in the repository).
 - **EBA Q&As.** Text copied from each page's HTML; only the layout and white
   space differ: list items are one line each, and the submitter's name and
   country are omitted. The HTML pages are not committed.

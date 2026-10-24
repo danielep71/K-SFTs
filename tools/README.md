@@ -45,7 +45,7 @@ versions; each gate also writes `<gate>.log`.
 | `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
 | `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
 | `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
-| `vba-public-api` | Every procedure and module-level declaration states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
+| `vba-public-api` | Every procedure, and every module-level declaration that VBA would otherwise make public (`Enum`, `Type`, `Event`, `Declare`), states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
 | `mypy` | `mypy --strict` over `tools/`, tests included. |
@@ -53,7 +53,7 @@ versions; each gate also writes `<gate>.log`.
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 
 The label gates run on every pull request here, although the label workflows
-themselves only run when label files change. Live label reconciliation and
+run on a pull request only when it changes label files. Live label reconciliation and
 drift detection stay in those workflows.
 
 <a id="vba-static-checks"></a>
@@ -108,8 +108,6 @@ and a project `#Const` fail closed, because their value cannot be known.
   `Application.Run` from reaching a procedure; the
   [public API boundary](../docs/REPOSITORY_STRUCTURE.md#-public-api-boundary)
   is a contract, not an access control.
-- a comment continued with ` _` onto the next line is read as code by the
-  three environment-aware checks; avoid continuing comments.
 
 **Source and adaptations.** The checks are adapted from K-SACCR
 ([NOTICE.md](../NOTICE.md)), which took the jump, conditional-compilation
@@ -129,6 +127,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
 - `Rem` recognized after a `:` separator and after a numeric line label as
   well as at the line start, and `vba-jumps` reading each statement of a
   line separated by `:`, so that `Private Sub F(): ...: End Sub` closes;
+- a comment ending in ` _` read as continuing on the next line, as VBA reads
+  it, in all four gates, so that a `GoTo`, a label, a directive or a
+  declaration on that line is comment text;
 - an apostrophe or a colon inside `[...]`, as in `['Sheet 1'!A1]` or
   `[A1:B2]`, read as part of the expression, and every target of
   `On <expression> GoTo` and `GoSub` checked, not only the first;
@@ -226,9 +227,11 @@ reports on every pull request and can be made a required check.
 grouped into one pull request against the active release branch, with the
 `ci` and `P3` labels and danielep71 as assignee, with no PR milestone.
 During triage, link each PR to an appropriate issue carrying the milestone.
-Dependabot reads this file from the default branch, so it takes effect once
-it is integrated into `main`. When a new release branch is opened, update its
-`target-branch`. Milestones remain assigned only to issues.
+Dependabot reads this file from the default branch, `main`, where it is
+active ([docs/GOVERNANCE.md](../docs/GOVERNANCE.md#configured-controls)). A
+change to it takes effect once it is integrated into `main`. When a new release
+branch is opened, update its `target-branch`. Milestones remain assigned only
+to issues.
 
 Nothing merges automatically. Before merging an update:
 

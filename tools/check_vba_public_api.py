@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Check VBA visibility and docs/PUBLIC_API.txt against the exported source.
 
-Every procedure and module-level declaration states its visibility. The
-public declarations of src/modules/ (the facade) and the inventory must match
+Every procedure, and every module-level declaration that VBA would otherwise
+make public (Enum, Type, Event, Declare), states its visibility. The public
+declarations of src/modules/ (the facade) and the inventory must match
 one to one, with the same normalized signatures, and no two public names may
 collide (docs/REPOSITORY_STRUCTURE.md, Public API boundary). Each compilation
 environment of check_vba_conditionals.py is read separately. Adapted from
@@ -22,6 +23,7 @@ from check_vba_conditionals import reachable_sources
 from vba_lexer import (
     Finding,
     logical_units,
+    missing,
     read_component,
     report,
     split_statements,
@@ -317,6 +319,9 @@ def check(root: Path) -> tuple[list[Finding], int, int]:
     declarations: dict[Declaration, list[str]] = {}
     findings: list[Finding] = []
     for path in components:
+        if absent := missing(root, path):
+            findings.append(absent)
+            continue
         found, errors = scan_component(path, read_component(root, path))
         declarations.update(found)
         findings.extend(errors)

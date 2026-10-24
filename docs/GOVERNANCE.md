@@ -22,7 +22,7 @@ VBA conventions, supported hosts and import steps in
 [VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md) and
 [INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/CCR-K-SFTs/issues/4)).
 
-Commits may be authored by Daniele Penza or by bots acting within authorized
+Commits may be authored by the maintainer or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
 is not recreated under the maintainer's name only to change its authorship.
 Bot-authored pull requests remain subject to the applicable checks and
@@ -106,6 +106,10 @@ later pushes. Before merging a pull request whose head changed after review:
 3. Wait until the review shows **Completed** for that head SHA.
 4. Fix or explicitly answer every finding and resolve the applicable
    conversations. A further push requires this check again.
+5. Record the reviewed SHA and the result (for example *no findings*, or
+   the findings and how each was settled) in the pull request as text. A
+   link is only a pointer: the Codex summary is one comment edited in
+   place, so it later describes another commit or review.
 
 Codex does not review bot-authored pull requests; for those, the maintainer's
 review of the final diff and head SHA is the only review. Do not claim Codex
@@ -163,10 +167,10 @@ seen to enforce on a real pull request is listed under
 | Merge methods | Verified on 2026-10-24: the repository allows merge commits, squash and rebase. The rulesets allow **merge commits only** into `main`, and **squash or merge commits** into `release/**`, matching [Integration](#-integration). Observed: task pull requests squash-merged into `release/0.1.0` (#40, #43), the release integrated into `main` with a merge commit (#41), and the sync back with a merge commit (#44). Head branches are deleted automatically after merge. |
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
 | Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
-| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, so it is active only after integration. |
+| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, where it has been since [#15](https://github.com/danielep71/CCR-K-SFTs/pull/15). Active: verified on 2026-10-24 by its first pull request, [#18](https://github.com/danielep71/CCR-K-SFTs/pull/18). |
 | Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/CCR-K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
 | Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
-| Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
+| Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, where it has been since [#19](https://github.com/danielep71/CCR-K-SFTs/pull/19). Active: verified on 2026-10-24 by its runs on issue events, for example run [40104872758](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40104872758). |
 | Traffic history | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
 
 <a id="demonstrated-enforcement"></a>
@@ -189,10 +193,11 @@ GitHub refused, or a rule shown to hold, on a real pull request.
   current base, not the head alone. The run name carries the SHA of that test
   merge. The *Verify candidate identity* step fails the job if the checked-out
   commit differs from it.
-- **The whole change.** Every gate reads every tracked file of that commit,
-  not only the changed files, and the workflow has no path filter, so every
-  file a pull request changes is checked. The up-to-date rule makes the
-  checked tree the tree that merges.
+- **The whole change.** Each gate reads every file in its scope in that
+  commit, not only the changed files, and the workflow has no path filter,
+  so every pull request is checked. Files outside every gate's scope, such as
+  most Markdown documents, are checked by review only. The up-to-date rule
+  makes the checked tree the tree that merges.
 - **Not each commit.** Intermediate commits are not checked one by one. A
   squash merge lands only the checked tree.
 
@@ -206,8 +211,10 @@ check but was not exercised with a failing one.
 - The sole owner cannot approve their own pull requests, so no approving
   review is required. The maintainer review, Codex review and CI above take
   its place.
-- Live label reconciliation runs only from `main`. Label changes merged into a
-  release branch take effect after integration into `main`.
+- Live label reconciliation runs only from `main`: on pushes to `main` that
+  change label files, and on manual dispatch on `main` (a dispatch on any
+  other branch skips it). Label changes merged into a release branch take
+  effect after integration into `main`.
 - Run logs and report artifacts expire: the artifacts after 30 days, the logs
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into

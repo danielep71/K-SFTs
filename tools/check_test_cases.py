@@ -23,6 +23,8 @@ REGISTER = Path("docs/methodology/README.md")
 FIXTURES = Path("tests/fixtures")
 EXPECTED = Path("tests/expected")
 DERIVATIONS = "tests/derivations/"
+# Until this directory holds the input and output contract, only illustrative- cases may exist.
+CONTRACTS = Path("docs/contracts")
 
 CASE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SNAKE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$")
@@ -114,7 +116,8 @@ LOAD_FAILED = object()
 
 
 def load_json(path: Path, root: Path, report: Report) -> Any:
-    """Parse strict JSON: duplicate keys and the non-standard NaN and Infinity fail."""
+    """Parse strict JSON: duplicate keys, the non-standard NaN and Infinity, and any
+    number that overflows to infinity (such as 1e400), anywhere in the file, fail."""
 
     def no_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
         result: dict[str, Any] = {}
@@ -127,9 +130,24 @@ def load_json(path: Path, root: Path, report: Report) -> Any:
     def no_constants(name: str) -> None:
         raise ValueError(f"non-standard number {name}")
 
+    def finite_float(text: str) -> float:
+        value = float(text)
+        if not math.isfinite(value):
+            raise ValueError(f"number {text} overflows to infinity")
+        return value
+
+    def finite_int(text: str) -> int:
+        value = int(text)
+        try:
+            float(value)
+        except OverflowError:
+            raise ValueError(f"number {text} overflows to infinity") from None
+        return value
+
     try:
         return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=no_duplicates,
-                          parse_constant=no_constants)
+                          parse_constant=no_constants, parse_float=finite_float,
+                          parse_int=finite_int)
     except (OSError, UnicodeDecodeError, ValueError) as error:
         report.add(rel(path, root), f"not valid UTF-8 JSON ({error})")
         return LOAD_FAILED
@@ -187,8 +205,6 @@ def input_value_problem(key: str, value: object, invalid: bool) -> str | None:
     suffix = next((s for s in SUFFIXES if key.endswith(s)), None)
     if suffix is None:
         return f"input {key!r} has no unit suffix"
-    if isinstance(value, float) and not math.isfinite(value):
-        return f"input {key!r} is not a finite number"
     if value is None or invalid:
         return None
     if suffix in ("_amount", "_rate", "_factor", "_years"):
@@ -336,6 +352,14 @@ def tolerance_problem(tolerance: object) -> str | None:
     return None
 
 
+def exact_tolerance_problem(output: dict[str, Any]) -> str | None:
+    """An exact comparison (both bounds 0) is for whole numbers only."""
+    tolerance, value = output["tolerance"], output["value"]
+    if tolerance["absolute"] == 0 and tolerance["relative"] == 0 and value != int(value):
+        return "an exact tolerance (absolute and relative 0) needs a whole-number value"
+    return None
+
+
 def form_problems(output: dict[str, Any]) -> list[str]:
     if "text" in output:
         if problem := keys_problem(output, TEXT_KEYS):
@@ -350,6 +374,8 @@ def form_problems(output: dict[str, Any]) -> list[str]:
     if not isinstance(unit, str) or not (unit in UNITS or CURRENCY.match(unit)):
         problems.append(f"unit {unit!r} is not a currency code, 1, years or business_days")
     if problem := tolerance_problem(output["tolerance"]):
+        problems.append(problem)
+    elif not problems and (problem := exact_tolerance_problem(output)):
         problems.append(problem)
     return problems
 
@@ -463,9 +489,13 @@ def check_expected(path: Path, root: Path, cases: Mapping[str, Case], method: Me
         report.add(where, "an invalid case needs a _status text output")
 
 
-def check_cases(cases: Mapping[str, Case], report: Report) -> None:
+def check_cases(cases: Mapping[str, Case], report: Report, contract: bool) -> None:
     for case_id, case in sorted(cases.items()):
         where = f"{FIXTURES.as_posix()}/{case_id}.json"
+        if not contract and not case_id.startswith("illustrative-"):
+            report.add(where, f"only illustrative- cases may exist until the input contract "
+                              f"is written in {CONTRACTS.as_posix()}/ (TEST_CASES.md, Fixture "
+                              f"format)")
         if case.expected_files == 0:
             report.add(where, "has no expected file")
             continue
@@ -487,7 +517,8 @@ def check(root: Path) -> tuple[list[str], int, int]:
             cases[path.stem] = case
     for path in expected:
         check_expected(path, root, cases, method, report)
-    check_cases(cases, report)
+    contract = (root / CONTRACTS).is_dir() and any((root / CONTRACTS).iterdir())
+    check_cases(cases, report, contract)
     return report.findings, len(fixtures), len(expected)
 
 

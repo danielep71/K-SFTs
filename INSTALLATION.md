@@ -229,10 +229,14 @@ more entry points show the failure paths and are expected to fail:
   keep the whole run, type
   `TEST_Harness.SaveLog "<folder>\examples.log"` after it, with a folder
   outside the checkout or the ignored `test-results/` directory.
-- **Recovery.** A run that stopped half way, or that changed Excel settings
-  it did not restore, leaves `recovery=REQUIRED`, and the next run is
-  refused. Check **File → Options → Formulas** (calculation) and the other
-  settings the log names, then type `TEST_Harness.ResetTests`.
+- **Recovery.** A run that ended without `EndRun` while the VBA project kept
+  its state (for example, a new run typed while stopped in break mode), or
+  that changed Excel settings it did not restore, leaves `recovery=REQUIRED`,
+  and the next run is refused. Check **File → Options → Formulas**
+  (calculation) and the other settings the log names, then type
+  `TEST_Harness.ResetTests`. **End** or **Reset** in the VBE clears the
+  harness's state: the next run is then not refused and takes the settings
+  it finds as its baseline, so check them by hand first.
 - **What it proves.** The suite exercises the harness itself: assertions,
   tolerances, error values, raised errors, completeness and the cleanup
   pattern. It contains no SFT calculation, and a passing run validates

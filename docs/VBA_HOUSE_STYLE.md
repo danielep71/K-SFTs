@@ -14,7 +14,7 @@ parameters apply here.
 every component. The `vba-*` gates of `python tools/check.py` enforce the
 mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
-and the public API inventory. Everything else is enforced by review
+of whatever VBA would otherwise make public, and the public API inventory. Everything else is enforced by review
 ([what the checks cannot see](../tools/README.md#vba-static-checks)).
 
 <a id="naming"></a>
@@ -297,7 +297,8 @@ generated, names the generator and says it must not be edited by hand.
   imported ([INSTALLATION.md](../INSTALLATION.md#importing-vba-into-excel)).
 - **Forms:** a `.frm` and its `.frx` are one component, kept side by side in
   `src/forms/`. The `.frx` is binary and never edited as text.
-- **Workbooks and other Office files** are build outputs, ignored by Git. One
+- **Workbooks, Access databases and macro-enabled Office files** are build
+  outputs, ignored by Git. One
   may be committed only at an exact path re-included in `.gitignore` and
   approved in an issue; the only intended one is the macro-free template in
   `src/workbook/`. No such path is approved yet.
@@ -313,10 +314,13 @@ generated, names the generator and says it must not be edited by hand.
 - `python tools/check.py` must pass. It is a static check and never compiles
   or runs VBA: a static PASS proves neither that the project compiles nor
   that a result is right ([tools/README.md](../tools/README.md#vba-static-checks)).
-- Changed VBA is merged only after it has been imported, compiled and tested
-  in Excel on a [supported host](../INSTALLATION.md#supported-hosts). How
-  that run is recorded is defined in
-  [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9).
+- From the first recorded host run
+  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)) on, changed VBA is
+  merged only after it has been imported, compiled and tested in Excel on a
+  [supported host](../INSTALLATION.md#supported-hosts); #9 defines how that
+  run is recorded. Until then, VBA may be merged on a static PASS only if
+  the pull request states that it was not compiled or run, as the harness
+  was ([#76](https://github.com/danielep71/CCR-K-SFTs/pull/76)).
 
 ---
 

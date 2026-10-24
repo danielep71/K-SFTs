@@ -4,7 +4,8 @@ run-name: Repository integrity — ${{ github.ref_name }} @ ${{ github.sha }}
 # Runs tools/check.py, the single entry point for the repository's checks,
 # on every pull request and push to the integration branches. No path filter:
 # the job reports on every pull request, so it can be a required check.
-# Static tooling, label and workflow checks only; no VBA compilation or Excel.
+# Static checks only: tooling, labels and issue forms, test-case format, VBA
+# source and workflows; no VBA compilation or Excel.
 
 on:
   pull_request:
