@@ -124,7 +124,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
   committed;
 - signatures in the inventory without white space just inside parentheses,
   string literals kept as written;
-- `Rem` recognized after a `:` separator as well as at the line start;
+- `Rem` recognized after a `:` separator and after a numeric line label as
+  well as at the line start, and `vba-jumps` reading each statement of a
+  line separated by `:`, so that `Private Sub F(): ...: End Sub` closes;
 - `VBA6` true under VBA7, as Microsoft documents it (false there in
   K-SACCR), and no `Declare` keyword test on procedure lines, which also
   matched text inside string literals;

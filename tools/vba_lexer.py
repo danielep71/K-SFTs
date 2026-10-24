@@ -17,6 +17,7 @@ from pathlib import Path
 VBA_SUFFIXES = frozenset({".bas", ".cls", ".frm"})
 REM = re.compile(r"Rem(?=\s|$)", re.IGNORECASE)
 CONTINUATION = re.compile(r"\s_\s*$")
+LINE_NUMBER = re.compile(r"\s*\d+(?=\s)")
 
 
 @dataclass(frozen=True)
@@ -69,14 +70,16 @@ def read_component(root: Path, path: str) -> str:
 
 def strip_code(raw: str, *, blank_strings: bool = False) -> str:
     """One physical line without its comment: from a ' outside a string, or
-    from Rem where a statement starts (at the line start or after a ``:``
-    separator, not after a ``:=`` named argument). With ``blank_strings`` the
-    content of string literals becomes spaces, so that keywords quoted in a
-    string are not read as code; columns are preserved either way."""
-    result: list[str] = []
+    from Rem where a statement starts (at the line start, after a numeric line
+    label such as ``100``, or after a ``:`` separator, not after a ``:=``
+    named argument). With ``blank_strings`` the content of string literals
+    becomes spaces, so that keywords quoted in a string are not read as code;
+    columns are preserved either way."""
+    label = LINE_NUMBER.match(raw)
+    index = label.end() if label else 0
+    result: list[str] = [raw[:index]]
     in_string = False
     statement_start = True
-    index = 0
     while index < len(raw):
         char = raw[index]
         if char == '"':
@@ -96,6 +99,42 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
             statement_start = False
         index += 1
     return "".join(result).rstrip()
+
+
+def date_delimiter(code: str, index: int, in_date: bool) -> bool:
+    """Whether the # at ``index`` opens or closes a date literal such as #1/2/2026#."""
+    if in_date:
+        return True
+    previous = code[index - 1] if index else ""
+    if previous and (previous.isalnum() or previous in "_.)]"):
+        return False  # a type suffix, as in Total#
+    return "#" in code[index + 1:]  # a literal needs its closing #; Print #1 has none
+
+
+def split_statements(code: str) -> list[str]:
+    """Split one logical line at colons outside strings and date literals; a
+    ``:=`` named argument is not a separator, and a Rem statement ends the line."""
+    statements: list[str] = []
+    start = 0
+    in_string = in_date = False
+    index = 0
+    while index < len(code):
+        char = code[index]
+        if char == '"' and not in_date:
+            if in_string and code[index:index + 2] == '""':
+                index += 2
+                continue
+            in_string = not in_string
+        elif char == "#" and not in_string and date_delimiter(code, index, in_date):
+            in_date = not in_date
+        elif char == ":" and not (in_string or in_date) and code[index:index + 2] != ":=":
+            statements.append(code[start:index].strip())
+            start = index + 1
+        index += 1
+    statements.append(code[start:].strip())
+    rem = next((i for i, item in enumerate(statements) if re.match(r"^Rem(?:\s|$)", item, re.I)),
+               len(statements))
+    return statements[:rem]
 
 
 def logical_units(lines: list[str], *, blank_strings: bool = False
