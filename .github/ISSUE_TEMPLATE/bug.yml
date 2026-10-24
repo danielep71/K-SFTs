@@ -1,0 +1,131 @@
+name: "🐛 Bug report"
+description: "Report reproducible incorrect behavior in CCR-K-SFTs source, tooling or documentation."
+title: "[Bug]: "
+labels: ["bug", "P2"]
+assignees: ["danielep71"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug report
+
+        **Reproducible · Exact commit · Sourced expected value · Synthetic data only**
+
+        Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug.
+
+        > [!CAUTION]
+        > Synthetic data only: never paste real trades, counterparties, collateral, credentials or private workbooks, and do not describe a vulnerability in an issue.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "🎚️ Affected area"
+      options:
+        - Calculation engine
+        - Public API
+        - Workbook and VBA source
+        - Tests and fixtures
+        - Tooling and CI
+        - Documentation
+        - Repository and governance
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "🎯 Defect and impact"
+      description: What is wrong, who is affected and what the consequence is. For a calculation defect, name the affected quantity.
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: "🔖 Exact commit"
+      description: Full 40-character commit SHA, or release tag, that reproduces the defect.
+      placeholder: 0123456789abcdef0123456789abcdef01234567
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔁 Minimal reproduction"
+      description: Deterministic steps and synthetic inputs.
+      placeholder: |
+        1. Check out the commit above
+        2. Run ... with ...
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ Expected behavior"
+      description: The expected result, error or state, with its source (regulatory text, published example, or a derivation independent of this repository's code).
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "❌ Observed behavior"
+      description: Exact values, messages or logs, and whether the failure is repeatable.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "🖥️ Environment"
+      description: Write "N/A" for tooling or documentation defects that do not depend on the host.
+      value: |
+        Excel version/build:
+        Office bitness:
+        Windows version:
+        Locale / decimal separator:
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "🏁 Acceptance criteria"
+      description: Checkable conditions for the fix, including the regression test that must pass.
+      placeholder: |
+        - [ ] ...
+        - [ ] Regression test with a sourced expected value
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: "🧪 Validation evidence required"
+      description: The checks and evidence that will prove the fix, for example `python tools/check.py`, a regression case, or an Excel run on the exact commit.
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "🔗 Dependencies and blocking status"
+      description: Name each prerequisite as an issue link (#12) or on a line starting "External condition:". Write "None" if nothing blocks this work. Triage adds `blocked` only while a named prerequisite is unresolved.
+      placeholder: None
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "☑️ Submission checks"
+      options:
+        - label: I searched open and closed issues for an equivalent report.
+          required: true
+        - label: I reproduced this on the exact commit stated above.
+          required: true
+        - label: This report contains only synthetic data and no secrets, private links or vulnerability details.
+          required: true

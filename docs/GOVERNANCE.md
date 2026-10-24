@@ -134,6 +134,8 @@ configured, read back and exercised in [#12](https://github.com/danielep71/CCR-K
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
 | Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
 | Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, so it is active only after integration. |
+| Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
+| Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
 
 ### Accepted limitations
 
@@ -148,30 +150,85 @@ verified or changed.
 
 ## 🗂️ Issues
 
-Assign issues to **danielep71**, give each exactly one priority (`P1`, `P2` or
-`P3`), the appropriate type labels from [.github/labels.json](../.github/labels.json)
-and a relevant milestone. Pull requests into the active release branch carry
-the release milestone and labels of the work they deliver. Record the
-objective and checkable acceptance criteria for substantive work. Issue forms
-and their triage are defined in [#11](https://github.com/danielep71/CCR-K-SFTs/issues/11).
+Open issues with a form: **Bug report**, **Enhancement** or **Documentation**
+([.github/ISSUE_TEMPLATE](../.github/ISSUE_TEMPLATE)); blank issues are
+disabled. Each form asks for the scope, the reproduction or requested
+behavior, checkable acceptance criteria, the validation evidence required and
+the dependency status. Pull requests follow
+[.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md).
+
+Every issue has:
+
+- the assignee **danielep71**;
+- exactly one priority, `P1`, `P2` or `P3`, and the appropriate type labels
+  from [.github/labels.json](../.github/labels.json);
+- the milestone of the work it belongs to.
+
+Pull requests into the active release branch carry the release milestone and
+the labels of the work they deliver.
+
+### Priorities
+
+| Priority | Use |
+| --- | --- |
+| `P1` | Reserved for a **confirmed calculation bug**: wrong results for valid inputs. Never for setup, documentation or tooling work. |
+| `P2` | Material correctness, robustness or maintainability defect. Default of the Bug report form. |
+| `P3` | Non-blocking quality, testing, documentation or setup work. Default of the Enhancement and Documentation forms. |
+
+A form sets its default priority; triage confirms or changes it. Raise a bug
+to `P1` only once the calculation defect is confirmed, and only with the `bug`
+label.
 
 ### Dependency status
 
 `blocked` is the only dependency status label. It means that a named,
-unresolved prerequisite prevents work from starting.
+unresolved prerequisite prevents work from starting. Ready issues carry no
+status label.
 
-- Name every blocker in the issue, as an issue link or a concrete external
-  condition. Ready issues carry no status label.
-- When an issue closes, review the issues that name it as a prerequisite.
-  Remove `blocked` from each one whose prerequisites are all resolved, or
-  whose dependency the maintainer explicitly resolves.
-- Add `blocked` when a new unresolved prerequisite is identified, and name it.
+- Name every blocker in the issue's *Dependencies and blocking status*
+  section, as an issue link (`#12`) or on a line starting
+  `External condition:`. Write `None` when nothing blocks the work.
+- Add `blocked` when a named prerequisite is unresolved, and remove it when
+  all of them are resolved or the maintainer explicitly resolves the
+  dependency. When an issue closes, review the issues that name it.
+
+### Triage
+
+Issue forms cannot set a milestone or enforce the rules above, so the
+read-only **Issue triage** workflow
+([.github/workflows/issue-triage.yml](../.github/workflows/issue-triage.yml))
+audits every open issue whenever an issue is opened, edited, closed,
+reopened, labelled, assigned or given a milestone, and on manual dispatch.
+It fails, and GitHub notifies the maintainer, when an open issue:
+
+- is not assigned to danielep71, has no milestone, or does not have exactly
+  one priority;
+- has `P1` without `bug`;
+- carries a label that is not in the catalogue;
+- has no dependency section, or names an issue that does not exist;
+- is `blocked` without an open prerequisite or external condition, or names
+  an open prerequisite or external condition without being `blocked`.
+
+The workflow never changes an issue: it does not assign, label or set a
+milestone. On each new issue, and whenever the audit fails, the maintainer:
+
+1. sets the milestone of the work the issue belongs to;
+2. confirms or changes the priority;
+3. adds or removes `blocked` as the dependency section requires;
+4. re-runs the workflow, or makes the next issue change, and checks that it
+   passes.
+
+The same rules run locally with
+`python tools/check_issues.py --repository danielep71/CCR-K-SFTs` and a
+`GITHUB_TOKEN`; `python tools/check.py` checks the forms and the label
+catalogue offline.
 
 ### Closure
 
 Close an issue as completed only when its acceptance criteria are met by
 linked evidence. Check an acceptance box only when the linked evidence
-demonstrates it. The closing comment contains a **Resolution** section with:
+demonstrates it. When the issue is closed, its body gains a **Resolution**
+section with:
 
 - links to the change (pull request and commit);
 - the checks actually run, with their results;
