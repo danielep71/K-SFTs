@@ -1,26 +1,26 @@
 # 🏛️ Repository governance
 
-This document defines how changes to CCR-K-SFTs are proposed, reviewed and
+This document defines how changes to K-SFTs are proposed, reviewed and
 integrated. It separates the **intended policy** from the **controls verified
 as configured**; a rule written here is not evidence that GitHub enforces it.
 
 ## 👤 Ownership and scope
 
-**Daniele Penza (@danielep71)** maintains CCR-K-SFTs and decides scope,
+**Daniele Penza (@danielep71)** maintains K-SFTs and decides scope,
 priorities, branch strategy, integration and publication. Contributors and
 automation work within the scope authorized by the maintainer.
 
 This is an independent personal project.
 
-CCR-K-SFTs covers counterparty credit risk for securities financing
+K-SFTs covers counterparty credit risk for securities financing
 transactions. The current milestone, **v0.1.0 - Repo setup**, prepares the
 repository infrastructure only. Production SFT calculations, numerical
 certification and workbook packaging belong to later milestones; the project
 boundary and architecture are defined in
-[REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/CCR-K-SFTs/issues/2)), and the
+[REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/K-SFTs/issues/2)), and the
 VBA conventions, supported hosts and import steps in
 [VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md) and
-[INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/CCR-K-SFTs/issues/4)).
+[INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/K-SFTs/issues/4)).
 
 Commits may be authored by the maintainer or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
@@ -67,7 +67,7 @@ release will be published (see [Releases](#-releases)).
    window anyway, merge `main` into a branch cut from the release branch and
    merge that branch into the release branch with a merge commit, through a
    pull request whose diff is empty (CI only). Do not relax a rule to get
-   past it ([#50](https://github.com/danielep71/CCR-K-SFTs/pull/50)).
+   past it ([#50](https://github.com/danielep71/K-SFTs/pull/50)).
 6. `main` receives commits only through these integration pull requests. If
    it receives any other commit while the release branch has commits of its
    own, the sync pull request cannot meet the up-to-date rule; stop and
@@ -134,7 +134,7 @@ Applies to `main` and every `release/**` branch:
 | Rule | Policy |
 | --- | --- |
 | Pull request required | Yes; 0 approving reviews (sole owner). |
-| Required status check | `Repository integrity`, the job of `.github/workflows/repository-integrity.yml` ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)). |
+| Required status check | `Repository integrity`, the job of `.github/workflows/repository-integrity.yml` ([#5](https://github.com/danielep71/K-SFTs/issues/5)). |
 | Branch up to date before merge | Required. |
 | Conversations resolved before merge | Required. |
 | Force pushes | Blocked. |
@@ -162,30 +162,30 @@ seen to enforce on a real pull request is listed under
 | Repository visibility | Private. Not to be changed for setup. |
 | Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection are available on private repositories under this plan; no upgrade is required. |
 | `main` and `release/0.1.0` branches | Verified on 2026-10-23: both exist; `release/0.1.0` was created from `main` at `85b2b3b`. |
-| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Required check, up-to-date and merge-method rules demonstrated on `release/**` ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12), [below](#demonstrated-enforcement)); the other rules are verified only. |
-| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
+| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Required check, up-to-date and merge-method rules demonstrated on `release/**` ([#12](https://github.com/danielep71/K-SFTs/issues/12), [below](#demonstrated-enforcement)); the other rules are verified only. |
+| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
 | Merge methods | Verified on 2026-10-24: the repository allows merge commits, squash and rebase. The rulesets allow **merge commits only** into `main`, and **squash or merge commits** into `release/**`, matching [Integration](#-integration). Observed: task pull requests squash-merged into `release/0.1.0` (#40, #43), the release integrated into `main` with a merge commit (#41), and the sync back with a merge commit (#44). Head branches are deleted automatically after merge. |
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
-| Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
-| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, where it has been since [#15](https://github.com/danielep71/CCR-K-SFTs/pull/15). Active: verified on 2026-10-24 by its first pull request, [#18](https://github.com/danielep71/CCR-K-SFTs/pull/18). |
-| Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/CCR-K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
-| Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
-| Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, where it has been since [#19](https://github.com/danielep71/CCR-K-SFTs/pull/19). Active: verified on 2026-10-24 by its runs on issue events, for example run [40104872758](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40104872758). |
-| Traffic history | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
+| Codex code review | Enabled: observed on [#14](https://github.com/danielep71/K-SFTs/pull/14), on opening and on an `@codex review` request. |
+| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, where it has been since [#15](https://github.com/danielep71/K-SFTs/pull/15). Active: verified on 2026-10-24 by its first pull request, [#18](https://github.com/danielep71/K-SFTs/pull/18). |
+| Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
+| Issue forms and PR template | Configured ([#11](https://github.com/danielep71/K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
+| Issue triage workflow | Configured ([#11](https://github.com/danielep71/K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, where it has been since [#19](https://github.com/danielep71/K-SFTs/pull/19). Active: verified on 2026-10-24 by its runs on issue events, for example run [40104872758](https://github.com/danielep71/K-SFTs/actions/runs/40104872758). |
+| Traffic history | Configured ([#36](https://github.com/danielep71/K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
 
 <a id="demonstrated-enforcement"></a>
 
 ### Demonstrated enforcement
 
 Recorded on **2026-10-24** for
-[#12](https://github.com/danielep71/CCR-K-SFTs/issues/12). Each row is a merge
+[#12](https://github.com/danielep71/K-SFTs/issues/12). Each row is a merge
 GitHub refused, or a rule shown to hold, on a real pull request.
 
 | Rule | Evidence |
 | --- | --- |
-| A failing required check blocks the merge | Controlled exercise [#79](https://github.com/danielep71/CCR-K-SFTs/pull/79) into `release/0.1.0`. Head `62c4518` added `tests/modules/TEST_DefectProbe.bas`, whose line 13 ends in trailing white space. Run [40102906705](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40102906705) checked test merge `49a8403`, and `vba-source` failed with `tests/modules/TEST_DefectProbe.bas:13: trailing white space`. A squash merge pinned to that head was refused: *405 Repository rule violations found. Required status check "Repository integrity" is failing.* Correction `607a848` removed the module, and run [40103030691](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40103030691) passed on test merge `808e576`. The pull request was squash-merged, so the defective revision never reached an integration branch. |
-| A green check is not permission to merge | Sync [#49](https://github.com/danielep71/CCR-K-SFTs/pull/49) had an empty diff and a passing check, but was refused with *405 Base branch was modified* because the release branch had moved. [#29](https://github.com/danielep71/CCR-K-SFTs/pull/29), whose base had moved, was refused with *Required status check "Repository integrity" is expected*. |
-| Only the allowed merge methods | While merge commits were not allowed on `release/**`, the merge of [#31](https://github.com/danielep71/CCR-K-SFTs/pull/31) was refused with HTTP 405. |
+| A failing required check blocks the merge | Controlled exercise [#79](https://github.com/danielep71/K-SFTs/pull/79) into `release/0.1.0`. Head `62c4518` added `tests/modules/TEST_DefectProbe.bas`, whose line 13 ends in trailing white space. Run [40102906705](https://github.com/danielep71/K-SFTs/actions/runs/40102906705) checked test merge `49a8403`, and `vba-source` failed with `tests/modules/TEST_DefectProbe.bas:13: trailing white space`. A squash merge pinned to that head was refused: *405 Repository rule violations found. Required status check "Repository integrity" is failing.* Correction `607a848` removed the module, and run [40103030691](https://github.com/danielep71/K-SFTs/actions/runs/40103030691) passed on test merge `808e576`. The pull request was squash-merged, so the defective revision never reached an integration branch. |
+| A green check is not permission to merge | Sync [#49](https://github.com/danielep71/K-SFTs/pull/49) had an empty diff and a passing check, but was refused with *405 Base branch was modified* because the release branch had moved. [#29](https://github.com/danielep71/K-SFTs/pull/29), whose base had moved, was refused with *Required status check "Repository integrity" is expected*. |
+| Only the allowed merge methods | While merge commits were not allowed on `release/**`, the merge of [#31](https://github.com/danielep71/K-SFTs/pull/31) was refused with HTTP 405. |
 
 **What a pull request run checks.**
 
@@ -219,7 +219,7 @@ check but was not exercised with a failing one.
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into
   [Demonstrated enforcement](#demonstrated-enforcement) and
-  [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12).
+  [#12](https://github.com/danielep71/K-SFTs/issues/12).
 - A merge refusal can only be shown by attempting the merge. A rule that has
   not been triggered on a real pull request is recorded as verified, not as
   enforced.
@@ -307,7 +307,7 @@ milestone. On each new issue, and whenever the audit fails, the maintainer:
    passes.
 
 The same rules run locally with
-`python tools/check_issues.py --repository danielep71/CCR-K-SFTs` and a
+`python tools/check_issues.py --repository danielep71/K-SFTs` and a
 `GITHUB_TOKEN`; `python tools/check.py` checks the forms and the label
 catalogue offline.
 

@@ -1,6 +1,6 @@
 # 🧪 Numerical test cases
 
-This document defines how CCR-K-SFTs's numerical test cases are written:
+This document defines how K-SFTs's numerical test cases are written:
 files, inputs and their units, expected results and their provenance,
 tolerances, case categories, invalid inputs and when a rule counts as
 validated. Sources and rule IDs come from the [methodology](README.md). Its
@@ -105,7 +105,7 @@ A case is one input file and one expected-result file per calculation regime:
 `null` means not applicable. Files are strict JSON and numbers are finite, in
 every category: `NaN`, `Infinity` and a number that overflows to infinity
 (such as `1e400`) are rejected. A non-finite input is tested in a VBA test
-module instead ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)). A
+module instead ([#7](https://github.com/danielep71/K-SFTs/issues/7)). A
 file holding only `null`, or anything other than an object, is rejected,
 never skipped.
 
@@ -250,7 +250,7 @@ Each fixture declares one `category`:
   public input domain at least one `invalid` case, as a fixture or a VBA test.
 - A run of the test harness that does not execute every expected case and
   assertion is **incomplete, not a pass**
-  ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)).
+  ([#7](https://github.com/danielep71/K-SFTs/issues/7)).
 - A release states which rules are validated, under which version of the
   controlling text, and lists
   every rule that is implemented but not validated.
@@ -281,4 +281,4 @@ It does not check:
 - that an `invalid` case has no numeric output for what it rejects;
 - any value: nothing is computed or compared. Running cases in Excel belongs
   to the regression harness
-  ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)).
+  ([#7](https://github.com/danielep71/K-SFTs/issues/7)).

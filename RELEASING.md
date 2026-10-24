@@ -78,9 +78,9 @@ produced again for the new candidate.
 
 In a task pull request into the release branch, move the `[Unreleased]`
 entries into `## [X.Y.Z] - YYYY-MM-DD` and add its link reference,
-`[X.Y.Z]: https://github.com/danielep71/CCR-K-SFTs/releases/tag/vX.Y.Z`.
+`[X.Y.Z]: https://github.com/danielep71/K-SFTs/releases/tag/vX.Y.Z`.
 Keep an empty `## [Unreleased]` section, with its link reference changed to
-`https://github.com/danielep71/CCR-K-SFTs/compare/vX.Y.Z...HEAD`. Create or
+`https://github.com/danielep71/K-SFTs/compare/vX.Y.Z...HEAD`. Create or
 update `VERSION` to `X.Y.Z` in the same pull request. Update the *Current
 status* table above.
 

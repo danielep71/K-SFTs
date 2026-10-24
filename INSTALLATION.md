@@ -13,7 +13,7 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 > and the workbook template holds only a Readme sheet. The import, compile
 > and harness steps below were first run on a host on 2026-10-24, recorded
 > in [tested environments](#tested-environments) and
-> [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). The
+> [#9](https://github.com/danielep71/K-SFTs/issues/9). The
 > [developer setup](#developer-setup) has been run from a fresh clone on
 > Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -22,7 +22,7 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 ## 🖥️ Supported hosts
 
 Decided by the maintainer on 2026-10-24 in
-[#4](https://github.com/danielep71/CCR-K-SFTs/issues/4).
+[#4](https://github.com/danielep71/K-SFTs/issues/4).
 
 | Host | Support level |
 | --- | --- |
@@ -45,7 +45,7 @@ below, each with its evidence.
 
 | Host | Excel build | Windows | Bitness | Commit | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
+| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
 
 <a id="get-the-source"></a>
 
@@ -54,8 +54,8 @@ below, each with its evidence.
 Use a **Git clone**:
 
 ```sh
-git clone https://github.com/danielep71/CCR-K-SFTs.git
-cd CCR-K-SFTs
+git clone https://github.com/danielep71/K-SFTs.git
+cd K-SFTs
 git switch release/0.1.0
 ```
 
@@ -283,7 +283,7 @@ more entry points show the failure paths and are expected to fail:
 ## 🧾 Recording an Excel run
 
 The evidence that a commit's VBA was imported, compiled and run on a host,
-for [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9) and for every
+for [#9](https://github.com/danielep71/K-SFTs/issues/9) and for every
 later issue or pull request that cites an Excel run. It needs no
 self-hosted runner, no change to the macro-security level and no *Trust
 access to the VBA project object model*.

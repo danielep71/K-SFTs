@@ -78,7 +78,7 @@ validation:
 | --- | --- | --- |
 | Static checks | `python tools/check.py`, locally and in CI | The source files follow the rules above |
 | Compilation | Excel: **Debug → Compile VBAProject** on a [supported host](../INSTALLATION.md#supported-hosts) | The project compiles: names, calls, types, arguments |
-| Numerical validation | The regression harness ([#7](https://github.com/danielep71/CCR-K-SFTs/issues/7)) against [published or independent cases](../docs/methodology/TEST_CASES.md#completeness-policy) | A rule computes the documented result |
+| Numerical validation | The regression harness ([#7](https://github.com/danielep71/K-SFTs/issues/7)) against [published or independent cases](../docs/methodology/TEST_CASES.md#completeness-policy) | A rule computes the documented result |
 
 **Modeled hosts.** `vba-conditionals`, `vba-jumps` and `vba-public-api` read
 each component once per compilation environment, with the branches of every
@@ -191,7 +191,7 @@ repository only, and no retired-component list. No test runs it: it needs
 Windows Excel, and K-SACCR's PowerShell tests were not adopted. It is
 validated by running it on a host: first on 2026-10-24, in development mode
 in Windows PowerShell 5.1
-([#102](https://github.com/danielep71/CCR-K-SFTs/issues/102)).
+([#102](https://github.com/danielep71/K-SFTs/issues/102)).
 
 ## 🗂️ Issue triage
 
@@ -204,7 +204,7 @@ prerequisite. The token therefore needs `pull-requests: read` as well:
 without it the issues API omits pull requests.
 
 ```sh
-GITHUB_TOKEN=<token with issues:read and pull-requests:read> python tools/check_issues.py --repository danielep71/CCR-K-SFTs
+GITHUB_TOKEN=<token with issues:read and pull-requests:read> python tools/check_issues.py --repository danielep71/K-SFTs
 python tools/check_issues.py --input issues.json   # issues exported as GitHub REST JSON
 python tools/check_issues.py --check-config        # forms and label catalogue only
 ```

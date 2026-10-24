@@ -1,8 +1,8 @@
-# CCR-K-SFTs
+# K-SFTs
 
 Counterparty credit risk for securities financing transactions (SFTs):
 repurchase agreements, securities lending and borrowing, and margin lending.
-CCR-K-SFTs is intended to become an Excel/VBA application that calculates SFT
+K-SFTs is intended to become an Excel/VBA application that calculates SFT
 exposure from transactions, collateral and netting sets.
 
 > [!IMPORTANT]

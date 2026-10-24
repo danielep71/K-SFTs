@@ -1,6 +1,6 @@
 # 📐 Methodology
 
-This directory records **what CCR-K-SFTs will implement and on what
+This directory records **what K-SFTs will implement and on what
 authority**: the controlling and reference texts with their dates, the
 primary-source provenance of every rule, the scope decisions, assumptions,
 and the trace from each rule to its formula, code and tests. The numerical
@@ -19,7 +19,7 @@ K-SACCR's derivative SA-CCR content applies here.
 ## ⚖️ Regulatory basis
 
 Decided by the maintainer on 2026-10-24 in
-[#8](https://github.com/danielep71/CCR-K-SFTs/issues/8) (D1).
+[#8](https://github.com/danielep71/K-SFTs/issues/8) (D1).
 
 | Role | Source | Use |
 | --- | --- | --- |
@@ -145,7 +145,7 @@ are non-binding.
 | Topic | Current position |
 | --- | --- |
 | Units | Amounts in a stated currency, unscaled; rates and haircuts as decimals; periods in years unless the name says otherwise ([VBA_HOUSE_STYLE.md](../VBA_HOUSE_STYLE.md#units-and-domains)). Test cases follow the same rules ([TEST_CASES.md](TEST_CASES.md#fixture-format)) |
-| Inputs | Transaction, collateral and netting-set data supplied by the caller. CCR-K-SFTs will not price securities or source market data, FX rates or ratings |
+| Inputs | Transaction, collateral and netting-set data supplied by the caller. K-SFTs will not price securities or source market data, FX rates or ratings |
 | Supervisory parameters | Taken only from a registered controlling text, recorded with its locator, and never typed in code without a `REFERENCE` |
 | Numeric conventions | `Double` arithmetic, no intermediate rounding; tolerances are explicit on every expected value ([TEST_CASES.md](TEST_CASES.md#tolerance)) (D8) |
 | Calculation outputs and reporting | A calculation output (such as the fully adjusted exposure value E*) is kept distinct from any reporting measure; the reporting Q&As in the register are used to draw that line, not as calculation rules |
