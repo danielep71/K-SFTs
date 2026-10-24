@@ -166,10 +166,10 @@ python tools/check_excel_run.py <evidence-folder> --commit <commit>
 
 Exit code 0 means PASS, 1 a finding. It needs only the standard library and
 Git. It has been run on Linux and, for #9's evidence, on Windows 11 in
-PowerShell; the other tools are run on Linux only. If it fails on another
-host, run it from WSL or a Linux checkout with the evidence folder copied
-across. Its positive and negative fixtures, built
-from the commit's own source, are in `test_check_excel_run.py`, run by
+PowerShell; the other Python tools are run on Linux only. If it fails on
+another host, run it from WSL or a Linux checkout with the evidence folder
+copied across. Its positive and negative fixtures, built from the commit's
+own source, are in `test_check_excel_run.py`, run by
 `tool-tests`. The fixture logs are synthetic: they follow the documented
 log format, not a recorded run.
 
@@ -189,7 +189,9 @@ this repository's prefixes and homes, homes that do not exist yet skipped,
 a stop without saving when a mode lists nothing, forms imported from the
 repository only, and no retired-component list. No test runs it: it needs
 Windows Excel, and K-SACCR's PowerShell tests were not adopted. It is
-validated by running it on a host ([#102](https://github.com/danielep71/CCR-K-SFTs/issues/102)).
+validated by running it on a host: first on 2026-10-24, in development mode
+in Windows PowerShell 5.1
+([#102](https://github.com/danielep71/CCR-K-SFTs/issues/102)).
 
 ## 🗂️ Issue triage
 

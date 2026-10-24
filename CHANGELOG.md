@@ -100,6 +100,9 @@ SFT calculation, public API or workbook.
   25H2. The normal run passed (9 cases, 18 assertions), both failure paths
   ended as documented, and `tools/check_excel_run.py` passed on the evidence
   ([tested environments](INSTALLATION.md#tested-environments); #9).
+- On the same host, `tools/Sync-KSFT-VBA.ps1` imported the test modules into
+  a workbook built from the template, in development mode, and the example
+  suite passed in it (#102).
 
 ### Known limitations
 
