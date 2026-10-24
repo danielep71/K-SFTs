@@ -1,0 +1,146 @@
+name: Traffic history
+run-name: "Traffic history — ${{ github.event_name }}"
+
+# Keeps this repository's GitHub traffic beyond the API's 14-day window:
+# collects views, clones, top referrers and popular paths once a day and
+# merges them into CSV files on the data-only `traffic-history` branch with
+# tools/traffic_history.py. Analytics only: it is not CI and must never run
+# builds or tests. Operation, credentials and recovery: docs/TRAFFIC.md.
+#
+# Credentials
+#   TRAFFIC_TOKEN, a fine-grained personal access token limited to this
+#   repository with Administration: read (the traffic API needs it; the
+#   workflow token cannot read traffic), stored in the `analytics`
+#   environment, whose deployment branches are limited to the default branch.
+#   Only the fetch step receives it; that step runs curl and no repository
+#   code. The workflow token pushes the history, with contents: write.
+
+on:
+  schedule:
+    # Daily, off the hour; GitHub may start scheduled runs late.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One collection at a time, and never cancel one that is writing.
+  group: traffic-history
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  collect:
+    name: Collect traffic
+    # A manual run may select any branch; only the default branch's reviewed
+    # copy runs. The analytics environment enforces the same restriction.
+    if: github.event_name == 'schedule' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: analytics
+    permissions:
+      contents: write
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source
+          persist-credentials: false
+
+      - name: Check out traffic-history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: traffic-history
+          path: history
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Fetch traffic from the GitHub API
+        id: fetch
+        env:
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          API: ${{ github.api_url }}/repos/${{ github.repository }}/traffic
+        run: |
+          set -euo pipefail
+          if [ -z "${TRAFFIC_TOKEN:-}" ]; then
+            echo "::error::TRAFFIC_TOKEN is not set in the analytics environment (docs/TRAFFIC.md)"
+            exit 1
+          fi
+          echo "collected_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          RAW="$RUNNER_TEMP/traffic-raw"
+          echo "RAW=$RAW" >> "$GITHUB_ENV"
+          mkdir -p "$RAW"
+          # curl retries timeouts, 408, 429 and 5xx responses, honouring
+          # Retry-After; any other failure stops the run before a merge.
+          for resource in views clones popular/referrers popular/paths; do
+            name="${resource#popular/}"
+            curl --silent --show-error --location --fail-with-body \
+              --retry 5 --retry-max-time 300 --max-time 60 \
+              --header "Authorization: Bearer $TRAFFIC_TOKEN" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2026-03-10" \
+              --output "$RAW/$name.json" \
+              "$API/$resource" \
+              || { echo "::error::Traffic API request for $resource failed"; exit 1; }
+          done
+
+      - name: Merge into the history
+        env:
+          COLLECTED_AT: ${{ steps.fetch.outputs.collected_at }}
+        run: >-
+          python source/tools/traffic_history.py merge
+          --raw "$RAW" --data history/data
+          --collected-at "$COLLECTED_AT"
+          --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push the history
+        working-directory: history
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          COLLECTED_AT: ${{ steps.fetch.outputs.collected_at }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          basic="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          echo "::add-mask::$basic"
+          auth="AUTHORIZATION: basic $basic"
+          git_auth() { git -c "http.https://github.com/.extraheader=$auth" "$@"; }
+
+          commit() {
+            git add data
+            if git diff --cached --quiet; then
+              echo "No change to the history."
+              return 1
+            fi
+            git commit --quiet -m "chore: record traffic collected at $COLLECTED_AT"
+          }
+
+          commit || exit 0
+          for attempt in 1 2 3; do
+            if git_auth push origin HEAD:traffic-history; then
+              exit 0
+            fi
+            # Another writer moved the branch: rebuild this collection on its
+            # new tip instead of overwriting it.
+            sleep $((attempt * 10))
+            git_auth fetch origin traffic-history
+            git reset --hard FETCH_HEAD
+            python ../source/tools/traffic_history.py merge \
+              --raw "$RAW" --data data --collected-at "$COLLECTED_AT"
+            commit || exit 0
+          done
+          echo "::error::Could not push the history after 3 attempts"
+          exit 1

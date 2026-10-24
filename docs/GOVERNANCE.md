@@ -33,6 +33,7 @@ bypass branch rules.
 | `release/0.1.0` | **Active setup integration branch** for v0.1.0 - Repo setup. Base for task branches and target of task and sync pull requests. Created from `main` at `85b2b3b` on 2026-10-23 by maintainer decision. |
 | Other `release/X.Y.Z` | Opened only by maintainer decision, without a `v` prefix. Do not infer a new target from a version number or from this document. |
 | `fix/<issue>-<slug>`, `docs/<slug>`, `test/<slug>` | Short-lived task branches, created from the active release branch and deleted after merge. |
+| `traffic-history` | Data-only branch written by the Traffic history workflow ([docs/TRAFFIC.md](TRAFFIC.md)). Unrelated to `main`; never merged, never a task base, never deleted. |
 
 A release branch is an integration branch: its name does not imply that a
 release will be published (see [Releases](#-releases)).
@@ -124,6 +125,10 @@ Applies to `main` and every `release/**` branch:
 | Deletion | Blocked. |
 | Bypass | None. |
 
+`traffic-history` is written directly by automation and has its own rules:
+deletion and force pushes blocked, no pull request or status check required,
+no bypass ([docs/TRAFFIC.md](TRAFFIC.md), *Branch protection*).
+
 A required check must report on every pull request into a protected branch.
 Path-filtered workflows, such as the label workflows, must not be the only
 required checks, or unrelated pull requests cannot merge.
@@ -148,6 +153,7 @@ configured, read back and exercised in [#12](https://github.com/danielep71/CCR-K
 | Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/CCR-K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
 | Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
 | Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
+| Traffic history (2026-10-24) | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` branch created as orphan commit `8560b31`; workflow scheduled daily from `main`, active only after integration. Pending: the `analytics` environment and its `TRAFFIC_TOKEN` (maintainer), the `traffic-history` ruleset (maintainer), and a first manual and scheduled run. |
 
 ### Accepted limitations
 
