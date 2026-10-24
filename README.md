@@ -15,6 +15,37 @@ exposure from transactions, collateral and netting sets.
 
 This is an independent personal project.
 
+## What exists today
+
+- **Repository checks** (`python tools/check.py`, also run by CI on every pull
+  request): tooling tests, label and issue-form configuration, the format of
+  the numerical test-case files, static rules on the exported VBA source, and
+  the workflows. They read files only: they compile no VBA and check no
+  calculation.
+- **A VBA regression harness** with a neutral example suite in
+  `tests/modules/`. It exercises the harness itself and contains no SFT
+  calculation. It has not yet been compiled or run in Excel
+  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)).
+- **Methodology and test-case documents**: the regulatory basis, the copies
+  of the texts relied on, and the format of future test cases.
+
+Not available: an exposure calculation, a public API, a workbook or a
+release. No figure produced from this repository should be relied on.
+
+## Getting started
+
+1. Clone the repository and switch to the active release branch
+   ([get the source](INSTALLATION.md#get-the-source)).
+2. Install the tools and run `python tools/check.py`
+   ([developer setup](INSTALLATION.md#developer-setup)).
+3. To try the harness, build a development workbook on a supported Excel host
+   and run `TEST_Examples.RunExampleTests`
+   ([importing VBA into Excel](INSTALLATION.md#importing-vba-into-excel),
+   [running the harness](INSTALLATION.md#running-the-harness)).
+4. Before proposing a change, read [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Documents
+
 | Document | Purpose |
 | --- | --- |
 | [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md) | Scope, profile, layout, dependency direction, public API boundary, open decisions |
@@ -22,12 +53,14 @@ This is an independent personal project.
 | [docs/methodology/sources/README.md](docs/methodology/sources/README.md) | Copies of the regulatory texts relied on, with hashes and terms of use |
 | [docs/methodology/TEST_CASES.md](docs/methodology/TEST_CASES.md) | Test-case files, tolerances, reference classes, completeness |
 | [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md) | VBA naming, contracts, errors, cleanup, encoding |
-| [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; importing and exporting the VBA source; running the harness |
+| [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; developer setup and evidence locations; importing and exporting the VBA source; running the harness |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Reporting a problem with synthetic data; the development workflow; validation rules |
 | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) | Branches, integration, review, protection, issues, releases |
 | [docs/TRAFFIC.md](docs/TRAFFIC.md) | Repository traffic history |
 | [tools/README.md](tools/README.md) | Repository checks: `python tools/check.py` |
 | [SECURITY.md](SECURITY.md) | Reporting vulnerabilities; synthetic data only |
 | [NOTICE.md](NOTICE.md), [LICENSE](LICENSE) | Copyright, provenance and the MPL-2.0 licence |
 
-Installation and contributor onboarding are completed in
-[#10](https://github.com/danielep71/CCR-K-SFTs/issues/10).
+Versions, the changelog and the release procedure are not defined yet
+([#13](https://github.com/danielep71/CCR-K-SFTs/issues/13)); nothing has
+been published.

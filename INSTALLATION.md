@@ -10,11 +10,11 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 > [!IMPORTANT]
 > **Status on 2026-10-24: repository setup only.** The only VBA components
 > are the test modules in `tests/modules/`; no production component,
-> template or workbook exists. The steps below have never been run on a
-> host. The first real import, compile and run is recorded in
-> [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). Prerequisites,
-> local commands and contributor setup are completed in
-> [#10](https://github.com/danielep71/CCR-K-SFTs/issues/10).
+> template or workbook exists. The Excel steps below have never been run on
+> a host; the first real import, compile and run is recorded in
+> [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). The
+> [developer setup](#developer-setup) has been run from a fresh clone on
+> Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <a id="supported-hosts"></a>
 
@@ -70,6 +70,67 @@ through an approved integration.
   ZIP is not a complete checkout.
 - Do not download single modules through GitHub's **Raw** view: it serves the
   LF form stored in Git, which the VBE does not read correctly.
+
+<a id="developer-setup"></a>
+
+## 🛠️ Developer setup
+
+The repository checks run without Excel. They have been run on Linux, in CI
+and from a fresh clone; on Windows they are untested, so use WSL or CI there.
+
+| Prerequisite | Version | Needed for |
+| --- | --- | --- |
+| Git | any recent | the checkout; the checks read the tracked files through `git` |
+| Python | 3.12 or later (CI uses 3.13) | `tools/check.py` and every Python gate |
+| Node.js | 22 | the label synchronizer and drift-detector self-tests |
+| Ruff, mypy | 0.16.6, 2.3.1 | the `ruff` and `mypy` gates |
+| actionlint | 1.7.12 | the `actionlint` gate |
+| shellcheck | optional | the shell scripts inside workflows, through actionlint; CI's runner has it |
+| Excel | a [supported host](#supported-hosts) | importing, compiling and running the VBA only |
+
+From the root of the checkout, on CPython 3.13 and Linux x86_64:
+
+```sh
+python3.13 -m venv .venv
+. .venv/bin/activate
+python -m pip install --only-binary=:all: --require-hashes -r tools/requirements-quality-ci.txt
+V=1.7.12
+T=$(mktemp -d)
+curl -fsSL -o "$T/actionlint.tar.gz" \
+  "https://github.com/rhysd/actionlint/releases/download/v$V/actionlint_${V}_linux_amd64.tar.gz"
+echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $T/actionlint.tar.gz" \
+  | sha256sum --check --strict
+tar -xzf "$T/actionlint.tar.gz" -C .venv/bin actionlint
+python tools/check.py
+```
+
+- `.venv/` is ignored by Git, so the tools installed in it leave the checkout
+  clean. Install nothing else inside the checkout: `--ci` fails on any
+  untracked file.
+- The lock in `tools/requirements-quality-ci.txt` covers CPython 3.13 on
+  Linux x86_64 only. Elsewhere, install the same versions without it
+  (`pip install ruff==0.16.6 mypy==2.3.1`); CI remains the reference run.
+- The checksum is the one the workflow verifies
+  (`.github/workflows/repository-integrity.yml`).
+
+| Command | Use |
+| --- | --- |
+| `python tools/check.py` | Before every push. Every gate must PASS; a missing tool is NOT RUN and fails the run. |
+| `python tools/check.py --allow-missing` | While iterating without every tool. Ends INCOMPLETE, which is never a pass. |
+| `python tools/check.py --ci` | What CI runs: also fails on a modified or untracked file, so run it after committing. |
+
+The gates and modes are described in [tools/README.md](tools/README.md).
+
+<a id="evidence-locations"></a>
+
+### Where evidence goes
+
+| Evidence | Location |
+| --- | --- |
+| Local check reports | `test-results/repository-integrity.md` and `.json`, and one `<gate>.log` per gate. The directory is ignored by Git. |
+| Hosted check results | The `Repository integrity` run of the pull request: its job summary, and the artifact `repository-integrity-<sha>-<run>-<attempt>`, kept 30 days. |
+| Harness log | The Immediate window; the complete log through `TEST_Harness.SaveLog`, saved outside the checkout or in `test-results/` ([running the harness](#running-the-harness)). |
+| Evidence cited by an issue or pull request | Copied into its body: the run link, the SHA checked and the decisive lines, since logs and artifacts expire ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#accepted-limitations)). Excel run evidence is defined in [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). |
 
 <a id="importing-vba-into-excel"></a>
 
