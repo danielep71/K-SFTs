@@ -67,7 +67,7 @@ of the table:
 | Record | Fields |
 | --- | --- |
 | `RUN=<suite>` | `mode` (`NORMAL` or a deliberate failure mode), `expected_cases`, `expected_assertions`, `started` |
-| `ENVIRONMENT=` | `host`, `version`, `os`, `office` (`64-bit` or `32-bit`), `runtime` (`VBA7` or `VBA6`) |
+| `ENVIRONMENT=` | `host`, `version`, `build` (Excel's build number), `os`, `office` (`64-bit` or `32-bit`), `runtime` (`VBA7` or `VBA6`) |
 | `CASE=<case-id>` | One per case, in run order |
 | `ASSERT=<case-id>/<name>` | `status` (`PASS` or `FAIL`); on failure, the assertion's detail: the expected and actual values (and the tolerances, for `AssertNear`), or the suite's text for `AssertTrue` |
 | `FAILURE=<id>` | One per failure: an assertion, `<case-id>.unexpected-error`, `runner.unexpected-error`, `harness.case-id`, `harness.no-case` or `harness.completeness`, with its detail |

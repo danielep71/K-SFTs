@@ -11,8 +11,9 @@ Attribute VB_Name = "TEST_Examples"
 ' PUBLIC SURFACE
 '   RunExampleTests is the documented test entry point.
 '   RunExampleTestsWithInjectedFailure and RunExampleTestsWithSkippedCase
-'   show what a failed and an incomplete run report. Option Private Module
-'   keeps all three out of the workbook's external surface.
+'   show what a failed and an incomplete run report. SaveExampleEvidence
+'   runs all three and saves their logs as the evidence of an Excel run.
+'   Option Private Module keeps them out of the workbook's external surface.
 '
 ' DEPENDENCIES
 '   TEST_Harness; the VBA and Excel object models.
@@ -25,11 +26,14 @@ Attribute VB_Name = "TEST_Examples"
 ' ERROR POLICY
 '   As TEST_Harness.EndRun: a run that does not pass raises ERR_TEST_FAILED,
 '   or the unexpected error that escaped the runner. A refused start raises
-'   TEST_Harness.ERR_TEST_DIRTY_START.
+'   TEST_Harness.ERR_TEST_DIRTY_START. SaveExampleEvidence prints those
+'   errors instead of raising them, after saving each run's log.
 '
 ' USAGE
 '   In a development workbook holding the modules of tests/modules/, type
-'   TEST_Examples.RunExampleTests in the Immediate window.
+'   TEST_Examples.RunExampleTests in the Immediate window. To record an
+'   Excel run, type TEST_Examples.SaveExampleEvidence "<folder>" instead
+'   (INSTALLATION.md, Recording an Excel run).
 '
 ' UPDATED
 '   2026-10-24
@@ -130,6 +134,38 @@ Public Sub RunExampleTestsWithSkippedCase()
 End Sub
 
 
+Public Sub SaveExampleEvidence( _
+    ByVal Folder As String)
+'
+'==============================================================================
+'                             SaveExampleEvidence
+'------------------------------------------------------------------------------
+' PURPOSE
+'   Run the suite in its three modes and save each complete log in Folder:
+'   examples.log, injected.log and skipped.log, which
+'   tools/check_excel_run.py checks against the commit.
+'
+' INPUTS
+'   Folder: an existing folder outside the checkout or in the ignored
+'   test-results/ directory, without a trailing backslash.
+'
+' ERROR POLICY
+'   The error that ends each run is its reported outcome: it is printed
+'   after the log is saved, not raised, so that all three logs are written.
+'   Whether the runs ended as documented is judged by check_excel_run.py,
+'   never here. An error of SaveLog propagates.
+'
+' UPDATED
+'   2026-10-24
+'==============================================================================
+'
+        SaveRun "NORMAL", Folder & "\examples.log"
+        SaveRun "INJECTED_FAILURE", Folder & "\injected.log"
+        SaveRun "SKIPPED_CASE", Folder & "\skipped.log"
+
+End Sub
+
+
 '
 '------------------------------------------------------------------------------
 '
@@ -195,6 +231,46 @@ RunFailed:
         ErrSource = Err.Source
         ErrDescription = Err.Description
         Resume Finish
+
+End Sub
+
+
+Private Sub SaveRun( _
+    ByVal Mode As String, _
+    ByVal Path As String)
+'
+'==============================================================================
+'                                   SaveRun
+'------------------------------------------------------------------------------
+' PURPOSE
+'   Run the suite in Mode, save its log to Path and print how the run ended.
+'
+' ERROR POLICY
+'   The run's own error is captured and printed after the log is saved; an
+'   error of SaveLog propagates.
+'
+' UPDATED
+'   2026-10-24
+'==============================================================================
+'
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim RunErrorNumber        As Long      'Error that ended the run; 0 for none
+    Dim RunErrorDescription   As String    'Its description
+
+'------------------------------------------------------------------------------
+' RUN AND SAVE
+'------------------------------------------------------------------------------
+        On Error Resume Next
+        RunSuite Mode
+        RunErrorNumber = Err.Number
+        RunErrorDescription = Err.Description
+        On Error GoTo 0
+        TEST_Harness.SaveLog Path
+        Debug.Print "SAVED=" & Path & "; mode=" & Mode & "; error=" & CStr(RunErrorNumber) & _
+            IIf(RunErrorNumber = 0, vbNullString, " " & RunErrorDescription)
 
 End Sub
 
