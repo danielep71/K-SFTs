@@ -154,19 +154,26 @@ class EvidenceTest(unittest.TestCase):
         found = findings(empty)
         for filename in check_excel_run.LOGS.values():
             self.assertIn(f"{filename}: incomplete log: no record", found)
-        self.assertFinding(edit("examples.log", "CASE=text-exact\r\n", ""), "examples.log: cases")
+        self.assertFinding(edit("examples.log", "CASE=text-exact\r\n", ""),
+                           "expected CASE=text-exact")
         self.assertFinding(edit("examples.log", "RESULT=PASS", "stray line\r\nRESULT=PASS"),
                            "not a KEY=value record")
 
     def test_a_run_that_did_not_pass(self) -> None:
         self.assertFinding(edit("examples.log", "status=PASS", "status=FAIL"),
-                           "examples.log: failed assertions")
+                           "examples.log:4: ASSERT status=FAIL, expected PASS")
         self.assertFinding(edit("examples.log", "RESULT=PASS", "RESULT=FAIL"), "RESULT=FAIL")
         self.assertFinding(edit("examples.log", "mode=NORMAL", "mode=SKIPPED_CASE"),
-                           "RUN is not suite examples in mode NORMAL")
+                           "RUN mode=SKIPPED_CASE, expected NORMAL")
+        self.assertFinding(edit("examples.log", "ASSERTIONS=18", "ERROR=run; number=5\r\n"
+                                "ASSERTIONS=18"), "ERROR=run, expected ASSERTIONS=18")
         self.assertFinding(edit("examples.log", "RECOVERY=NONE\r\n",
                                 "RECOVERY=NONE\r\nRUN=examples; mode=NORMAL\r\n"),
-                           "more than one run")
+                           "RUN=examples, expected RESULT=PASS")
+        def appended(folder: Path) -> None:
+            log = (folder / "examples.log").read_bytes()
+            (folder / "examples.log").write_bytes(log + log)
+        self.assertFinding(appended, "after RESULT (more than one run?)")
 
     def test_failed_cleanup(self) -> None:
         def dirty(folder: Path) -> None:
@@ -175,9 +182,16 @@ class EvidenceTest(unittest.TestCase):
             edit("examples.log", "RECOVERY=NONE", "RECOVERY=REQUIRED; reason=changed")(folder)
             edit("examples.log", "cleanup=PASS; recovery=NONE",
                  "cleanup=FAIL; recovery=REQUIRED")(folder)
-        found = findings(dirty)
-        for text in ("CLEANUP CLEANUP=FAIL", "RECOVERY RECOVERY=REQUIRED", "cleanup=FAIL"):
-            self.assertTrue(any(text in item for item in found), (text, found))
+        self.assertFinding(dirty, "CLEANUP=FAIL, expected CLEANUP=PASS")
+        for filename in check_excel_run.LOGS.values():
+            with self.subTest(log=filename):
+                self.assertFinding(edit(filename, "RECOVERY=NONE\r\n",
+                                        "RECOVERY=REQUIRED; reason=unsafe host state\r\n"),
+                                   f"{filename}:")
+                self.assertFinding(edit(filename, "RECOVERY=NONE\r\n", ""),
+                                   "expected RECOVERY=NONE")
+                self.assertFinding(edit(filename, "cleanup=PASS; recovery=NONE",
+                                        "cleanup=PASS; recovery=REQUIRED"), "RESULT=")
 
     def test_failure_paths_must_end_as_documented(self) -> None:
         self.assertFinding(edit("injected.log", "failures=1; cleanup", "failures=2; cleanup"),
@@ -185,9 +199,9 @@ class EvidenceTest(unittest.TestCase):
         self.assertFinding(edit("skipped.log", "completeness=INCOMPLETE", "completeness=COMPLETE"),
                            "skipped.log")
         self.assertFinding(edit("skipped.log", "FAILURE=harness.completeness", "FAILURE=other"),
-                           "skipped.log: FAILURE records ['other'")
+                           "FAILURE=other, expected FAILURE=harness.completeness")
         self.assertFinding(edit("skipped.log", "status=PASS", "status=FAIL; x"),
-                           "skipped.log: failed assertions")
+                           "skipped.log:4: ASSERT status=FAIL, expected PASS")
 
     def test_the_injected_failure_must_be_the_designated_assertion(self) -> None:
         designated = suite().injected[0]
@@ -198,9 +212,7 @@ class EvidenceTest(unittest.TestCase):
             edit("injected.log", f"ASSERT={other}; status=PASS",
                  f"ASSERT={other}; status=FAIL; expected=1; actual=0.75")(folder)
             edit("injected.log", f"FAILURE={designated}", f"FAILURE={other}")(folder)
-        found = findings(moved)
-        self.assertTrue(any("injected.log: failed assertions" in item for item in found), found)
-        self.assertTrue(any("injected.log: FAILURE records" in item for item in found), found)
+        self.assertFinding(moved, f"FAILURE={other}, expected FAILURE={designated}")
 
     def test_environment(self) -> None:
         self.assertFinding(edit("injected.log", "build=17928", "build=18000"),

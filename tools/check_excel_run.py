@@ -181,44 +181,77 @@ def first_difference(actual: bytes, expected: bytes) -> int:
     return min(actual.count(b"\n"), expected.count(b"\n")) + 1
 
 
-def summary(records: list[Record], key: str) -> Record | None:
-    return next((record for record in records if record.key == key), None)
+@dataclass
+class Plan:
+    """What one mode's run must log: its cases and assertions in order, the
+    failures it must report (assertions, or harness identifiers) and its RESULT."""
+
+    mode: str
+    cases: list[str]
+    assertions: list[str]
+    failing: list[str]
+    result: dict[str, str]
 
 
-def check_shape(name: str, records: list[Record], mode: str, suite: Suite,
-                problems: list[str]) -> None:
-    """RUN, then ENVIRONMENT, first; RESULT last and only once."""
-    if len(records) < 2 or records[0].key != "RUN" or records[1].key != "ENVIRONMENT":
-        problems.append(f"{name}: does not start with RUN and ENVIRONMENT records")
-        return
-    run = records[0]
-    if run.value != "examples" or run.fields.get("mode") != mode:
-        problems.append(f"{name}:1: RUN is not suite examples in mode {mode}")
-    if (run.fields.get("expected_cases"), run.fields.get("expected_assertions")) != \
-            (str(suite.expected_cases), str(suite.expected_assertions)):
-        problems.append(f"{name}:1: expected counts differ from the commit's suite")
-    results = [record for record in records if record.key == "RESULT"]
-    if not results or records[-1].key != "RESULT":
-        problems.append(f"{name}: incomplete log: the last record is not RESULT")
-    if len(results) > 1 or [record.key for record in records].count("RUN") > 1:
-        problems.append(f"{name}: more than one run in the log")
+def plans(suite: Suite) -> list[Plan]:
+    skipped = set(suite.last_case)
+    cases = [case for case in suite.cases if case not in skipped]
+    assertions = [item for item in suite.assertions if item not in skipped]
+
+    def result(verdict: str, operation: str, complete: bool, kept: tuple[list[str], list[str]],
+               failures: int) -> dict[str, str]:
+        return {"RESULT": verdict, "suite": "examples", "operation": operation,
+                "completeness": "COMPLETE" if complete else "INCOMPLETE",
+                "cases": str(len(kept[0])), "assertions": str(len(kept[1])),
+                "failures": str(failures), "cleanup": "PASS", "recovery": "NONE"}
+
+    every = (suite.cases, suite.assertions)
+    return [Plan("NORMAL", *every, [], result("PASS", "PASS", True, every, 0)),
+            Plan("INJECTED_FAILURE", *every, suite.injected,
+                 result("FAIL", "FAIL", True, every, len(suite.injected))),
+            Plan("SKIPPED_CASE", cases, assertions, ["harness.completeness"],
+                 result("FAIL", "PASS", False, (cases, assertions), 1))]
 
 
-def check_order(name: str, records: list[Record], cases: list[str], assertions: list[str],
-                problems: list[str]) -> None:
-    logged_cases = [record.value for record in records if record.key == "CASE"]
-    logged = [record.value for record in records if record.key == "ASSERT"]
-    if logged_cases != cases:
-        problems.append(f"{name}: cases {logged_cases} differ from the commit's {cases}")
-    if logged != assertions:
-        problems.append(f"{name}: assertions differ from the commit's suite, in name or order")
+def sequence(plan: Plan, suite: Suite) -> list[tuple[str, str]]:
+    """Every record the run writes, as (key, first value), in order."""
+    records = [("RUN", "examples"), ("ENVIRONMENT", "")]
+    for case in plan.cases:
+        records.append(("CASE", case))
+        for item in (name for name in plan.assertions if name.startswith(f"{case}/")):
+            records.append(("ASSERT", item))
+            if item in plan.failing:
+                records.append(("FAILURE", item))
+    records += [("FAILURE", item) for item in plan.failing if "/" not in item]
+    records += [("CASES", str(len(plan.cases))), ("ASSERTIONS", str(len(plan.assertions))),
+                ("FAILURES", str(len(plan.failing)))]
+    records += [("PRIMARY_FAILURE", plan.failing[0])] if plan.failing else []
+    return records + [("CLEANUP", "PASS"), ("RECOVERY", "NONE"),
+                      ("RESULT", plan.result["RESULT"])]
 
 
-def expect(name: str, record: Record | None, wanted: dict[str, str],
-           problems: list[str]) -> None:
-    if record is None:
-        problems.append(f"{name}: no {next(iter(wanted))} record")
-        return
+def check_sequence(name: str, records: list[Record], expected: list[tuple[str, str]],
+                   problems: list[str]) -> bool:
+    """The log holds exactly the expected records, in order: none missing, extra,
+    repeated or contradicting the run's outcome."""
+    for record, (key, value) in zip(records, expected, strict=False):
+        if (record.key, record.value) != (key, value):
+            problems.append(f"{name}:{record.line}: {record.key}={record.value}, "
+                            f"expected {key}={value}")
+            return False
+    if len(records) < len(expected):
+        key, value = expected[len(records)]
+        problems.append(f"{name}: incomplete log: it ends before {key}={value}")
+        return False
+    if len(records) > len(expected):
+        extra = records[len(expected)]
+        problems.append(f"{name}:{extra.line}: {extra.key}={extra.value} after RESULT "
+                        "(more than one run?)")
+        return False
+    return True
+
+
+def expect(name: str, record: Record, wanted: dict[str, str], problems: list[str]) -> None:
     for key, value in wanted.items():
         actual = record.value if key == record.key else record.fields.get(key)
         if actual != value:
@@ -226,69 +259,34 @@ def expect(name: str, record: Record | None, wanted: dict[str, str],
                             f"expected {value}")
 
 
-def check_failures(name: str, records: list[Record], failing: list[str],
-                   problems: list[str]) -> None:
-    """Exactly the ``failing`` assertions or failure identifiers fail, each once."""
-    failed = [record.value for record in records
-              if record.key == "ASSERT" and record.fields.get("status") != "PASS"]
-    asserted = [item for item in failing if "/" in item]
-    if failed != asserted:
-        problems.append(f"{name}: failed assertions {failed}, expected {asserted}")
-    recorded = [record.value for record in records if record.key == "FAILURE"]
-    if recorded != failing:
-        problems.append(f"{name}: FAILURE records {recorded}, expected {failing}")
+def check_fields(name: str, records: list[Record], plan: Plan, suite: Suite,
+                 problems: list[str]) -> None:
+    expected = {"CASES": str(suite.expected_cases), "ASSERTIONS": str(suite.expected_assertions)}
     for record in records:
-        if record.key == "ERROR":
-            problems.append(f"{name}:{record.line}: ERROR={record.value}")
-
-
-def check_normal(records: list[Record], suite: Suite, problems: list[str]) -> None:
-    name = LOGS["NORMAL"]
-    check_order(name, records, suite.cases, suite.assertions, problems)
-    check_failures(name, records, [], problems)
-    expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
-    expect(name, summary(records, "RECOVERY"), {"RECOVERY": "NONE"}, problems)
-    expect(name, summary(records, "RESULT"), {
-        "RESULT": "PASS", "suite": "examples", "operation": "PASS", "completeness": "COMPLETE",
-        "cases": str(suite.expected_cases), "assertions": str(suite.expected_assertions),
-        "failures": "0", "cleanup": "PASS", "recovery": "NONE"}, problems)
-
-
-def check_injected(records: list[Record], suite: Suite, problems: list[str]) -> None:
-    name = LOGS["INJECTED_FAILURE"]
-    check_order(name, records, suite.cases, suite.assertions, problems)
-    check_failures(name, records, suite.injected, problems)
-    expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
-    expect(name, summary(records, "RESULT"), {
-        "RESULT": "FAIL", "operation": "FAIL", "completeness": "COMPLETE",
-        "cases": str(suite.expected_cases), "assertions": str(suite.expected_assertions),
-        "failures": "1", "cleanup": "PASS", "recovery": "NONE"}, problems)
-
-
-def check_skipped(records: list[Record], suite: Suite, problems: list[str]) -> None:
-    name = LOGS["SKIPPED_CASE"]
-    skipped = set(suite.last_case)
-    cases = [case for case in suite.cases if case not in skipped]
-    assertions = [item for item in suite.assertions if item not in skipped]
-    check_order(name, records, cases, assertions, problems)
-    check_failures(name, records, ["harness.completeness"], problems)
-    expect(name, summary(records, "CLEANUP"), {"CLEANUP": "PASS"}, problems)
-    expect(name, summary(records, "RESULT"), {
-        "RESULT": "FAIL", "operation": "PASS", "completeness": "INCOMPLETE",
-        "cases": str(len(cases)), "assertions": str(len(assertions)), "failures": "1",
-        "cleanup": "PASS", "recovery": "NONE"}, problems)
+        if record.key == "RUN":
+            expect(name, record, {"mode": plan.mode, "expected_cases": expected["CASES"],
+                                  "expected_assertions": expected["ASSERTIONS"]}, problems)
+        elif record.key == "ASSERT":
+            status = "FAIL" if record.value in plan.failing else "PASS"
+            expect(name, record, {"status": status}, problems)
+        elif record.key in expected:
+            expect(name, record, {"expected": expected[record.key]}, problems)
+        elif record.key == "FAILURES":
+            expect(name, record, {"errors": "0"}, problems)
+        elif record.key == "RESULT" and {"RESULT": record.value, **record.fields} != plan.result:
+            problems.append(f"{name}:{record.line}: RESULT={record.value} with "
+                            f"{record.fields}, expected {plan.result}")
 
 
 def check_logs(folder: Path, suite: Suite, evidence: Evidence) -> None:
-    checks = {"NORMAL": check_normal, "INJECTED_FAILURE": check_injected,
-              "SKIPPED_CASE": check_skipped}
     environments = []
-    for mode, filename in LOGS.items():
+    for plan in plans(suite):
+        filename = LOGS[plan.mode]
         records = read_log(folder / filename, evidence.findings)
         if not records:
             continue
-        check_shape(filename, records, mode, suite, evidence.findings)
-        checks[mode](records, suite, evidence.findings)
+        if check_sequence(filename, records, sequence(plan, suite), evidence.findings):
+            check_fields(filename, records, plan, suite, evidence.findings)
         if len(records) > 1 and records[1].key == "ENVIRONMENT":
             environments.append(records[1].fields)
     for environment in environments:
