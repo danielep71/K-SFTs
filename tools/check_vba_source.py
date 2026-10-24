@@ -19,7 +19,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from vba_lexer import Finding, read_component, report, tracked_files
+from vba_lexer import Finding, missing, read_component, report, tracked_files
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPONENT_SUFFIXES = frozenset({".bas", ".cls", ".frm"})
@@ -148,6 +148,8 @@ def form_resources(root: Path, path: str, text: str, tracked: set[str]) -> list[
         if Path(filename).name != filename or companion not in tracked:
             findings.append(Finding(path, None, f"form resource {filename} is not tracked "
                                                 "beside the form"))
+        elif absent := missing(root, companion):
+            findings.append(absent)
         elif (root / companion).stat().st_size <= int(offset, 16):
             findings.append(Finding(path, None, f"resource offset is outside {filename}"))
     return findings
@@ -221,6 +223,9 @@ def check(root: Path) -> tuple[list[Finding], int]:
                                                 "source and no committed path is approved"))
     names: dict[str, str] = {}
     for path in components:
+        if absent := missing(root, path):
+            findings.append(absent)
+            continue
         findings.extend(content(root, path, tracked_set, names))
     findings.extend(storage(root, components))
     return findings, len(components)

@@ -62,6 +62,14 @@ def tracked_components(root: Path) -> list[str]:
     return [path for path in tracked_files(root) if Path(path).suffix.lower() in VBA_SUFFIXES]
 
 
+def missing(root: Path, path: str) -> Finding | None:
+    """A finding for a tracked file that is not in the working tree, so that
+    the checks report it rather than fail to read it."""
+    if (root / path).is_file():
+        return None
+    return Finding(path, None, "tracked in Git but missing from the working tree")
+
+
 def read_component(root: Path, path: str) -> str:
     """Component text with LF line ends. A non-ASCII byte becomes U+FFFD; the
     vba-source gate reports it, the other checks still analyze the file."""

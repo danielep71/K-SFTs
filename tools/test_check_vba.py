@@ -867,6 +867,24 @@ class MainTest(unittest.TestCase):
                         self.assertIn("PASS" if expected == 0 else "FAIL", verdict)
                         self.assertIn("static check, nothing compiled or run", verdict)
 
+    def test_a_tracked_file_missing_from_the_working_tree_is_a_finding(self) -> None:
+        def run_check_without(check: Callable[[Path], tuple[list[Finding], *tuple[int, ...]]],
+                              deleted: str) -> list[str]:
+            # Deleted after staging, so the file stays tracked.
+            with repository(VALID) as root:
+                (root / deleted).unlink()
+                return [str(finding) for finding in check(root)[0]]
+
+        checks = (check_vba_source.check, check_vba_conditionals.check, check_vba_jumps.check,
+                  check_vba_public_api.check)
+        missing = "src/modules/SFT_Functions.bas: tracked in Git but missing from the working tree"
+        for check in checks:
+            with self.subTest(check=check.__module__):
+                self.assertIn(missing, run_check_without(check, "src/modules/SFT_Functions.bas"))
+        self.assertIn("src/forms/frmRunOptions.frx: tracked in Git but missing from the "
+                      "working tree",
+                      run_check_without(check_vba_source.check, "src/forms/frmRunOptions.frx"))
+
 
 if __name__ == "__main__":
     unittest.main()
