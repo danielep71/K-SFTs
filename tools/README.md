@@ -2,9 +2,9 @@
 
 `check.py` is the single entry point for the repository's checks. The same
 command runs locally and in the `Repository integrity` workflow. It checks the
-repository tooling, the label configuration and the workflows. It does not
-check VBA source, compile anything in Excel or validate SFT calculations; no
-such gates exist until the code they check exists.
+repository tooling, the label and issue-form configuration and the workflows.
+It does not check VBA source, compile anything in Excel or validate SFT
+calculations; no such gates exist until the code they check exists.
 
 ## ▶️ Running the checks
 
@@ -37,6 +37,7 @@ versions; each gate also writes `<gate>.log`.
 | `labels-sync-self-test` | The label synchronizer's validation, overlay and reconciliation fixtures. |
 | `labels-manifest` | `.github/labels.json` is valid under `.github/label-policy.json`. |
 | `labels-drift-self-test` | The read-only drift detector's fixtures. |
+| `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
 | `mypy` | `mypy --strict` over `tools/`, tests included. |
@@ -46,6 +47,21 @@ versions; each gate also writes `<gate>.log`.
 The label gates run on every pull request here, although the label workflows
 themselves only run when label files change. Live label reconciliation and
 drift detection stay in those workflows.
+
+## 🗂️ Issue triage
+
+`check_issues.py` applies the issue rules of `docs/GOVERNANCE.md` (Triage) to
+every open issue and reports findings; it never changes an issue. The
+`Issue triage` workflow runs it on issue events with a read-only token.
+
+```sh
+GITHUB_TOKEN=<token with issues:read> python tools/check_issues.py --repository danielep71/CCR-K-SFTs
+python tools/check_issues.py --input issues.json   # issues exported as GitHub REST JSON
+python tools/check_issues.py --check-config        # forms and label catalogue only
+```
+
+Exit code 0 means no findings, 1 means findings, 2 means the audit could not
+run. Its rules are tested by `test_check_issues.py` in `tool-tests`.
 
 ## 🔧 Tool versions
 

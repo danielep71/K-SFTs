@@ -1,0 +1,76 @@
+name: Issue triage
+run-name: "Issue triage — ${{ github.event_name }} by ${{ github.actor }}"
+
+# Audits every open issue against the rules issue forms cannot enforce:
+# assignee, exactly one priority, P1 only on bugs, a milestone, catalogue
+# labels, and `blocked` exactly while a named prerequisite is unresolved.
+# Read-only: it never changes an issue. A failed run is the triage signal;
+# the maintainer resolves each finding by hand (docs/GOVERNANCE.md, Issues).
+# Issue events run the workflow from the default branch only.
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+      - closed
+      - labeled
+      - unlabeled
+      - assigned
+      - unassigned
+      - milestoned
+      - demilestoned
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-triage
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  audit:
+    name: Audit open issues
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Audit open issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python tools/check_issues.py
+          --repository "$GITHUB_REPOSITORY"
+          --output test-results/issue-triage.json
+          --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: Retain the audit report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: issue-triage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 30
