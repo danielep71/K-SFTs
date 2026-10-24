@@ -28,10 +28,12 @@ Resolves #
 <!-- After a push, wait for any earlier review to finish, then post
 @codex review as a top-level comment and compare the completed review's SHA
 with the current head (docs/GOVERNANCE.md, Review). For a bot-authored PR,
-record the maintainer's review of the final head and that Codex was skipped. -->
+record the maintainer's review of the final head and that Codex was skipped.
+A sync PR whose diff is empty needs CI only: record the empty diff instead of a
+review. -->
 
 - Final PR head SHA:
-- Review type (Codex / maintainer review of a bot-authored PR):
+- Review type (Codex / maintainer review of a bot-authored PR / not required: empty-diff sync PR):
 - Reviewed commit SHA and review permalink:
 - `Repository integrity` result and run link:
 

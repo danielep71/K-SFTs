@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: "🔒 Report a security vulnerability privately"
+    url: "https://github.com/danielep71/CCR-K-SFTs/blob/main/SECURITY.md"
+    about: "Do not open an issue. Report it privately by email, as SECURITY.md describes."
   - name: "🏛️ Governance and issue rules"
     url: "https://github.com/danielep71/CCR-K-SFTs/blob/main/docs/GOVERNANCE.md"
     about: "Priorities, milestones, dependency status and how issues are closed."
