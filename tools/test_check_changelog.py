@@ -101,9 +101,15 @@ class VersionTest(unittest.TestCase):
                               findings(RELEASED, raw))
 
     def test_main_reports_the_verdict(self) -> None:
-        with contextlib.redirect_stdout(io.StringIO()) as output:
-            self.assertEqual(check_changelog.main(["--root", str(ROOT)]), 0)
-        self.assertIn("changelog: PASS (0 dated release(s)", output.getvalue())
+        for version, code, verdict in (("0.2.0\n", 0, "changelog: PASS (2 dated release(s)"),
+                                       ("0.1.0\n", 1, "changelog: FAIL (2 dated release(s)")):
+            with self.subTest(version=version), \
+                    tempfile.TemporaryDirectory(prefix="changelog-") as temporary, \
+                    contextlib.redirect_stdout(io.StringIO()) as output:
+                (Path(temporary) / "CHANGELOG.md").write_text(RELEASED, encoding="utf-8")
+                (Path(temporary) / "VERSION").write_text(version, encoding="utf-8")
+                self.assertEqual(check_changelog.main(["--root", temporary]), code)
+                self.assertIn(verdict, output.getvalue())
 
 
 if __name__ == "__main__":
