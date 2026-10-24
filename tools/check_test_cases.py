@@ -109,7 +109,13 @@ def keys_problem(data: Mapping[str, Any], allowed: frozenset[str]) -> str | None
     return None
 
 
+# Returned by load_json when a file cannot be read; distinct from a JSON null.
+LOAD_FAILED = object()
+
+
 def load_json(path: Path, root: Path, report: Report) -> Any:
+    """Parse strict JSON: duplicate keys and the non-standard NaN and Infinity fail."""
+
     def no_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
         result: dict[str, Any] = {}
         for key, value in pairs:
@@ -118,11 +124,15 @@ def load_json(path: Path, root: Path, report: Report) -> Any:
             result[key] = value
         return result
 
+    def no_constants(name: str) -> None:
+        raise ValueError(f"non-standard number {name}")
+
     try:
-        return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=no_duplicates)
+        return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=no_duplicates,
+                          parse_constant=no_constants)
     except (OSError, UnicodeDecodeError, ValueError) as error:
         report.add(rel(path, root), f"not valid UTF-8 JSON ({error})")
-        return None
+        return LOAD_FAILED
 
 
 def rel(path: Path, root: Path) -> str:
@@ -177,6 +187,8 @@ def input_value_problem(key: str, value: object, invalid: bool) -> str | None:
     suffix = next((s for s in SUFFIXES if key.endswith(s)), None)
     if suffix is None:
         return f"input {key!r} has no unit suffix"
+    if isinstance(value, float) and not math.isfinite(value):
+        return f"input {key!r} is not a finite number"
     if value is None or invalid:
         return None
     if suffix in ("_amount", "_rate", "_factor", "_years"):
@@ -287,7 +299,7 @@ def envelope_problems(data: dict[str, Any], stem: str) -> list[str]:
 def check_fixture(path: Path, root: Path, report: Report) -> Case | None:
     where = rel(path, root)
     data = load_json(path, root, report)
-    if data is None:
+    if data is LOAD_FAILED:
         return None
     if not isinstance(data, dict):
         report.add(where, "is not an object")
@@ -421,9 +433,10 @@ def check_expected(path: Path, root: Path, cases: Mapping[str, Case], method: Me
         report.add(where, f"is not named <case-id>.<{names}>.json for an existing fixture")
         return
     data = load_json(path, root, report)
+    if data is LOAD_FAILED:
+        return
     if not isinstance(data, dict):
-        if data is not None:
-            report.add(where, "is not an object")
+        report.add(where, "is not an object")
         return
     if problem := keys_problem(data, EXPECTED_KEYS):
         report.add(where, problem)

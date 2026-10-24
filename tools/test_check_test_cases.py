@@ -140,6 +140,37 @@ class CheckTestCasesTests(unittest.TestCase):
         self.assertTrue(any("broken.json: not valid UTF-8 JSON" in f for f in findings))
         self.assertTrue(any("duplicate key 'id'" in f for f in findings))
 
+    def test_null_documents_are_reported_not_skipped(self) -> None:
+        self.ws.case(fixture())
+        self.ws.write("tests/fixtures/extra-case.json", "null")
+        self.ws.write("tests/expected/illustrative-case.bcbs.json", "null")
+        findings = self.ws.findings()
+        self.assertIn("tests/fixtures/extra-case.json: is not an object", findings)
+        self.assertIn("tests/expected/illustrative-case.bcbs.json: is not an object", findings)
+
+    def test_non_finite_numbers_are_rejected_in_every_category(self) -> None:
+        for category in ("nominal", "invalid"):
+            with self.subTest(category=category):
+                data = fixture()
+                data["category"] = category
+                text = json.dumps(data).replace('"cash_amount": 100', '"cash_amount": NaN')
+                self.assertIn("NaN", text)
+                self.ws.write("tests/fixtures/illustrative-case.json", text)
+                self.assertFinding("not valid UTF-8 JSON (non-standard number NaN)")
+        self.ws.write("tests/fixtures/illustrative-case.json", fixture())
+        self.ws.write("tests/expected/illustrative-case.crr.json",
+                      json.dumps(expected()).replace('"value": 100', '"value": -Infinity'))
+        self.assertFinding("not valid UTF-8 JSON (non-standard number -Infinity)")
+
+    def test_overflowing_numbers_are_rejected_in_every_category(self) -> None:
+        for category in ("nominal", "invalid"):
+            with self.subTest(category=category):
+                data = fixture()
+                data["category"] = category
+                text = json.dumps(data).replace('"cash_amount": 100', '"cash_amount": 1e400')
+                self.ws.write("tests/fixtures/illustrative-case.json", text)
+                self.assertFinding("input 'cash_amount' is not a finite number")
+
     def test_envelope_rules(self) -> None:
         data = fixture()
         data.update(synthetic=False, category="other", calculation_currency_code="eur",
@@ -215,7 +246,7 @@ class CheckTestCasesTests(unittest.TestCase):
         del text_with_unit["value"]
         self.ws.case(fixture(), ("crr", expected(
             "illustrative-case", "CRR",
-            number_output(value=float("nan")), number_output(unit="EUR/USD"),
+            number_output(value="100"), number_output(unit="EUR/USD"),
             number_output(tolerance={"absolute": -1, "relative": 0}),
             number_output(tolerance={"absolute": 0}), text_with_unit)))
         for text in ("value is not a finite number", "unit 'EUR/USD'",
