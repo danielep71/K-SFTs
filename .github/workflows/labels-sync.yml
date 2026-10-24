@@ -2,8 +2,8 @@ name: Sync issue labels
 
 # Pull requests validate without write permission. Only a trusted push to main
 # or an explicit manual dispatch can reconcile the live repository taxonomy.
-# The script validates and self-tests before the first API mutation, then
-# verifies an exact post-run match.
+# The job runs the script's self-test, then reconciles; the script validates
+# before the first API mutation and verifies an exact post-run match.
 
 on:
   pull_request:

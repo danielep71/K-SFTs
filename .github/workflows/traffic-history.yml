@@ -82,8 +82,8 @@ jobs:
           RAW="$RUNNER_TEMP/traffic-raw"
           echo "RAW=$RAW" >> "$GITHUB_ENV"
           mkdir -p "$RAW"
-          # curl retries timeouts, 408, 429 and 5xx responses, honouring
-          # Retry-After; any other failure stops the run before a merge.
+          # curl retries timeouts and HTTP 408, 429, 500, 502, 503 and 504,
+          # honouring Retry-After; any other failure stops the run before a merge.
           for resource in views clones popular/referrers popular/paths; do
             name="${resource#popular/}"
             curl --silent --show-error --location --fail-with-body \

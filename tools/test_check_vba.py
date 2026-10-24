@@ -2,8 +2,9 @@
 
 Each fixture is a throw-away Git repository holding synthetic VBA components,
 written with CRLF as the VBE exports them and stored under this repository's
-.gitattributes. The components are fixtures for the checks only: no
-calculation, product or regulatory value is implied by them.
+.gitattributes (one storage test deliberately omits it). The components are
+fixtures for the checks only: no calculation, product or regulatory value is
+implied by them.
 """
 
 from __future__ import annotations
@@ -142,7 +143,8 @@ VALID: dict[str, str | bytes] = {
 
 @contextlib.contextmanager
 def repository(files: Mapping[str, str | bytes], *, attributes: bool = True) -> Iterator[Path]:
-    """A Git repository holding ``files``: text written with CRLF, then staged."""
+    """A Git repository holding ``files``: VBA components written with CRLF, other
+    text as given, then staged."""
     with tempfile.TemporaryDirectory(prefix="vba-check-") as temporary:
         root = Path(temporary)
         subprocess.run(["git", "init", "-q", str(root)], check=True)

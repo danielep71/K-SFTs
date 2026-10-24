@@ -222,7 +222,7 @@ def load_live(repository: str, token: str) -> Loaded:
         if len(batch) < 100:
             break
     else:
-        raise RuntimeError("more than 10000 issues; refusing to audit a partial list")
+        raise RuntimeError("10000 or more issues; refusing to audit a possibly partial list")
     return split(items)
 
 

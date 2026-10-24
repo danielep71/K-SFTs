@@ -42,7 +42,8 @@ Attribute VB_Name = "TEST_Harness"
 '
 ' USAGE
 '   Called by the suites in tests/modules/, for example
-'   TEST_Examples.RunExampleTests; never run on its own.
+'   TEST_Examples.RunExampleTests; SaveLog and ResetTests are also typed in
+'   the Immediate window. It has no suite of its own.
 '
 ' UPDATED
 '   2026-10-24
@@ -85,7 +86,7 @@ Attribute VB_Name = "TEST_Harness"
         Private mCaseIds              As Collection     'Case identifiers seen in this run
         Private mPrimaryFailure       As String         'First failure recorded in this run
         Private mLastResult           As String         'RESULT record of the last finished run
-        Private mLog                  As Collection     'Every record written since BeginRun
+        Private mLog                  As Collection     'Log since the last BeginRun or ResetTests
         Private mSnapshotValid        As Boolean        'True once all four properties were read
         Private mInitialCalculation   As XlCalculation  'Calculation at BeginRun
         Private mInitialAlerts        As Boolean        'DisplayAlerts at BeginRun
@@ -115,7 +116,7 @@ Public Sub BeginRun( _
 '   the host state to compare at the end and write the log header.
 '
 ' INPUTS
-'   SuiteName: stable suite identifier, written in every summary record.
+'   SuiteName: stable suite identifier, written in the RUN and RESULT records.
 '   Mode: NORMAL, or the name of a deliberate failure mode of the suite.
 '   ExpectedCases, ExpectedAssertions: counts of a complete run, >= 1.
 '
@@ -134,7 +135,8 @@ Public Sub BeginRun( _
 ' REFUSE AN UNSAFE START
 '------------------------------------------------------------------------------
     'An interrupted run or an unverified cleanup must be acknowledged with
-    'ResetTests before a new run may overwrite its state.
+    'ResetTests before a new run may overwrite its state. A project reset
+    '(End or Reset in the VBE) clears this state, so such a stop is not seen.
         If mRunActive Then
             mRecoveryRequired = True
             mRecoveryReason = "run of " & mSuite & " still active (interrupted?)"
@@ -298,7 +300,8 @@ Public Sub EndRun( _
 '   operation: what ran: PASS, FAIL (an assertion or a case identifier
 '   failed) or ERROR (an unexpected error occurred). completeness: COMPLETE
 '   only when both expected counts were met exactly. cleanup: PASS when the host state is unchanged.
-'   recovery: REQUIRED when the host state changed or could not be checked.
+'   recovery: REQUIRED when the host state changed or could not be checked,
+'   or when a start was refused while this run was active.
 '   RESULT=PASS needs operation PASS, COMPLETE, cleanup PASS and no recovery.
 '
 ' ERROR POLICY

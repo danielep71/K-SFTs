@@ -193,10 +193,11 @@ GitHub refused, or a rule shown to hold, on a real pull request.
   current base, not the head alone. The run name carries the SHA of that test
   merge. The *Verify candidate identity* step fails the job if the checked-out
   commit differs from it.
-- **The whole change.** Every gate reads every tracked file of that commit,
-  not only the changed files, and the workflow has no path filter, so every
-  file a pull request changes is checked. The up-to-date rule makes the
-  checked tree the tree that merges.
+- **The whole change.** Each gate reads every file in its scope in that
+  commit, not only the changed files, and the workflow has no path filter,
+  so every pull request is checked. Files outside every gate's scope, such as
+  most Markdown documents, are checked by review only. The up-to-date rule
+  makes the checked tree the tree that merges.
 - **Not each commit.** Intermediate commits are not checked one by one. A
   squash merge lands only the checked tree.
 
@@ -210,8 +211,10 @@ check but was not exercised with a failing one.
 - The sole owner cannot approve their own pull requests, so no approving
   review is required. The maintainer review, Codex review and CI above take
   its place.
-- Live label reconciliation runs only from `main`. Label changes merged into a
-  release branch take effect after integration into `main`.
+- Live label reconciliation runs on pushes to `main` that change label files,
+  and on manual dispatch, which can select any branch. Label changes merged
+  into a release branch take effect after integration into `main`, unless the
+  workflow is dispatched on that branch.
 - Run logs and report artifacts expire: the artifacts after 30 days, the logs
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into

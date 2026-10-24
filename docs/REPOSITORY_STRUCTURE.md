@@ -110,7 +110,7 @@ committed.
 | `src/core/` | Calculation engine: validation, haircuts and exposure arithmetic, netting-set aggregation, shared helpers | In-project only. Every standard module declares `Option Private Module`. |
 | `src/modules/` | Public facade: the supported entry points, constants and enumerations | Supported API, listed in [PUBLIC_API.txt](PUBLIC_API.txt) |
 | `src/classes/` | Class modules, for example transaction, collateral or netting-set objects | Status stated in each class header |
-| `src/workbook/` | Exported document modules (`ThisWorkbook`, sheet modules) and the macro-free workbook template | Host glue only; no calculation logic |
+| `src/workbook/` | Exported document modules (`ThisWorkbook`, sheet modules), `M_` standard modules of host glue, and the macro-free workbook template | Host glue only; no calculation logic |
 | `src/forms/` | UserForms, `.frm` beside its `.frx`, only if a form is needed | Host glue only |
 
 ### Verification and examples
@@ -156,8 +156,9 @@ A VBA `Public` declaration is not automatically supported API.
   needs its own issue, a documented reason and a changelog entry once
   releases exist.
 - **In-project only:** everything in `src/core/`, kept off the external
-  surface by `Option Private Module`, and anything in `src/modules/` not
-  listed in the inventory.
+  surface by `Option Private Module`, and the `Private` members of
+  `src/modules/`. Every `Public` declaration in `src/modules/` must be
+  listed in the inventory; the `vba-public-api` gate rejects one that is not.
 - **Never supported:** test and example modules; they are not part of the
   workbook.
 
