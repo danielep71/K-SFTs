@@ -91,7 +91,9 @@ were not checked in a commit message.
   request that changes VBA states whether it was compiled and run in Excel,
   on which host and at which commit, and never implies it was when it was
   not. No VBA has been compiled or run yet
-  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)).
+  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)); from that first
+  host run on, changed VBA merges only after an Excel run
+  ([review and validation](docs/VBA_HOUSE_STYLE.md#-review-and-validation)).
 - **A skipped or incomplete run is not a pass**, whether the checks end
   INCOMPLETE or the harness reports `completeness=INCOMPLETE`.
 - **Expected values never come from the code under test.** They come from a

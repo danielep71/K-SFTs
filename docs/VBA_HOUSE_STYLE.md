@@ -313,10 +313,13 @@ generated, names the generator and says it must not be edited by hand.
 - `python tools/check.py` must pass. It is a static check and never compiles
   or runs VBA: a static PASS proves neither that the project compiles nor
   that a result is right ([tools/README.md](../tools/README.md#vba-static-checks)).
-- Changed VBA is merged only after it has been imported, compiled and tested
-  in Excel on a [supported host](../INSTALLATION.md#supported-hosts). How
-  that run is recorded is defined in
-  [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9).
+- From the first recorded host run
+  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)) on, changed VBA is
+  merged only after it has been imported, compiled and tested in Excel on a
+  [supported host](../INSTALLATION.md#supported-hosts); #9 defines how that
+  run is recorded. Until then, VBA may be merged on a static PASS only if
+  the pull request states that it was not compiled or run, as the harness
+  was ([#76](https://github.com/danielep71/CCR-K-SFTs/pull/76)).
 
 ---
 
