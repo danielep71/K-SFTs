@@ -209,7 +209,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 | Imports the components of one workbook | `-Mode Production`: those under `src/`; `-Mode Development`: those and `tests/modules/`. Without `-Mode` it asks. The lists are in `tools/vba-projects.json`, which the `vba-manifest` gate keeps equal to the tracked components. |
 | Replaces document-module code, if you agree | It asks, unless `-IncludeSheets` or `-SkipSheets` answers; the workbook's sheet objects are kept. |
 | Imports from a folder | `-SourceDir` (or `tools/Sync-KSFT-VBA-Downloads.cmd`, which asks for one and defaults to `Downloads`) takes only the `.bas` and `.cls` files found there, by their `Attribute VB_Name`, after listing them for confirmation. |
-| Protects the workbook | A backup copy first, removed after a successful save; no change to cells, formulas, names, formatting or sheets, checked before saving; the workbook is closed unsaved on any error. |
+| Protects the workbook | A backup copy first, removed after a successful save. It writes no cells, formulas, names or formatting, and before saving it checks that no sheet was added, removed, renamed or reordered. The workbook is closed unsaved on any error. |
 
 It never writes to the repository. After it, compile as in step 6.
 
