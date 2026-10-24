@@ -2,7 +2,7 @@
 
 ## 📌 Supported versions
 
-No version of CCR-K-SFTs has been released ([RELEASING.md](RELEASING.md)).
+No version of K-SFTs has been released ([RELEASING.md](RELEASING.md)).
 The active release branch named in [docs/GOVERNANCE.md](docs/GOVERNANCE.md)
 and `main` are supported on a
 best-effort basis. Reports must identify a full commit SHA. Modified copies
@@ -14,7 +14,7 @@ Do **not** disclose a suspected vulnerability in an issue, pull request,
 commit message, sample file or screenshot.
 
 Email **danielep71@gmail.com** with the subject
-**Private security report — CCR-K-SFTs**. GitHub's private vulnerability
+**Private security report — K-SFTs**. GitHub's private vulnerability
 reporting is not available while the repository is private.
 
 Include:
@@ -26,7 +26,7 @@ Include:
 
 ## ⏱️ Response targets
 
-CCR-K-SFTs is maintained by one person; the targets are best effort, not a
+K-SFTs is maintained by one person; the targets are best effort, not a
 contractual commitment:
 
 - acknowledgement within 5 business days;

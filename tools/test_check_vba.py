@@ -297,7 +297,7 @@ class SourceTest(unittest.TestCase):
         self.assertTrue(any("check it out with CRLF" in item for item in findings), findings)
 
     def test_workbooks_are_not_committed(self) -> None:
-        self.assertFinding({"src/workbook/CCR-K-SFTs.xlsm": b"PK\x03\x04"}, "workbook committed")
+        self.assertFinding({"src/workbook/K-SFTs.xlsm": b"PK\x03\x04"}, "workbook committed")
 
     def test_only_the_approved_template_may_be_committed(self) -> None:
         template = "src/workbook/SFT_Template.xlsx"

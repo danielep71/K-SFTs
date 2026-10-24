@@ -251,7 +251,7 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     source.add_argument("--input", type=Path, help="issues exported as GitHub REST JSON")
     source.add_argument("--check-config", action="store_true",
                         help="check the issue forms and label catalogue only (offline)")
-    parser.add_argument("--repo-name", default="danielep71/CCR-K-SFTs",
+    parser.add_argument("--repo-name", default="danielep71/K-SFTs",
                         help="repository used to resolve issue URLs with --input")
     parser.add_argument("--output", type=Path, help="write the findings as JSON")
     parser.add_argument("--summary", type=Path, help="append the Markdown report to this file")

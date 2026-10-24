@@ -1,6 +1,6 @@
-# 🤝 Contributing to CCR-K-SFTs
+# 🤝 Contributing to K-SFTs
 
-CCR-K-SFTs is an independent personal project with one maintainer, who
+K-SFTs is an independent personal project with one maintainer, who
 decides scope, priorities and what is integrated
 ([docs/GOVERNANCE.md](docs/GOVERNANCE.md)). The repository is private.
 Every change starts from an issue and arrives through a pull request.
@@ -92,7 +92,7 @@ were not checked in a commit message.
   request that changes VBA states whether it was compiled and run in Excel,
   on which host and at which commit, and never implies it was when it was
   not. Since the first host run on 2026-10-24
-  ([#9](https://github.com/danielep71/CCR-K-SFTs/issues/9)), changed VBA
+  ([#9](https://github.com/danielep71/K-SFTs/issues/9)), changed VBA
   merges only after an Excel run
   ([review and validation](docs/VBA_HOUSE_STYLE.md#-review-and-validation)).
 - **A skipped or incomplete run is not a pass**, whether the checks end

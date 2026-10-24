@@ -9,7 +9,7 @@ Governance is in [GOVERNANCE.md](GOVERNANCE.md).
 
 ## 🎯 Scope and status
 
-**Scope.** CCR-K-SFTs is intended to calculate counterparty credit risk
+**Scope.** K-SFTs is intended to calculate counterparty credit risk
 exposure for **securities financing transactions** (SFTs): repurchase and
 reverse repurchase agreements, securities lending and borrowing, and margin
 lending, together with the collateral exchanged under them. The regulatory
@@ -35,14 +35,14 @@ milestones.
 
 ## 🧭 Profile decision
 
-**CCR-K-SFTs uses the `application` profile.** Decided by the maintainer on
-2026-10-24 in [#2](https://github.com/danielep71/CCR-K-SFTs/issues/2).
+**K-SFTs uses the `application` profile.** Decided by the maintainer on
+2026-10-24 in [#2](https://github.com/danielep71/K-SFTs/issues/2).
 `.github/label-policy.json` already selects the same profile for the label
 catalogue.
 
 | Question | Answer |
 | --- | --- |
-| Who calls it? | A user working in the CCR-K-SFTs workbook: entering transactions, collateral and netting sets, running the calculation and reading the results. |
+| Who calls it? | A user working in the K-SFTs workbook: entering transactions, collateral and netting sets, running the calculation and reading the results. |
 | What does it own? | The workbook: input and result sheets, the calculation engine, and their startup and packaging. |
 | Lifecycle | The workbook is the deliverable. It is built from the exported source in this repository, never edited as the source of truth. |
 | Supported environments | Excel for Windows, 64-bit as the supported target ([INSTALLATION.md](../INSTALLATION.md#supported-hosts)); intended and tested environments are recorded separately. |
@@ -213,7 +213,7 @@ apply to SFTs** and are never imported as defaults.
 
 | # | Decision | Why it matters | Where it is made |
 | --- | --- | --- | --- |
-| D1 | Regulatory framework and jurisdiction. **Decided 2026-10-24 ([#8](https://github.com/danielep71/CCR-K-SFTs/issues/8)):** the EU CRR (Regulation (EU) No 575/2013 with Regulation (EU) 2024/1623) is the controlling source and the only calculation regime; the Basel Framework is the methodological reference and EBA Q&As are used for interpretation ([regulatory basis](methodology/README.md#regulatory-basis)) | Fixes every formula, parameter and term, and the citation format | #8 |
+| D1 | Regulatory framework and jurisdiction. **Decided 2026-10-24 ([#8](https://github.com/danielep71/K-SFTs/issues/8)):** the EU CRR (Regulation (EU) No 575/2013 with Regulation (EU) 2024/1623) is the controlling source and the only calculation regime; the Basel Framework is the methodological reference and EBA Q&As are used for interpretation ([regulatory basis](methodology/README.md#regulatory-basis)) | Fixes every formula, parameter and term, and the citation format | #8 |
 | D2 | Rule version and effective date. **Decided 2026-10-24 (#8):** the version that applies on the calculation date; registered: the CRR consolidated text of 26.06.2026 for calculation dates from 1 January 2025, and CRE22 as in force from 1 January 2023 ([version applicability](methodology/README.md#version-applicability)) | Results must be reproducible against one dated text | #8 |
 | D3 | Approach. **Decided 2026-10-24 (#8):** the Financial Collateral Comprehensive Method (CRR Article 223) with supervisory volatility adjustments (Articles 224, 226, 227); internal models, the Simple Method, CCP treatment and the CRE56 floors are separate scope decisions ([first scope](methodology/README.md#scope)) | Determines inputs, parameters and validation | #8 |
 | D4 | Products in scope: repo and reverse repo, securities lending and borrowing, margin lending | Fixes the transaction record and its validation | Later methodology issue |

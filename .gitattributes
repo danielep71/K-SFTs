@@ -1,8 +1,8 @@
 #==============================================================================
-# CCR-K-SFTs .gitattributes
+# K-SFTs .gitattributes
 #------------------------------------------------------------------------------
 # PURPOSE
-#   Define Git behavior for the CCR-K-SFTs repository.
+#   Define Git behavior for the K-SFTs repository.
 #
 # POLICY
 #   - Exported VBA source is normalized in Git and checked out as CRLF.

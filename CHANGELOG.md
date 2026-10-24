@@ -1,6 +1,6 @@
 # 📜 Changelog
 
-All notable changes to CCR-K-SFTs are recorded here, from the user's point of
+All notable changes to K-SFTs are recorded here, from the user's point of
 view. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -112,4 +112,4 @@ SFT calculation, public API or workbook.
   product, collateral and output decisions are open
   ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)).
 
-[Unreleased]: https://github.com/danielep71/CCR-K-SFTs/commits/main
+[Unreleased]: https://github.com/danielep71/K-SFTs/commits/main

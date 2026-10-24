@@ -1,5 +1,5 @@
 name: "🐛 Bug report"
-description: "Report reproducible incorrect behavior in CCR-K-SFTs source, tooling or documentation."
+description: "Report reproducible incorrect behavior in K-SFTs source, tooling or documentation."
 title: "[Bug]: "
 labels: ["bug", "P2"]
 assignees: ["danielep71"]
@@ -14,7 +14,7 @@ body:
         Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug.
 
         > [!CAUTION]
-        > Synthetic data only: never paste real trades, counterparties, collateral, credentials or private workbooks. Report a vulnerability privately as [`SECURITY.md`](https://github.com/danielep71/CCR-K-SFTs/blob/main/SECURITY.md) describes, never in an issue.
+        > Synthetic data only: never paste real trades, counterparties, collateral, credentials or private workbooks. Report a vulnerability privately as [`SECURITY.md`](https://github.com/danielep71/K-SFTs/blob/main/SECURITY.md) describes, never in an issue.
 
   - type: dropdown
     id: area

@@ -1,6 +1,6 @@
 # 🧱 Production source
 
-Production VBA source: the only input to the CCR-K-SFTs workbook. **Nothing
+Production VBA source: the only input to the K-SFTs workbook. **Nothing
 is here yet.** The repository is in setup, and no calculation engine, facade
 or workbook exists ([docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md)).
 
