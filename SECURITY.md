@@ -2,8 +2,9 @@
 
 ## 📌 Supported versions
 
-No version of CCR-K-SFTs has been released. The active release branch named
-in [docs/GOVERNANCE.md](docs/GOVERNANCE.md) and `main` are supported on a
+No version of CCR-K-SFTs has been released ([RELEASING.md](RELEASING.md)).
+The active release branch named in [docs/GOVERNANCE.md](docs/GOVERNANCE.md)
+and `main` are supported on a
 best-effort basis. Reports must identify a full commit SHA. Modified copies
 are unsupported unless the problem reproduces in this repository.
 

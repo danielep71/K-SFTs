@@ -47,7 +47,8 @@ Each issue gets an assignee, exactly one priority and a milestone at triage
    `fix/<issue>-<slug>`, `docs/<slug>` or `test/<slug>`.
 3. **Change** as little as the issue needs: no unrelated formatting,
    generated output or opportunistic refactoring. Update the documentation the
-   change affects in the same pull request.
+   change affects in the same pull request, and add a material change to the
+   `[Unreleased]` section of [CHANGELOG.md](CHANGELOG.md).
 4. **Check** with `python tools/check.py` before every push; every gate must
    pass. After committing, `python tools/check.py --ci` runs exactly what CI
    runs.
@@ -116,7 +117,7 @@ were not checked in a commit message.
 | Branches, review, protection, issues | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 | Pull request checklist | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 | Vulnerabilities and data | [SECURITY.md](SECURITY.md) |
-| Versions and releases | Not defined yet ([#13](https://github.com/danielep71/CCR-K-SFTs/issues/13)); nothing is published. |
+| Versions, changelog and releases | [CHANGELOG.md](CHANGELOG.md), [RELEASING.md](RELEASING.md); nothing is published yet. |
 
 ## 📄 Licensing
 

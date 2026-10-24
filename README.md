@@ -19,8 +19,8 @@ This is an independent personal project.
 
 - **Repository checks** (`python tools/check.py`, also run by CI on every pull
   request): tooling tests, label and issue-form configuration, the format of
-  the numerical test-case files, static rules on the exported VBA source, and
-  the workflows. They read files only: they compile no VBA and check no
+  the numerical test-case files and of the changelog, static rules on the
+  exported VBA source, and the workflows. They read files only: they compile no VBA and check no
   calculation.
 - **A VBA regression harness** with a neutral example suite in
   `tests/modules/`. It exercises the harness itself and contains no SFT
@@ -59,8 +59,8 @@ release. No figure produced from this repository should be relied on.
 | [docs/TRAFFIC.md](docs/TRAFFIC.md) | Repository traffic history |
 | [tools/README.md](tools/README.md) | Repository checks: `python tools/check.py` |
 | [SECURITY.md](SECURITY.md) | Reporting vulnerabilities; synthetic data only |
+| [CHANGELOG.md](CHANGELOG.md), [RELEASING.md](RELEASING.md) | Changes by version; preparing and publishing a release |
 | [NOTICE.md](NOTICE.md), [LICENSE](LICENSE) | Copyright, provenance and the MPL-2.0 licence |
 
-Versions, the changelog and the release procedure are not defined yet
-([#13](https://github.com/danielep71/CCR-K-SFTs/issues/13)); nothing has
-been published.
+No version has been released yet: changes are recorded under
+`[Unreleased]` in [CHANGELOG.md](CHANGELOG.md).

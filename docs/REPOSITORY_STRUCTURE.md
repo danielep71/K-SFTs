@@ -85,7 +85,8 @@ tools/              repository checks and automation (Python)
 ```
 
 The root holds the project documents (`README.md`, `INSTALLATION.md`,
-`CONTRIBUTING.md`, `SECURITY.md`, `NOTICE.md`, `LICENSE`) and the repository
+`CONTRIBUTING.md`, `CHANGELOG.md`, `RELEASING.md`, `SECURITY.md`, `NOTICE.md`,
+`LICENSE`), `VERSION` once a version is released, and the repository
 configuration (`.editorconfig`, `.gitattributes`, `.gitignore`,
 `pyproject.toml`).
 
