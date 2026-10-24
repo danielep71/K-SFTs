@@ -139,7 +139,8 @@ nul
 .DS_Store
 .AppleDouble
 .LSOverride
-Icon?
+# A custom folder icon is a file named Icon plus a carriage return.
+Icon[[:cntrl:]]
 ._*
 .Trashes
 .Spotlight-V100
@@ -171,7 +172,8 @@ Icon?
 *~
 
 *.nppBackup
-session.xml
+# Notepad++ session file, rooted so that a fixture of that name stays visible.
+/session.xml
 
 
 
