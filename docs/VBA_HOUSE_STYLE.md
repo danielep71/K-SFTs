@@ -107,8 +107,9 @@ signature. Omit sections that are empty.
   `MarketValue >= 0` or `0 <= Haircut < 1`.
 - Day-count, holding-period, remargining and every other regulatory
   convention belong to the methodology
-  ([open decisions](REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions),
-  [#8](https://github.com/danielep71/CCR-K-SFTs/issues/8)). A procedure cites
+  ([methodology](methodology/README.md),
+  [open decisions](REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)).
+  A procedure cites
   the convention it implements in `REFERENCE`; it never chooses one silently.
 
 <a id="errors"></a>
