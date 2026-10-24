@@ -289,7 +289,8 @@ access to the VBA project object model*.
    `windows` is what `winver` shows. `references` lists the boxes ticked
    in **Tools → References**, separated by `; `. Write `compile=PASS` only if
    step 4 completed with no error; otherwise write what it reported.
-8. **Check** the folder against the commit, with Python 3.12 or later and Git:
+8. **Check** the folder against the commit, with Python 3.12 or later and Git
+   (untested on Windows; from WSL or a Linux checkout if it fails there):
 
    ```sh
    python tools/check_excel_run.py test-results/excel-run --commit <commit>
@@ -306,6 +307,7 @@ access to the VBA project object model*.
 | --- | --- |
 | An exported module differs from the commit's file, or one is missing or extra | The workbook was not built from that commit |
 | A log is missing or empty, does not end with `RESULT`, holds more than one run, or a line is not a `KEY=value` record | The log is incomplete |
+| A record is missing, extra or out of the order in which the commit's suite writes it, or an unexpected error (`ERROR`) is logged | The run did not execute the suite as written |
 | The normal run is not `RESULT=PASS`, or its cases and assertions differ from the commit's suite in name or order | The run did not pass as written |
 | `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
 | The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |

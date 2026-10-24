@@ -328,10 +328,12 @@ pull request or commit description.
 
 ## 📦 Releases
 
-The version, changelog and release procedure are defined in [#13](https://github.com/danielep71/CCR-K-SFTs/issues/13). Until then,
-no release, tag or workbook is published. Closing a milestone or integrating a
-release branch into `main` does not publish a release; publication happens
-only on an explicit maintainer decision.
+Versions follow Semantic Versioning; the changelog and its rules are in
+[CHANGELOG.md](../CHANGELOG.md) and the procedure for preparing and
+publishing a version is in [RELEASING.md](../RELEASING.md). No version has
+been released and no tag exists. Closing a milestone or integrating a
+release branch into `main` does not publish a release: preparation and
+publication each happen only on an explicit maintainer decision.
 
 ## 🔐 Security and licensing
 

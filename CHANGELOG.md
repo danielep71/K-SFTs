@@ -1,0 +1,98 @@
+# 📜 Changelog
+
+All notable changes to CCR-K-SFTs are recorded here, from the user's point of
+view. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+It is not a commit log or a substitute for release evidence. **No version has
+been released**: everything below is under `[Unreleased]`.
+
+## 🧭 Maintenance policy
+
+- Add a material change under `[Unreleased]` in the same pull request as the
+  change it describes. A change with nothing for a user to notice (a typo, a
+  refactor with no effect) needs no entry.
+- Describe the observable result: what exists, what a user or contributor
+  can now do, what changed in a contract, and what to do about it.
+- Link the issue or pull request that holds the detail.
+- Record only evidence that was produced. A static check is not an Excel run:
+  say what was and was not run in Excel.
+- Until a version is released, edit an existing entry rather than adding one
+  that describes a change to an unreleased state: an entry describes what the
+  release contains.
+- Entries move into a dated section only when a release is prepared
+  ([RELEASING.md](RELEASING.md)). A published section is not rewritten; a
+  demonstrable error is corrected with a note.
+
+<a id="date-and-version-rules"></a>
+
+### Date and version rules
+
+`python tools/check.py` (gate `changelog`) checks the headings, dates, order,
+link references and `VERSION`. What a version number means (`0.y.z`, patch,
+minor, major) is checked in review.
+
+| Rule | Standard |
+| --- | --- |
+| Version | `MAJOR.MINOR.PATCH`, without a leading `v` in headings |
+| Release heading | `## [X.Y.Z] - YYYY-MM-DD`, a real calendar date |
+| Ordering | `[Unreleased]` first; releases newest to oldest, by version and date |
+| Link references | `[Unreleased]` and every release; a release's points to `…/releases/tag/vX.Y.Z` |
+| `0.y.z` | Initial development: no compatibility is promised between versions |
+| Patch, minor, major | From `1.0.0`: a compatible correction, a compatible capability, an incompatible change to the public contract |
+
+| Category | Use for |
+| --- | --- |
+| **Added** | New capabilities, files, checks or tests |
+| **Changed** | Changes to existing behavior, contracts, tooling or documentation |
+| **Fixed** | Corrected defects |
+| **Security** | Safely disclosed security corrections |
+| **Validation** | Evidence actually produced |
+| **Known limitations** | Deliberate, unresolved boundaries |
+
+Use only the categories an entry needs.
+
+<a id="unreleased"></a>
+
+## [Unreleased]
+
+Planned as 0.1.0, *Repo setup*: repository infrastructure only. It contains no
+SFT calculation, public API or workbook.
+
+### Added
+
+- Governance: the branch model, integration and sync pull requests, review
+  of the final head, rulesets on `main`, `release/**` and `v*` tags, and the
+  issue rules ([docs/GOVERNANCE.md](docs/GOVERNANCE.md); #1, #12).
+- The project boundary, layout, dependency direction and public API boundary
+  ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md); #2).
+- Licensing under MPL 2.0, the provenance register and the security policy
+  ([NOTICE.md](NOTICE.md), [SECURITY.md](SECURITY.md); #3).
+- Source conventions: exported VBA as the source, ASCII only, CRLF checkout,
+  the VBA house style, supported hosts and the import and export steps
+  ([docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md),
+  [INSTALLATION.md](INSTALLATION.md); #4, #20).
+- `python tools/check.py`, run locally and by the `Repository integrity`
+  workflow on every pull request: tooling tests, label and issue-form
+  configuration, the test-case format, static checks of the exported VBA
+  source and the workflows ([tools/README.md](tools/README.md); #5, #6).
+- A VBA regression harness with a neutral example suite in `tests/modules/`,
+  and a procedure and checker for recording an Excel run against its commit
+  ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9).
+- The regulatory basis (the EU CRR, with the Basel Framework as reference),
+  registered copies of the texts relied on, and the test-case file format
+  ([docs/methodology/](docs/methodology/README.md); #8).
+- Onboarding: README, developer setup and contributing guide (#10).
+- Issue and pull request forms and an issue-triage check (#11).
+- Repository traffic history kept beyond GitHub's 14 days
+  ([docs/TRAFFIC.md](docs/TRAFFIC.md); #36).
+- This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
+
+### Known limitations
+
+- No VBA has been compiled or run in Excel yet (#9).
+- There is no calculation, public API, workbook or numerical test case; the
+  product, collateral and output decisions are open
+  ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)).
+
+[Unreleased]: https://github.com/danielep71/CCR-K-SFTs/commits/main

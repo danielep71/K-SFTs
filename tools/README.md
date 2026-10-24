@@ -42,6 +42,7 @@ versions; each gate also writes `<gate>.log`.
 | `labels-drift-self-test` | The read-only drift detector's fixtures. |
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |
+| `changelog` | `CHANGELOG.md` follows its [date and version rules](../CHANGELOG.md#date-and-version-rules): `## [Unreleased]` first, release headings `## [X.Y.Z] - YYYY-MM-DD` with real dates, newest first by version and date, a link reference for each, a release's pointing to its tag; `VERSION` absent before the first dated release, then equal to the newest one (`check_changelog.py`). Nothing is tagged or published. |
 | `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
 | `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
 | `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
@@ -53,8 +54,8 @@ versions; each gate also writes `<gate>.log`.
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 
 The label gates run on every pull request here, although the label workflows
-run on a pull request only when it changes label files. Live label reconciliation and
-drift detection stay in those workflows.
+run on a pull request only when it changes label files. Live label
+reconciliation and drift detection stay in those workflows.
 
 <a id="vba-static-checks"></a>
 
