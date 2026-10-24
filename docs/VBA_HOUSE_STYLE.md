@@ -10,9 +10,11 @@ structure is adapted from K-SACCR's `docs/VBA_HOUSE_STYLE.md` (see
 parameters apply here.
 
 **Status on 2026-10-24:** no VBA component exists yet. These rules apply from
-the first one. The static checks that will enforce the mechanical rules are
-planned in [#6](https://github.com/danielep71/CCR-K-SFTs/issues/6); until
-then they are enforced by review.
+the first one. The `vba-*` gates of `python tools/check.py` enforce the
+mechanical ones: component names and `VB_Name`, module options, ASCII,
+tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
+and the public API inventory. Everything else is enforced by review
+([what the checks cannot see](../tools/README.md#vba-static-checks)).
 
 <a id="naming"></a>
 
@@ -305,7 +307,8 @@ generated, names the generator and says it must not be edited by hand.
   header, `INPUTS` entry and line comment it makes stale, and the `UPDATED`
   date of each procedure and module it touches.
 - `python tools/check.py` must pass. It is a static check and never compiles
-  VBA ([tools/README.md](../tools/README.md)).
+  or runs VBA: a static PASS proves neither that the project compiles nor
+  that a result is right ([tools/README.md](../tools/README.md#vba-static-checks)).
 - Changed VBA is merged only after it has been imported, compiled and tested
   in Excel on a [supported host](../INSTALLATION.md#supported-hosts). How
   that run is recorded is defined in
