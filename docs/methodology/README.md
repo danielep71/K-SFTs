@@ -114,16 +114,16 @@ reuse terms are in [sources/README.md](sources/README.md).
 
 | ID | Role | Source | Version | Status |
 | --- | --- | --- | --- | --- |
-| `CRR` | Controlling | Regulation (EU) No 575/2013, consolidated text | 26.06.2026, version 021.001 | **Relied on.** Copy of Articles 192 to 197, 205 to 207 and 220 to 227 in `sources/`. Read on 2026-10-24: Article 220(1)–(5) in full; Articles 221, 223(1) and 224(1) in part; the headings of Articles 222 to 228. Formulas are images, not yet transcribed or checked |
+| `CRR` | Controlling | Regulation (EU) No 575/2013, consolidated text | 26.06.2026, version 021.001 | **Relied on.** Copy in `sources/`: page 1 and pages 281 to 323 (Chapter 4, Articles 192 to 227, and the start of Article 228). Read on 2026-10-24: Article 220(1)–(5) in full; Articles 221, 223(1) and 224(1) in part; the headings of Articles 222 to 228. Formulas and tables are not yet transcribed or checked |
 | `CRR3` | Controlling (amending act) | Regulation (EU) 2024/1623 | OJ L, 19.6.2024 | Read on 2026-10-24 for its date of application only (Article 2) and the list of its points amending Articles 194 to 227 |
-| `CRE22` | Methodological reference | Basel Framework, CRE22 *Standardised approach: credit risk mitigation* | In force 1 January 2023, published 26 November 2020 | **Relied on.** Copy in `sources/`. CRE22.40 to CRE22.65 read on 2026-10-24; formulas are images, not yet transcribed |
+| `CRE22` | Methodological reference | Basel Framework, CRE22 *Standardised approach: credit risk mitigation* | In force 1 January 2023, published 26 November 2020 | **Relied on.** Copy in `sources/` (the chapter PDF of this version). CRE22.40 to CRE22.65 read on 2026-10-24; formulas are not yet transcribed |
 | `CRE22-2028` | Methodological reference | CRE22, future version | In force 1 November 2028, published 28 October 2025 | Registered, not relied on |
-| `CRE32` | Methodological reference | CRE32 *IRB approach: risk components* | In force 1 January 2023, published 27 March 2020 (future version in force 1 November 2028) | Registered, not read; out of scope |
-| `CRE50` | Methodological reference | CRE50 *Counterparty credit risk definitions and terminology* | In force 15 December 2019, published 5 July 2024 | Registered, not read |
-| `CRE51` | Methodological reference | CRE51 *Counterparty credit risk overview* | In force 1 January 2023, published 27 March 2020 (future version in force 1 November 2028) | Registered, not read |
-| `CRE53` | Methodological reference | CRE53 *Internal models method for counterparty credit risk* | In force 1 January 2023, published 5 June 2020 | Registered, not read; out of scope |
-| `CRE54` | Methodological reference | CRE54 *Capital requirements for bank exposures to central counterparties* | In force 1 January 2023, published 27 March 2020 | Registered, not read; out of scope |
-| `CRE56` | Methodological reference | CRE56 *Minimum haircut floors for securities financing transactions* | In force 1 January 2023, published 1 July 2021 | Registered, not read; out of scope until its applicability is assessed |
+| `CRE32` | Methodological reference | CRE32 *IRB approach: risk components* | In force 1 January 2023, published 27 March 2020 (future version in force 1 November 2028) | Copy in `sources/`; not read; out of scope |
+| `CRE50` | Methodological reference | CRE50 *Counterparty credit risk definitions and terminology* | In force 15 December 2019, published 5 July 2024 | Copy in `sources/`; not read |
+| `CRE51` | Methodological reference | CRE51 *Counterparty credit risk overview* | In force 1 January 2023, published 27 March 2020 (future version in force 1 November 2028) | Copy in `sources/`; not read |
+| `CRE53` | Methodological reference | CRE53 *Internal models method for counterparty credit risk* | In force 1 January 2023, published 5 June 2020 | Copy in `sources/`; not read; out of scope |
+| `CRE54` | Methodological reference | CRE54 *Capital requirements for bank exposures to central counterparties* | In force 1 January 2023, published 27 March 2020 | Copy in `sources/`; not read; out of scope |
+| `CRE56` | Methodological reference | CRE56 *Minimum haircut floors for securities financing transactions* | In force 1 January 2023, published 1 July 2021 | Copy in `sources/`; not read; out of scope until its applicability is assessed |
 | `EBA-QA-2017_3375` | Interpretation | Maturity mismatch for exposures under master netting agreements (CRR Article 220) | Final, published 24/07/2020 | Copy in `sources/`. **Pre-CRR3:** it names the own-estimates approach (Article 225, now deleted) and Articles 223 to 226; to be re-checked against Article 220 as amended before reliance |
 | `EBA-QA-2015_2010` | Interpretation | EAD of over-collateralised SFTs under the FCCM (COREP C 07.00) | Final, published 26/11/2021 | Copy in `sources/`. Reporting Q&A; pre-CRR3; to be re-checked before reliance |
 | `EBA-QA-2017_3590` | Interpretation | Original exposure value of SFTs under Article 220 (large exposures, C 28.00) | Final, published 04/10/2019 | Copy in `sources/`. Reporting Q&A; pre-CRR3; to be re-checked before reliance |
@@ -188,7 +188,8 @@ table when code first implements it.
 | *None yet* | | | | | | | |
 
 - **Formula** is transcribed in `docs/methodology/` from the registered
-  copy, naming the image or table it comes from, and checked against it.
+  copy, naming the page and the formula or table it comes from, and checked
+  against it.
 - **Cases** lists the case IDs; **Status** is the validation status of the
   [completeness policy](TEST_CASES.md#completeness-policy).
 - A Basel paragraph that explains a rule may be added in **Source** next to
