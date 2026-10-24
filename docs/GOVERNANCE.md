@@ -135,25 +135,26 @@ required checks, or unrelated pull requests cannot merge.
 
 ### Configured controls
 
-Recorded on **2026-10-23**. *Verified* means read back from GitHub;
-*pending* means not yet configured or not yet verified. Enforcement is
-configured, read back and exercised in [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12).
+Recorded on **2026-10-23**, updated on **2026-10-24**. *Verified* means read
+back from GitHub; *pending* means not yet configured or not yet verified. A
+verified setting is not yet demonstrated enforcement: the controlled
+failing-and-passing exercise belongs to [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12).
 
-| Control | Status on 2026-10-23 |
+| Control | Status |
 | --- | --- |
 | Repository visibility | Private. Not to be changed for setup. |
 | Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection are available on private repositories under this plan; no upgrade is required. |
-| `main` and `release/0.1.0` branches | Verified: both exist and point at `85b2b3b`. |
-| Rulesets for `main` and `release/**` | Pending: not read back; configuration and verification in [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12). |
-| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Not yet required by a ruleset ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
-| Squash merging available | Pending: not verified ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
+| `main` and `release/0.1.0` branches | Verified on 2026-10-23: both exist; `release/0.1.0` was created from `main` at `85b2b3b`. |
+| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Enforcement exercise pending ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
+| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
+| Merge methods | Verified on 2026-10-24: the repository allows merge commits, squash and rebase. The rulesets allow **merge commits only** into `main`, and **squash or merge commits** into `release/**`, matching [Integration](#-integration). Observed: task pull requests squash-merged into `release/0.1.0` (#40, #43), the release integrated into `main` with a merge commit (#41), and the sync back with a merge commit (#44). Head branches are deleted automatically after merge. |
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
 | Codex code review | Enabled: observed on [#14](https://github.com/danielep71/CCR-K-SFTs/pull/14), on opening and on an `@codex review` request. |
 | Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, so it is active only after integration. |
 | Security features | Dependabot alerts enabled (maintainer-reported); secret scanning, code scanning and private vulnerability reporting not available on this private repository ([#3](https://github.com/danielep71/CCR-K-SFTs/issues/3)). Recorded in [SECURITY.md](../SECURITY.md). |
 | Issue forms and PR template | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
 | Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
-| Traffic history (2026-10-24) | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` branch created as orphan commit `8560b31`; workflow scheduled daily from `main`, active only after integration. Pending: the `analytics` environment and its `TRAFFIC_TOKEN` (maintainer), the `traffic-history` ruleset (maintainer), and a first manual and scheduled run. |
+| Traffic history | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
 
 ### Accepted limitations
 
