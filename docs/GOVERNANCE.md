@@ -217,7 +217,9 @@ It fails, and GitHub notifies the maintainer, when an open issue:
   one priority;
 - has `P1` without `bug`;
 - carries a label that is not in the catalogue;
-- has no dependency section, or names an issue that does not exist;
+- has no dependency section, or names a number that is neither an issue
+  nor a pull request (a named pull request is a reference, never a
+  prerequisite);
 - is `blocked` without an open prerequisite or external condition, or names
   an open prerequisite or external condition without being `blocked`.
 

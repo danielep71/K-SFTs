@@ -14,7 +14,7 @@ import re
 import sys
 import urllib.error
 import urllib.request
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -100,12 +100,14 @@ def metadata_findings(issue: Issue) -> list[Finding]:
     return findings
 
 
-def dependency_findings(issue: Issue, states: Mapping[int, str], repository: str) -> list[Finding]:
+def dependency_findings(issue: Issue, states: Mapping[int, str], repository: str,
+                        pulls: Collection[int] = ()) -> list[Finding]:
+    """A named pull request is a known reference, never a prerequisite."""
     section = dependency_section(issue.body)
     if section is None:
         return [Finding(issue.number, "dependencies", "has no dependency section")]
     named = references(section, repository, issue.number)
-    missing = sorted(n for n in named if n not in states)
+    missing = sorted(n for n in named if n not in states and n not in pulls)
     open_prerequisites = sorted(n for n in named if states.get(n) == "open")
     external = any(EXTERNAL.match(line) for line in section)
     blocked = BLOCKED in issue.labels
@@ -126,14 +128,15 @@ def dependency_findings(issue: Issue, states: Mapping[int, str], repository: str
 
 
 def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
-          catalogue: set[str] | None = None) -> list[Finding]:
-    """Audit every open issue; ``states`` maps every known issue number to its state."""
+          catalogue: set[str] | None = None, pulls: Collection[int] = ()) -> list[Finding]:
+    """Audit every open issue; ``states`` maps every known issue number to its state
+    and ``pulls`` holds the numbers of the repository's pull requests."""
     findings = []
     for issue in sorted(issues, key=lambda item: item.number):
         if issue.state != "open":
             continue
         findings += metadata_findings(issue)
-        findings += dependency_findings(issue, states, repository)
+        findings += dependency_findings(issue, states, repository, pulls)
         if catalogue is not None:
             findings += [Finding(issue.number, "catalogue", f"has label {label!r}, "
                                  "which is not in .github/labels.json")
@@ -194,24 +197,37 @@ def fetch(url: str, token: str) -> Any:
         return json.load(response)
 
 
-def load_live(repository: str, token: str) -> tuple[list[Issue], dict[int, str]]:
-    """Fetch every issue (open and closed, pull requests excluded) of the repository."""
+Loaded = tuple[list[Issue], dict[int, str], set[int]]
+
+
+def split(items: Iterable[Mapping[str, Any]]) -> Loaded:
+    """Return the issues, their states and the pull request numbers of REST items."""
     issues: list[Issue] = []
+    pulls: set[int] = set()
+    for item in items:
+        if "pull_request" in item:
+            pulls.add(int(item["number"]))
+        else:
+            issues.append(issue_from_api(item))
+    return issues, {issue.number: issue.state for issue in issues}, pulls
+
+
+def load_live(repository: str, token: str) -> Loaded:
+    """Fetch every issue and pull request (open and closed) of the repository."""
+    items: list[Mapping[str, Any]] = []
     for page in range(1, 101):
         batch = fetch(f"{API}/repos/{repository}/issues?state=all&per_page=100&page={page}",
                       token)
-        issues += [issue_from_api(item) for item in batch if "pull_request" not in item]
+        items += batch
         if len(batch) < 100:
             break
     else:
         raise RuntimeError("more than 10000 issues; refusing to audit a partial list")
-    return issues, {issue.number: issue.state for issue in issues}
+    return split(items)
 
 
-def load_file(path: Path) -> tuple[list[Issue], dict[int, str]]:
-    items = json.loads(path.read_text(encoding="utf-8"))
-    issues = [issue_from_api(item) for item in items if "pull_request" not in item]
-    return issues, {issue.number: issue.state for issue in issues}
+def load_file(path: Path) -> Loaded:
+    return split(json.loads(path.read_text(encoding="utf-8")))
 
 
 def render(findings: Sequence[Finding], audited: int) -> str:
@@ -256,12 +272,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             token = os.environ.get("GITHUB_TOKEN", "")
             if not token:
                 raise RuntimeError("--repository requires GITHUB_TOKEN")
-            issues, states = load_live(args.repository, token)
+            issues, states, pulls = load_live(args.repository, token)
             repository = args.repository
         else:
-            issues, states = load_file(args.input)
+            issues, states, pulls = load_file(args.input)
             repository = args.repo_name
-        findings = audit(issues, states, repository, catalogue_labels(root))
+        findings = audit(issues, states, repository, catalogue_labels(root), pulls)
     except (OSError, RuntimeError, ValueError, KeyError, urllib.error.URLError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 2

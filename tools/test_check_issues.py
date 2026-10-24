@@ -29,9 +29,11 @@ def blocked_by(*numbers: int, heading: str = "## Dependencies and blocking statu
     return f"## Objective\n\nx\n\n{heading}\n\n**blocked**:\n\n{lines}\n\n## Tracking\n\n#99\n"
 
 
-def rules(issues: list[Issue], states: dict[int, str] | None = None) -> list[tuple[int, str]]:
+def rules(issues: list[Issue], states: dict[int, str] | None = None,
+          pulls: frozenset[int] = frozenset()) -> list[tuple[int, str]]:
     known = states if states is not None else {i.number: i.state for i in issues}
-    return [(f.number, f.rule) for f in check_issues.audit(issues, known, REPOSITORY)]
+    return [(f.number, f.rule)
+            for f in check_issues.audit(issues, known, REPOSITORY, pulls=pulls)]
 
 
 class MetadataTests(unittest.TestCase):
@@ -92,6 +94,15 @@ class DependencyTests(unittest.TestCase):
     def test_self_reference_is_ignored(self) -> None:
         self.assertEqual(rules([issue(2, "P3", body=blocked_by(2))]), [])
 
+    def test_named_pull_request_is_a_reference_not_a_prerequisite(self) -> None:
+        body = "## Dependencies and blocking status\n\nNone. #1 was delivered in #22.\n"
+        closed = issue(1, state="closed")
+        self.assertEqual(rules([issue(2, "P3", body=body), closed], pulls=frozenset({22})), [])
+        # A pull request never justifies blocked, and unknown numbers are still reported.
+        self.assertEqual(rules([issue(2, "P3", BLOCKED_LABEL, body=blocked_by(22, 7))],
+                               pulls=frozenset({22})),
+                         [(2, "dependencies"), (2, "blocked")])
+
 
 
 class ConfigTests(unittest.TestCase):
@@ -109,7 +120,8 @@ class MainTests(unittest.TestCase):
     def test_input_mode_reports_and_exits_nonzero_on_findings(self) -> None:
         items = [
             {"number": 1, "state": "open", "labels": [{"name": "P3"}],
-             "assignees": [{"login": "danielep71"}], "milestone": None, "body": READY},
+             "assignees": [{"login": "danielep71"}], "milestone": None,
+             "body": READY + "Delivered in #2, a pull request.\n"},
             {"number": 2, "state": "open", "labels": [], "assignees": [],
              "milestone": None, "body": READY, "pull_request": {}},
         ]
