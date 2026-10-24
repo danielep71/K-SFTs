@@ -16,7 +16,8 @@ CCR-K-SFTs covers counterparty credit risk for securities financing
 transactions. The current milestone, **v0.1.0 - Repo setup**, prepares the
 repository infrastructure only. Production SFT calculations, numerical
 certification and workbook packaging belong to later milestones; the project
-boundary and architecture are defined separately ([#2](https://github.com/danielep71/CCR-K-SFTs/issues/2)).
+boundary and architecture are defined in
+[REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/CCR-K-SFTs/issues/2)).
 
 Commits may be authored by Daniele Penza or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
