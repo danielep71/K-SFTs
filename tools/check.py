@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Any
 
 SCOPE = (
-    "Repository tooling, label and issue-form configuration and workflow checks only; "
-    "no VBA source, Excel or SFT calculation has been checked."
+    "Repository tooling, label and issue-form configuration, test-case format and workflow "
+    "checks only; no VBA source, Excel or SFT calculation has been checked."
 )
 LABEL_POLICY = ".github/label-policy.json"
 
@@ -99,6 +99,7 @@ def default_gates() -> list[Gate]:
              ("node", ".github/scripts/labels-drift.mjs", "--policy", LABEL_POLICY, "--self-test")),
         Gate("issue-config", "python",
              (python, "tools/check_issues.py", "--check-config")),
+        Gate("test-cases", "python", (python, "tools/check_test_cases.py")),
         Gate("ruff", "ruff", ("ruff", "check", "--no-cache", "tools")),
         Gate("ruff-complexity-probe", "ruff", probe=ruff_complexity_probe),
         Gate("mypy", "mypy", ("mypy", "--no-incremental")),
