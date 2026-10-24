@@ -53,7 +53,11 @@ workbook template and tests.
 ## ⚙️ Automation risk surface
 
 The repository holds no calculation code yet. Its automation runs with the
-workflow token only; no other secret is configured.
+workflow token, except the traffic collection, which also reads
+`TRAFFIC_TOKEN`: a fine-grained token limited to this repository with
+*Administration: read*, stored in the `analytics` environment, which only
+`main` may use. Only the step that calls the traffic API receives it, and that
+step runs no repository code ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 
 | Workflow | Token permissions | Runs on |
 | --- | --- | --- |
@@ -61,9 +65,11 @@ workflow token only; no other secret is configured.
 | `Issue triage` | `contents: read`, `issues: read`, `pull-requests: read` | Issue events and manual dispatch, from `main` |
 | `Detect issue-label drift` | `contents: read`, `issues: read` | Label-file pull requests, daily schedule, manual dispatch |
 | `Sync issue labels` | `contents: read`; `issues: write` only to reconcile labels | Label-file pull requests (validation only); label-file pushes to `main` and manual dispatch (reconciliation) |
+| `Traffic history` | `contents: write`, to push `traffic-history`; plus `TRAFFIC_TOKEN` for the traffic API | Daily schedule and manual dispatch, from `main` only |
 
 Every checkout sets `persist-credentials: false`, and every action is pinned
-to a full commit SHA. No workflow approves, merges or dismisses alerts.
+to a full commit SHA; the traffic workflow passes its push credential to `git`
+for that command only. No workflow approves, merges or dismisses alerts.
 
 ## 🛡️ Security features
 
@@ -89,6 +95,9 @@ Update this table, with its date, when a feature is enabled or changed.
 - Excel files can hold sensitive material outside visible cells; inspect any
   workbook before sharing it.
 - If a secret is exposed, revoke or rotate it at once, before reporting it.
+- Renew `TRAFFIC_TOKEN` before it expires and at least every 90 days, and
+  revoke it at once if the traffic workflow is changed by anyone but the
+  maintainer ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 
 ## 🤝 Safe harbor
 

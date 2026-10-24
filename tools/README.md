@@ -67,6 +67,23 @@ python tools/check_issues.py --check-config        # forms and label catalogue o
 Exit code 0 means no findings, 1 means findings, 2 means the audit could not
 run. Its rules are tested by `test_check_issues.py` in `tool-tests`.
 
+## 📈 Traffic history
+
+`traffic_history.py` merges one collection of GitHub traffic API responses
+(`views.json`, `clones.json`, `referrers.json`, `paths.json`) into the CSV
+history of the `traffic-history` branch. It needs only the standard library
+and no token: the `Traffic history` workflow fetches the responses first.
+
+```sh
+python tools/traffic_history.py merge --raw <responses> --data <history>/data
+python tools/traffic_history.py init --data <history>/data   # empty files with headers
+```
+
+Every response and every existing file is validated before anything is
+written, so exit code 2 means the history was left unchanged. The merge and
+data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md); `test_traffic_history.py`
+covers them in `tool-tests`.
+
 ## 🔧 Tool versions
 
 | Tool | Version | Source |
