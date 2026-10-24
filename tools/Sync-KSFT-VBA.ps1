@@ -15,8 +15,9 @@ unless -Mode gives the answer:
   on synthetic data only.
 
 With -SourceDir only the standard and class modules found in that folder are
-imported (see the third example). Standard modules are replaced from source. ThisWorkbook and worksheet document modules
-keep their workbook objects and only their code text is replaced. The script
+imported (see the third example). Standard and class modules are replaced from
+source. ThisWorkbook and worksheet document modules keep their workbook
+objects and only their code text is replaced. The script
 does not write cells, formulas, names, formatting, tables, worksheets, or
 workbook structure.
 
@@ -25,7 +26,8 @@ modules in the source and asks whether to replace their code as well. Answer
 N for a workbook built from a newer template, whose sheet code must stay as
 it is. -IncludeSheets or -SkipSheets gives the answer in advance.
 
-.REQUIREMENTS
+.NOTES
+Requirements:
 - Windows desktop Excel.
 - Excel > Options > Trust Center > Macro Settings >
   "Trust access to the VBA project object model" enabled.
@@ -37,8 +39,9 @@ setting and remains the route for recording an Excel run.
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm"
 
-Asks whether the workbook is a production or a development workbook, then
-whether to replace the sheet code as well.
+Asks whether the workbook is a production or a development workbook, then,
+when the source has worksheet or ThisWorkbook modules, whether to replace
+their code as well.
 
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -Mode Development -SkipSheets
@@ -49,8 +52,8 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SkipSheets
 
-Asks for production or development, then imports the standard modules only
-and leaves the code of every worksheet and of ThisWorkbook as it is, without
+Asks for production or development, then imports every component except the
+worksheet and ThisWorkbook modules, whose code it leaves as it is, without
 asking about it.
 
 With -SourceDir, only the modules found in that folder are imported, for
@@ -63,8 +66,9 @@ project prefix (CORE_, SFT_, M_, TEST_), such as a test suite added by
 the pull request under test; it is listed apart as a new module. A form
 (.frm) is imported from the repository only, beside its .frx. Other
 files in the folder are ignored. When several files carry the same VB_Name
-(for example "CORE_Validation (1).bas"), the newest is taken. The script lists the files and asks for confirmation unless -Force
-is given, converts their line endings to CRLF and imports them. Every other
+(for example "CORE_Validation (1).bas"), the newest is taken. The script
+lists the files and asks for confirmation unless -Force is given, converts
+their line endings to CRLF and imports them. Every other
 module in the workbook is left as it is.
 #>
 
@@ -653,7 +657,7 @@ try {
 
         if (-not $Force) {
             $answer = Read-Host "Import these $($sourceFiles.Count) module(s) into the workbook? [Y/N]"
-            if ($answer -notmatch '^\s*(y|yes|s|si)\s*$') {
+            if ($answer -notmatch '^\s*(y|yes)\s*$') {
                 Write-Host "Cancelled: the workbook was not changed."
                 exit 2
             }
@@ -676,7 +680,7 @@ try {
                 Write-Host ("  {0}" -f (Get-VbaComponentName -SourcePath $file.FullName))
             }
             $answer = Read-Host "Replace the code of these $($documentFiles.Count) sheet module(s) as well? [Y/N]"
-            $importSheets = ($answer -match '^\s*(y|yes|s|si)\s*$')
+            $importSheets = ($answer -match '^\s*(y|yes)\s*$')
         }
 
         if ($importSheets) {
