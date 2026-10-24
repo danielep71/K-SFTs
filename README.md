@@ -16,6 +16,8 @@ This is an independent personal project.
 | Document | Purpose |
 | --- | --- |
 | [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md) | Scope, profile, layout, dependency direction, public API boundary, open decisions |
+| [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md) | VBA naming, contracts, errors, cleanup, encoding |
+| [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; importing and exporting the VBA source |
 | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) | Branches, integration, review, protection, issues, releases |
 | [docs/TRAFFIC.md](docs/TRAFFIC.md) | Repository traffic history |
 | [tools/README.md](tools/README.md) | Repository checks: `python tools/check.py` |

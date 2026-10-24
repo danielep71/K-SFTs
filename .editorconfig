@@ -12,8 +12,8 @@
 #   - Trailing whitespace is removed except in Markdown, where two trailing
 #     spaces can represent an explicit line break.
 #   - VBA source encoding is intentionally not forced. The VBE exports text
-#     using the Windows system code page; a repository should enable a Git
-#     working-tree encoding only after confirming that its source requires one.
+#     using the Windows system code page, so VBA source is ASCII only
+#     (docs/VBA_HOUSE_STYLE.md); no Git working-tree encoding is configured.
 #
 # RELATIONSHIP WITH .gitattributes
 #   .editorconfig controls how supporting editors create and save working-tree
