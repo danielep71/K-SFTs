@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+"""Check issue metadata and dependency status that issue forms cannot enforce.
+
+Read-only: the check never changes an issue. It reports findings for the
+maintainer to resolve by hand (docs/GOVERNANCE.md, Issues).
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.request
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+OWNER = "danielep71"
+PRIORITIES = ("P1", "P2", "P3")
+BLOCKED = "blocked"
+FORM_PRIORITIES = {"bug.yml": "P2", "enhancement.yml": "P3", "documentation.yml": "P3"}
+DEPENDENCY_STATUS_WORDS = re.compile(r"block|ready|waiting|depend|on[ -]hold|prerequisite", re.I)
+HEADING = re.compile(r"^#{2,3}\s+(.*)$")
+EXTERNAL = re.compile(r"^\s*(?:[-*]\s*)?external condition:\s*\S", re.I)
+API = "https://api.github.com"
+
+
+@dataclass(frozen=True)
+class Issue:
+    number: int
+    state: str  # "open" or "closed"
+    labels: tuple[str, ...]
+    assignees: tuple[str, ...]
+    milestone: str | None
+    body: str
+
+
+@dataclass(frozen=True)
+class Finding:
+    number: int
+    rule: str
+    message: str
+
+
+def issue_from_api(item: Mapping[str, Any]) -> Issue:
+    milestone = item.get("milestone")
+    return Issue(
+        number=int(item["number"]),
+        state=str(item["state"]).lower(),
+        labels=tuple(str(label["name"]) for label in item.get("labels", [])),
+        assignees=tuple(str(user["login"]) for user in item.get("assignees", [])),
+        milestone=str(milestone["title"]) if milestone else None,
+        body=str(item.get("body") or ""),
+    )
+
+
+def dependency_section(body: str) -> list[str] | None:
+    """Return the lines of the issue's dependency section, or None if it has none."""
+    lines = body.splitlines()
+    for index, line in enumerate(lines):
+        match = HEADING.match(line)
+        if match and "dependencies" in match.group(1).lower():
+            section = []
+            for following in lines[index + 1:]:
+                if HEADING.match(following):
+                    break
+                section.append(following)
+            return section
+    return None
+
+
+def references(lines: Iterable[str], repository: str, own: int) -> set[int]:
+    url = re.compile(rf"github\.com/{re.escape(repository)}/issues/(\d+)", re.I)
+    found: set[int] = set()
+    for line in lines:
+        found.update(int(n) for n in re.findall(r"(?<![\w/&])#(\d+)\b", line))
+        found.update(int(n) for n in url.findall(line))
+    found.discard(own)
+    return found
+
+
+def metadata_findings(issue: Issue) -> list[Finding]:
+    findings = []
+    if OWNER not in issue.assignees:
+        findings.append(Finding(issue.number, "assignee", f"is not assigned to {OWNER}"))
+    priorities = [label for label in issue.labels if label in PRIORITIES]
+    if len(priorities) != 1:
+        found = ", ".join(priorities) or "none"
+        findings.append(Finding(issue.number, "priority",
+                                f"needs exactly one of P1/P2/P3 (found: {found})"))
+    if "P1" in priorities and "bug" not in issue.labels:
+        findings.append(Finding(issue.number, "p1-reserved",
+                                "has P1 without bug: P1 is reserved for confirmed calculation bugs"))
+    if not issue.milestone:
+        findings.append(Finding(issue.number, "milestone", "has no milestone"))
+    return findings
+
+
+def dependency_findings(issue: Issue, states: Mapping[int, str], repository: str) -> list[Finding]:
+    section = dependency_section(issue.body)
+    if section is None:
+        return [Finding(issue.number, "dependencies", "has no dependency section")]
+    named = references(section, repository, issue.number)
+    missing = sorted(n for n in named if n not in states)
+    open_prerequisites = sorted(n for n in named if states.get(n) == "open")
+    external = any(EXTERNAL.match(line) for line in section)
+    blocked = BLOCKED in issue.labels
+    findings = [Finding(issue.number, "dependencies", f"names #{n}, which does not exist")
+                for n in missing]
+    if blocked and not open_prerequisites and not external:
+        findings.append(Finding(issue.number, "blocked",
+                                "is blocked but names no open prerequisite or external "
+                                "condition: remove blocked or name the blocker"))
+    if not blocked and open_prerequisites:
+        listed = ", ".join(f"#{n}" for n in open_prerequisites)
+        findings.append(Finding(issue.number, "blocked",
+                                f"names open prerequisite(s) {listed} but is not blocked"))
+    if not blocked and external:
+        findings.append(Finding(issue.number, "blocked",
+                                "names an external condition but is not blocked"))
+    return findings
+
+
+def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
+          catalogue: set[str] | None = None) -> list[Finding]:
+    """Audit every open issue; ``states`` maps every known issue number to its state."""
+    findings = []
+    for issue in sorted(issues, key=lambda item: item.number):
+        if issue.state != "open":
+            continue
+        findings += metadata_findings(issue)
+        findings += dependency_findings(issue, states, repository)
+        if catalogue is not None:
+            findings += [Finding(issue.number, "catalogue", f"has label {label!r}, "
+                                 "which is not in .github/labels.json")
+                         for label in issue.labels if label not in catalogue]
+    return findings
+
+
+def catalogue_labels(root: Path) -> set[str]:
+    data = json.loads((root / ".github" / "labels.json").read_text(encoding="utf-8"))
+    return {str(label["name"]) for label in data["core"]}
+
+
+def config_findings(root: Path) -> list[str]:
+    """Check the label catalogue and the issue forms against the issue rules."""
+    problems = []
+    labels = catalogue_labels(root)
+    status_labels = sorted(n for n in labels if DEPENDENCY_STATUS_WORDS.search(n))
+    if status_labels != [BLOCKED]:
+        problems.append(f"the dependency status labels must be exactly ['blocked'], "
+                        f"found {status_labels}")
+    forms = root / ".github" / "ISSUE_TEMPLATE"
+    for name, priority in sorted(FORM_PRIORITIES.items()):
+        path = forms / name
+        if not path.is_file():
+            problems.append(f"{path.relative_to(root)} is missing")
+            continue
+        text = path.read_text(encoding="utf-8")
+        form_labels = flow_list(text, "labels")
+        if [label for label in form_labels if label in PRIORITIES] != [priority]:
+            problems.append(f"{name} must set exactly the priority {priority}")
+        problems += [f"{name} sets unknown label {label!r}"
+                     for label in form_labels if label not in labels]
+        if flow_list(text, "assignees") != [OWNER]:
+            problems.append(f"{name} must assign {OWNER}")
+        if not re.search(r"^\s*id:\s*dependencies\s*$", text, re.M):
+            problems.append(f"{name} has no dependencies field")
+    config = forms / "config.yml"
+    if not config.is_file() or not re.search(r"^blank_issues_enabled:\s*false\s*$",
+                                             config.read_text(encoding="utf-8"), re.M):
+        problems.append("ISSUE_TEMPLATE/config.yml must set blank_issues_enabled: false")
+    return problems
+
+
+def flow_list(text: str, key: str) -> list[str]:
+    match = re.search(rf"^{key}:\s*\[(.*)\]\s*$", text, re.M)
+    if not match:
+        return []
+    return [item.strip().strip("\"'") for item in match.group(1).split(",") if item.strip()]
+
+
+def fetch(url: str, token: str) -> Any:
+    request = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    })
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.load(response)
+
+
+def load_live(repository: str, token: str) -> tuple[list[Issue], dict[int, str]]:
+    """Fetch every issue (open and closed, pull requests excluded) of the repository."""
+    issues: list[Issue] = []
+    for page in range(1, 101):
+        batch = fetch(f"{API}/repos/{repository}/issues?state=all&per_page=100&page={page}",
+                      token)
+        issues += [issue_from_api(item) for item in batch if "pull_request" not in item]
+        if len(batch) < 100:
+            break
+    else:
+        raise RuntimeError("more than 10000 issues; refusing to audit a partial list")
+    return issues, {issue.number: issue.state for issue in issues}
+
+
+def load_file(path: Path) -> tuple[list[Issue], dict[int, str]]:
+    items = json.loads(path.read_text(encoding="utf-8"))
+    issues = [issue_from_api(item) for item in items if "pull_request" not in item]
+    return issues, {issue.number: issue.state for issue in issues}
+
+
+def render(findings: Sequence[Finding], audited: int) -> str:
+    status = "PASS" if not findings else "FAIL"
+    lines = ["# Issue triage", "", f"Status: **{status}**; open issues audited: {audited}", ""]
+    if findings:
+        lines += ["| Issue | Rule | Finding |", "| --- | --- | --- |"]
+        lines += [f"| #{f.number} | `{f.rule}` | {f.message} |" for f in findings]
+        lines += ["", "Resolve each finding by hand; this check never changes an issue. "
+                  "See docs/GOVERNANCE.md, Issues."]
+    else:
+        lines.append("Every open issue meets the triage rules.")
+    return "\n".join(lines) + "\n"
+
+
+def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--repository", help="owner/name; reads GITHUB_TOKEN")
+    source.add_argument("--input", type=Path, help="issues exported as GitHub REST JSON")
+    source.add_argument("--check-config", action="store_true",
+                        help="check the issue forms and label catalogue only (offline)")
+    parser.add_argument("--repo-name", default="danielep71/CCR-K-SFTs",
+                        help="repository used to resolve issue URLs with --input")
+    parser.add_argument("--output", type=Path, help="write the findings as JSON")
+    parser.add_argument("--summary", type=Path, help="append the Markdown report to this file")
+    return parser.parse_args(argv)
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    root = args.root.resolve()
+    try:
+        if args.check_config:
+            problems = config_findings(root)
+            for problem in problems:
+                print(f"FAIL: {problem}")
+            print(f"issue-config: {'PASS' if not problems else 'FAIL'}")
+            return 1 if problems else 0
+        if args.repository:
+            token = os.environ.get("GITHUB_TOKEN", "")
+            if not token:
+                raise RuntimeError("--repository requires GITHUB_TOKEN")
+            issues, states = load_live(args.repository, token)
+            repository = args.repository
+        else:
+            issues, states = load_file(args.input)
+            repository = args.repo_name
+        findings = audit(issues, states, repository, catalogue_labels(root))
+    except (OSError, RuntimeError, ValueError, KeyError, urllib.error.URLError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 2
+    report = render(findings, sum(1 for issue in issues if issue.state == "open"))
+    print(report, end="")
+    if args.summary:
+        with args.summary.open("a", encoding="utf-8") as handle:
+            handle.write(report)
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(
+            {"status": "pass" if not findings else "fail",
+             "findings": [vars(f) for f in findings]}, indent=2) + "\n", encoding="utf-8")
+    return 1 if findings else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
