@@ -52,6 +52,8 @@ set "RC=%ERRORLEVEL%"
 echo.
 if "%RC%"=="0" (
     echo SUCCESS: K-SFT VBA synchronization completed.
+) else if "%RC%"=="2" (
+    echo NOT CHANGED: nothing was imported; the workbook was not changed.
 ) else (
     echo FAILED: K-SFT VBA synchronization returned exit code %RC%.
 )
