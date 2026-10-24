@@ -63,10 +63,21 @@ class Declaration:
         return f"{self.component}\t{self.kind}\t{self.name}"
 
 
+STRING = re.compile(r'"(?:[^"]|"")*"?')
+
+
 def norm(text: str) -> str:
-    """White space as single spaces, none just inside parentheses: a signature
-    split over continuation lines reads as it would on one line."""
-    return re.sub(r"\(\s+", "(", re.sub(r"\s+\)", ")", re.sub(r"\s+", " ", text.strip())))
+    """White space as single spaces, none just inside parentheses, outside
+    string literals: a signature split over continuation lines reads as it
+    would on one line, and a literal such as a default keeps its value."""
+    def code(part: str) -> str:
+        return re.sub(r"\(\s+", "(", re.sub(r"\s+\)", ")", re.sub(r"\s+", " ", part)))
+    parts: list[str] = []
+    position = 0
+    for literal in STRING.finditer(text):
+        parts += [code(text[position:literal.start()]), literal.group()]
+        position = literal.end()
+    return ("".join(parts) + code(text[position:])).strip()
 
 
 def date_delimiter(code: str, index: int, in_date: bool) -> bool:

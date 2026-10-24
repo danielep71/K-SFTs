@@ -121,7 +121,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
   31-character name limit; `Option Private Module` in `tests/modules/` too;
   `Option Base 1`, tabs and trailing white space rejected; no workbook may be
   committed;
-- signatures in the inventory without white space just inside parentheses;
+- signatures in the inventory without white space just inside parentheses,
+  string literals kept as written;
+- `Rem` recognized after a `:` separator as well as at the line start;
 - none of K-SACCR's module names, component counts, workbook template or
   synchronizer checks, changelog and version checks, and no financial
   assertion.

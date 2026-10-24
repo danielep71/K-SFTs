@@ -21,7 +21,7 @@ import check_vba_conditionals
 import check_vba_jumps
 import check_vba_public_api
 import check_vba_source
-from vba_lexer import Finding
+from vba_lexer import Finding, strip_code
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -440,6 +440,11 @@ End Sub
         End If
 End Sub
 ''',
+    "rem-after-separator": '''Private Sub First()
+        Debug.Print 1: Rem GoTo Missing
+        Debug.Print 2:Rem GoSub Lost
+End Sub
+''',
     "exclusive-branches": '''Private Sub First()
 #If VBA7 Then
         GoTo Modern
@@ -687,6 +692,18 @@ class PublicApiTest(unittest.TestCase):
         self.assertEqual(self.findings(api_files(modern_only, rows, SFT_Legacy=legacy)), [])
         self.assertFinding(api_files(API_FACADE, rows, SFT_Legacy=legacy), "collides")
 
+    def test_signatures_keep_string_literals(self) -> None:
+        facade = API_FACADE.replace("Private Sub Helper()", "Public Function SFT_Pad( _\n"
+                                    '    Optional ByVal Text As String = "A  ( B )") _\n'
+                                    "    As String\nEnd Function\n\nPrivate Sub Helper()")
+        exact = api_inventory(API_ROWS + [("Function", "SFT_Pad", 'Public Function SFT_Pad('
+                                           'Optional ByVal Text As String = "A  ( B )") '
+                                           "As String")])
+        self.assertEqual(self.findings(api_files(facade, exact)), [])
+        collapsed = exact.replace('"A  ( B )"', '"A (B)"')
+        self.assertFinding(api_files(facade, collapsed), "signature mismatch for SFT_Api\tFunction"
+                                                         "\tSFT_Pad")
+
     def test_colon_separated_and_commented_statements(self) -> None:
         facade = API_FACADE.replace("Private mHidden As Long",
                                     "Private mHidden As Long: Public gExtra As Long ' note: x")
@@ -694,6 +711,27 @@ class PublicApiTest(unittest.TestCase):
         dated = API_FACADE.replace("Private mHidden As Long",
                                    "Private Const START_DATE As Date = #1/2/2026#: Rem : Public x")
         self.assertEqual(self.findings(api_files(dated)), [])
+
+
+class LexerTest(unittest.TestCase):
+    def test_comments_end_the_code(self) -> None:
+        cases = {
+            "x = 1 ' note": "x = 1",
+            "Rem whole line": "",
+            "  Rem": "",
+            "Debug.Print 1: Rem GoTo Missing": "Debug.Print 1:",
+            'Debug.Print "a: Rem b"': 'Debug.Print "a: Rem b"',
+            "Call Run(Remainder:=1)": "Call Run(Remainder:=1)",
+            "Report Name:= Rem": "Report Name:= Rem",
+            "Remove 1": "Remove 1",
+            "x = 1: Remark = 2": "x = 1: Remark = 2",
+            '"it\'s": GoTo Label': '"it\'s": GoTo Label',
+        }
+        for raw, expected in cases.items():
+            with self.subTest(raw=raw):
+                self.assertEqual(strip_code(raw), expected)
+        self.assertEqual(strip_code('Debug.Print "GoTo x": GoTo y', blank_strings=True),
+                         "Debug.Print         : GoTo y")
 
 
 class MainTest(unittest.TestCase):

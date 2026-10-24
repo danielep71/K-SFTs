@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 VBA_SUFFIXES = frozenset({".bas", ".cls", ".frm"})
-REM = re.compile(r"^\s*Rem(?:\s|$)", re.IGNORECASE)
+REM = re.compile(r"Rem(?=\s|$)", re.IGNORECASE)
 CONTINUATION = re.compile(r"\s_\s*$")
 
 
@@ -68,11 +68,14 @@ def read_component(root: Path, path: str) -> str:
 
 
 def strip_code(raw: str, *, blank_strings: bool = False) -> str:
-    """One physical line without its comment. With ``blank_strings`` the
+    """One physical line without its comment: from a ' outside a string, or
+    from Rem where a statement starts (at the line start or after a ``:``
+    separator, not after a ``:=`` named argument). With ``blank_strings`` the
     content of string literals becomes spaces, so that keywords quoted in a
     string are not read as code; columns are preserved either way."""
     result: list[str] = []
     in_string = False
+    statement_start = True
     index = 0
     while index < len(raw):
         char = raw[index]
@@ -83,13 +86,16 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
                 continue
             in_string = not in_string
             result.append(" " if blank_strings else char)
-        elif char == "'" and not in_string:
+        elif not in_string and (char == "'" or (statement_start and REM.match(raw, index))):
             break
         else:
             result.append(" " if blank_strings and in_string else char)
+        if not in_string and char == ":" and raw[index + 1:index + 2] != "=":
+            statement_start = True
+        elif not char.isspace():
+            statement_start = False
         index += 1
-    text = "".join(result)
-    return "" if REM.match(text) else text.rstrip()
+    return "".join(result).rstrip()
 
 
 def logical_units(lines: list[str], *, blank_strings: bool = False

@@ -172,12 +172,13 @@ entries yet. Each supported declaration gets two lines:
 
 `kind` is `Function`, `Sub`, `Property Get`, `Property Let`, `Property Set`,
 `Const`, `Variable`, `Declare Function`, `Declare Sub`, `Enum` or `Type`.
-The signature is the declaration with its continuation lines joined, white
-space reduced to single spaces and none just inside parentheses; for an
-`Enum` or `Type` it is its statements joined by ` | `. A declaration that
-differs between `#If` branches has one `# SIG` line per variant. Lines
-starting with `#` and blank lines are comments, except `# SIG` lines. The
-`vba-public-api` gate compares the inventory with the exported source
+The signature is the declaration with its continuation lines joined and,
+outside string literals, white space reduced to single spaces and none just
+inside parentheses; for an `Enum` or `Type` it is its statements joined by
+` | `. A declaration that differs between `#If` branches has one `# SIG`
+line per variant. Lines starting with `#` and blank lines are comments,
+except `# SIG` lines. The `vba-public-api` gate compares the inventory with
+the exported source
 ([tools/README.md](../tools/README.md#vba-static-checks)).
 
 ### Input and output contract
