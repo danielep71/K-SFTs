@@ -8,10 +8,10 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 (see [NOTICE.md](NOTICE.md)).
 
 > [!IMPORTANT]
-> **Status on 2026-10-24: repository setup only.** No VBA component, template
-> or workbook exists yet, so the steps below have never been run on a host.
-> They are the convention the first components follow. The first real
-> import, compile and run is recorded in
+> **Status on 2026-10-24: repository setup only.** The only VBA components
+> are the test modules in `tests/modules/`; no production component,
+> template or workbook exists. The steps below have never been run on a
+> host. The first real import, compile and run is recorded in
 > [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). Prerequisites,
 > local commands and contributor setup are completed in
 > [#10](https://github.com/danielep71/CCR-K-SFTs/issues/10).
@@ -137,6 +137,47 @@ Do not paste source into arbitrarily named modules: the component name
 
 Exported files keep the VBE's header lines (`VERSION`, `BEGIN … END`,
 `Attribute`). Never edit or remove them when reformatting.
+
+<a id="running-the-harness"></a>
+
+## ▶️ Running the harness
+
+In a **development** workbook built as above, open the Immediate window
+(**Ctrl+G**) and type:
+
+```text
+TEST_Examples.RunExampleTests
+```
+
+It runs the example suite through `TEST_Harness` and writes one record per
+line. A passing run ends with:
+
+```text
+RESULT=PASS; suite=examples; operation=PASS; completeness=COMPLETE; cases=9; assertions=18; failures=0; cleanup=PASS; recovery=NONE
+```
+
+Anything else, or the error *Suite examples did not pass*, is a failure. Two
+more entry points show the failure paths and are expected to fail:
+
+| Entry point | Expected end |
+| --- | --- |
+| `TEST_Examples.RunExampleTestsWithInjectedFailure` | `RESULT=FAIL`, `operation=FAIL`, `completeness=COMPLETE`, `failures=1`, then *Suite examples did not pass* |
+| `TEST_Examples.RunExampleTestsWithSkippedCase` | `RESULT=FAIL`, `operation=PASS`, `completeness=INCOMPLETE`, `cases=8`, `assertions=16`, `failures=1`, then *Suite examples did not pass* |
+
+- **Complete log.** The Immediate window keeps only its last 200 lines. To
+  keep the whole run, type
+  `TEST_Harness.SaveLog "<folder>\examples.log"` after it, with a folder
+  outside the checkout or the ignored `test-results/` directory.
+- **Recovery.** A run that stopped half way, or that changed Excel settings
+  it did not restore, leaves `recovery=REQUIRED`, and the next run is
+  refused. Check **File → Options → Formulas** (calculation) and the other
+  settings the log names, then type `TEST_Harness.ResetTests`.
+- **What it proves.** The suite exercises the harness itself: assertions,
+  tolerances, error values, raised errors, completeness and the cleanup
+  pattern. It contains no SFT calculation, and a passing run validates
+  none. The log format is in [tests/README.md](tests/README.md#log-format);
+  recording a run as evidence is defined in
+  [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9).
 
 ## 📚 Related documents
 

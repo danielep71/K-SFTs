@@ -22,7 +22,7 @@ This is an independent personal project.
 | [docs/methodology/sources/README.md](docs/methodology/sources/README.md) | Copies of the regulatory texts relied on, with hashes and terms of use |
 | [docs/methodology/TEST_CASES.md](docs/methodology/TEST_CASES.md) | Test-case files, tolerances, reference classes, completeness |
 | [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md) | VBA naming, contracts, errors, cleanup, encoding |
-| [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; importing and exporting the VBA source |
+| [INSTALLATION.md](INSTALLATION.md) | Supported Excel hosts; importing and exporting the VBA source; running the harness |
 | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) | Branches, integration, review, protection, issues, releases |
 | [docs/TRAFFIC.md](docs/TRAFFIC.md) | Repository traffic history |
 | [tools/README.md](tools/README.md) | Repository checks: `python tools/check.py` |
