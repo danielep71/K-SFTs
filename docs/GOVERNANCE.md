@@ -53,6 +53,8 @@ release will be published (see [Releases](#-releases)).
 5. After the integration commit passes its checks on `main`, bring the
    release branch level with `main` through a sync pull request from `main`
    into the release branch, merged with a merge commit once its checks pass.
+   A sync pull request whose diff is empty needs CI only, no Codex review
+   (see [Review](#-review)).
 6. `main` receives commits only through these integration pull requests. If
    it receives any other commit while the release branch has commits of its
    own, the sync pull request cannot meet the up-to-date rule; stop and
@@ -96,6 +98,15 @@ Codex does not review bot-authored pull requests; for those, the maintainer's
 review of the final diff and head SHA is the only review. Do not claim Codex
 coverage when it was skipped. If review fails or is unavailable, leave the
 pull request open and record the blocker.
+
+**Sync pull requests.** A sync pull request from `main` into the release
+branch (Integration, step 5) whose diff is empty changes no file: it only adds
+the integration commit, whose content was reviewed on its own pull requests.
+It needs CI only: `Repository integrity` must pass on its head, and no Codex
+review is required. Before merging, confirm that the diff is empty (`git diff`
+between the release branch and `main` shows nothing) and record that and the
+CI result in the pull request. A sync pull request that changes any file is
+reviewed like any other pull request, Codex included.
 
 ## 🔐 Protection policy
 
