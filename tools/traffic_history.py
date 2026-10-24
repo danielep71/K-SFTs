@@ -31,7 +31,8 @@ SNAPSHOTS = "snapshots.csv"
 REFERRERS = "referrers.csv"
 PATHS = "paths.csv"
 HEADERS: dict[str, tuple[str, ...]] = {
-    DAILY: ("date", "views", "unique_views", "clones", "unique_clones", "collected_at"),
+    DAILY: ("date", "views", "unique_views", "views_collected_at",
+            "clones", "unique_clones", "clones_collected_at"),
     SNAPSHOTS: ("snapshot_date", "collected_at", "first_date", "last_date",
                 "views_14d", "unique_views_14d", "clones_14d", "unique_clones_14d"),
     REFERRERS: ("snapshot_date", "rank", "referrer", "count", "uniques"),
@@ -44,6 +45,7 @@ ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 STAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 NUMERIC = {"views", "unique_views", "clones", "unique_clones", "views_14d", "unique_views_14d",
            "clones_14d", "unique_clones_14d", "rank", "count", "uniques"}
+STAMPS = {"collected_at", "views_collected_at", "clones_collected_at"}
 Row = dict[str, str]
 
 
@@ -178,17 +180,30 @@ def read_history(path: Path) -> list[Row]:
             raise TrafficError(f"{path.name}:{number}: wrong number of fields")
         if not ISO_DATE.match(row[header[0]]):
             raise TrafficError(f"{path.name}:{number}: invalid date {row[header[0]]!r}")
-        # Daily metrics may be blank: that metric was never reported for the date.
-        bad = [key for key in NUMERIC & set(header)
-               if not (row[key].isascii() and row[key].isdigit())
-               and not (row[key] == "" and path.name == DAILY)]
-        if bad:
-            raise TrafficError(f"{path.name}:{number}: non-numeric {', '.join(sorted(bad))}")
-        if "collected_at" in row and not STAMP.match(row["collected_at"]):
-            raise TrafficError(f"{path.name}:{number}: invalid collected_at "
-                               f"{row['collected_at']!r}")
+        check_fields(path.name, number, row)
         rows.append(dict(row))
     return rows
+
+
+def check_fields(name: str, number: int, row: Mapping[str, str]) -> None:
+    """Counts are digits and collection times have their fixed form.
+
+    A daily metric may be blank together with its collection time: that metric
+    was never reported for the date.
+    """
+    def blank_metric(key: str) -> bool:
+        metric = key.removesuffix("_collected_at").removeprefix("unique_")
+        return (name == DAILY and row[metric] == "" and row[f"unique_{metric}"] == ""
+                and row[f"{metric}_collected_at"] == "")
+
+    bad = [key for key in NUMERIC & set(row)
+           if not (row[key].isascii() and row[key].isdigit()) and not blank_metric(key)]
+    if bad:
+        raise TrafficError(f"{name}:{number}: non-numeric {', '.join(sorted(bad))}")
+    bad = [key for key in STAMPS & set(row)
+           if not STAMP.match(row[key]) and not blank_metric(key)]
+    if bad:
+        raise TrafficError(f"{name}:{number}: invalid {', '.join(sorted(bad))}")
 
 
 def render(name: str, rows: Sequence[Mapping[str, str]]) -> str:
@@ -205,27 +220,28 @@ def render(name: str, rows: Sequence[Mapping[str, str]]) -> str:
 def merge_daily(rows: list[Row], collection: Collection) -> list[Row]:
     """Newest collection wins per date and metric; unreported dates keep their values.
 
-    A row written by a later collection than this one is never replaced, so
-    replaying an older collection cannot undo newer counts.
+    Views and clones each carry the time of the collection that last changed
+    them. A metric stored by a later collection than this one is never
+    replaced, so replaying an older collection cannot undo newer counts, yet it
+    can still fill a metric that no newer collection reported.
     """
-    stamp = collection.stamp
     by_date = {row["date"]: row for row in rows}
     for prefix, series in (("views", collection.views), ("clones", collection.clones)):
+        stamp_key = f"{prefix}_collected_at"
         for day, (total, unique) in series.days.items():
             row = by_date.setdefault(day, {key: "" for key in HEADERS[DAILY]} | {"date": day})
-            values = {prefix: str(total), f"unique_{prefix}": str(unique)}
-            if row["collected_at"] > stamp:
+            if row[stamp_key] > collection.stamp:
                 continue
+            values = {prefix: str(total), f"unique_{prefix}": str(unique)}
             if any(row[key] != value for key, value in values.items()):
                 row.update(values)
-                row["collected_at"] = stamp
+                row[stamp_key] = collection.stamp
     return [by_date[day] for day in sorted(by_date)]
 
 
-def merge_snapshot(rows: list[Row], collection: Collection) -> list[Row]:
-    """One snapshot per UTC date; a same-day collection replaces it only if values differ."""
+def snapshot_row(collection: Collection) -> Row:
     reported = sorted(set(collection.views.days) | set(collection.clones.days))
-    new = {
+    return {
         "snapshot_date": collection.snapshot_date,
         "collected_at": collection.stamp,
         "first_date": reported[0] if reported else "",
@@ -235,19 +251,47 @@ def merge_snapshot(rows: list[Row], collection: Collection) -> list[Row]:
         "clones_14d": str(collection.clones.count),
         "unique_clones_14d": str(collection.clones.uniques),
     }
-    kept = [row for row in rows if row["snapshot_date"] != new["snapshot_date"]]
-    old = [row for row in rows if row["snapshot_date"] == new["snapshot_date"]]
+
+
+def on_day(rows: Sequence[Row], day: str) -> list[Row]:
+    return [row for row in rows if row["snapshot_date"] == day]
+
+
+def replace_day(rows: Sequence[Row], day: str, new: Sequence[Row]) -> list[Row]:
+    """Replace one snapshot date's rows; other dates are never touched."""
+    kept = [row for row in rows if row["snapshot_date"] != day]
+    return sorted([*kept, *new],
+                  key=lambda row: (row["snapshot_date"], int(row.get("rank") or 0)))
+
+
+def merge_day(current: Mapping[str, list[Row]], collection: Collection) -> dict[str, list[Row]]:
+    """Merge a collection day's snapshot, referrers and paths as one unit.
+
+    The snapshot's ``collected_at`` is the time of the collection that last
+    changed any of the three. A later collection replaces the unit only if
+    something in it differs; an earlier one replayed afterwards never does.
+    """
+    day = collection.snapshot_date
+    unit = {name: current[name] for name in (SNAPSHOTS, REFERRERS, PATHS)}
+    stored = on_day(current[SNAPSHOTS], day)
+    if stored and stored[0]["collected_at"] > collection.stamp:
+        return unit
+    new = {
+        SNAPSHOTS: [snapshot_row(collection)],
+        REFERRERS: [{"snapshot_date": day} | row for row in collection.referrers],
+        PATHS: [{"snapshot_date": day} | row for row in collection.paths],
+    }
     ignore = {"collected_at"}
-    if old and all(old[0][key] == new[key] for key in HEADERS[SNAPSHOTS] if key not in ignore):
-        new = old[0]
-    return sorted(kept + [new], key=lambda row: row["snapshot_date"])
-
-
-def merge_ranked(rows: list[Row], snapshot_date: str, ranked: list[Row]) -> list[Row]:
-    """Replace one snapshot date's ranking; other dates are never touched."""
-    kept = [row for row in rows if row["snapshot_date"] != snapshot_date]
-    new = [{"snapshot_date": snapshot_date} | row for row in ranked]
-    return sorted(kept + new, key=lambda row: (row["snapshot_date"], int(row["rank"])))
+    unchanged = (
+        bool(stored)
+        and all(stored[0][key] == new[SNAPSHOTS][0][key]
+                for key in HEADERS[SNAPSHOTS] if key not in ignore)
+        and on_day(current[REFERRERS], day) == new[REFERRERS]
+        and on_day(current[PATHS], day) == new[PATHS]
+    )
+    if unchanged:
+        return unit
+    return {name: replace_day(current[name], day, rows) for name, rows in new.items()}
 
 
 def gaps(daily: Sequence[Mapping[str, str]]) -> list[tuple[str, str]]:
@@ -266,19 +310,7 @@ def merge(raw: Path, data: Path, collected_at: datetime) -> Report:
     collection = load_collection(raw, collected_at)
     current = {name: read_history(data / name) for name in HEADERS}
     merged = {DAILY: merge_daily([dict(row) for row in current[DAILY]], collection)}
-    # A later collection on the same UTC day already holds that day's snapshot
-    # and rankings: an older one replayed afterwards leaves them as they are.
-    superseded = any(row["snapshot_date"] == collection.snapshot_date
-                     and row["collected_at"] > collection.stamp
-                     for row in current[SNAPSHOTS])
-    if superseded:
-        merged.update({name: current[name] for name in (SNAPSHOTS, REFERRERS, PATHS)})
-    else:
-        merged[SNAPSHOTS] = merge_snapshot(current[SNAPSHOTS], collection)
-        merged[REFERRERS] = merge_ranked(current[REFERRERS], collection.snapshot_date,
-                                         collection.referrers)
-        merged[PATHS] = merge_ranked(current[PATHS], collection.snapshot_date,
-                                     collection.paths)
+    merged.update(merge_day(current, collection))
     report = Report(gaps=gaps(merged[DAILY]))
     pending = {}
     for name, rows in merged.items():

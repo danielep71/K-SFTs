@@ -68,7 +68,8 @@ class Workspace:
             return list(csv.DictReader(handle))
 
     def daily(self) -> dict[str, tuple[str, str, str]]:
-        return {row["date"]: (row["views"], row["clones"], row["collected_at"])
+        """Views, clones and the views' collection time, by date."""
+        return {row["date"]: (row["views"], row["clones"], row["views_collected_at"])
                 for row in self.rows(DAILY)}
 
     def snapshot(self) -> dict[str, str]:
@@ -160,6 +161,40 @@ class MergeTests(unittest.TestCase):
             self.assertEqual(ws.daily()["2026-09-30"][0], "1")
             self.assertEqual(ws.daily()["2026-10-14"][:2], ("5", "5"))
 
+    def test_older_collection_fills_a_metric_the_newer_one_did_not_report(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(1, 1)] * 14),
+                       clones=window("2026-10-14", [(1, 1)] * 13 + [(2, 1)]))
+            ws.raw.rename(ws.raw.parent / "morning")
+            ws.raw.mkdir()
+            # The evening collection reports views for 2026-10-14 but no clones.
+            ws.collect(window("2026-10-14", [(1, 1)] * 13 + [(5, 2)]),
+                       clones=window("2026-10-13", [(1, 1)] * 13))
+            ws.merge("2026-10-14T18:00:00")
+            traffic_history.merge(ws.raw.parent / "morning", ws.data, at("2026-10-14T06:00:00"))
+            row = next(row for row in ws.rows(DAILY) if row["date"] == "2026-10-14")
+            self.assertEqual((row["views"], row["views_collected_at"]),
+                             ("5", "2026-10-14T18:00:00Z"))
+            self.assertEqual((row["clones"], row["clones_collected_at"]),
+                             ("2", "2026-10-14T06:00:00Z"))
+
+    def test_replay_keeps_newer_rankings_when_totals_are_unchanged(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(1, 1)] * 14))
+            ws.raw.rename(ws.raw.parent / "morning")
+            ws.raw.mkdir()
+            traffic_history.merge(ws.raw.parent / "morning", ws.data, at("2026-10-14T06:00:00"))
+            ws.collect(window("2026-10-14", [(1, 1)] * 14),
+                       referrers=[{"referrer": "example.org", "count": 4, "uniques": 2}])
+            ws.merge("2026-10-14T18:00:00")
+            self.assertEqual(ws.rows(SNAPSHOTS)[0]["collected_at"], "2026-10-14T18:00:00Z")
+            evening = ws.snapshot()
+            report = traffic_history.merge(ws.raw.parent / "morning", ws.data,
+                                           at("2026-10-14T06:00:00"))
+            self.assertEqual(report.changed, {})
+            self.assertEqual(ws.snapshot(), evening)
+            self.assertEqual(ws.rows(REFERRERS)[0]["referrer"], "example.org")
+
     def test_zero_activity_is_stored_and_uncollected_dates_are_unavailable(self) -> None:
         with workspace() as ws:
             ws.collect(window("2026-10-14", [(0, 0)] * 14))
@@ -217,14 +252,16 @@ class FailureTests(unittest.TestCase):
 
     def test_corrupt_history_file_is_never_overwritten(self) -> None:
         for content, message in [("date,views\n2026-10-01,1\n", "header"),
-                                 (traffic_history.render(DAILY, []) + "2026-10-01,x,1,1,1,t\n",
-                                  "non-numeric"),
-                                 (traffic_history.render(DAILY, []) + "yesterday,1,1,1,1,t\n",
-                                  "invalid date"),
+                                 (traffic_history.render(DAILY, [])
+                                  + "2026-10-01,x,1,2026-10-01T06:00:00Z,1,1,2026-10-01T06:00:00Z\n", "non-numeric"),
+                                 (traffic_history.render(DAILY, [])
+                                  + "yesterday,1,1,2026-10-01T06:00:00Z,1,1,2026-10-01T06:00:00Z\n", "invalid date"),
                                  (traffic_history.render(DAILY, []) + "2026-10-01,1\n",
                                   "number of fields"),
-                                 (traffic_history.render(DAILY, []) + "2026-10-01,1,1,1,1,t\n",
-                                  "invalid collected_at")]:
+                                 (traffic_history.render(DAILY, [])
+                                  + "2026-10-01,1,1,t,1,1,2026-10-01T06:00:00Z\n", "invalid views_collected_at"),
+                                 (traffic_history.render(DAILY, [])
+                                  + "2026-10-01,1,,,1,1,2026-10-01T06:00:00Z\n", "non-numeric unique_views")]:
             with self.subTest(message=message), workspace() as ws:
                 ws.data.mkdir()
                 (ws.data / DAILY).write_text(content, encoding="utf-8")
@@ -239,7 +276,8 @@ class CommandTests(unittest.TestCase):
             self.assertEqual(ws.rows(PATHS), [])
             (ws.data / DAILY).write_text(traffic_history.render(DAILY, [
                 {"date": "2026-10-01", "views": "1", "unique_views": "1", "clones": "",
-                 "unique_clones": "", "collected_at": "2026-10-01T06:00:00Z"}]),
+                 "unique_clones": "", "views_collected_at": "2026-10-01T06:00:00Z",
+                 "clones_collected_at": ""}]),
                 encoding="utf-8")
             self.assertEqual(traffic_history.initialize(ws.data), [])
             self.assertEqual(len(ws.rows(DAILY)), 1)
