@@ -21,7 +21,7 @@ import check_vba_conditionals
 import check_vba_jumps
 import check_vba_public_api
 import check_vba_source
-from vba_lexer import Finding, strip_code
+from vba_lexer import Finding, logical_units, strip_code
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -360,6 +360,7 @@ CONDITIONAL_INVALID = {
     "stray-end-if": ("#End If\n", "#End If without #If"),
     "unsupported-directive": ("#Region Main\n", "unsupported conditional-compilation directive"),
 }
+CONDITIONAL_VALID["continued-comment-hides-directive"] = "' retired guard _\n#If Mac Then\n"
 
 
 def module(body: str) -> str:
@@ -499,6 +500,29 @@ Legacy:
 #End If
 End Sub
 ''',
+    "continued-comment-hides-jump": '''Private Sub First()
+        ' a comment continued _
+        GoTo Missing
+End Sub
+''',
+    "continued-rem-hides-jump": '''Private Sub First()
+        Rem a remark continued _
+        GoTo Missing
+End Sub
+''',
+    "comment-continued-twice": '''Private Sub First()
+        ' first line _
+          second line _
+        GoTo Missing
+End Sub
+''',
+    "continued-comment-after-label-and-separator": '''Private Sub First()
+100     Debug.Print 1: ' note _
+        GoTo Missing
+        Debug.Print 2: Rem note _
+        GoSub Lost
+End Sub
+''',
 }
 JUMPS_INVALID = {
     "cross-procedure": ('''Private Sub First()
@@ -547,6 +571,16 @@ End Sub
                                         "GoTo target 'Lost'"),
     "one-line-procedure-missing-label": ("Private Sub First(): GoTo Lost: End Sub\n",
                                          "GoTo target 'Lost'"),
+    "continued-comment-hides-label": ("Private Sub First()\n        GoTo Missing\n"
+                                      "        ' a comment continued _\nMissing:\nEnd Sub\n",
+                                      "GoTo target 'Missing'"),
+    "continued-comment-ends": ("Private Sub First()\n        ' a comment continued _\n"
+                               "          on this line\n        GoTo Missing\nEnd Sub\n",
+                               "GoTo target 'Missing'"),
+    "continuation-mark-in-a-string": ("Private Sub First()\n        Debug.Print \"ends _\"\n"
+                                      "        GoTo Missing\nEnd Sub\n", "GoTo target 'Missing'"),
+    "continuation-mark-in-brackets": ("Private Sub First()\n        Debug.Print ['a _'!A1]\n"
+                                      "        GoTo Missing\nEnd Sub\n", "GoTo target 'Missing'"),
 }
 
 
@@ -772,6 +806,11 @@ class PublicApiTest(unittest.TestCase):
                                    "Private Const START_DATE As Date = #1/2/2026#: Rem : Public x")
         self.assertEqual(self.findings(api_files(dated)), [])
 
+    def test_continued_comment_is_not_a_declaration(self) -> None:
+        retired = API_FACADE.replace("Private mHidden As Long",
+                                     "Private mHidden As Long ' retired: _\nPublic gRetired As Long")
+        self.assertEqual(self.findings(api_files(retired)), [])
+
 
 class LexerTest(unittest.TestCase):
     def test_comments_end_the_code(self) -> None:
@@ -799,6 +838,11 @@ class LexerTest(unittest.TestCase):
                          "Debug.Print         : GoTo y")
         self.assertEqual(strip_code("x = ['GoTo z'!A1]: GoTo y", blank_strings=True),
                          "x = [" + " " * len("'GoTo z'!A1") + "]: GoTo y")
+
+    def test_a_comment_ending_in_a_continuation_continues(self) -> None:
+        lines = ["x = 1 ' a _", "GoTo y _", "  z", "Rem b _", "w", "s = \"t _\"", "v = 2"]
+        self.assertEqual([code for _, _, _, code in logical_units(lines)],
+                         ["x = 1", "", "", "", "", 's = "t _"', "v = 2"])
 
 
 class MainTest(unittest.TestCase):

@@ -108,8 +108,6 @@ and a project `#Const` fail closed, because their value cannot be known.
   `Application.Run` from reaching a procedure; the
   [public API boundary](../docs/REPOSITORY_STRUCTURE.md#-public-api-boundary)
   is a contract, not an access control.
-- a comment continued with ` _` onto the next line is read as code by the
-  three environment-aware checks; avoid continuing comments.
 
 **Source and adaptations.** The checks are adapted from K-SACCR
 ([NOTICE.md](../NOTICE.md)), which took the jump, conditional-compilation
@@ -129,6 +127,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
 - `Rem` recognized after a `:` separator and after a numeric line label as
   well as at the line start, and `vba-jumps` reading each statement of a
   line separated by `:`, so that `Private Sub F(): ...: End Sub` closes;
+- a comment ending in ` _` read as continuing on the next line, as VBA reads
+  it, in all four gates, so that a `GoTo`, a label, a directive or a
+  declaration on that line is comment text;
 - an apostrophe or a colon inside `[...]`, as in `['Sheet 1'!A1]` or
   `[A1:B2]`, read as part of the expression, and every target of
   `On <expression> GoTo` and `GoSub` checked, not only the first;
