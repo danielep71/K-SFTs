@@ -211,10 +211,10 @@ check but was not exercised with a failing one.
 - The sole owner cannot approve their own pull requests, so no approving
   review is required. The maintainer review, Codex review and CI above take
   its place.
-- Live label reconciliation runs on pushes to `main` that change label files,
-  and on manual dispatch, which can select any branch. Label changes merged
-  into a release branch take effect after integration into `main`, unless the
-  workflow is dispatched on that branch.
+- Live label reconciliation runs only from `main`: on pushes to `main` that
+  change label files, and on manual dispatch on `main` (a dispatch on any
+  other branch skips it). Label changes merged into a release branch take
+  effect after integration into `main`.
 - Run logs and report artifacts expire: the artifacts after 30 days, the logs
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into
