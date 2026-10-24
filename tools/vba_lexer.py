@@ -69,17 +69,20 @@ def read_component(root: Path, path: str) -> str:
 
 
 def strip_code(raw: str, *, blank_strings: bool = False) -> str:
-    """One physical line without its comment: from a ' outside a string, or
+    """One physical line without its comment: from a ' outside a string and
+    outside [...] (where it quotes a sheet name, as in ['Sheet 1'!A1]), or
     from Rem where a statement starts (at the line start, after a numeric line
     label such as ``100``, or after a ``:`` separator, not after a ``:=``
     named argument). With ``blank_strings`` the content of string literals
-    becomes spaces, so that keywords quoted in a string are not read as code;
+    and of [...] expressions becomes spaces, so that keywords quoted in a
+    string or a sheet name are not read as code; the brackets stay, and
     columns are preserved either way."""
     label = LINE_NUMBER.match(raw)
     index = label.end() if label else 0
     result: list[str] = [raw[:index]]
     in_string = False
     statement_start = True
+    brackets = 0
     while index < len(raw):
         char = raw[index]
         if char == '"':
@@ -89,10 +92,16 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
                 continue
             in_string = not in_string
             result.append(" " if blank_strings else char)
-        elif not in_string and (char == "'" or (statement_start and REM.match(raw, index))):
+        elif not in_string and ((char == "'" and not brackets)
+                                or (statement_start and REM.match(raw, index))):
             break
         else:
-            result.append(" " if blank_strings and in_string else char)
+            hidden = in_string or (brackets and char not in "[]")
+            result.append(" " if blank_strings and hidden else char)
+        if not in_string and char == "[":
+            brackets += 1
+        elif not in_string and char == "]" and brackets:
+            brackets -= 1
         if not in_string and char == ":" and raw[index + 1:index + 2] != "=":
             statement_start = True
         elif not char.isspace():
@@ -112,10 +121,11 @@ def date_delimiter(code: str, index: int, in_date: bool) -> bool:
 
 
 def split_statements(code: str) -> list[str]:
-    """Split one logical line at colons outside strings and date literals; a
-    ``:=`` named argument is not a separator, and a Rem statement ends the line."""
+    """Split one logical line at colons outside strings, date literals and
+    [...] expressions (such as [A1:B2]); a ``:=`` named argument is not a
+    separator, and a Rem statement ends the line."""
     statements: list[str] = []
-    start = 0
+    start = brackets = 0
     in_string = in_date = False
     index = 0
     while index < len(code):
@@ -125,9 +135,13 @@ def split_statements(code: str) -> list[str]:
                 index += 2
                 continue
             in_string = not in_string
-        elif char == "#" and not in_string and date_delimiter(code, index, in_date):
+        elif in_string or in_date and char != "#":
+            pass
+        elif char == "#" and date_delimiter(code, index, in_date):
             in_date = not in_date
-        elif char == ":" and not (in_string or in_date) and code[index:index + 2] != ":=":
+        elif char in "[]":
+            brackets = brackets + 1 if char == "[" else max(brackets - 1, 0)
+        elif char == ":" and not brackets and code[index:index + 2] != ":=":
             statements.append(code[start:index].strip())
             start = index + 1
         index += 1
