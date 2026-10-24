@@ -53,6 +53,9 @@ drift detection stay in those workflows.
 `check_issues.py` applies the issue rules of `docs/GOVERNANCE.md` (Triage) to
 every open issue and reports findings; it never changes an issue. The
 `Issue triage` workflow runs it on issue events with a read-only token.
+Pull requests are not audited, but their numbers are loaded so that a
+dependency section may name one as a reference; it never counts as a
+prerequisite.
 
 ```sh
 GITHUB_TOKEN=<token with issues:read> python tools/check_issues.py --repository danielep71/CCR-K-SFTs
