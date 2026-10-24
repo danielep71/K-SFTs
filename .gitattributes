@@ -1,0 +1,253 @@
+#==============================================================================
+# CCR-K-SFTs .gitattributes
+#------------------------------------------------------------------------------
+# PURPOSE
+#   Define Git behavior for the CCR-K-SFTs repository.
+#
+# POLICY
+#   - Exported VBA source is normalized in Git and checked out as CRLF.
+#   - Repository text and cross-platform tooling are checked out as LF.
+#   - Office packages, UserForm binaries, archives, and media remain binary.
+#   - Binary payloads never receive text normalization or line-based merges.
+#   - GitHub Linguist reports exported modules as VBA. Path-specific rules,
+#     such as documentation assets, wait for the repository layout (#4).
+#
+# PLACEMENT
+#   Keep this file at the repository root. Custom [attr] macros are honored only
+#   in a top-level attributes file.
+#
+# ADOPTION / POLICY CHANGES
+#   Attribute changes do not rewrite existing blobs automatically. Inspect any
+#   normalization separately:
+#
+#       git add --renormalize --dry-run .
+#       git add --renormalize .
+#       git diff --cached --check
+#
+#   Commit a required normalization as its own mechanical change.
+#
+# VBA DIFF DRIVER
+#   The vba driver below is harmless without local configuration. For procedure
+#   names in diff hunk headers, configure each clone once:
+#
+#       git config diff.vba.xfuncname \
+#         "^([ \t]*(Public|Private|Friend)?[ \t]*(Static[ \t]+)?(Sub|Function|Property[ \t]+(Get|Let|Set))[ \t]+[A-Za-z_].*)$"
+#
+#   The outer capture group is intentional: it returns the complete declaration
+#   rather than only a visibility keyword.
+#==============================================================================
+
+
+#------------------------------------------------------------------------------
+# REUSABLE ATTRIBUTE POLICIES
+#------------------------------------------------------------------------------
+[attr]vba-source    text eol=crlf diff=vba linguist-language=VBA
+[attr]vba-form-bin  binary merge=binary linguist-generated
+[attr]office-doc    binary merge=binary -linguist-detectable
+[attr]opaque        binary merge=binary
+
+
+#------------------------------------------------------------------------------
+# DETERMINISTIC DEFAULT
+#------------------------------------------------------------------------------
+# Normalize detected text to LF in the index and use LF in the working tree.
+# Explicit VBA and Windows-native rules below override the working-tree EOL.
+* text=auto eol=lf
+
+
+#------------------------------------------------------------------------------
+# EXPORTED VBA SOURCE
+#------------------------------------------------------------------------------
+*.bas   vba-source
+*.cls   vba-source
+*.frm   vba-source
+*.frx   vba-form-bin
+
+
+#------------------------------------------------------------------------------
+# WINDOWS-NATIVE SCRIPTS
+#------------------------------------------------------------------------------
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.psd1  text eol=crlf
+*.vbs   text eol=crlf
+*.reg   text eol=crlf
+*.ini   text eol=crlf
+
+
+#------------------------------------------------------------------------------
+# POSIX SHELL TOOLING
+#------------------------------------------------------------------------------
+*.sh    text eol=lf
+
+
+#------------------------------------------------------------------------------
+# PYTHON TOOLING
+#------------------------------------------------------------------------------
+*.py    text eol=lf
+*.pyw   text eol=lf
+
+
+#------------------------------------------------------------------------------
+# NODE / JAVASCRIPT TOOLING
+#------------------------------------------------------------------------------
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+
+
+#------------------------------------------------------------------------------
+# DOCUMENTATION AND STRUCTURED CONFIGURATION
+#------------------------------------------------------------------------------
+*.md            text eol=lf
+*.txt           text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.json          text eol=lf
+*.jsonc         text eol=lf
+*.xml           text eol=lf
+*.csv           text eol=lf
+*.tsv           text eol=lf
+*.toml          text eol=lf
+*.cfg           text eol=lf
+*.svg           text eol=lf
+
+.editorconfig   text eol=lf
+.gitattributes  text eol=lf
+.gitignore      text eol=lf
+.gitkeep        text eol=lf
+LICENSE         text eol=lf
+VERSION         text eol=lf
+Dockerfile      text eol=lf
+Makefile        text eol=lf
+
+
+#------------------------------------------------------------------------------
+# MICROSOFT OFFICE PACKAGES
+#------------------------------------------------------------------------------
+# Office Open XML files are ZIP containers; legacy formats are binary. Keep all
+# of them opaque to text conversion and line-based merge machinery.
+*.xls   office-doc
+*.xlsx  office-doc
+*.xlsm  office-doc
+*.xlsb  office-doc
+*.xlt   office-doc
+*.xltx  office-doc
+*.xltm  office-doc
+*.xlam  office-doc
+*.xla   office-doc
+*.xlw   office-doc
+*.xll   opaque
+*.thmx  office-doc
+
+*.doc   office-doc
+*.docx  office-doc
+*.docm  office-doc
+*.dot   office-doc
+*.dotx  office-doc
+*.dotm  office-doc
+
+*.ppt   office-doc
+*.pptx  office-doc
+*.pptm  office-doc
+*.pot   office-doc
+*.potx  office-doc
+*.potm  office-doc
+*.pps   office-doc
+*.ppsx  office-doc
+*.ppsm  office-doc
+*.ppam  office-doc
+
+*.accdb office-doc
+*.accde office-doc
+*.accdr office-doc
+*.mdb   office-doc
+*.mde   office-doc
+*.ade   office-doc
+
+
+#------------------------------------------------------------------------------
+# OFFICE LOCK FILES
+#------------------------------------------------------------------------------
+# Normally ignored, but still classified defensively if one reaches the index.
+~$*        opaque
+*.laccdb   opaque
+*.ldb      opaque
+
+
+#------------------------------------------------------------------------------
+# ARCHIVES, EXECUTABLES, AND NATIVE BINARIES
+#------------------------------------------------------------------------------
+*.zip   opaque
+*.7z    opaque
+*.rar   opaque
+*.gz    opaque
+*.tgz   opaque
+*.bz2   opaque
+*.xz    opaque
+*.zst   opaque
+*.cab   opaque
+*.msi   opaque
+*.exe   opaque
+*.dll   opaque
+*.so    opaque
+*.dylib opaque
+*.ocx   opaque
+*.tlb   opaque
+
+
+#------------------------------------------------------------------------------
+# IMAGES, MEDIA, DOCUMENTS, AND FONTS
+#------------------------------------------------------------------------------
+# SVG remains reviewable text and is classified in the text section above.
+*.png   opaque
+*.jpg   opaque
+*.jpeg  opaque
+*.gif   opaque
+*.webp  opaque
+*.bmp   opaque
+*.ico   opaque
+*.tif   opaque
+*.tiff  opaque
+*.avif  opaque
+*.heic  opaque
+*.pdf   opaque
+*.mp4   opaque
+*.mov   opaque
+*.webm  opaque
+*.mp3   opaque
+*.wav   opaque
+*.gifv  opaque
+*.ttf   opaque
+*.otf   opaque
+*.woff  opaque
+*.woff2 opaque
+*.eot   opaque
+
+
+#------------------------------------------------------------------------------
+# ARCHIVE HYGIENE
+#------------------------------------------------------------------------------
+# These rules apply to git archive and archive producers that honor Git
+# attributes. Repository plumbing is not part of a consumable source package.
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.editorconfig   export-ignore
+.github         export-ignore
+.github/**      export-ignore
+
+
+#==============================================================================
+# OPTIONAL PER-REPOSITORY ENCODING POLICY
+#------------------------------------------------------------------------------
+# VBE exports use the Windows system code page. If non-ASCII VBA source is not
+# valid UTF-8 and every supported Git client handles working-tree-encoding,
+# consider enabling these rules after a dedicated round-trip and normalization
+# test. Leave them disabled for pure ASCII source.
+#
+#   *.bas  working-tree-encoding=windows-1252
+#   *.cls  working-tree-encoding=windows-1252
+#   *.frm  working-tree-encoding=windows-1252
+#==============================================================================
