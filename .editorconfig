@@ -1,0 +1,167 @@
+#==============================================================================
+# .editorconfig
+#------------------------------------------------------------------------------
+# PURPOSE
+#   Provide the editing baseline for the CCR-K-SFTs repository.
+#
+# POLICY
+#   - Exported VBA source uses CRLF and 4-space indentation.
+#   - Documentation, GitHub configuration, and cross-platform tooling use LF.
+#   - YAML, JSON, XML, and JavaScript use 2-space indentation.
+#   - Python and shell scripts use 4-space indentation.
+#   - Trailing whitespace is removed except in Markdown, where two trailing
+#     spaces can represent an explicit line break.
+#   - VBA source encoding is intentionally not forced. The VBE exports text
+#     using the Windows system code page; a repository should enable a Git
+#     working-tree encoding only after confirming that its source requires one.
+#
+# RELATIONSHIP WITH .gitattributes
+#   .editorconfig controls how supporting editors create and save working-tree
+#   files. .gitattributes remains authoritative for Git normalization, binary
+#   classification, merge and diff behavior, Linguist, and release archives.
+#==============================================================================
+
+root = true
+
+
+#------------------------------------------------------------------------------
+# DEFAULT TEXT POLICY
+#------------------------------------------------------------------------------
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+
+#------------------------------------------------------------------------------
+# EXPORTED VBA SOURCE
+#------------------------------------------------------------------------------
+# Do not set charset here: preserve the VBE/system-code-page export contract.
+[*.{bas,cls,frm}]
+end_of_line = crlf
+indent_style = space
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# PYTHON TOOLING
+#------------------------------------------------------------------------------
+[*.{py,pyw}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# NODE / JAVASCRIPT TOOLING
+#------------------------------------------------------------------------------
+[*.{js,mjs,cjs}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+tab_width = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# GITHUB / STRUCTURED CONFIGURATION
+#------------------------------------------------------------------------------
+[*.{yml,yaml,json,jsonc}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+tab_width = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# RIBBONX AND OTHER XML
+#------------------------------------------------------------------------------
+[*.xml]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+tab_width = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# OTHER CROSS-PLATFORM TEXT
+#------------------------------------------------------------------------------
+[*.{toml,cfg,csv,tsv,svg}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# DOCUMENTATION
+#------------------------------------------------------------------------------
+[*.md]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+# Preserve intentional Markdown hard line breaks.
+trim_trailing_whitespace = false
+
+[*.txt]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[LICENSE]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# WINDOWS-NATIVE SCRIPTS / HOST-SENSITIVE TEXT
+#------------------------------------------------------------------------------
+# Do not force an encoding: some Windows-native formats remain host-specific.
+[*.{bat,cmd,ps1,psm1,psd1,vbs,reg,ini}]
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# POSIX SHELL SCRIPTS
+#------------------------------------------------------------------------------
+[*.sh]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
+# REPOSITORY CONTROL FILES
+#------------------------------------------------------------------------------
+[{.editorconfig,.gitattributes,.gitignore,.gitkeep}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
