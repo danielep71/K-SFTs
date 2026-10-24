@@ -54,8 +54,8 @@ versions; each gate also writes `<gate>.log`.
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 
 The label gates run on every pull request here, although the label workflows
-run on a pull request only when it changes label files. Live label reconciliation and
-drift detection stay in those workflows.
+run on a pull request only when it changes label files. Live label
+reconciliation and drift detection stay in those workflows.
 
 <a id="vba-static-checks"></a>
 

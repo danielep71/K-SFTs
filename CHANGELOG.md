@@ -29,7 +29,8 @@ been released**: everything below is under `[Unreleased]`.
 ### Date and version rules
 
 `python tools/check.py` (gate `changelog`) checks the headings, dates, order,
-link references and `VERSION` against these rules.
+link references and `VERSION`. What a version number means (`0.y.z`, patch,
+minor, major) is checked in review.
 
 | Rule | Standard |
 | --- | --- |
