@@ -58,7 +58,7 @@ workflow token only; no other secret is configured.
 | Workflow | Token permissions | Runs on |
 | --- | --- | --- |
 | `Repository integrity` | `contents: read` | Pull requests and pushes to `main` and `release/**`, manual dispatch |
-| `Issue triage` | `contents: read`, `issues: read` | Issue events and manual dispatch, from `main` |
+| `Issue triage` | `contents: read`, `issues: read`, `pull-requests: read` | Issue events and manual dispatch, from `main` |
 | `Detect issue-label drift` | `contents: read`, `issues: read` | Label-file pull requests, daily schedule, manual dispatch |
 | `Sync issue labels` | `contents: read`; `issues: write` only to reconcile labels | Label-file pull requests (validation only); label-file pushes to `main` and manual dispatch (reconciliation) |
 
