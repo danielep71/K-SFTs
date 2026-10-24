@@ -10,7 +10,9 @@ validates an SFT calculation ([VBA static checks](#vba-static-checks)).
 ## ▶️ Running the checks
 
 Requirements: Git, Python 3.12 or later and Node.js 22 on `PATH`, plus the
-quality tools below. `check.py` itself needs only the standard library.
+quality tools below. `check.py` itself needs only the standard library. The
+step-by-step setup is in
+[INSTALLATION.md](../INSTALLATION.md#developer-setup).
 
 ```sh
 python tools/check.py

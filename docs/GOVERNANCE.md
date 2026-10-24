@@ -149,15 +149,16 @@ required checks, or unrelated pull requests cannot merge.
 
 Recorded on **2026-10-23**, updated on **2026-10-24**. *Verified* means read
 back from GitHub; *pending* means not yet configured or not yet verified. A
-verified setting is not yet demonstrated enforcement: the controlled
-failing-and-passing exercise belongs to [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12).
+verified setting is not by itself demonstrated enforcement: what GitHub was
+seen to enforce on a real pull request is listed under
+[Demonstrated enforcement](#demonstrated-enforcement).
 
 | Control | Status |
 | --- | --- |
 | Repository visibility | Private. Not to be changed for setup. |
 | Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection are available on private repositories under this plan; no upgrade is required. |
 | `main` and `release/0.1.0` branches | Verified on 2026-10-23: both exist; `release/0.1.0` was created from `main` at `85b2b3b`. |
-| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Enforcement exercise pending ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)). |
+| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Required check, up-to-date and merge-method rules demonstrated on `release/**` ([#12](https://github.com/danielep71/CCR-K-SFTs/issues/12), [below](#demonstrated-enforcement)); the other rules are verified only. |
 | `Repository integrity` check | Configured ([#5](https://github.com/danielep71/CCR-K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
 | Merge methods | Verified on 2026-10-24: the repository allows merge commits, squash and rebase. The rulesets allow **merge commits only** into `main`, and **squash or merge commits** into `release/**`, matching [Integration](#-integration). Observed: task pull requests squash-merged into `release/0.1.0` (#40, #43), the release integrated into `main` with a merge commit (#41), and the sync back with a merge commit (#44). Head branches are deleted automatically after merge. |
 | Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
@@ -168,6 +169,38 @@ failing-and-passing exercise belongs to [#12](https://github.com/danielep71/CCR-
 | Issue triage workflow | Configured ([#11](https://github.com/danielep71/CCR-K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, so it is active only after integration. |
 | Traffic history | Configured ([#36](https://github.com/danielep71/CCR-K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
 
+<a id="demonstrated-enforcement"></a>
+
+### Demonstrated enforcement
+
+Recorded on **2026-10-24** for
+[#12](https://github.com/danielep71/CCR-K-SFTs/issues/12). Each row is a merge
+GitHub refused, or a rule shown to hold, on a real pull request.
+
+| Rule | Evidence |
+| --- | --- |
+| A failing required check blocks the merge | Controlled exercise [#79](https://github.com/danielep71/CCR-K-SFTs/pull/79) into `release/0.1.0`. Head `62c4518` added `tests/modules/TEST_DefectProbe.bas`, whose line 13 ends in trailing white space. Run [40102906705](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40102906705) checked test merge `49a8403`, and `vba-source` failed with `tests/modules/TEST_DefectProbe.bas:13: trailing white space`. A squash merge pinned to that head was refused: *405 Repository rule violations found. Required status check "Repository integrity" is failing.* Correction `607a848` removed the module, and run [40103030691](https://github.com/danielep71/CCR-K-SFTs/actions/runs/40103030691) passed on test merge `808e576`. The pull request was squash-merged, so the defective revision never reached an integration branch. |
+| A green check is not permission to merge | Sync [#49](https://github.com/danielep71/CCR-K-SFTs/pull/49) had an empty diff and a passing check, but was refused with *405 Base branch was modified* because the release branch had moved. [#29](https://github.com/danielep71/CCR-K-SFTs/pull/29), whose base had moved, was refused with *Required status check "Repository integrity" is expected*. |
+| Only the allowed merge methods | While merge commits were not allowed on `release/**`, the merge of [#31](https://github.com/danielep71/CCR-K-SFTs/pull/31) was refused with HTTP 405. |
+
+**What a pull request run checks.**
+
+- **The candidate.** A run checks GitHub's test merge of the head into the
+  current base, not the head alone. The run name carries the SHA of that test
+  merge. The *Verify candidate identity* step fails the job if the checked-out
+  commit differs from it.
+- **The whole change.** Every gate reads every tracked file of that commit,
+  not only the changed files, and the workflow has no path filter, so every
+  file a pull request changes is checked. The up-to-date rule makes the
+  checked tree the tree that merges.
+- **Not each commit.** Intermediate commits are not checked one by one. A
+  squash merge lands only the checked tree.
+
+**Not demonstrated.** These are verified by read-back only: the
+resolved-conversation rule, the blocks on deletion and force pushes, the tag
+ruleset, and every rule of the `main` ruleset, which has the same required
+check but was not exercised with a failing one.
+
 ### Accepted limitations
 
 - The sole owner cannot approve their own pull requests, so no approving
@@ -175,6 +208,14 @@ failing-and-passing exercise belongs to [#12](https://github.com/danielep71/CCR-
   its place.
 - Live label reconciliation runs only from `main`. Label changes merged into a
   release branch take effect after integration into `main`.
+- Run logs and report artifacts expire: the artifacts after 30 days, the logs
+  after the repository's Actions retention period. The decisive lines of the
+  enforcement evidence are therefore copied into
+  [Demonstrated enforcement](#demonstrated-enforcement) and
+  [#12](https://github.com/danielep71/CCR-K-SFTs/issues/12).
+- A merge refusal can only be shown by attempting the merge. A rule that has
+  not been triggered on a real pull request is recorded as verified, not as
+  enforced.
 
 Update this section, with its date, whenever a control is configured,
 verified or changed.
