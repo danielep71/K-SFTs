@@ -74,7 +74,8 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
     from Rem where a statement starts (at the line start, after a numeric line
     label such as ``100``, or after a ``:`` separator, not after a ``:=``
     named argument). With ``blank_strings`` the content of string literals
-    becomes spaces, so that keywords quoted in a string are not read as code;
+    and of [...] expressions becomes spaces, so that keywords quoted in a
+    string or a sheet name are not read as code; the brackets stay, and
     columns are preserved either way."""
     label = LINE_NUMBER.match(raw)
     index = label.end() if label else 0
@@ -95,7 +96,8 @@ def strip_code(raw: str, *, blank_strings: bool = False) -> str:
                                 or (statement_start and REM.match(raw, index))):
             break
         else:
-            result.append(" " if blank_strings and in_string else char)
+            hidden = in_string or (brackets and char not in "[]")
+            result.append(" " if blank_strings and hidden else char)
         if not in_string and char == "[":
             brackets += 1
         elif not in_string and char == "]" and brackets:

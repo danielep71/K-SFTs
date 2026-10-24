@@ -472,6 +472,11 @@ Private Sub Second()
 Done:
 End Sub
 ''',
+    "jump-keyword-in-a-sheet-name": '''Private Sub First()
+        Debug.Print ['GoTo Missing'!A1], [GoSub!B2]: GoTo Done
+Done:
+End Sub
+''',
     "computed-jump": '''Private Sub First(ByVal Choice As Long)
         On Choice GoTo One, Two
         On Choice GoSub One, Two
@@ -792,6 +797,8 @@ class LexerTest(unittest.TestCase):
                 self.assertEqual(strip_code(raw), expected)
         self.assertEqual(strip_code('Debug.Print "GoTo x": GoTo y', blank_strings=True),
                          "Debug.Print         : GoTo y")
+        self.assertEqual(strip_code("x = ['GoTo z'!A1]: GoTo y", blank_strings=True),
+                         "x = [" + " " * len("'GoTo z'!A1") + "]: GoTo y")
 
 
 class MainTest(unittest.TestCase):
