@@ -55,7 +55,15 @@ release will be published (see [Releases](#-releases)).
    release branch level with `main` through a sync pull request from `main`
    into the release branch, merged with a merge commit once its checks pass.
    A sync pull request whose diff is empty needs CI only, no Codex review
-   (see [Review](#-review)).
+   (see [Review](#-review)). No task pull request merges into the release
+   branch between the integration and its sync: the release branch would
+   gain a commit that `main` lacks, and the up-to-date rule would then refuse
+   both the sync and the next integration. Task pull requests wait, or merge
+   before the integration pull request is opened. If one merges in that
+   window anyway, merge `main` into a branch cut from the release branch and
+   merge that branch into the release branch with a merge commit, through a
+   pull request whose diff is empty (CI only). Do not relax a rule to get
+   past it ([#50](https://github.com/danielep71/CCR-K-SFTs/pull/50)).
 6. `main` receives commits only through these integration pull requests. If
    it receives any other commit while the release branch has commits of its
    own, the sync pull request cannot meet the up-to-date rule; stop and
