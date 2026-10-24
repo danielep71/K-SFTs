@@ -45,8 +45,9 @@ class Procedure:
 
 
 def is_procedure(code: str) -> re.Match[str] | None:
-    match = PROC_OPEN.match(code)
-    return match if match and " declare " not in f" {code.casefold()} " else None
+    """A procedure header; a Declare statement never matches, since its
+    keyword stands where PROC_OPEN expects Sub, Function or Property."""
+    return PROC_OPEN.match(code)
 
 
 def label_at_start(code: str) -> str | None:

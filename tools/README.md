@@ -80,7 +80,8 @@ validation:
 each component once per compilation environment, with the branches of every
 `#If` that environment would compile: `vba7-win64`, the supported 64-bit
 Excel, plus `vba7-win32` and the pre-VBA7 `vba6-win32`, so that a branch
-written for them is still checked. `Win32` is true in all three, as in VBA.
+written for them is still checked. As in VBA, `Win32` is true in all three
+and `VBA6`, which means version-6 compatible, is true under VBA7 too.
 The symbols are `VBA6`, `VBA7`, `Win32` and `Win64`; `Mac`, any other symbol
 and a project `#Const` fail closed, because their value cannot be known.
 
@@ -124,6 +125,9 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
 - signatures in the inventory without white space just inside parentheses,
   string literals kept as written;
 - `Rem` recognized after a `:` separator as well as at the line start;
+- `VBA6` true under VBA7, as Microsoft documents it (false there in
+  K-SACCR), and no `Declare` keyword test on procedure lines, which also
+  matched text inside string literals;
 - none of K-SACCR's module names, component counts, workbook template or
   synchronizer checks, changelog and version checks, and no financial
   assertion.

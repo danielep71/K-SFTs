@@ -225,7 +225,7 @@ def scan_source(path: str, text: str, public: bool) -> Scan:
         index += 1
         if not code.strip() or code.lstrip().startswith(("Attribute ", "Option ", "#")):
             continue
-        if procedure and " declare " not in f" {code.casefold()} ":
+        if procedure:
             visibility = (procedure.group("vis") or "").casefold()
             if not visibility:
                 scan.reject(line, f"implicit public procedure: {procedure.group('name')}")

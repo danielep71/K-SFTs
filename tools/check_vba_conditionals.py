@@ -28,15 +28,16 @@ DIRECTIVE = re.compile(r"^\s*#\s*(If|ElseIf|Else|End\s+If)\b(.*)$", re.IGNORECAS
 CONST = re.compile(r"^\s*#\s*Const\b", re.IGNORECASE)
 TOKEN = re.compile(r"\s*(\(|\)|<>|=|-?\d+|[A-Za-z_]\w*)")
 
-# Microsoft documents Win32 as True on 32-bit and 64-bit development
-# platforms, and Win64 as True on 64-bit Office as well. 64-bit Excel
-# (vba7-win64) is the supported target (INSTALLATION.md); vba7-win32 and the
-# pre-VBA7 vba6-win32 are modeled so that a branch written for them is still
+# Microsoft's compiler constants: VBA6 means version-6 compatible, so it is
+# True under VBA7 as well; Win32 is True on 32-bit and 64-bit development
+# platforms, and Win64 on 64-bit Office as well. 64-bit Excel (vba7-win64)
+# is the supported target (INSTALLATION.md); vba7-win32 and the pre-VBA7
+# vba6-win32 are modeled so that a branch written for them is still
 # evaluated and its declarations checked.
 ENVIRONMENTS: dict[str, dict[str, bool]] = {
     "vba6-win32": {"VBA6": True, "VBA7": False, "WIN32": True, "WIN64": False},
-    "vba7-win32": {"VBA6": False, "VBA7": True, "WIN32": True, "WIN64": False},
-    "vba7-win64": {"VBA6": False, "VBA7": True, "WIN32": True, "WIN64": True},
+    "vba7-win32": {"VBA6": True, "VBA7": True, "WIN32": True, "WIN64": False},
+    "vba7-win64": {"VBA6": True, "VBA7": True, "WIN32": True, "WIN64": True},
 }
 SYMBOLS = frozenset(ENVIRONMENTS["vba7-win64"])
 VBA7_ENVIRONMENTS = tuple(name for name, symbols in ENVIRONMENTS.items() if symbols["VBA7"])

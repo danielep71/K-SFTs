@@ -306,7 +306,7 @@ CONDITIONAL_VALID = {
     Private Declare Function FLegacy Lib "kernel32" () As Long
 #End If
 ''',
-    "inactive-legacy": '''#If VBA6 Then
+    "inactive-legacy": '''#If Not VBA7 Then
     #If Win64 Then
         Private Declare Function Impossible Lib "kernel32" () As Long
     #End If
@@ -345,6 +345,10 @@ CONDITIONAL_INVALID = {
 #End If
 ''', "vba7-win64"),
     "unknown-symbol": ("#If Mac Then\n#End If\n", "unsupported conditional-compilation symbol"),
+    "vba6-is-true-under-vba7": ('''#If VBA6 Then
+    Private Declare Function Legacy Lib "kernel32" () As Long
+#End If
+''', "without PtrSafe in vba7-win32, vba7-win64"),
     "integer-literal": ("#If 2 Then\n#End If\n", "-1 and 0"),
     "missing-then": ("#If VBA7\n#End If\n", "must end with Then"),
     "project-const": ("#Const FEATURE = True\n", "project #Const"),
@@ -684,7 +688,7 @@ class PublicApiTest(unittest.TestCase):
 
     def test_exclusive_names_across_modules(self) -> None:
         modern_only = API_FACADE.replace(DECLARE, f"#If VBA7 Then\n{DECLARE}\n#End If")
-        legacy = f'Attribute VB_Name = "SFT_Legacy"\nOption Explicit\n#If VBA6 Then\n{LEGACY}\n' \
+        legacy = f'Attribute VB_Name = "SFT_Legacy"\nOption Explicit\n#If Not VBA7 Then\n{LEGACY}\n' \
                  "#End If\n"
         rows = api_inventory(API_ROWS, "SFT_Legacy\tDeclare Function\tTick\n# SIG\tSFT_Legacy\t"
                                        'Declare Function\tTick\tPublic Declare Function Tick Lib '
@@ -703,6 +707,14 @@ class PublicApiTest(unittest.TestCase):
         collapsed = exact.replace('"A  ( B )"', '"A (B)"')
         self.assertFinding(api_files(facade, collapsed), "signature mismatch for SFT_Api\tFunction"
                                                          "\tSFT_Pad")
+
+    def test_declare_inside_a_literal_is_text(self) -> None:
+        facade = API_FACADE.replace("Private Sub Helper()", "Public Function SFT_Say("
+                                    'Optional ByVal Text As String = " declare ") As String\n'
+                                    "End Function\n\nPrivate Sub Helper()")
+        rows = api_inventory(API_ROWS + [("Function", "SFT_Say", "Public Function SFT_Say("
+                                          'Optional ByVal Text As String = " declare ") As String')])
+        self.assertEqual(self.findings(api_files(facade, rows)), [])
 
     def test_colon_separated_and_commented_statements(self) -> None:
         facade = API_FACADE.replace("Private mHidden As Long",
