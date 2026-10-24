@@ -16,8 +16,8 @@ from typing import Any
 
 SCOPE = (
     "Repository tooling, label and issue-form configuration, test-case and changelog format, "
-    "static VBA source and workflow checks only; no VBA has been compiled or run in Excel and no SFT "
-    "calculation has been checked."
+    "static VBA source and workflow checks only; these checks compile and run no VBA in Excel and "
+    "check no SFT calculation."
 )
 LABEL_POLICY = ".github/label-policy.json"
 
