@@ -88,9 +88,18 @@ SFT calculation, public API or workbook.
   ([docs/TRAFFIC.md](docs/TRAFFIC.md); #36).
 - This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
 
+### Validation
+
+- The harness and the example suite at `1a6f0f7` were imported, compiled
+  and run in Excel 16.0 (build 20430, 64-bit, VBA7) on Windows 11 Enterprise
+  25H2. The normal run passed (9 cases, 18 assertions), both failure paths
+  ended as documented, and `tools/check_excel_run.py` passed on the evidence
+  ([tested environments](INSTALLATION.md#tested-environments); #9).
+
 ### Known limitations
 
-- No VBA has been compiled or run in Excel yet (#9).
+- Excel has been run on one host only; 32-bit Office and other builds are
+  untested.
 - There is no calculation, public API, workbook or numerical test case; the
   product, collateral and output decisions are open
   ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)).

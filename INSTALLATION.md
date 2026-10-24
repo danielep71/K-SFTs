@@ -10,8 +10,9 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 > [!IMPORTANT]
 > **Status on 2026-10-24: repository setup only.** The only VBA components
 > are the test modules in `tests/modules/`; no production component,
-> template or workbook exists. The Excel steps below have never been run on
-> a host; the first real import, compile and run is recorded in
+> template or workbook exists. The import, compile and harness steps below
+> were first run on a host on 2026-10-24, recorded in
+> [tested environments](#tested-environments) and
 > [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9). The
 > [developer setup](#developer-setup) has been run from a fresh clone on
 > Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -44,7 +45,7 @@ below, each with its evidence.
 
 | Host | Excel build | Windows | Bitness | Commit | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| None yet | | | | | [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9) |
+| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/CCR-K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
 
 <a id="get-the-source"></a>
 
@@ -290,7 +291,8 @@ access to the VBA project object model*.
    in **Tools → References**, separated by `; `. Write `compile=PASS` only if
    step 4 completed with no error; otherwise write what it reported.
 8. **Check** the folder against the commit, with Python 3.12 or later and Git
-   (untested on Windows; from WSL or a Linux checkout if it fails there):
+   (run on Linux and, for #9, on Windows 11; from WSL or a Linux checkout if
+   it fails on another host):
 
    ```sh
    python tools/check_excel_run.py test-results/excel-run --commit <commit>
