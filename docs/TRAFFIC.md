@@ -47,13 +47,13 @@ merge script runs without it, and the push uses the workflow token with
 The `traffic-history` branch holds `README.md` and these files under `data/`.
 It was created on 2026-10-24 as the orphan commit `8560b31`, with the files
 below empty apart from their headers, so it has no history in common with
-`main`. It is never merged into `main` or a release branch, and its history is
+`main`; `8915601` then set the current `daily.csv` header, before any data. It is never merged into `main` or a release branch, and its history is
 not rewritten.
 
 | File | Key | Contents |
 | --- | --- | --- |
-| `daily.csv` | `date` | Views, unique views, clones and unique clones per UTC day, and `collected_at`, the collection that last changed the row. |
-| `snapshots.csv` | `snapshot_date` | One row per collection day: when it ran, the first and last day the API reported, and the 14-day totals. |
+| `daily.csv` | `date` | Views and unique views, clones and unique clones per UTC day. `views_collected_at` and `clones_collected_at` give the collection that last changed each pair. |
+| `snapshots.csv` | `snapshot_date` | One row per collection day: the first and last day the API reported, the 14-day totals, and `collected_at`, the collection that last changed that day's snapshot, referrers or paths. |
 | `referrers.csv` | `snapshot_date`, `rank` | The top 10 referrers over the 14 days before each collection. |
 | `paths.csv` | `snapshot_date`, `rank` | The top 10 repository paths over the same window. |
 
@@ -66,22 +66,25 @@ them only as 14-day totals, never per day.
 
 - **Overlapping windows:** for every date the collection reports, its values
   replace the stored ones. The newest collection wins, so a day that was
-  incomplete when first collected is corrected later. A row keeps its
-  `collected_at` when its values do not change.
+  incomplete when first collected is corrected later. Views and clones are
+  merged separately, each with its own collection time, which stays unchanged
+  when its values do not change.
 - **Older history:** dates the collection does not report keep their values.
   Nothing is deleted.
 - **No double counting:** values are replaced, never added. Unique counts are
   never summed across days or windows; a 14-day unique count is only in
   `snapshots.csv`.
-- **Same-day runs:** a second collection on the same UTC day replaces that
-  day's snapshot, referrers and paths, and only if their values changed.
-  Running the workflow twice with the same data changes nothing.
+- **Same-day runs:** a collection day's snapshot, referrers and paths are one
+  unit. A second collection on the same UTC day replaces the unit only if any
+  of the three changed. Running the workflow twice with the same data changes
+  nothing.
 - **Order:** "newest" means the latest collection time. Merging an older
   collection after a newer one, when a saved collection is replayed or a run
   is rebuilt on a newer branch tip, never replaces what the newer one stored;
-  it can only fill dates nothing newer reported. A row keeps the time of the
-  collection that last *changed* it; a day's counts only grow until the day
-  ends, so an older collection replayed later cannot hold different values.
+  it can only fill a date or metric that nothing newer reported. A stored
+  time is that of the collection that last *changed* the values; a day's
+  counts only grow until the day ends, so an older collection replayed later
+  cannot hold different values.
 
 ### Zero or unavailable
 
