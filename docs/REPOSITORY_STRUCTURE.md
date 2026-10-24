@@ -41,7 +41,7 @@ catalogue.
 | Who calls it? | A user working in the CCR-K-SFTs workbook: entering transactions, collateral and netting sets, running the calculation and reading the results. |
 | What does it own? | The workbook: input and result sheets, the calculation engine, and their startup and packaging. |
 | Lifecycle | The workbook is the deliverable. It is built from the exported source in this repository, never edited as the source of truth. |
-| Supported environments | Excel for Windows, to be specified in [#4](https://github.com/danielep71/CCR-K-SFTs/issues/4); intended and tested environments are recorded separately. |
+| Supported environments | Excel for Windows, 64-bit as the supported target ([INSTALLATION.md](../INSTALLATION.md#supported-hosts)); intended and tested environments are recorded separately. |
 
 **Why not `library`:** the end product is a workbook with its business user
 interface, not only callable functions. Starting as a library would force a
@@ -230,8 +230,9 @@ primary source, in `docs/methodology/` and updates this table.
 
 Rules 1 to 3 and 5 are to be enforced by the static checks of
 [#6](https://github.com/danielep71/CCR-K-SFTs/issues/6); until then they are
-enforced by review. Naming, encoding and import/export conventions are set in
-[#4](https://github.com/danielep71/CCR-K-SFTs/issues/4).
+enforced by review. Naming, contracts and encoding are set in
+[VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md), and the import and export steps in
+[INSTALLATION.md](../INSTALLATION.md#importing-vba-into-excel).
 
 ## 📚 Directory guides
 

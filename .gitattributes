@@ -9,8 +9,14 @@
 #   - Repository text and cross-platform tooling are checked out as LF.
 #   - Office packages, UserForm binaries, archives, and media remain binary.
 #   - Binary payloads never receive text normalization or line-based merges.
-#   - GitHub Linguist reports exported modules as VBA. Path-specific rules,
-#     such as documentation assets, wait for the repository layout (#4).
+#   - GitHub Linguist reports exported modules as VBA.
+#   - Rules depend on file type only. Every location in
+#     docs/REPOSITORY_STRUCTURE.md (src/, tests/, examples/, docs/, tools/)
+#     holds files whose type alone fixes their handling, so no path-specific
+#     rule is needed; Linguist already treats docs/ and examples/ as
+#     documentation. Add a path rule only with a layout change that needs it.
+#   - VBA source is ASCII only (docs/VBA_HOUSE_STYLE.md), so no
+#     working-tree encoding is configured.
 #
 # PLACEMENT
 #   Keep this file at the repository root. Custom [attr] macros are honored only
@@ -240,12 +246,13 @@ Makefile        text eol=lf
 
 
 #==============================================================================
-# OPTIONAL PER-REPOSITORY ENCODING POLICY
+# ENCODING POLICY
 #------------------------------------------------------------------------------
-# VBE exports use the Windows system code page. If non-ASCII VBA source is not
-# valid UTF-8 and every supported Git client handles working-tree-encoding,
-# consider enabling these rules after a dedicated round-trip and normalization
-# test. Leave them disabled for pure ASCII source.
+# VBE exports use the Windows system code page, which differs between hosts.
+# Decided in #4: VBA source is ASCII only, identical in every code page, and
+# any other character is built at run time with ChrW
+# (docs/VBA_HOUSE_STYLE.md#export-compatibility). These rules therefore stay
+# disabled. Enabling one would need a new decision and a round-trip test:
 #
 #   *.bas  working-tree-encoding=windows-1252
 #   *.cls  working-tree-encoding=windows-1252
