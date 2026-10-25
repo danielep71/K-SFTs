@@ -758,5 +758,16 @@ for row in BVC:
     r += 1
 bc.freeze_panes(5, 3)
 
+# Code names, sh + noun (docs/VBA_HOUSE_STYLE.md). Without them Excel assigns
+# defaults when the VBA project is first opened, which the import script
+# reports as a changed sheet structure.
+CODE_NAMES = {"README": "shReadme", "Params": "shParams", "NettingSets": "shNettingSets",
+              "Transactions": "shTransactions", "Results": "shResults", "Positions": "shPositions",
+              "LegCalc": "shLegCalc", "Checks": "shChecks", "TestCatalogue": "shTestCatalogue",
+              "FormulaTest": "shFormulaTest", "Basel_vs_CRR": "shBaselVsCRR"}
+wb.set_vba_name("ThisWorkbook")
+for sheet in wb.worksheets():
+    sheet.set_vba_name(CODE_NAMES[sheet.get_name()])
+
 wb.close()
 print("written", OUT.relative_to(ROOT), "-", len(rows), "catalogue tests,", len(TESTS), "formula tests")
