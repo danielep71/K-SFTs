@@ -2,4 +2,20 @@
 # Only declarations in src/modules/ may be listed. See docs/REPOSITORY_STRUCTURE.md,
 # Public API boundary. Each entry is followed by its normalized signature:
 # # SIG<TAB><component><TAB><kind><TAB><name><TAB><signature>
-# No supported declaration exists yet.
+# SFT_Formulas holds the SFT worksheet functions of the 0.2.0 prototype.
+SFT_Formulas	Function	SFT_HoldingPeriod
+# SIG	SFT_Formulas	Function	SFT_HoldingPeriod	Public Function SFT_HoldingPeriod(ByVal MinimumBD As Double, Optional ByVal LargeOrIlliquid As Boolean = False, Optional ByVal Disputes As Boolean = False, Optional ByVal OverrideBD As Double = 0#, Optional ByVal LargeBD As Double = 20#) As Variant
+SFT_Formulas	Function	SFT_ScaledHaircut
+# SIG	SFT_Formulas	Function	SFT_ScaledHaircut	Public Function SFT_ScaledHaircut(ByVal H10 As Double, ByVal HoldingBD As Double, Optional ByVal RemarginBD As Double = 1#, Optional ByVal BaseBD As Double = 10#) As Variant
+SFT_Formulas	Function	SFT_ExposureSingle
+# SIG	SFT_Formulas	Function	SFT_ExposureSingle	Public Function SFT_ExposureSingle(ByVal E As Double, ByVal He As Double, ByVal C As Double, ByVal Hc As Double, Optional ByVal Hfx As Double = 0#) As Variant
+SFT_Formulas	Function	SFT_NetExposure
+# SIG	SFT_Formulas	Function	SFT_NetExposure	Public Function SFT_NetExposure(ByVal Es As Variant, ByVal Hs As Variant) As Variant
+SFT_Formulas	Function	SFT_GrossExposure
+# SIG	SFT_Formulas	Function	SFT_GrossExposure	Public Function SFT_GrossExposure(ByVal Es As Variant, ByVal Hs As Variant) As Variant
+SFT_Formulas	Function	SFT_IssueCount
+# SIG	SFT_Formulas	Function	SFT_IssueCount	Public Function SFT_IssueCount(ByVal Es As Variant, Optional ByVal Threshold As Double = 0.1) As Variant
+SFT_Formulas	Function	SFT_ExposureNetted
+# SIG	SFT_Formulas	Function	SFT_ExposureNetted	Public Function SFT_ExposureNetted(ByVal SumE As Double, ByVal SumC As Double, ByVal NetExposure As Double, ByVal GrossExposure As Double, ByVal N As Double, Optional ByVal FXTerm As Double = 0#, Optional ByVal NetWeight As Double = 0.4, Optional ByVal GrossWeight As Double = 0.6) As Variant
+SFT_Formulas	Function	SFT_CapitalRequirement
+# SIG	SFT_Formulas	Function	SFT_CapitalRequirement	Public Function SFT_CapitalRequirement(ByVal EAD As Double, ByVal RiskWeight As Double, Optional ByVal CapitalRatio As Double = 0.08) As Variant

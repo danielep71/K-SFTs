@@ -5,11 +5,22 @@
   "configurations": {
     "production": {
       "description": "A workbook that calculates: the components under src/, never tests or examples.",
-      "modules": []
+      "modules": [
+        "src/core/CORE_Config.bas",
+        "src/core/CORE_Engine.bas",
+        "src/core/CORE_Util.bas",
+        "src/modules/SFT_Formulas.bas",
+        "src/workbook/M_Main.bas"
+      ]
     },
     "development": {
       "description": "A workbook that runs the test suites: the production components and every module of tests/modules/.",
       "modules": [
+        "src/core/CORE_Config.bas",
+        "src/core/CORE_Engine.bas",
+        "src/core/CORE_Util.bas",
+        "src/modules/SFT_Formulas.bas",
+        "src/workbook/M_Main.bas",
         "tests/modules/TEST_Examples.bas",
         "tests/modules/TEST_Harness.bas"
       ]

@@ -711,9 +711,11 @@ class PublicApiTest(unittest.TestCase):
         self.assertEqual(self.findings(VALID), [])
         self.assertEqual(self.findings(api_files()), [])
 
-    def test_repository_inventory_matches_empty_source(self) -> None:
-        inventory = (ROOT / "docs/PUBLIC_API.txt").read_text(encoding="utf-8")
-        self.assertEqual(self.findings({"docs/PUBLIC_API.txt": inventory}), [])
+    def test_repository_inventory_matches_source(self) -> None:
+        files = {"docs/PUBLIC_API.txt": (ROOT / "docs/PUBLIC_API.txt").read_text(encoding="utf-8")}
+        for path in sorted((ROOT / "src").rglob("*.bas")):
+            files[path.relative_to(ROOT).as_posix()] = path.read_text(encoding="cp1252")
+        self.assertEqual(self.findings(files), [])
 
     def test_implicit_visibility_is_rejected_everywhere(self) -> None:
         self.assertFinding(api_files(API_FACADE.replace("Public Function SFT_Echo",

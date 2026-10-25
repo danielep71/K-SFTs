@@ -1,0 +1,636 @@
+{
+ "haircuts": [
+  [
+   "CASH",
+   "CASH",
+   "",
+   "",
+   "",
+   0.0,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 3"
+  ],
+  [
+   "GOLD",
+   "GOLD",
+   "",
+   "",
+   "",
+   0.2,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 3"
+  ],
+  [
+   "EQUITY_MAIN",
+   "EQUITY",
+   "",
+   "",
+   "",
+   0.2,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 3"
+  ],
+  [
+   "EQUITY_LISTED",
+   "EQUITY",
+   "",
+   "",
+   "",
+   0.3,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 3"
+  ],
+  [
+   "DEBT_SOV_CQS1_LE1",
+   "DEBT",
+   "SOV",
+   "CQS1",
+   "LE1",
+   0.005,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS1_1TO3",
+   "DEBT",
+   "SOV",
+   "CQS1",
+   "1TO3",
+   0.02,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS1_3TO5",
+   "DEBT",
+   "SOV",
+   "CQS1",
+   "3TO5",
+   0.02,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS1_5TO10",
+   "DEBT",
+   "SOV",
+   "CQS1",
+   "5TO10",
+   0.04,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS1_GT10",
+   "DEBT",
+   "SOV",
+   "CQS1",
+   "GT10",
+   0.04,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS1_LE1",
+   "DEBT",
+   "OTH",
+   "CQS1",
+   "LE1",
+   0.01,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS1_1TO3",
+   "DEBT",
+   "OTH",
+   "CQS1",
+   "1TO3",
+   0.03,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS1_3TO5",
+   "DEBT",
+   "OTH",
+   "CQS1",
+   "3TO5",
+   0.04,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS1_5TO10",
+   "DEBT",
+   "OTH",
+   "CQS1",
+   "5TO10",
+   0.06,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS1_GT10",
+   "DEBT",
+   "OTH",
+   "CQS1",
+   "GT10",
+   0.12,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS1_LE1",
+   "DEBT",
+   "SEC",
+   "CQS1",
+   "LE1",
+   0.02,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS1_1TO3",
+   "DEBT",
+   "SEC",
+   "CQS1",
+   "1TO3",
+   0.08,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS1_3TO5",
+   "DEBT",
+   "SEC",
+   "CQS1",
+   "3TO5",
+   0.08,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS1_5TO10",
+   "DEBT",
+   "SEC",
+   "CQS1",
+   "5TO10",
+   0.16,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS1_GT10",
+   "DEBT",
+   "SEC",
+   "CQS1",
+   "GT10",
+   0.16,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS23_LE1",
+   "DEBT",
+   "SOV",
+   "CQS23",
+   "LE1",
+   0.01,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS23_1TO3",
+   "DEBT",
+   "SOV",
+   "CQS23",
+   "1TO3",
+   0.03,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS23_3TO5",
+   "DEBT",
+   "SOV",
+   "CQS23",
+   "3TO5",
+   0.03,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS23_5TO10",
+   "DEBT",
+   "SOV",
+   "CQS23",
+   "5TO10",
+   0.06,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS23_GT10",
+   "DEBT",
+   "SOV",
+   "CQS23",
+   "GT10",
+   0.06,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS23_LE1",
+   "DEBT",
+   "OTH",
+   "CQS23",
+   "LE1",
+   0.02,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS23_1TO3",
+   "DEBT",
+   "OTH",
+   "CQS23",
+   "1TO3",
+   0.04,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS23_3TO5",
+   "DEBT",
+   "OTH",
+   "CQS23",
+   "3TO5",
+   0.06,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS23_5TO10",
+   "DEBT",
+   "OTH",
+   "CQS23",
+   "5TO10",
+   0.12,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_OTH_CQS23_GT10",
+   "DEBT",
+   "OTH",
+   "CQS23",
+   "GT10",
+   0.2,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS23_LE1",
+   "DEBT",
+   "SEC",
+   "CQS23",
+   "LE1",
+   0.04,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS23_1TO3",
+   "DEBT",
+   "SEC",
+   "CQS23",
+   "1TO3",
+   0.12,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS23_3TO5",
+   "DEBT",
+   "SEC",
+   "CQS23",
+   "3TO5",
+   0.12,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS23_5TO10",
+   "DEBT",
+   "SEC",
+   "CQS23",
+   "5TO10",
+   0.24,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SEC_CQS23_GT10",
+   "DEBT",
+   "SEC",
+   "CQS23",
+   "GT10",
+   0.24,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ],
+  [
+   "DEBT_SOV_CQS4_ALL",
+   "DEBT",
+   "SOV",
+   "CQS4",
+   "ALL",
+   0.15,
+   "BOTH",
+   "CRE22.49 / CRR Art. 224 Table 1"
+  ]
+ ],
+ "risk_weights": [
+  [
+   "SOV_CQS1",
+   "SOV",
+   "CQS1",
+   0,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_CQS2",
+   "SOV",
+   "CQS2",
+   0.2,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_CQS3",
+   "SOV",
+   "CQS3",
+   0.5,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_CQS4",
+   "SOV",
+   "CQS4",
+   1,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_CQS5",
+   "SOV",
+   "CQS5",
+   1,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_CQS6",
+   "SOV",
+   "CQS6",
+   1.5,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "SOV_UNRATED",
+   "SOV",
+   "UNRATED",
+   1.0,
+   "BOTH",
+   "CRE20.7 / CRR Art. 114(2)"
+  ],
+  [
+   "INST_CQS1",
+   "INST",
+   "CQS1",
+   0.2,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_CQS2",
+   "INST",
+   "CQS2",
+   0.3,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_CQS3",
+   "INST",
+   "CQS3",
+   0.5,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_CQS4",
+   "INST",
+   "CQS4",
+   1,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_CQS5",
+   "INST",
+   "CQS5",
+   1,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_CQS6",
+   "INST",
+   "CQS6",
+   1.5,
+   "BOTH",
+   "CRE20.18 / CRR Art. 120(1)"
+  ],
+  [
+   "INST_ST_CQS1",
+   "INST",
+   "ST_CQS1",
+   0.2,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_ST_CQS2",
+   "INST",
+   "ST_CQS2",
+   0.2,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_ST_CQS3",
+   "INST",
+   "ST_CQS3",
+   0.2,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_ST_CQS4",
+   "INST",
+   "ST_CQS4",
+   0.5,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_ST_CQS5",
+   "INST",
+   "ST_CQS5",
+   0.5,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_ST_CQS6",
+   "INST",
+   "ST_CQS6",
+   1.5,
+   "BOTH",
+   "CRE20.18-20.19 / CRR Art. 120(2)"
+  ],
+  [
+   "INST_SCRA_A",
+   "INST",
+   "SCRA_A",
+   0.4,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_SCRA_A_ENH",
+   "INST",
+   "SCRA_A_ENH",
+   0.3,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_SCRA_B",
+   "INST",
+   "SCRA_B",
+   0.75,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_SCRA_C",
+   "INST",
+   "SCRA_C",
+   1.5,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_ST_SCRA_A",
+   "INST",
+   "ST_SCRA_A",
+   0.2,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_ST_SCRA_A_ENH",
+   "INST",
+   "ST_SCRA_A_ENH",
+   0.2,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_ST_SCRA_B",
+   "INST",
+   "ST_SCRA_B",
+   0.5,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "INST_ST_SCRA_C",
+   "INST",
+   "ST_SCRA_C",
+   1.5,
+   "BOTH",
+   "CRE20.21 / CRR Art. 121(3)"
+  ],
+  [
+   "CORP_CQS1",
+   "CORP",
+   "CQS1",
+   0.2,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_CQS2",
+   "CORP",
+   "CQS2",
+   0.5,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_CQS3",
+   "CORP",
+   "CQS3",
+   0.75,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_CQS4",
+   "CORP",
+   "CQS4",
+   1,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_CQS5",
+   "CORP",
+   "CQS5",
+   1.5,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_CQS6",
+   "CORP",
+   "CQS6",
+   1.5,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(1)"
+  ],
+  [
+   "CORP_UNRATED",
+   "CORP",
+   "UNRATED",
+   1.0,
+   "BOTH",
+   "CRE20 corporates / CRR Art. 122(2)"
+  ],
+  [
+   "QCCP",
+   "QCCP",
+   "",
+   0.02,
+   "BOTH",
+   "CRE54.7 / CRR Art. 306(1)(a)"
+  ]
+ ]
+}

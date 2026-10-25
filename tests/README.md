@@ -12,7 +12,7 @@ The repository tooling has its own tests in [tools/](../tools/README.md).
 | `modules/` | VBA test modules: the harness `TEST_Harness` and the neutral example suite `TEST_Examples`; the case runner and the SFT suites come with the calculation |
 | `fixtures/` | Synthetic inputs: transactions, collateral, netting sets |
 | `expected/` | Expected results, each with its provenance |
-| `derivations/` | Python reference derivations that compute expected results from the documented method; evidence for tests, never shipped |
+| `derivations/` | Python reference derivations that compute expected results from the documented method; evidence for tests, never shipped. `sft_reference.py` and its data in `derivations/prototype/` give the expected values of the 0.2.0 prototype's demo portfolio |
 
 The fixture schema, tolerances, reference classes and completeness rules are
 defined in [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md)

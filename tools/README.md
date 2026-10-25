@@ -60,6 +60,15 @@ reconciliation and drift detection stay in those workflows.
 
 <a id="vba-static-checks"></a>
 
+## 🧪 Prototype scripts
+
+Not gates of `tools/check.py`:
+
+| Script | Does |
+| --- | --- |
+| `build_template.py` | Writes `src/workbook/SFT_Template.xlsx` from `tests/derivations/prototype/`; needs `xlsxwriter` |
+| `lo_regression.py` | Runs the exported VBA headless in LibreOffice (VBA compatibility mode), compares Results with the derivation and runs the `SFT_*` unit tests. Not Excel evidence; its harness-only shims are listed in its docstring |
+
 ## 🔤 VBA static checks
 
 The four `vba-*` gates apply the mechanical rules of
