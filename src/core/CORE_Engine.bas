@@ -1691,7 +1691,7 @@ Private Sub ReadNettingSet( _
 '   SheetRow: the sheet row, for the messages.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -1700,6 +1700,7 @@ Private Sub ReadNettingSet( _
 '------------------------------------------------------------------------------
     Dim Flag      As Boolean    'A Y/N field read
     Dim Number    As Double     'A numeric field read
+    Dim Found     As String     'Headers of the cells holding an error value
 
 '------------------------------------------------------------------------------
 ' IDENTITY AND AGREEMENT
@@ -1812,6 +1813,15 @@ Private Sub ReadNettingSet( _
             End If
         End With
 
+'------------------------------------------------------------------------------
+' WORKSHEET ERROR VALUES
+'------------------------------------------------------------------------------
+    'An error value would read as a blank cell and take the field's default.
+        Found = ErrorColumns(Block, r, NS_HEADERS, 0)
+        If Len(Found) > 0 Then
+            NsError NsIndex, "Worksheet error value in: " & Found
+        End If
+
 End Sub
 
 
@@ -1886,9 +1896,14 @@ Private Sub ReadLeg( _
 '   rejects the leg and, through BuildTransactions, its transaction.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim Found   As String    'Headers of the cells holding an error value
 
 '------------------------------------------------------------------------------
 ' IDENTITY
@@ -1975,11 +1990,73 @@ Private Sub ReadLeg( _
             .Signature = .Asset & "|" & .Issuer & "|" & .CQS & "|" & .SecMatSerial & "|" & .Listing & "|" & _
                          .FundH10 & "|" & .Ccy
         End With
+
+'------------------------------------------------------------------------------
+' WORKSHEET ERROR VALUES
+'------------------------------------------------------------------------------
+    'An error value would read as a blank cell and take the field's default.
+        Found = ErrorColumns(Block, r, TX_HEADERS, TX_COMMENT)
+        If Len(Found) > 0 Then
+            LegError LegIndex, "Worksheet error value in: " & Found
+        End If
         If mLegs(LegIndex).Valid Then
             FindHaircut LegIndex
         End If
 
 End Sub
+
+
+Private Function ErrorColumns( _
+    ByRef Block As Variant, _
+    ByVal r As Long, _
+    ByVal Headers As String, _
+    ByVal SkipColumn As Long) _
+    As String
+'
+'==============================================================================
+'                                 ErrorColumns
+'------------------------------------------------------------------------------
+' PURPOSE
+'   List the headers of the cells of one input row that hold a worksheet
+'   error value (#N/A, #VALUE! and others).
+'
+' INPUTS
+'   Block, r: the input block and the row in it. Headers: the table's
+'   headers, separated by |. SkipColumn: a column that is not read, or 0.
+'
+' RETURNS
+'   The headers, separated by "; ", or an empty string.
+'
+' UPDATED
+'   2026-10-25
+'==============================================================================
+'
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim Names()   As String    'Headers, 0-based
+    Dim Col       As Long      'Column in Block
+    Dim Label     As String    'Header of the column
+
+'------------------------------------------------------------------------------
+' SCAN
+'------------------------------------------------------------------------------
+        Names = Split(Headers, "|")
+        For Col = 1 To UBound(Block, 2)
+            If Col <> SkipColumn Then
+                If IsError(Block(r, Col)) Then
+                    If Col - 1 <= UBound(Names) Then
+                        Label = Names(Col - 1)
+                    Else
+                        Label = "column " & Col
+                    End If
+                    ErrorColumns = AppendText(ErrorColumns, Label)
+                End If
+            End If
+        Next Col
+
+End Function
 
 
 Private Sub ReadLegAsset( _
@@ -2885,7 +2962,15 @@ Private Sub ComputeNettingSets()
                     End If
                 Else
                     t = mLegs(i).TxIndex
-                    ApplyHaircut i, mTx(t).HoldingBD, mTx(t).LentCcy
+                    If Ns = mTx(t).NsIndex Then
+                        ApplyHaircut i, mTx(t).HoldingBD, mTx(t).LentCcy
+                    Else
+                    'A leg filed under another netting set than its first leg: its
+                    'transaction is rejected and has no holding period of its own,
+                    'so LegCalc shows the haircut of the leg's netting set.
+                        ApplyHaircut i, HoldingFor(Ns, mTx(t).TxType <> TT_MARGINLEND, _
+                                                   mTx(t).TxType = TT_MARGINLEND), mTx(t).LentCcy
+                    End If
                     If mLegs(i).Recognised And mNS(Ns).Status = "VALID" Then
                         AddToTransaction t, i
                     End If
