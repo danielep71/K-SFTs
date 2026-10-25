@@ -19,7 +19,7 @@ version and changelog rules are in
 | Released versions | None |
 | `VERSION` | Does not exist yet: it is created when the first release is prepared |
 | Planned first version | 0.1.0, *Repo setup*: infrastructure only, no calculation, public API or workbook |
-| Active branch | `release/0.1.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
+| Active branch | `release/0.2.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
 
 <a id="versioning"></a>
 
