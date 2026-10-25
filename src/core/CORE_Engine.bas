@@ -900,7 +900,7 @@ Private Function HeaderProblems( _
     Dim Parts()   As String       'Expected headers, 0-based
     Dim Sheet     As Worksheet    'The input sheet
     Dim Found     As String       'Header in the sheet
-    Dim c         As Long         'Position in Parts; column c + 1
+    Dim Col       As Long         'Position in Parts; column Col + 1
 
 '------------------------------------------------------------------------------
 ' COMPARE
@@ -913,17 +913,17 @@ Private Function HeaderProblems( _
         End If
         Set Sheet = GetSheet(SheetName)
         Parts = Split(Expected, "|")
-        For c = 0 To UBound(Parts)
-            If Len(Parts(c)) > 0 Then
-                Found = SafeStr(TableCell(Sheet, HeaderRow, c + 1).Value)
-                If HeaderKey(Found) <> HeaderKey(Parts(c)) Then
-                    LogMsg SEV_ERROR, SheetName, "", "Column " & (c + 1) & " header is '" & Found & _
-                           "', expected '" & Parts(c) & "': a column was inserted, deleted or moved.", HeaderRow
+        For Col = 0 To UBound(Parts)
+            If Len(Parts(Col)) > 0 Then
+                Found = SafeStr(TableCell(Sheet, HeaderRow, Col + 1).Value)
+                If HeaderKey(Found) <> HeaderKey(Parts(Col)) Then
+                    LogMsg SEV_ERROR, SheetName, "", "Column " & (Col + 1) & " header is '" & Found & _
+                           "', expected '" & Parts(Col) & "': a column was inserted, deleted or moved.", HeaderRow
                     HeaderProblems = 1
                     Exit Function
                 End If
             End If
-        Next c
+        Next Col
 
 End Function
 
@@ -954,7 +954,7 @@ Private Function NamedHeaderProblems( _
     Dim Cell      As Range        'The name's top-left cell
     Dim Parts()   As String       'Expected headers, 0-based
     Dim Found     As String       'Header in the sheet
-    Dim c         As Long         'Position in Parts
+    Dim Col       As Long         'Position in Parts
 
 '------------------------------------------------------------------------------
 ' COMPARE
@@ -966,17 +966,17 @@ Private Function NamedHeaderProblems( _
             Exit Function
         End If
         Parts = Split(Expected, "|")
-        For c = 0 To UBound(Parts)
-            If Len(Parts(c)) > 0 Then
-                Found = SafeStr(Cell.Offset(0, c).Value)
-                If HeaderKey(Found) <> HeaderKey(Parts(c)) Then
-                    LogMsg SEV_ERROR, SH_PARAMS, NameText, "Header '" & Found & "' found where '" & Parts(c) & _
+        For Col = 0 To UBound(Parts)
+            If Len(Parts(Col)) > 0 Then
+                Found = SafeStr(Cell.Offset(0, Col).Value)
+                If HeaderKey(Found) <> HeaderKey(Parts(Col)) Then
+                    LogMsg SEV_ERROR, SH_PARAMS, NameText, "Header '" & Found & "' found where '" & Parts(Col) & _
                            "' was expected.", Cell.Row
                     NamedHeaderProblems = 1
                     Exit Function
                 End If
             End If
-        Next c
+        Next Col
 
 End Function
 
@@ -2249,7 +2249,7 @@ Private Sub BuildTransactions()
     Dim CountedFor()   As Long       'Per netting set: last rejected transaction counted
     Dim t              As Long       'Transaction
     Dim i              As Long       'Leg
-    Dim n              As Long       'Netting set
+    Dim Ns             As Long       'Netting set
 
 '------------------------------------------------------------------------------
 ' GROUP
@@ -2312,11 +2312,11 @@ Private Sub BuildTransactions()
                 If mLegs(i).Valid Then
                     mLegs(i).Messages = AppendText(mLegs(i).Messages, "Transaction rejected")
                 End If
-                n = mLegs(i).NsIndex
-                If n > 0 And n <> mTx(t).NsIndex Then
-                    If CountedFor(n) <> t Then
-                        CountedFor(n) = t
-                        With mNS(n)
+                Ns = mLegs(i).NsIndex
+                If Ns > 0 And Ns <> mTx(t).NsIndex Then
+                    If CountedFor(Ns) <> t Then
+                        CountedFor(Ns) = t
+                        With mNS(Ns)
                             .TxCount = .TxCount + 1
                             .TxRejected = .TxRejected + 1
                         End With
@@ -2506,15 +2506,15 @@ Private Sub CheckNettingSets()
 '------------------------------------------------------------------------------
 ' DECLARE
 '------------------------------------------------------------------------------
-    Dim n   As Long    'Netting set
+    Dim Ns  As Long    'Netting set
     Dim t   As Long    'Transaction
 
 '------------------------------------------------------------------------------
 ' TRANSACTION TYPES AND SHORT-TERM STATUS
 '------------------------------------------------------------------------------
-        For n = 1 To mNsCount
-            mNS(n).AllShortTerm = True
-        Next n
+        For Ns = 1 To mNsCount
+            mNS(Ns).AllShortTerm = True
+        Next Ns
         For t = 1 To mTxCount
             If mTx(t).NsIndex > 0 And Not mTx(t).Rejected Then
                 With mNS(mTx(t).NsIndex)
@@ -2535,11 +2535,11 @@ Private Sub CheckNettingSets()
 '------------------------------------------------------------------------------
         CheckZeroHaircut
         CheckIssues
-        For n = 1 To mNsCount
-            CheckHoldingOverride n
-            FindRiskWeight n
-            SetStatus n
-        Next n
+        For Ns = 1 To mNsCount
+            CheckHoldingOverride Ns
+            FindRiskWeight Ns
+            SetStatus Ns
+        Next Ns
 
 End Sub
 
@@ -2570,7 +2570,7 @@ Private Sub CheckZeroHaircut()
 '------------------------------------------------------------------------------
     Dim Failures()   As String    'Per netting set: conditions not met
     Dim FirstCcy()   As String    'Per netting set: currency of the first recognised leg
-    Dim n            As Long      'Netting set
+    Dim Ns           As Long      'Netting set
     Dim i            As Long      'Leg
 
 '------------------------------------------------------------------------------
@@ -2578,36 +2578,36 @@ Private Sub CheckZeroHaircut()
 '------------------------------------------------------------------------------
         ReDim Failures(1 To mNsCount)
         ReDim FirstCcy(1 To mNsCount)
-        For n = 1 To mNsCount
-            With mNS(n)
+        For Ns = 1 To mNsCount
+            With mNS(Ns)
                 If .ZeroHaircut And .HasCapitalMarket Then
-                    Failures(n) = AppendText(Failures(n), "margin lending is not a repo-style transaction")
+                    Failures(Ns) = AppendText(Failures(Ns), "margin lending is not a repo-style transaction")
                 End If
                 If .ZeroHaircut And .RemarginBD > 1# Then
-                    Failures(n) = AppendText(Failures(n), "remargining is not daily")
+                    Failures(Ns) = AppendText(Failures(Ns), "remargining is not daily")
                 End If
             End With
-        Next n
+        Next Ns
 
 '------------------------------------------------------------------------------
 ' LEG CONDITIONS
 '------------------------------------------------------------------------------
         For i = 1 To mLegCount
-            n = mLegs(i).NsIndex
-            If n > 0 Then
-                If mNS(n).ZeroHaircut And mLegs(i).Recognised Then
-                    If Len(FirstCcy(n)) = 0 Then
-                        FirstCcy(n) = mLegs(i).Ccy
-                    ElseIf mLegs(i).Ccy <> FirstCcy(n) Then
-                        Failures(n) = AppendText(Failures(n), "legs in more than one currency (" & _
+            Ns = mLegs(i).NsIndex
+            If Ns > 0 Then
+                If mNS(Ns).ZeroHaircut And mLegs(i).Recognised Then
+                    If Len(FirstCcy(Ns)) = 0 Then
+                        FirstCcy(Ns) = mLegs(i).Ccy
+                    ElseIf mLegs(i).Ccy <> FirstCcy(Ns) Then
+                        Failures(Ns) = AppendText(Failures(Ns), "legs in more than one currency (" & _
                                                  mLegs(i).LegID & ")")
-                        FirstCcy(n) = mLegs(i).Ccy
+                        FirstCcy(Ns) = mLegs(i).Ccy
                     End If
                     If Not (mLegs(i).Asset = AT_CASH Or (mLegs(i).Asset = AT_DEBT And mLegs(i).Issuer = IS_SOV)) Then
-                        Failures(n) = AppendText(Failures(n), "leg " & mLegs(i).LegID & " is neither cash " & _
+                        Failures(Ns) = AppendText(Failures(Ns), "leg " & mLegs(i).LegID & " is neither cash " & _
                                                  "nor a central government security")
                     ElseIf Not mLegs(i).Eligible Then
-                        Failures(n) = AppendText(Failures(n), "leg " & mLegs(i).LegID & " is not eligible")
+                        Failures(Ns) = AppendText(Failures(Ns), "leg " & mLegs(i).LegID & " is not eligible")
                     End If
                 End If
             End If
@@ -2616,16 +2616,16 @@ Private Sub CheckZeroHaircut()
 '------------------------------------------------------------------------------
 ' REPORT
 '------------------------------------------------------------------------------
-        For n = 1 To mNsCount
-            If mNS(n).ZeroHaircut Then
-                If Len(Failures(n)) > 0 Then
-                    NsError n, "0% haircut declared but its conditions are not met: " & Failures(n)
+        For Ns = 1 To mNsCount
+            If mNS(Ns).ZeroHaircut Then
+                If Len(Failures(Ns)) > 0 Then
+                    NsError Ns, "0% haircut declared but its conditions are not met: " & Failures(Ns)
                 Else
-                    LogMsg SEV_INFO, SH_NS, mNS(n).ID, "0% haircut applied: the conditions on the counterparty, " & _
-                           "documentation and settlement are taken as declared.", mNS(n).Row
+                    LogMsg SEV_INFO, SH_NS, mNS(Ns).ID, "0% haircut applied: the conditions on the counterparty, " & _
+                           "documentation and settlement are taken as declared.", mNS(Ns).Row
                 End If
             End If
-        Next n
+        Next Ns
 
 End Sub
 
@@ -2675,7 +2675,7 @@ End Sub
 
 
 Private Sub CheckHoldingOverride( _
-    ByVal n As Long)
+    ByVal Ns As Long)
 '
 '==============================================================================
 '                             CheckHoldingOverride
@@ -2697,7 +2697,7 @@ Private Sub CheckHoldingOverride( _
 '------------------------------------------------------------------------------
 ' CHECK
 '------------------------------------------------------------------------------
-        With mNS(n)
+        With mNS(Ns)
             If .HoldingOverride <= 0# Then
                 Exit Sub
             End If
@@ -2713,7 +2713,7 @@ End Sub
 
 
 Private Sub FindRiskWeight( _
-    ByVal n As Long)
+    ByVal Ns As Long)
 '
 '==============================================================================
 '                                FindRiskWeight
@@ -2741,7 +2741,7 @@ Private Sub FindRiskWeight( _
 '------------------------------------------------------------------------------
 ' BUILD THE KEY
 '------------------------------------------------------------------------------
-        With mNS(n)
+        With mNS(Ns)
             If .AllShortTerm And .TxCount > .TxRejected Then
                 ShortPart = "ST_"
             End If
@@ -2779,7 +2779,7 @@ Private Sub FindRiskWeight( _
             End If
             Position = TableRow(mRwIndex, mRwRegimes, .RWKey, .Regime)
             If Position = 0 Then
-                NsError n, "Risk-weight key " & .RWKey & " not in the risk-weight table for " & .Regime
+                NsError Ns, "Risk-weight key " & .RWKey & " not in the risk-weight table for " & .Regime
             Else
                 .RiskWeight = mRwValues(Position)
             End If
@@ -2789,7 +2789,7 @@ End Sub
 
 
 Private Sub SetStatus( _
-    ByVal n As Long)
+    ByVal Ns As Long)
 '
 '==============================================================================
 '                                  SetStatus
@@ -2803,7 +2803,7 @@ Private Sub SetStatus( _
 '   2026-10-24
 '==============================================================================
 '
-        With mNS(n)
+        With mNS(Ns)
             If .InputErrors > 0 Then
                 .Status = "INVALID: " & .InputErrors & " input error(s)"
             ElseIf .TxRejected > 0 Then
@@ -2845,7 +2845,7 @@ Private Sub ComputeNettingSets()
 '------------------------------------------------------------------------------
 ' DECLARE
 '------------------------------------------------------------------------------
-    Dim n   As Long    'Netting set
+    Dim Ns  As Long    'Netting set
     Dim t   As Long    'Transaction
     Dim i   As Long    'Leg
     Dim r   As Long    'Regime index
@@ -2853,19 +2853,19 @@ Private Sub ComputeNettingSets()
 '------------------------------------------------------------------------------
 ' HOLDING PERIODS
 '------------------------------------------------------------------------------
-        For n = 1 To mNsCount
-            With mNS(n)
+        For Ns = 1 To mNsCount
+            With mNS(Ns)
                 If .MNA Then
-                    .HoldingBD = HoldingFor(n, .HasRepoStyle, .HasCapitalMarket)
+                    .HoldingBD = HoldingFor(Ns, .HasRepoStyle, .HasCapitalMarket)
                     .HaircutScale = Sqr((.RemarginBD + .HoldingBD - 1#) / pHcBase)
                 End If
             End With
-        Next n
+        Next Ns
         For t = 1 To mTxCount
-            n = mTx(t).NsIndex
-            If n > 0 Then
-                If Not mNS(n).MNA Then
-                    mTx(t).HoldingBD = HoldingFor(n, mTx(t).TxType <> TT_MARGINLEND, mTx(t).TxType = TT_MARGINLEND)
+            Ns = mTx(t).NsIndex
+            If Ns > 0 Then
+                If Not mNS(Ns).MNA Then
+                    mTx(t).HoldingBD = HoldingFor(Ns, mTx(t).TxType <> TT_MARGINLEND, mTx(t).TxType = TT_MARGINLEND)
                 End If
             End If
         Next t
@@ -2876,17 +2876,17 @@ Private Sub ComputeNettingSets()
     'Every leg of a known netting set gets its haircut, so that LegCalc
     'shows it; only recognised legs of VALID netting sets enter the sums.
         For i = 1 To mLegCount
-            n = mLegs(i).NsIndex
-            If n > 0 Then
-                If mNS(n).MNA Then
-                    ApplyHaircut i, mNS(n).HoldingBD, ""
-                    If mLegs(i).Recognised And mNS(n).Status = "VALID" Then
-                        AddToPositions n, i
+            Ns = mLegs(i).NsIndex
+            If Ns > 0 Then
+                If mNS(Ns).MNA Then
+                    ApplyHaircut i, mNS(Ns).HoldingBD, ""
+                    If mLegs(i).Recognised And mNS(Ns).Status = "VALID" Then
+                        AddToPositions Ns, i
                     End If
                 Else
                     t = mLegs(i).TxIndex
                     ApplyHaircut i, mTx(t).HoldingBD, mTx(t).LentCcy
-                    If mLegs(i).Recognised And mNS(n).Status = "VALID" Then
+                    If mLegs(i).Recognised And mNS(Ns).Status = "VALID" Then
                         AddToTransaction t, i
                     End If
                 End If
@@ -2902,8 +2902,8 @@ Private Sub ComputeNettingSets()
 '------------------------------------------------------------------------------
 ' CAPITAL AND TOTALS
 '------------------------------------------------------------------------------
-        For n = 1 To mNsCount
-            With mNS(n)
+        For Ns = 1 To mNsCount
+            With mNS(Ns)
                 r = RegimeIndex(.Regime)
                 mRegSets(r) = mRegSets(r) + 1
                 If .Status = "VALID" Then
@@ -2920,7 +2920,7 @@ Private Sub ComputeNettingSets()
                     mWithheld = mWithheld + 1
                 End If
             End With
-        Next n
+        Next Ns
 
 End Sub
 
@@ -2957,7 +2957,7 @@ End Function
 
 
 Private Function HoldingFor( _
-    ByVal n As Long, _
+    ByVal Ns As Long, _
     ByVal RepoStyle As Boolean, _
     ByVal CapitalMarket As Boolean) _
     As Double
@@ -2978,7 +2978,7 @@ Private Function HoldingFor( _
 '   2026-10-24
 '==============================================================================
 '
-        With mNS(n)
+        With mNS(Ns)
             HoldingFor = Checked(SFT_HoldingPeriod(MinimumHolding(RepoStyle, CapitalMarket), .LargeOrIlliquid, _
                                                    .Disputes, .HoldingOverride, pHoldLarge), "SFT_HoldingPeriod")
         End With
@@ -3036,7 +3036,7 @@ End Sub
 
 
 Private Sub AddToPositions( _
-    ByVal n As Long, _
+    ByVal Ns As Long, _
     ByVal i As Long)
 '
 '==============================================================================
@@ -3061,20 +3061,20 @@ Private Sub AddToPositions( _
 ' NETTING-SET TOTALS
 '------------------------------------------------------------------------------
         With mLegs(i)
-            mNS(n).LegsUsed = mNS(n).LegsUsed + 1
+            mNS(Ns).LegsUsed = mNS(Ns).LegsUsed + 1
             If .Sign > 0 Then
-                mNS(n).SumE = mNS(n).SumE + .Value
+                mNS(Ns).SumE = mNS(Ns).SumE + .Value
             Else
-                mNS(n).SumC = mNS(n).SumC + .Value
+                mNS(Ns).SumC = mNS(Ns).SumC + .Value
             End If
 
 '------------------------------------------------------------------------------
 ' CURRENCY AND ISSUE
 '------------------------------------------------------------------------------
-            p = PositionFor(n, PK_CURRENCY, .Ccy, "", .Ccy)
+            p = PositionFor(Ns, PK_CURRENCY, .Ccy, "", .Ccy)
             AddLegValue p, i
             If .Asset <> AT_CASH Then
-                p = PositionFor(n, PK_ISSUE, .IssueKey, .Asset, .Ccy)
+                p = PositionFor(Ns, PK_ISSUE, .IssueKey, .Asset, .Ccy)
                 mPos(p).H = .H
                 AddLegValue p, i
             End If
@@ -3084,7 +3084,7 @@ End Sub
 
 
 Private Function PositionFor( _
-    ByVal n As Long, _
+    ByVal Ns As Long, _
     ByVal Kind As String, _
     ByVal Key As String, _
     ByVal Asset As String, _
@@ -3111,7 +3111,7 @@ Private Function PositionFor( _
 '------------------------------------------------------------------------------
 ' FIND OR CREATE
 '------------------------------------------------------------------------------
-        LookupKey = n & "|" & Kind & "|" & Key
+        LookupKey = Ns & "|" & Kind & "|" & Key
         p = KeyIndex(mPosIndex, LookupKey)
         If p = 0 Then
             mPosCount = mPosCount + 1
@@ -3122,7 +3122,7 @@ Private Function PositionFor( _
             End If
             p = mPosCount
             KeyAdd mPosIndex, LookupKey, p
-            mPos(p).NsIndex = n
+            mPos(p).NsIndex = Ns
             mPos(p).Kind = Kind
             mPos(p).Key = Key
             mPos(p).Asset = Asset
@@ -3218,7 +3218,7 @@ Private Sub FinishNetted()
     Dim Starts()   As Long      'First slot of each netting set in Order
     Dim Filled()   As Long      'Slots filled so far per netting set
     Dim Order()    As Long      'Position indices grouped by netting set
-    Dim n          As Long      'Netting set
+    Dim Ns         As Long      'Netting set
     Dim p          As Long      'Position or slot
 
 '------------------------------------------------------------------------------
@@ -3234,30 +3234,30 @@ Private Sub FinishNetted()
             Filled(mPos(p).NsIndex) = Filled(mPos(p).NsIndex) + 1
         Next p
         Starts(1) = 1
-        For n = 1 To mNsCount
-            Starts(n + 1) = Starts(n) + Filled(n)
-            Filled(n) = 0
-        Next n
+        For Ns = 1 To mNsCount
+            Starts(Ns + 1) = Starts(Ns) + Filled(Ns)
+            Filled(Ns) = 0
+        Next Ns
         For p = 1 To mPosCount
-            n = mPos(p).NsIndex
-            Order(Starts(n) + Filled(n)) = p
-            Filled(n) = Filled(n) + 1
+            Ns = mPos(p).NsIndex
+            Order(Starts(Ns) + Filled(Ns)) = p
+            Filled(Ns) = Filled(Ns) + 1
         Next p
 
 '------------------------------------------------------------------------------
 ' CALCULATE EACH NETTING SET
 '------------------------------------------------------------------------------
-        For n = 1 To mNsCount
-            If mNS(n).MNA And mNS(n).Status = "VALID" And Filled(n) > 0 Then
-                FinishOneNetted n, Order, Starts(n), Starts(n) + Filled(n) - 1
+        For Ns = 1 To mNsCount
+            If mNS(Ns).MNA And mNS(Ns).Status = "VALID" And Filled(Ns) > 0 Then
+                FinishOneNetted Ns, Order, Starts(Ns), Starts(Ns) + Filled(Ns) - 1
             End If
-        Next n
+        Next Ns
 
 End Sub
 
 
 Private Sub FinishOneNetted( _
-    ByVal n As Long, _
+    ByVal Ns As Long, _
     ByRef Order() As Long, _
     ByVal FirstSlot As Long, _
     ByVal LastSlot As Long)
@@ -3314,7 +3314,7 @@ Private Sub FinishOneNetted( _
 '------------------------------------------------------------------------------
 ' CURRENCIES
 '------------------------------------------------------------------------------
-        With mNS(n)
+        With mNS(Ns)
             If Not .ZeroHaircut Then
                 Hfx = Checked(SFT_ScaledHaircut(pHfx, .HoldingBD, .RemarginBD, pHcBase), "SFT_ScaledHaircut")
             End If
@@ -3380,16 +3380,16 @@ Private Sub FinishSingles()
     Dim HeAvg    As Double    'Value-weighted haircut of the legs lent
     Dim HcAvg    As Double    'Value-weighted haircut of the legs received
     Dim HfxAvg   As Double    'Value-weighted currency haircut of the legs received
-    Dim n        As Long      'Netting set
+    Dim Ns       As Long      'Netting set
     Dim t        As Long      'Transaction
 
 '------------------------------------------------------------------------------
 ' EACH TRANSACTION
 '------------------------------------------------------------------------------
         For t = 1 To mTxCount
-            n = mTx(t).NsIndex
-            If n > 0 Then
-                If Not mNS(n).MNA And mNS(n).Status = "VALID" Then
+            Ns = mTx(t).NsIndex
+            If Ns > 0 Then
+                If Not mNS(Ns).MNA And mNS(Ns).Status = "VALID" Then
                     With mTx(t)
                         HeAvg = 0#
                         HcAvg = 0#
@@ -3403,13 +3403,13 @@ Private Sub FinishSingles()
                         End If
                         .EStar = Checked(SFT_ExposureSingle(.E, Max2(HeAvg, 0#), .C, Max2(HcAvg, 0#), _
                                                             Max2(HfxAvg, 0#)), "SFT_ExposureSingle")
-                        mNS(n).SumE = mNS(n).SumE + .E
-                        mNS(n).SumC = mNS(n).SumC + .C
-                        mNS(n).FXTerm = mNS(n).FXTerm + .FXTerm
-                        mNS(n).EStar = mNS(n).EStar + .EStar
-                        If .HoldingBD > mNS(n).HoldingBD Then
-                            mNS(n).HoldingBD = .HoldingBD
-                            mNS(n).HaircutScale = Sqr((mNS(n).RemarginBD + .HoldingBD - 1#) / pHcBase)
+                        mNS(Ns).SumE = mNS(Ns).SumE + .E
+                        mNS(Ns).SumC = mNS(Ns).SumC + .C
+                        mNS(Ns).FXTerm = mNS(Ns).FXTerm + .FXTerm
+                        mNS(Ns).EStar = mNS(Ns).EStar + .EStar
+                        If .HoldingBD > mNS(Ns).HoldingBD Then
+                            mNS(Ns).HoldingBD = .HoldingBD
+                            mNS(Ns).HaircutScale = Sqr((mNS(Ns).RemarginBD + .HoldingBD - 1#) / pHcBase)
                         End If
                     End With
                 End If
@@ -3503,7 +3503,7 @@ Private Sub WriteResults()
     Dim TopRow     As Long         'First data row
     Dim Block()    As Variant      'Output rows
     Dim RowCount   As Long         'Rows written
-    Dim n          As Long         'Netting set
+    Dim Ns         As Long         'Netting set
     Dim r          As Long         'Regime index
 
 '------------------------------------------------------------------------------
@@ -3512,9 +3512,9 @@ Private Sub WriteResults()
         Set Sheet = GetSheet(SH_RESULTS)
         TopRow = OutputFirstRow(SH_RESULTS)
         ReDim Block(1 To mNsCount + 2, 1 To RS_NCOLS)
-        For n = 1 To mNsCount
+        For Ns = 1 To mNsCount
             RowCount = RowCount + 1
-            With mNS(n)
+            With mNS(Ns)
                 Block(RowCount, 1) = .ID
                 Block(RowCount, 2) = .Counterparty
                 Block(RowCount, 3) = .Regime
@@ -3544,7 +3544,7 @@ Private Sub WriteResults()
                     Block(RowCount, 23) = .OwnFunds
                 End If
             End With
-        Next n
+        Next Ns
 
 '------------------------------------------------------------------------------
 ' TOTALS
@@ -3593,7 +3593,7 @@ Private Sub WritePositions()
     Dim TopRow     As Long         'First data row
     Dim Block()    As Variant      'Output rows
     Dim RowCount   As Long         'Rows written
-    Dim n          As Long         'Netting set
+    Dim Ns         As Long         'Netting set
     Dim p          As Long         'Position
     Dim t          As Long         'Transaction
     Dim NetPos     As Double       'Lent less received
@@ -3604,20 +3604,20 @@ Private Sub WritePositions()
         Set Sheet = GetSheet(SH_POSITIONS)
         TopRow = OutputFirstRow(SH_POSITIONS)
         ReDim Block(1 To mPosCount + mTxCount + 1, 1 To PS_NCOLS)
-        For n = 1 To mNsCount
-            If mNS(n).MNA Then
+        For Ns = 1 To mNsCount
+            If mNS(Ns).MNA Then
                 For p = 1 To mPosCount
-                    If mPos(p).NsIndex = n Then
+                    If mPos(p).NsIndex = Ns Then
                         RowCount = RowCount + 1
                         With mPos(p)
                             NetPos = .Lent - .Received
-                            Block(RowCount, 1) = mNS(n).ID
+                            Block(RowCount, 1) = mNS(Ns).ID
                             Block(RowCount, 2) = .Kind
                             Block(RowCount, 3) = .Key
                             Block(RowCount, 4) = .Asset
                             Block(RowCount, 5) = .Ccy
                             Block(RowCount, 6) = .Legs
-                            Block(RowCount, 7) = mNS(n).HoldingBD
+                            Block(RowCount, 7) = mNS(Ns).HoldingBD
                             Block(RowCount, 8) = .Lent
                             Block(RowCount, 9) = .Received
                             Block(RowCount, 10) = NetPos
@@ -3626,7 +3626,7 @@ Private Sub WritePositions()
                                 Block(RowCount, 12) = NetPos * .H
                                 Block(RowCount, 13) = Abs(NetPos) * .H
                                 Block(RowCount, 14) = IIf(.Counted, "Y", "N")
-                            ElseIf .Ccy = mNS(n).SettleCcy Then
+                            ElseIf .Ccy = mNS(Ns).SettleCcy Then
                                 Block(RowCount, 14) = "SETTLEMENT"
                             Else
                                 Block(RowCount, 14) = "MISMATCH"
@@ -3637,10 +3637,10 @@ Private Sub WritePositions()
                 Next p
             Else
                 For t = 1 To mTxCount
-                    If mTx(t).NsIndex = n And Not mTx(t).Rejected Then
+                    If mTx(t).NsIndex = Ns And Not mTx(t).Rejected Then
                         RowCount = RowCount + 1
                         With mTx(t)
-                            Block(RowCount, 1) = mNS(n).ID
+                            Block(RowCount, 1) = mNS(Ns).ID
                             Block(RowCount, 2) = PK_TRANSACTION
                             Block(RowCount, 3) = .ID
                             Block(RowCount, 4) = .TxType
@@ -3658,7 +3658,7 @@ Private Sub WritePositions()
                     End If
                 Next t
             End If
-        Next n
+        Next Ns
 
 '------------------------------------------------------------------------------
 ' WRITE AND FORMAT

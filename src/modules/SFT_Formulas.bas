@@ -750,7 +750,7 @@ Private Function Flatten( _
     Dim Probe        As Long       'Upper bound of the second dimension, if any
     Dim Count        As Long       'Elements written
     Dim r            As Long       'Row
-    Dim c            As Long       'Column
+    Dim Col          As Long       'Column
 
 '------------------------------------------------------------------------------
 ' READ THE SOURCE
@@ -793,10 +793,10 @@ Private Function Flatten( _
         Else
             ReDim Flat(1 To (UBound(Values, 1) - LBound(Values, 1) + 1) * (Probe - LBound(Values, 2) + 1))
             For r = LBound(Values, 1) To UBound(Values, 1)
-                For c = LBound(Values, 2) To Probe
+                For Col = LBound(Values, 2) To Probe
                     Count = Count + 1
-                    Flat(Count) = Values(r, c)
-                Next c
+                    Flat(Count) = Values(r, Col)
+                Next Col
             Next r
         End If
         Flatten = Flat

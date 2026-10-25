@@ -1018,7 +1018,7 @@ Public Function LastDataRowAny( _
     Dim LastUsedRow   As Long       'Last row of the used range
     Dim Values        As Variant    'Block values from FirstRow to LastUsedRow
     Dim r             As Long       'Row in Values, counted from the bottom
-    Dim c             As Long       'Column in Values
+    Dim Col           As Long       'Column in Values
 
 '------------------------------------------------------------------------------
 ' SCAN
@@ -1036,14 +1036,14 @@ Public Function LastDataRowAny( _
             Exit Function
         End If
         For r = UBound(Values, 1) To 1 Step -1
-            For c = 1 To UBound(Values, 2)
-                If c <> IgnoredColumn Then
-                    If Not IsBlankCell(Values(r, c)) Then
+            For Col = 1 To UBound(Values, 2)
+                If Col <> IgnoredColumn Then
+                    If Not IsBlankCell(Values(r, Col)) Then
                         LastDataRowAny = FirstRow + r - 1
                         Exit Function
                     End If
                 End If
-            Next c
+            Next Col
         Next r
 
 End Function
@@ -1075,19 +1075,19 @@ Public Function RowHasData( _
 '------------------------------------------------------------------------------
 ' DECLARE
 '------------------------------------------------------------------------------
-    Dim c   As Long    'Column
+    Dim Col   As Long    'Column
 
 '------------------------------------------------------------------------------
 ' CHECK
 '------------------------------------------------------------------------------
-        For c = 1 To ColumnCount
-            If c <> IgnoredColumn Then
-                If Not IsBlankCell(Block(RowIndex, c)) Then
+        For Col = 1 To ColumnCount
+            If Col <> IgnoredColumn Then
+                If Not IsBlankCell(Block(RowIndex, Col)) Then
                     RowHasData = True
                     Exit Function
                 End If
             End If
-        Next c
+        Next Col
 
 End Function
 
@@ -1243,7 +1243,7 @@ Public Sub FormatColumns( _
 ' DECLARE
 '------------------------------------------------------------------------------
     Dim Parts()   As String    'Number formats, one per column, 0-based
-    Dim c         As Long      'Position in Parts; column c + 1
+    Dim Col       As Long      'Position in Parts; column Col + 1
 
 '------------------------------------------------------------------------------
 ' FORMAT
@@ -1252,10 +1252,10 @@ Public Sub FormatColumns( _
             Exit Sub
         End If
         Parts = Split(Formats, "|")
-        For c = 0 To UBound(Parts)
-            If Len(Parts(c)) > 0 Then
-                TableRange(Sheet, FirstRow, c + 1, FirstRow + RowsToFormat - 1, c + 1).NumberFormat = Parts(c)
+        For Col = 0 To UBound(Parts)
+            If Len(Parts(Col)) > 0 Then
+                TableRange(Sheet, FirstRow, Col + 1, FirstRow + RowsToFormat - 1, Col + 1).NumberFormat = Parts(Col)
             End If
-        Next c
+        Next Col
 
 End Sub
