@@ -47,12 +47,14 @@
 </div>
 
 > [!IMPORTANT]
-> **Status: repository setup only.** There is no calculation engine, public
-> API, production workbook or validated method yet. Nothing here should be
-> used to compute exposure. The regulatory basis is chosen: the EU CRR
-> controls, with the Basel Framework as the methodological reference. The
-> first scope is bilateral SFTs under the Financial Collateral Comprehensive
-> Method; products, collateral and outputs are still open decisions.
+> **Status: working prototype, not a validated method.** The repository holds
+> a prototype that calculates E\*, RWA and own funds of SFT netting sets
+> ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)). It runs in Excel and
+> reproduces an independent reference, but it is not the methodology of
+> record and departs from recorded decisions. Nothing here should be used to
+> compute regulatory exposure. The regulatory basis is chosen: the EU CRR
+> controls, with the Basel Framework as the methodological reference;
+> products, collateral and outputs are still open decisions.
 
 > [!NOTE]
 > A workbook is **never stored in the repository as a macro-enabled file**.
@@ -84,8 +86,8 @@ covers it with SA-CCR.
 
 ## 🎯 What exists today
 
-The first milestone, *v0.1.0 - Repo setup*, builds the foundation the
-calculation will stand on:
+The first milestone, *v0.1.0 - Repo setup*, built the foundation the
+calculation stands on; *v0.2.0 - Prototype setup* adds the prototype as it is:
 
 | Area | Delivered |
 | --- | --- |
@@ -98,6 +100,7 @@ calculation will stand on:
 | Workbook build | A macro-free template and an optional script that imports the repository's VBA into a workbook built from it ([synchronizing VBA](INSTALLATION.md#synchronizing-vba)) |
 | Repository checks | `python tools/check.py` with 17 gates, run by CI on every pull request and on pushes to `main` and `release/**` ([tools/README.md](tools/README.md)) |
 | Governance | Branch model, integration and sync, rulesets on `main`, `release/**` and `v*` tags, review records, issue rules and a 20-label catalogue ([GOVERNANCE.md](docs/GOVERNANCE.md)) |
+| Prototype | E\* under the FCCM with supervisory haircuts (CRR Articles 220, 223, 224, 226, 227), risk weight, RWA and own funds per netting set; eight `SFT_*` worksheet functions; an 11-sheet template with a demo portfolio, a test catalogue and formula tests; an independent Python reference and a LibreOffice regression ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)) |
 | Releases | SemVer, a changelog with its own gate, and a release procedure that separates preparation from publication ([RELEASING.md](RELEASING.md)) |
 
 Not available yet: an exposure calculation, a public API, a production
@@ -228,13 +231,17 @@ The full layout, the dependency direction and the public API boundary are in
 
 ## ⚠️ Known limitations
 
-- **No calculation yet.** There is no SFT exposure, public API, production
-  workbook or numerical test case.
+- **Prototype only.** The calculation is a prototype, not the methodology of
+  record: it departs from recorded decisions (a BCBS regime, a QCCP class,
+  the open decisions D4, D6 and D7), its expected values are illustrative,
+  and there is no numerical test case in the format of
+  [TEST_CASES.md](docs/methodology/TEST_CASES.md) and no production
+  workbook ([departures](docs/methodology/PROTOTYPE.md)).
 - **Excel evidence on one host.** Recorded manually on one 64-bit host;
   32-bit Office and other builds are untested.
-- **Regulatory texts registered, not yet transcribed.** Their formulas and
-  tables are read and checked only when the rule that uses them is
-  implemented.
+- **Regulatory texts registered, not yet checked against the prototype.**
+  The prototype's formulas and tables are not yet checked against the
+  registered copies, page by page.
 - **Security scanning not enabled.** Secret scanning, push protection,
   code scanning and Dependabot security updates are off; vulnerabilities
   are reported privately on GitHub or by email ([SECURITY.md](SECURITY.md)).
@@ -249,9 +256,10 @@ The full layout, the dependency direction and the public API boundary are in
 
 | Step | Scope |
 | --- | --- |
-| v0.1.0 - Repo setup | Tooling, governance, conventions, the harness and its Excel evidence; closed by a certification from a fresh checkout (#13) |
+| v0.1.0 - Repo setup | Tooling, governance, conventions, the harness and its Excel evidence; closed by a certification from a fresh checkout, without a release (#13) |
+| v0.2.0 - Prototype setup | The prototype as it is, working in Excel and included into `main`, with no further development (#131 to #134) |
 | Open decisions | Products in scope (D4), collateral (D6), output measures (D7) ([open decisions](docs/REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)) |
-| Later milestones | The first-scope calculation, its numerical certification, and the production workbook |
+| Later milestones, up to v1.0.0 | The prototype's departures resolved, the first-scope calculation, its numerical certification, and the production workbook |
 
 Separate scope decisions, each needing its own issue: the internal models
 approach, CCP-cleared SFTs, the CRE56 haircut floors, the Financial
@@ -286,7 +294,7 @@ Collateral Simple Method, and other prudential measures
 ## 📌 Status
 
 **Unreleased.** Work is in the milestone
-[*v0.1.0 - Repo setup*](https://github.com/danielep71/K-SFTs/milestone/1);
+[*v0.2.0 - Prototype setup*](https://github.com/danielep71/K-SFTs/milestone/2);
 changes are recorded under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 Development happens on the
 [active release branch](docs/GOVERNANCE.md#-branches) through task branches

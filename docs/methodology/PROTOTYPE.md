@@ -7,8 +7,10 @@ decisions of [#8](https://github.com/danielep71/K-SFTs/issues/8) govern, and
 every rule below enters README.md's traceability table only through a
 reviewed change.
 
-**Where the prototype departs from the recorded decisions**, each to be
-resolved before integration:
+**Where the prototype departs from the recorded decisions.** By maintainer
+decision of 2026-10-25, milestone v0.2.0 integrates the prototype as it is,
+with these departures; each is resolved in a later milestone
+([#131](https://github.com/danielep71/K-SFTs/issues/131)):
 
 | Prototype | Recorded position | Needed |
 | --- | --- | --- |
@@ -59,7 +61,7 @@ consolidated text of 26.06.2026, i.e. with CRR3) and **BCBS** (CRE22 effective
 | Level | Input | Rule |
 | --- | --- | --- |
 | Leg | One row of Transactions: cash, or one security issue, `LENT` (given: E) or `RECEIVED` (C) | Valued in the reporting currency; keyed to a row of the haircut table |
-| Transaction | Legs sharing a TransactionID | Needs one leg of each side; legs agree on netting set, type and dates; rejected as a whole |
+| Transaction | Legs sharing a TransactionID | Needs one leg of each side; legs agree on netting set, type and dates; rejected as a whole, and counted as rejected in every netting set its legs name |
 | Netting set | One row of NettingSets | With an eligible master netting agreement (MNA = Y) all transactions are netted; otherwise each is calculated alone and E\* is summed |
 
 ### Haircuts
@@ -140,8 +142,8 @@ and makes the run WHAT-IF.
 | Status | When | E\* |
 | --- | --- | --- |
 | `VALID` | No input error, no rejected transaction | Calculated |
-| `INVALID: n input error(s)` | A netting-set input is unusable, a duplicate ID, a 0% haircut whose conditions fail, an issue described differently on two legs, or no risk-weight row | Withheld |
-| `INCOMPLETE: k of n transaction(s) rejected` | A transaction was rejected | Withheld |
+| `INVALID: n input error(s)` | A netting-set input is unusable (a worksheet error value such as `#N/A` in any cell included), a duplicate ID, a 0% haircut whose conditions fail, an issue described differently on two legs, or no risk-weight row | Withheld |
+| `INCOMPLETE: k of n transaction(s) rejected` | A transaction with a leg in the netting set was rejected; a leg holding a worksheet error value is rejected with it | Withheld |
 | `NO TRANSACTIONS` | No leg refers to it | — |
 
 A layout change (moved column, broken workbook name), an unusable parameter or
@@ -232,9 +234,11 @@ limited to one of them.
 | --- | --- | --- |
 | `CRR` | Regulation (EU) No 575/2013, consolidated text (CELEX 02013R0575-20260626) | 26.06.2026 |
 | `CRE22` | Basel Framework, CRE22 Standardised approach: credit risk mitigation | Effective 1 January 2023 |
-| `CRE20` | Basel Framework, CRE20 Standardised approach: individual exposures | Effective 1 January 2023 |
+| `CRE20` | Basel Framework, CRE20 Standardised approach: individual exposures | Effective 1 January 2023; not in the [source register](README.md#source-register) and not copied |
 | `CRE54` | Basel Framework, CRE54 Capital requirements for bank exposures to CCPs | Effective 1 January 2023 |
-| `CRE56` | Basel Framework, CRE56 Minimum haircut floors for SFTs | Effective 1 January 2022 |
+| `CRE56` | Basel Framework, CRE56 Minimum haircut floors for SFTs | Effective 1 January 2023, the registered copy |
 
-Source copies are not committed yet; when they are, follow the register and
-hash convention of K-SACCR's `docs/methodology/sources/README.md`.
+`CRR`, `CRE22`, `CRE54` and `CRE56` are registered, with copies and hashes in
+[sources/](sources/README.md). `CRE20` is cited for the risk weights but is
+not registered yet; the prototype's formulas and tables are not yet checked
+against the registered copies (see the departures above).

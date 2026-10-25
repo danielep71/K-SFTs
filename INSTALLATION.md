@@ -8,12 +8,17 @@ Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
 (see [NOTICE.md](NOTICE.md)).
 
 > [!IMPORTANT]
-> **Status on 2026-10-24: repository setup only.** The only VBA components
-> are the test modules in `tests/modules/`; no production component exists,
-> and the workbook template holds only a Readme sheet. The import, compile
-> and harness steps below were first run on a host on 2026-10-24, recorded
-> in [tested environments](#tested-environments) and
-> [#9](https://github.com/danielep71/K-SFTs/issues/9). The
+> **Status on 2026-10-25: working prototype.** The production components
+> are the five prototype modules in `src/`, listed in
+> `tools/vba-projects.json`, and the workbook template holds the prototype's
+> 11 sheets with a demo portfolio
+> ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)); the prototype is not the
+> methodology of record. The import, compile and harness steps below were
+> first run on a host on 2026-10-24
+> ([#9](https://github.com/danielep71/K-SFTs/issues/9)), and with the
+> prototype on 2026-10-25
+> ([#135](https://github.com/danielep71/K-SFTs/pull/135)), both recorded in
+> [tested environments](#tested-environments). The
 > [developer setup](#developer-setup) has been run from a fresh clone on
 > Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -46,6 +51,7 @@ below, each with its evidence.
 | Host | Excel build | Windows | Bitness | Commit | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
+| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `fbaee34` | [#135](https://github.com/danielep71/K-SFTs/pull/135): the prototype built with `Sync-KSFT-VBA.ps1` (Development), compiled and run on the demo portfolio (TestCatalogue 107 of 107, FormulaTest 25 of 25), and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
 
 <a id="get-the-source"></a>
 
@@ -87,6 +93,8 @@ and from a fresh clone; on Windows they are untested, so use WSL or CI there.
 | Ruff, mypy | 0.16.6, 2.3.1 | the `ruff` and `mypy` gates |
 | actionlint | 1.7.12 | the `actionlint` gate |
 | shellcheck | optional | the shell scripts inside workflows, through actionlint; CI's runner has it |
+| LibreOffice, its Python UNO bridge, openpyxl | optional; run with 24.2.7.2 and openpyxl 3.1.5 | `tools/lo_regression.py`, the prototype's headless regression; not a gate and not Excel evidence |
+| xlsxwriter | optional; run with 3.2.9 | `tools/build_template.py`, which regenerates `src/workbook/SFT_Template.xlsx` |
 | Excel | a [supported host](#supported-hosts) | importing, compiling and running the VBA only |
 
 From the root of the checkout, on CPython 3.13 and Linux x86_64:
@@ -145,9 +153,9 @@ The gates and modes are described in [tools/README.md](tools/README.md).
    `src/workbook/SFT_Template.xlsx` and save it with **File → Save As** as
    **Excel Macro-Enabled Workbook (`.xlsm`)**, outside the checkout or in
    the ignored `test-results/` directory. Built workbooks are never
-   committed, and nothing is ever saved over the template. Today the
-   template holds only a Readme sheet; sheets come with the input and output
-   contract.
+   committed, and nothing is ever saved over the template. The template
+   holds the prototype's 11 sheets, with a demo portfolio, and is generated
+   by `tools/build_template.py`; it is regenerated, never edited by hand.
 3. **Check the references.** Open the VBE (**Alt+F11**) and check that
    **Tools → References** shows only the four listed under
    [supported hosts](#supported-hosts).
