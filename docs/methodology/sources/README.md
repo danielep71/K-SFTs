@@ -90,9 +90,18 @@ under its publisher's terms.
 
 | Publisher | Terms | Checked |
 | --- | --- | --- |
-| Bank for International Settlements | <https://www.bis.org/terms_conditions.htm>: BIS material may be downloaded, displayed, printed, photocopied or redistributed for non-commercial purposes without written permission | Read 2026-10-24 |
-| European Banking Authority | <https://www.eba.europa.eu/legal-notice>: reproduction of EBA material is authorised, provided the source is acknowledged | Read 2026-10-24 |
-| European Union (EUR-Lex, Publications Office) | EU legislation published by the Publications Office may be reused with the source acknowledged (Commission Decision 2011/833/EU on the reuse of Commission documents) | **Not re-read:** the EUR-Lex legal notice could not be retrieved on 2026-10-24 |
+| Bank for International Settlements | <https://www.bis.org/terms_conditions.htm>: BIS material may be downloaded, displayed, printed, photocopied or redistributed for non-commercial purposes without written permission | Read 2026-10-24; re-read 2026-10-25 |
+| European Banking Authority | <https://www.eba.europa.eu/legal-notice>: reproduction of EBA material is authorised, provided the source is acknowledged, save where otherwise stated | Read 2026-10-24; re-read 2026-10-25 |
+| European Union (EUR-Lex) | <https://eur-lex.europa.eu/content/legal-notice/legal-notice.html>, *Copyright notice*: under Commission Decision 2011/833/EU the legal documents published in EUR-Lex may be re-used for commercial or non-commercial purposes, unless otherwise specified; the consolidated texts are licensed under the Creative Commons Attribution 4.0 International licence (CC BY 4.0), which requires the source to be acknowledged and any changes to be indicated | Read 2026-10-25 by the maintainer, who supplied the notice's text; this environment cannot retrieve the page |
 
-The repository is private and non-commercial. Making it public, or any
-commercial use, needs these terms checked again first.
+**CRR extract, CC BY 4.0 attribution.** `CRR_575-2013_consolidated_2026-06-26_extract.pdf`:
+© European Union, <https://eur-lex.europa.eu>, 1998-2026; Regulation (EU) No
+575/2013, consolidated text of 26.06.2026, licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Changes: only page 1
+and pages 281 to 323 of the 895-page consolidated PDF are kept, copied
+without change to their content (see *CRR extract* above).
+
+The repository is public since 2026-10-25 and non-commercial
+([#123](https://github.com/danielep71/K-SFTs/issues/123)); the three terms
+above permit that. Any commercial use needs them checked again first, since
+the BIS permits redistribution for non-commercial purposes only.
