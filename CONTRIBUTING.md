@@ -2,7 +2,7 @@
 
 K-SFTs is an independent personal project with one maintainer, who
 decides scope, priorities and what is integrated
-([docs/GOVERNANCE.md](docs/GOVERNANCE.md)). The repository is private.
+([docs/GOVERNANCE.md](docs/GOVERNANCE.md)). The repository is public.
 Every change starts from an issue and arrives through a pull request.
 
 The repository is in **setup**: there is no calculation engine, workbook or

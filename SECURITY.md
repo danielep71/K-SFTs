@@ -13,9 +13,12 @@ are unsupported unless the problem reproduces in this repository.
 Do **not** disclose a suspected vulnerability in an issue, pull request,
 commit message, sample file or screenshot.
 
-Email **danielep71@gmail.com** with the subject
-**Private security report — K-SFTs**. GitHub's private vulnerability
-reporting is not available while the repository is private.
+Report it privately in either of two ways:
+
+- on GitHub, through **Security → Report a vulnerability**
+  (<https://github.com/danielep71/K-SFTs/security/advisories/new>); or
+- by email to **danielep71@gmail.com**, with the subject
+  **Private security report — K-SFTs**.
 
 Include:
 
@@ -74,15 +77,18 @@ for that command only. No workflow approves, merges or dismisses alerts.
 
 ## 🛡️ Security features
 
-Recorded on **2026-10-24**. The repository is private on a GitHub Pro account.
+Recorded on **2026-10-25**. The repository is public (since 2026-10-25) on a
+GitHub Pro account. The states marked *API* were read back from the GitHub
+API on that date ([#123](https://github.com/danielep71/K-SFTs/issues/123)).
 
 | Feature | Status |
 | --- | --- |
-| Dependabot alerts and security updates | Enabled (maintainer-reported). |
+| Private vulnerability reporting | Enabled (API). Reports can be filed on GitHub or by email (above). |
+| Dependabot alerts | Enabled (maintainer-reported on 2026-10-24; not readable through this project's API access). |
+| Dependabot security updates | Not enabled (API), by the maintainer's decision. |
 | Dependabot version updates for GitHub Actions | Configured in `.github/dependabot.yml`; updates arrive as pull requests for review. |
-| Secret scanning and push protection | Not enabled: not available for private repositories without GitHub Secret Protection. |
-| Code scanning | Not enabled: not available for private repositories without GitHub Code Security. |
-| Private vulnerability reporting | Not available for private repositories; reports go by email (above). |
+| Secret scanning and push protection | Not enabled (API), by the maintainer's decision. Both are available for public repositories. |
+| Code scanning | Not enabled, by the maintainer's decision. CodeQL would cover the Python tools and workflows, not the VBA. |
 
 Update this table, with its date, when a feature is enabled or changed.
 

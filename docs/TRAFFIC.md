@@ -101,8 +101,11 @@ stored day that have no row.
 
 ### Visibility
 
-The repository is private, and so is the branch. The data is aggregate (counts,
-referrers and paths) and identifies no visitor. It is not published through
+The repository is public since 2026-10-25, and so is the branch: anyone can
+read its CSV files. By the maintainer's decision
+([#123](https://github.com/danielep71/K-SFTs/issues/123)) it stays public. The
+data is aggregate (counts, referrers and paths) and identifies no visitor. It
+is not published through
 GitHub Pages or badges. The counts include the maintainer's own visits and
 every clone made by CI checkouts.
 
