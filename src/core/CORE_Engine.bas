@@ -2233,10 +2233,12 @@ Private Sub BuildTransactions()
 '   Group the legs into transactions by Transaction ID, check each
 '   transaction as a whole, and reject it with all its legs when any leg is
 '   invalid or the legs disagree. Count the transactions of each netting
-'   set.
+'   set. A rejected transaction whose legs name several netting sets is
+'   counted, as rejected, in each of them, so that none is reported VALID
+'   without its legs.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -2244,8 +2246,10 @@ Private Sub BuildTransactions()
 ' DECLARE
 '------------------------------------------------------------------------------
     Dim LegInvalid()   As Boolean    'Per transaction: some leg is invalid
+    Dim CountedFor()   As Long       'Per netting set: last rejected transaction counted
     Dim t              As Long       'Transaction
     Dim i              As Long       'Leg
+    Dim n              As Long       'Netting set
 
 '------------------------------------------------------------------------------
 ' GROUP
@@ -2297,12 +2301,26 @@ Private Sub BuildTransactions()
 '------------------------------------------------------------------------------
 ' MARK THE LEGS OF REJECTED TRANSACTIONS
 '------------------------------------------------------------------------------
+        If mNsCount > 0 Then
+            ReDim CountedFor(1 To mNsCount)
+        End If
         For i = 1 To mLegCount
-            If mTx(mLegs(i).TxIndex).Rejected Then
+            t = mLegs(i).TxIndex
+            If mTx(t).Rejected Then
                 mLegs(i).TxRejected = True
                 mLegs(i).Recognised = False
                 If mLegs(i).Valid Then
                     mLegs(i).Messages = AppendText(mLegs(i).Messages, "Transaction rejected")
+                End If
+                n = mLegs(i).NsIndex
+                If n > 0 And n <> mTx(t).NsIndex Then
+                    If CountedFor(n) <> t Then
+                        CountedFor(n) = t
+                        With mNS(n)
+                            .TxCount = .TxCount + 1
+                            .TxRejected = .TxRejected + 1
+                        End With
+                    End If
                 End If
             End If
         Next i

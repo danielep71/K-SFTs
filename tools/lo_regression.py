@@ -131,13 +131,17 @@ def run(out_path: Path) -> list[str]:
 def compare(out_path: Path) -> tuple[int, list[str]]:
     expected = json.loads((ROOT / "tests/derivations/prototype/demo-portfolio.expected.json").read_text())["results"]
     sheet = openpyxl.load_workbook(out_path, data_only=True)["Results"]
-    checks, problems = 0, []
+    checks, problems, seen = 0, [], set()
     for row in range(7, 7 + 2000):
         nsid = sheet.cell(row, 3).value
         if not nsid:
             break
         if nsid not in expected:
             continue
+        if nsid in seen:
+            problems.append(f"{nsid}: more than one Results row")
+            continue
+        seen.add(nsid)
         for column, key in RESULT_COLUMNS.items():
             if key not in expected[nsid]:
                 continue
@@ -147,6 +151,9 @@ def compare(out_path: Path) -> tuple[int, list[str]]:
                 else got == want
             if not same:
                 problems.append(f"{nsid} {key}: calculated {got!r}, expected {want!r}")
+    problems += [f"{nsid}: no Results row" for nsid in sorted(set(expected) - seen)]
+    if checks == 0:
+        problems.append("no Results figure compared")
     return checks, problems
 
 
