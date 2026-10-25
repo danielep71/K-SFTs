@@ -14,8 +14,9 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-The repository is private. Its visibility, and any distribution of its
-content, is decided by the maintainer; the licence does not make it public.
+The repository is public since 2026-10-25, by the maintainer's decision
+([#123](https://github.com/danielep71/K-SFTs/issues/123)). Its visibility,
+and any other distribution of its content, is decided by the maintainer.
 
 ## 🔗 Provenance register
 

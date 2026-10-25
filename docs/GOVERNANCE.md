@@ -159,8 +159,8 @@ seen to enforce on a real pull request is listed under
 
 | Control | Status |
 | --- | --- |
-| Repository visibility | Private. Not to be changed for setup. |
-| Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection are available on private repositories under this plan; no upgrade is required. |
+| Repository visibility | Public since 2026-10-25, by the maintainer's decision ([#123](https://github.com/danielep71/K-SFTs/issues/123)); read back from the API. It was private until then. |
+| Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection apply on public repositories under any plan. |
 | `main` and `release/0.1.0` branches | Verified on 2026-10-23: both exist; `release/0.1.0` was created from `main` at `85b2b3b`. |
 | Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Required check, up-to-date and merge-method rules demonstrated on `release/**` ([#12](https://github.com/danielep71/K-SFTs/issues/12), [below](#demonstrated-enforcement)); the other rules are verified only. |
 | `Repository integrity` check | Configured ([#5](https://github.com/danielep71/K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
