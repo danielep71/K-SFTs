@@ -56,10 +56,10 @@ Use a **Git clone**:
 ```sh
 git clone https://github.com/danielep71/K-SFTs.git
 cd K-SFTs
-git switch release/0.1.0
+git switch release/0.2.0
 ```
 
-`release/0.1.0` is the
+`release/0.2.0` is the
 [active release branch](docs/GOVERNANCE.md#-branches); `main` receives it
 through an approved integration.
 
