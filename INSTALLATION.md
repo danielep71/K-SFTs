@@ -4,8 +4,6 @@ This document is authoritative for **the supported Excel hosts and how the
 VBA source is imported into and exported from Excel**. How the source is
 written is in [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md); where each
 component lives in [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
-Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
-(see [NOTICE.md](NOTICE.md)).
 
 > [!IMPORTANT]
 > **Status on 2026-10-25: working prototype.** The production components

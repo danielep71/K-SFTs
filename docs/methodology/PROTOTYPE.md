@@ -47,7 +47,7 @@ K-SFTs calculates, per netting set of securities financing transactions
    requirement** (8% × RWA).
 
 SA-CCR does not apply to SFTs (CRR Art. 271(1), 273; Basel CRE50/CRE22): the
-derivatives of the same counterparty stay in [K-SACCR](https://github.com/danielep71/VBA-SACCR-Toolkit).
+derivatives of the same counterparty are out of scope.
 Both regimes are supported per netting set: **CRR** (Regulation (EU) No 575/2013,
 consolidated text of 26.06.2026, i.e. with CRR3) and **BCBS** (CRE22 effective
 1 January 2023, CRE20, CRE54).
@@ -147,7 +147,7 @@ and makes the run WHAT-IF.
 | `NO TRANSACTIONS` | No leg refers to it | — |
 
 A layout change (moved column, broken workbook name), an unusable parameter or
-Params table, or no usable netting set stops the run, as in K-SACCR.
+Params table, or no usable netting set stops the run.
 
 <a id="regulatory-parameter-set"></a>
 

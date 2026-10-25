@@ -2,10 +2,8 @@
 
 This document is authoritative for **the project boundary, the project
 profile, where every durable artifact belongs and the boundary between the
-calculation core, the public interface and the Excel host**. Its structure is
-adapted from K-SACCR's `docs/REPOSITORY_STRUCTURE.md` (see
-[NOTICE.md](../NOTICE.md)); none of K-SACCR's calculation content applies here.
-Governance is in [GOVERNANCE.md](GOVERNANCE.md).
+calculation core, the public interface and the Excel host**. Governance is in
+[GOVERNANCE.md](GOVERNANCE.md).
 
 ## 🎯 Scope and status
 
@@ -20,7 +18,7 @@ Comprehensive Method with supervisory volatility adjustments; products,
 collateral and outputs are still
 [open decisions](#-open-product-and-methodology-decisions).
 
-**Out of scope:** derivatives exposure, which K-SACCR covers with SA-CCR;
+**Out of scope:** derivatives exposure under SA-CCR;
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
 the exposure measure, unless a later decision adds them.
 
@@ -210,7 +208,7 @@ it cannot be fixed before the approach, products and outputs are chosen.
 
 No regulatory formula, haircut, factor, bucket or netting assumption is a
 default of this project until a decision below records it, with its source,
-in `docs/methodology/`. In particular, K-SACCR's derivative SA-CCR formulas,
+in `docs/methodology/`. In particular, derivative SA-CCR formulas,
 supervisory factors, asset-class buckets and netting-set assumptions **do not
 apply to SFTs** and are never imported as defaults.
 

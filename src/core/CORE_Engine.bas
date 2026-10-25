@@ -73,8 +73,8 @@ Attribute VB_Name = "CORE_Engine"
 '   M_Main.
 '
 ' KNOWN DEVIATION
-'   As in K-SACCR, this module lives in src/core but reads and writes
-'   worksheets, which the repository structure reserves for src/workbook.
+'   This module lives in src/core but reads and writes worksheets, which
+'   the repository structure reserves for src/workbook.
 '
 ' COMPATIBILITY
 '   Excel VBA; no references beyond the defaults.

@@ -77,8 +77,8 @@ computes the exposure value, with every intermediate amount visible and
 every rule traced to its CRR article and paragraph.
 
 It is built for people who need to **check** an SFT exposure figure rather
-than only produce one. Derivatives exposure is out of scope here: K-SACCR
-covers it with SA-CCR.
+than only produce one. Derivatives exposure, under SA-CCR, is out of scope
+here.
 
 ---
 

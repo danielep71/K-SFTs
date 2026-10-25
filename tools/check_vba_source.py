@@ -7,8 +7,7 @@ only in their homes, each with its role's name prefix and a VB_Name equal to
 its file name; ASCII only; Option Explicit, and Option Private Module where
 required; no Option Base 1, tab or trailing white space; string literals
 closed; forms beside their .frx; LF storage with CRLF checkout; no workbook
-committed but the approved template, which must hold no macros. Adapted from
-K-SACCR; see NOTICE.md.
+committed but the approved template, which must hold no macros.
 """
 
 from __future__ import annotations
