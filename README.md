@@ -235,9 +235,9 @@ The full layout, the dependency direction and the public API boundary are in
 - **Regulatory texts registered, not yet transcribed.** Their formulas and
   tables are read and checked only when the rule that uses them is
   implemented.
-- **Private repository.** Secret scanning, code scanning and private
-  vulnerability reporting are not available; reports go by email
-  ([SECURITY.md](SECURITY.md)).
+- **Security scanning not enabled.** Secret scanning, push protection,
+  code scanning and Dependabot security updates are off; vulnerabilities
+  are reported privately on GitHub or by email ([SECURITY.md](SECURITY.md)).
 - **CI artifacts expire after 30 days.**
 - **Windows desktop Excel only.**
 
