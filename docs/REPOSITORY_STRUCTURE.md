@@ -24,12 +24,15 @@ collateral and outputs are still
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
 the exposure measure, unless a later decision adds them.
 
-**Status on 2026-10-24: repository setup only.** The milestone
-*v0.1.0 - Repo setup* builds tooling, governance and conventions. There is no
-calculation engine, public API, workbook or validated SFT method yet, and
-nothing in this repository should be used to compute exposure. Production
-calculations, numerical certification and workbook packaging belong to later
-milestones.
+**Status on 2026-10-25: working prototype.** *v0.1.0 - Repo setup* built
+tooling, governance and conventions; *v0.2.0 - Prototype setup* adds a
+prototype as it is ([PROTOTYPE.md](methodology/PROTOTYPE.md)). The prototype
+is not the methodology of record and departs from this document where
+[PROTOTYPE.md](methodology/PROTOTYPE.md) lists it, among them `src/core`
+modules that read and write sheets; nothing in this repository should be
+used to compute regulatory exposure. Resolving the departures, production
+calculations, numerical certification and workbook packaging belong to
+later milestones.
 
 <a id="profile-decision"></a>
 

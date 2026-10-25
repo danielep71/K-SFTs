@@ -9,9 +9,11 @@ structure is adapted from K-SACCR's `docs/VBA_HOUSE_STYLE.md` (see
 [NOTICE.md](../NOTICE.md)); none of K-SACCR's components, formulas or
 parameters apply here.
 
-**Status on 2026-10-24:** the only VBA components are the test modules in
-`tests/modules/`; no production component exists yet. These rules apply to
-every component. The `vba-*` gates of `python tools/check.py` enforce the
+**Status on 2026-10-25:** the VBA components are the test modules in
+`tests/modules/` and the five prototype modules in `src/`
+([PROTOTYPE.md](methodology/PROTOTYPE.md)), which pass the gates below but
+depart from the module rules where PROTOTYPE.md lists it: `src/core`
+modules read and write sheets. These rules apply to every component. The `vba-*` gates of `python tools/check.py` enforce the
 mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 of whatever VBA would otherwise make public, and the public API inventory.

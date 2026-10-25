@@ -56,8 +56,9 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
-Planned as 0.1.0, *Repo setup*: repository infrastructure only. It contains no
-SFT calculation, public API or workbook.
+No version is planned yet. This holds *v0.1.0 - Repo setup*, the repository
+infrastructure, closed without a release (#13), and *v0.2.0 - Prototype
+setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
 
@@ -96,6 +97,13 @@ SFT calculation, public API or workbook.
 - Repository traffic history kept beyond GitHub's 14 days
   ([docs/TRAFFIC.md](docs/TRAFFIC.md); #36).
 - This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
+- The SFT prototype, as it is: E\* of each netting set under the Financial
+  Collateral Comprehensive Method with supervisory haircuts, its risk weight,
+  RWA and own funds, in an 11-sheet workbook template with a demo portfolio;
+  eight `SFT_*` worksheet functions; an independent Python reference and a
+  LibreOffice regression. It is not the methodology of record, and departs
+  from recorded decisions where
+  [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135).
 
 ### Validation
 
@@ -107,13 +115,23 @@ SFT calculation, public API or workbook.
 - On the same host, `tools/Sync-KSFT-VBA.ps1` imported the test modules into
   a workbook built from the template, in development mode, and the example
   suite passed in it (#102).
+- The prototype at `fbaee34`, built on the same host with
+  `tools/Sync-KSFT-VBA.ps1`, compiled and ran on the demo portfolio: the
+  TestCatalogue's 107 checks against the reference and the 25 formula tests
+  passed, the example suite passed, and `tools/check_excel_run.py` passed on
+  the evidence (#135). The expected values are illustrative: an independent
+  implementation of the specification, not published worked examples.
 
 ### Known limitations
 
 - Excel has been run on one host only; 32-bit Office and other builds are
   untested.
-- There is no calculation, public API, workbook or numerical test case; the
-  product, collateral and output decisions are open
-  ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)).
+- The calculation is a prototype, not the methodology of record. Its
+  departures (a BCBS regime, a QCCP class, the open product, collateral and
+  output decisions, formulas not yet checked against the registered copies,
+  no test case in the format of TEST_CASES.md, `src/core` modules that touch
+  Excel) are left to later milestones
+  ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)).
+- There is no production workbook.
 
 [Unreleased]: https://github.com/danielep71/K-SFTs/commits/main
