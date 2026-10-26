@@ -4,11 +4,11 @@ Computes, for every netting set of a fixture, the fully adjusted exposure
 value E* of securities financing transactions under the financial collateral
 comprehensive method with supervisory haircuts, the risk weight, the
 risk-weighted exposure amount and the own funds requirement, following the
-specification in docs/methodology/README.md:
+specification in docs/methodology/PROTOTYPE.md:
 
   single transaction (no eligible master netting agreement)
       E* = max(0, sum_i E_i (1 + H_i) - sum_j C_j (1 - H_j - Hfx_j))
-                                            [CRE22.46; CRR Art. 223(5)]
+                                    [CRE22.46; CRR Art. 223(2), (3), (5)]
   netting set under an eligible master netting agreement
       E* = max(0, sum E - sum C + 0.4 net + 0.6 gross / sqrt(N)
                   + sum_k |E_k^fx| Hfx)       [CRE22.65; CRR Art. 220(3)]
@@ -22,7 +22,7 @@ TestCatalogue sheet compares the workbook with it.
 
 Usage:
   python tests/derivations/sft_reference.py              # print a summary
-  python tests/derivations/sft_reference.py --write      # write tests/derivations/prototype
+  python tests/derivations/sft_reference.py --write      # write tests/derivations/prototype/demo-portfolio.expected.json
 """
 
 from __future__ import annotations

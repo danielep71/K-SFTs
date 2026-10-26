@@ -3,18 +3,19 @@
 Not a substitute for Excel: LibreOffice runs the exported VBA with
 `Option VBASupport 1`, which is close to, but not, the VBE. It is the check
 that can run without Excel (CI, Linux): it loads the template, inserts the
-modules of src/ into the document's Basic library, runs CORE_Engine.Calculate
-and every SFT_* unit test, and compares Results with
+modules of src/ into the document's Basic library, runs M_Main.RunSFT_Silent
+(CORE_Engine.Calculate) and every SFT_* unit test, and compares Results with
 tests/derivations/prototype/demo-portfolio.expected.json.
 
 Harness-only shims, applied to an in-memory copy of the source, never to the
-files: `vbObjectError + n` constants are replaced by their value (LibreOffice
-does not accept that constant expression), `Option Private Module` is removed,
+files: `Attribute VB_*` lines are dropped, `vbObjectError + n` constants are
+replaced by their value (LibreOffice does not accept that constant
+expression), `Option Private Module` is removed,
 `Application.CalculationState <> xlDone` becomes False and `Debug.Print` is
 dropped (neither exists in LibreOffice).
 
 Usage: python tools/lo_regression.py [--keep OUT.xlsx]
-Needs LibreOffice (soffice) and its Python UNO bridge.
+Needs LibreOffice (soffice), its Python UNO bridge and openpyxl.
 """
 
 from __future__ import annotations

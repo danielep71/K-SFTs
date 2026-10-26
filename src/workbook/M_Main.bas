@@ -13,6 +13,7 @@ Attribute VB_Name = "M_Main"
 '   ClearOutputs: empty every output sheet.
 '   RunSFT_Silent: RunSFT for automation. Returns a machine-readable result
 '   line and raises errors instead of showing them.
+'   gSilent: Public flag for silent mode, set by RunSFT_Silent.
 '   The sheet buttons call the first three by name. These macros are not
 '   listed in docs/PUBLIC_API.txt.
 '
@@ -31,13 +32,16 @@ Attribute VB_Name = "M_Main"
 '   The primary error is copied before cleanup.
 '   Each setting is restored by its own helper, so one failed restoration
 '   does not stop the others, and a cleanup failure is reported separately
-'   from the primary error. With gSilent False the outcome is shown in a
-'   message box; with gSilent True it is raised to the caller. Errors in
-'   the inputs are not VBA errors: the engine lists them on Checks.
+'   from the primary error. With gSilent False the outcome, or the error,
+'   is shown in a message box; with gSilent True an error is raised to the
+'   caller, and the outcome is printed to the Immediate window and returned
+'   as the result line. Errors in the inputs are not VBA errors: the engine
+'   lists them on Checks.
 '
 ' KNOWN DEVIATION
-'   This standard module lives in src/workbook because the sheet buttons
-'   call it.
+'   This module calls CORE_Engine and CORE_Util in src/core directly; the
+'   repository structure routes src/workbook through the src/modules
+'   facade, which has no engine entry point yet.
 '
 ' COMPATIBILITY
 '   Excel VBA; no references beyond the defaults.
@@ -215,7 +219,8 @@ Private Function ExecuteOperation( _
 '
 ' RETURNS
 '   The result line built by ReportOutcome; empty when the operation raised
-'   an error or was refused because another was running.
+'   an error or was refused because another was running (in silent mode
+'   these are raised instead).
 '
 ' STATE OWNERSHIP
 '   Captures calculation mode, events and screen updating before changing
@@ -227,7 +232,7 @@ Private Function ExecuteOperation( _
 '   with it, or on its own when the operation succeeded.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -515,14 +520,14 @@ Private Function ReportOutcome( _
 '
 ' RETURNS
 '   "OK" or "STOPPED", the run class, the error and warning counts and the
-'   totals per regime, separated by " | ".
+'   totals per regime, separated by " | "; "OK | cleared" for OP_CLEAR.
 '
 ' ERROR POLICY
 '   A cleanup failure is raised in silent mode as ERR_CLEANUP_FAILED, or
 '   shown with the outcome otherwise.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 

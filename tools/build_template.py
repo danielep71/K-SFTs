@@ -1,6 +1,7 @@
 """Build the macro-free K-SFTs workbook template.
 
-Writes src/workbook/SFT_Template.xlsx from the fixtures, in the layout that
+Writes src/workbook/SFT_Template.xlsx from the demo portfolio, regulatory tables
+and expected values in tests/derivations/prototype/, in the layout that
 src/core/CORE_Config.bas describes: every table in column C, located through
 the workbook name of its first header cell; every parameter read through the
 workbook name equal to its code. The template holds no VBA: save it as .xlsm
@@ -166,7 +167,7 @@ README = [
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
      "5 business days. MARGINLEND: other capital-market-driven transaction, 10 business days. A netting set "
-     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2)]."),
+     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2) sets the periods by type only]."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
@@ -174,7 +175,7 @@ README = [
      "agreement."),
     ("Eligibility", "A leg whose haircut key is not in the haircut table is not eligible: lent, it takes "
      "NonEligibleHaircut (30%) [CRE22.54; Art. 224(4)]; received, it is not recognised as collateral. "
-     "Unrated debt of an institution is treated as CQS 2-3 [CRE22.39(d); Art. 197(4), 224(6)]."),
+     "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
     ("Methodology (per netting set)", None),
     ("Netting (eligible MNA)", "E* = max(0, sum E - sum C + 0.4 x net + 0.6 x gross / sqrt(N) + sum |E_fx| x "
      "Hfx); net = |sum E_s H_s|, gross = sum |E_s| H_s over security issues s, N = issues with |E_s| at "
@@ -188,8 +189,8 @@ README = [
      "transactions in the previous quarter or illiquid collateral; doubled after margin disputes; an "
      "override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
-     "cash and central government securities, one currency, daily remargining) and takes the rest as "
-     "declared [CRE22.60; CRR Art. 227]."),
+     "cash and central government securities, one currency, daily remargining) and takes the rest, "
+     "including the 0% risk weight of the securities, as declared [CRE22.60, 22.36; CRR Art. 227]."),
     ("Capital", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA [CRE22.48, RBC20.1; CRR "
      "Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when unrated, short-term "
      "weights when every transaction has an original maturity of 3 months or less [CRE20.18-20.21; Art. "
@@ -216,7 +217,8 @@ README = [
     ("SFT_NetExposure(Es, Hs)", "Net exposure |sum E_s H_s|"),
     ("SFT_GrossExposure(Es, Hs)", "Gross exposure sum |E_s| H_s"),
     ("SFT_IssueCount(Es, [Threshold])", "N: issues of at least one tenth of the largest"),
-    ("SFT_ExposureNetted(SumE, SumC, Net, Gross, N, [FXTerm], [NetWeight], [GrossWeight])", "E* of a netting set"),
+    ("SFT_ExposureNetted(SumE, SumC, NetExposure, GrossExposure, N, [FXTerm], [NetWeight], [GrossWeight])",
+     "E* of a netting set"),
     ("SFT_CapitalRequirement(EAD, RiskWeight, [CapitalRatio])", "Own funds requirement; RWA with ratio 1"),
     ("Scope and limitations", None),
     ("Not covered", "SA-CCR and derivatives; internal models (IMM, VaR, own-estimate haircuts); "
@@ -224,9 +226,10 @@ README = [
      "SFTs (CRE56, not in the CRR); maturity mismatch; credit risk mitigation on the exposure side other "
      "than collateral; cross-product netting with derivatives; CVA; the SCRA sovereign floor; capital "
      "buffers and Pillar 2."),
-    ("Status", "Prototype. Implements the regulatory set CRE22-CRR-2026-10-24, checked against CRE22 "
-     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026. Expected values are reproduced by "
-     "an independent Python derivation, not by published worked examples."),
+    ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
+     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026; its formulas and tables are not "
+     "yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
+     "reproduced by an independent Python derivation, not by published worked examples."),
     ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
     ("Code", None),
@@ -695,8 +698,8 @@ bc.set_tab_color(TAB_DOC)
 banner(bc, "Basel vs CRR", 7)
 for c, w in enumerate([22, 46, 46, 14, 46, 26]):
     bc.set_column(2 + c, 2 + c, w)
-bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026, "
-         "checked on 2026-10-24.", F["note"])
+bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026; "
+         "not yet checked against the registered copies.", F["note"])
 bc.set_row(2, 30)
 bc.set_row(4, 34)
 for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in both?", "Workbook treatment",
@@ -705,8 +708,8 @@ for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in bot
 BVC = [
     ("Exposure method", "Comprehensive approach with supervisory haircuts; VaR models and IMM as alternatives; "
      "SA-CCR does not apply to SFTs.", "Financial collateral comprehensive method with supervisory volatility "
-     "adjustments; own estimates, VaR and IMM as alternatives.", "Yes", "Supervisory haircuts only.",
-     "CRE22.40-22.65; CRR Art. 220-227, 271(1)"),
+     "adjustments (Art. 223(6); Art. 225, own estimates, is deleted); VaR and IMM as alternatives.", "Yes",
+     "Supervisory haircuts only.", "CRE22.40-22.65, CRE51.8; CRR Art. 220-227, 271(1)"),
     ("Haircut table", "10-day haircuts by rating, residual maturity and issuer (sovereign, other, "
      "securitisation).", "Art. 224 Table 1 with 20-, 10- and 5-day columns; the 10-day column equals CRE22.49 "
      "since CRR3.", "Yes", "One H10 table on Params, scaled by the holding period.", "CRE22.49; Art. 224 Table 1"),
