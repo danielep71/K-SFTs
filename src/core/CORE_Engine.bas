@@ -13,7 +13,7 @@ Attribute VB_Name = "CORE_Engine"
 '       E* = max(0, sum E - sum C + 0.4 net + 0.6 gross / sqrt(N)
 '                   + sum_k |E_k^fx| Hfx)               [CRR Art. 220(3)]
 '     without one, per transaction                          [CRE22.46]
-'       E* = max(0, E (1 + He) - C (1 - Hc - Hfx))      [CRR Art. 223(5)]
+'       E* = max(0, E (1 + He) - C (1 - Hc - Hfx))  [CRR Art. 223(2)-(5)]
 '     haircuts  H = H10 sqrt((N_R + T_M - 1) / 10)  [CRE22.59; Art. 226]
 '     RWA = E* x RW;  own funds requirement = 8% x RWA
 '
@@ -29,14 +29,15 @@ Attribute VB_Name = "CORE_Engine"
 ' FLOW
 '   Calculate runs, in order:
 '     ClearOutputSheets, ValidateSchema: clear old results, check the layout;
-'     LoadParams, LoadHaircutTable, LoadRiskWeightTable, LoadFXTable,
+'     LoadParams, LoadFXTable, LoadHaircutTable, LoadRiskWeightTable,
 '     LoadNettingSets: read the inputs;
 '     ClassifyRun: regulatory or what-if run;
 '     LoadLegs: one row per leg, validated, valued and keyed to a haircut;
 '     BuildTransactions: legs grouped into transactions, which are checked
 '     as a whole and rejected as a whole;
-'     CheckNettingSets: zero-haircut conditions, short-term status and the
-'     risk-weight key of each netting set;
+'     CheckNettingSets: transaction types, short-term status, zero-haircut
+'     conditions, issue consistency, holding period override, risk-weight
+'     key and status of each netting set;
 '     ComputeNettingSets: holding period, haircuts, positions and E*;
 '     WriteResults, WritePositions, WriteLegCalc, WriteChecks: outputs;
 '     WriteRunInfo: the run summary.
@@ -45,8 +46,8 @@ Attribute VB_Name = "CORE_Engine"
 '   its key to its array position.
 '
 ' PUBLIC SURFACE
-'   None outside this VBA project. Calculate and the run counters are
-'   Public for M_Main; Option Private Module keeps them off the supported
+'   None outside this VBA project. Calculate, TotalsText, RunClass and the
+'   run counters are Public for M_Main; Option Private Module keeps them off the supported
 '   external surface.
 '
 ' DEPENDENCIES
@@ -74,13 +75,15 @@ Attribute VB_Name = "CORE_Engine"
 '
 ' KNOWN DEVIATION
 '   This module lives in src/core but reads and writes worksheets, which
-'   the repository structure reserves for src/workbook.
+'   the repository structure reserves for src/workbook, calls SFT_Formulas
+'   in src/modules, and keeps module state (MODULE STATE below), which the
+'   house style excludes from src/core.
 '
 ' COMPATIBILITY
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '
 ' AUTHOR
 '   Daniele Penza
@@ -155,7 +158,7 @@ Attribute VB_Name = "CORE_Engine"
         Side              As String     'LENT or RECEIVED
         Sign              As Long       '+1 lent, -1 received
         Asset             As String     'Asset type
-        IssueKey          As String     'Issue ID, upper case; currency for cash
+        IssueKey          As String     'Issue ID, upper case; CASH and the currency for cash
         Issuer            As String     'Issuer type of a debt security
         CQS               As Long       'Credit quality step of the issue; 0 unrated
         SecMatSerial      As Double     'Security maturity date serial
@@ -208,14 +211,14 @@ Attribute VB_Name = "CORE_Engine"
     Private Type tPosition
         NsIndex           As Long       'Netting set
         Kind              As String     'ISSUE or CURRENCY
-        Key               As String     'Issue ID or currency as entered
+        Key               As String     'Issue ID or currency, upper case
         Asset             As String     'Asset type; blank for a currency
         Ccy               As String     'Currency
         Legs              As Long       'Legs aggregated
         Lent              As Double     'Value lent
         Received          As Double     'Value received
         H                 As Double     'Scaled haircut, or the currency haircut
-        Signature         As String     'Description of an issue's first leg
+        Signature         As String     'Not used
         Counted           As Boolean    'Counted in N
     End Type
 
@@ -272,7 +275,7 @@ Attribute VB_Name = "CORE_Engine"
         Private mErrCount      As Long
         Private mWarnCount     As Long
         Private mRunClass      As String     'RUN_REGULATORY, RUN_WHATIF or ""
-        Private mDeviations    As Long       'Parameters that differ from the set
+        Private mDeviations    As Long       'Differences from the regulatory set
         Private mTxUsed        As Long       'Transactions in VALID netting sets
         Private mLegsUsed      As Long       'Legs recognised in VALID netting sets
         Private mWithheld      As Long       'Netting sets whose E* is withheld
@@ -309,9 +312,11 @@ Public Function Calculate( _
 '
 ' RETURNS
 '   True when the run completed. Individual transactions may still have
-'   been rejected; the Checks sheet lists them. False when the layout is not
-'   as expected, or a parameter, a Params table or the netting sets could
-'   not be loaded.
+'   been rejected; the Checks sheet lists them. False when an input sheet,
+'   input table or Params layout is not as expected, or a parameter, a
+'   Params table or the netting sets could not be loaded. A missing output
+'   sheet or output header name raises from ClearOutputSheets before the
+'   layout is checked.
 '
 ' ERROR POLICY
 '   Raises ERR_CHECKS_WRITE when the Checks sheet cannot be written, after
@@ -323,7 +328,7 @@ Public Function Calculate( _
 '   Resets all module state, then fills it for this run.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -755,11 +760,12 @@ Private Function ValidateSchema() As Boolean
 '   a header that differs means a column was inserted, deleted or moved.
 '
 ' RETURNS
-'   True when the layout is as expected; otherwise False with every
-'   problem logged, and the run stops.
+'   True when the layout is as expected; otherwise False with the problems
+'   found logged (missing sheets first; then the first header mismatch of
+'   each table), and the run stops.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -890,7 +896,7 @@ Private Function HeaderProblems( _
 '   0 when they match; 1 with the first difference logged otherwise.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -944,7 +950,7 @@ Private Function NamedHeaderProblems( _
 '   0 when they match; 1 with the problem logged otherwise.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -1120,14 +1126,15 @@ Private Function LoadFXTable() As Boolean
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read the FX table below its header down to the first blank currency:
-'   units of reporting currency per unit of each currency.
+'   units of reporting currency per unit of each currency. A currency cell
+'   holding a worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable and the reporting currency is listed at
 '   1; otherwise False with each problem logged, and the run stops.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1148,10 +1155,13 @@ Private Function LoadFXTable() As Boolean
         ReDim mFxCcy(1 To 16)
         ReDim mFxRate(1 To 16)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, 0).Value)
+        Do While Not IsBlankCell(Header.Offset(r, 0).Value) Or IsError(Header.Offset(r, 0).Value)
             Ccy = UTxt(Header.Offset(r, 0).Value)
             Rate = Header.Offset(r, 2).Value2
-            If Len(Ccy) <> 3 Then
+            If IsError(Header.Offset(r, 0).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "FX currency holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf Len(Ccy) <> 3 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Ccy, "FX currency must be a 3-letter code.", Header.Row + r
                 Problems = Problems + 1
             ElseIf KeyIndex(mFxIndex, Ccy) > 0 Then
@@ -1200,7 +1210,8 @@ Private Function LoadHaircutTable() As Boolean
 ' PURPOSE
 '   Read the supervisory haircut table below its header down to the first
 '   blank key: key, H10 and the regimes each row applies to. A key that is
-'   not in the table makes the asset not eligible.
+'   not in the table makes the asset not eligible. A key cell holding a
+'   worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable; otherwise False and the run stops.
@@ -1209,7 +1220,7 @@ Private Function LoadHaircutTable() As Boolean
 '   CRE22.49; CRR Art. 224 Tables 1 and 3.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1231,11 +1242,14 @@ Private Function LoadHaircutTable() As Boolean
         ReDim mHcValues(1 To 64)
         ReDim mHcRegimes(1 To 64)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, HC_KEY - 1).Value)
+        Do While Not IsBlankCell(Header.Offset(r, HC_KEY - 1).Value) Or IsError(Header.Offset(r, HC_KEY - 1).Value)
             Key = UTxt(Header.Offset(r, HC_KEY - 1).Value)
             Value = Header.Offset(r, HC_H10 - 1).Value2
             Regimes = UTxt(Header.Offset(r, HC_REGIMES - 1).Value)
-            If KeyIndex(mHcIndex, Key) > 0 Then
+            If IsError(Header.Offset(r, HC_KEY - 1).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "Haircut key holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf KeyIndex(mHcIndex, Key) > 0 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Haircut key listed twice.", Header.Row + r
                 Problems = Problems + 1
             ElseIf Not IsNum(Value) Then
@@ -1277,7 +1291,8 @@ Private Function LoadRiskWeightTable() As Boolean
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read the risk-weight table below its header down to the first blank
-'   key: key, risk weight and the regimes each row applies to.
+'   key: key, risk weight and the regimes each row applies to. A key cell
+'   holding a worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable; otherwise False and the run stops.
@@ -1286,7 +1301,7 @@ Private Function LoadRiskWeightTable() As Boolean
 '   CRE20.7, 20.18-20.21, CRE54.7; CRR Art. 114, 120-122, 306(1)(a).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1308,11 +1323,14 @@ Private Function LoadRiskWeightTable() As Boolean
         ReDim mRwValues(1 To 64)
         ReDim mRwRegimes(1 To 64)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, RW_KEY - 1).Value)
+        Do While Not IsBlankCell(Header.Offset(r, RW_KEY - 1).Value) Or IsError(Header.Offset(r, RW_KEY - 1).Value)
             Key = UTxt(Header.Offset(r, RW_KEY - 1).Value)
             Value = Header.Offset(r, RW_WEIGHT - 1).Value2
             Regimes = UTxt(Header.Offset(r, RW_REGIMES - 1).Value)
-            If KeyIndex(mRwIndex, Key) > 0 Then
+            If IsError(Header.Offset(r, RW_KEY - 1).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "Risk-weight key holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf KeyIndex(mRwIndex, Key) > 0 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Risk-weight key listed twice.", Header.Row + r
                 Problems = Problems + 1
             ElseIf Not IsNum(Value) Then
@@ -1436,14 +1454,15 @@ Private Sub ClassifyRun()
 '                                 ClassifyRun
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Classify the run as REGULATORY, when every parameter, the haircut table
-'   and the risk-weight table equal the regulatory parameter set REF_SET_ID
-'   and no risk weight is overridden (the overrides are checked when the
-'   netting sets are read), or WHAT-IF, listing each difference on Checks
-'   as INFO.
+'   Classify the run as REGULATORY, when every parameter compared (all but
+'   the reporting date, reporting currency, default regime and DaysPerYear),
+'   the haircut table and the risk-weight table equal the regulatory
+'   parameter set REF_SET_ID and no risk weight is overridden (the overrides
+'   are read with the netting sets, which are loaded first), or WHAT-IF,
+'   listing each difference on Checks as INFO.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1691,7 +1710,7 @@ Private Sub ReadNettingSet( _
 '   SheetRow: the sheet row, for the messages.
 '
 ' UPDATED
-'   2026-10-25
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1816,7 +1835,9 @@ Private Sub ReadNettingSet( _
 '------------------------------------------------------------------------------
 ' WORKSHEET ERROR VALUES
 '------------------------------------------------------------------------------
-    'An error value would read as a blank cell and take the field's default.
+    'The text fields, the CQS and the risk weight override would read an
+    'error value as blank and take their default; the Y/N and numeric
+    'fields already reject it, so for them this is a second message.
         Found = ErrorColumns(Block, r, NS_HEADERS, 0)
         If Len(Found) > 0 Then
             NsError NsIndex, "Worksheet error value in: " & Found
@@ -1892,11 +1913,12 @@ Private Sub ReadLeg( _
 '                                   ReadLeg
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Read and check the fields of one leg; every problem is an ERROR that
-'   rejects the leg and, through BuildTransactions, its transaction.
+'   Read and check the fields of one leg; every input error is an ERROR
+'   that rejects the leg and, through BuildTransactions, its transaction.
+'   A valid leg is then keyed to its haircut (FindHaircut).
 '
 ' UPDATED
-'   2026-10-25
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2162,15 +2184,16 @@ Private Sub FindHaircut( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Build the haircut-table key of a valid leg, and set its H10 and
-'   eligibility. A leg whose key is not in the table for its regime is not
-'   eligible: lent, it takes NonEligibleHaircut; received, it is not
-'   recognised as collateral.
+'   eligibility. A leg other than a fund whose key is not in the table for
+'   its regime is not eligible: lent, it takes NonEligibleHaircut; received,
+'   it is not recognised as collateral. A fund is eligible with the H10
+'   entered on its leg.
 '
 ' REFERENCE
 '   CRE22.49, 22.54; CRR Art. 197, 224(1), (4)-(6).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2220,7 +2243,7 @@ Private Sub FindHaircut( _
                             If .Issuer = IS_INST Then
                                 Band = "CQS23"
                                 LegNote LegIndex, SEV_INFO, "Unrated institution debt treated as CQS 2-3: the " & _
-                                        "conditions of CRE22.39(d) / CRR Art. 197(4) are assumed met"
+                                        "conditions of CRE22.34(3)(b) / CRR Art. 197(4) are assumed met"
                             End If
                     End Select
                     If Band = "CQS4" Then
@@ -2315,7 +2338,7 @@ Private Sub BuildTransactions()
 '   without its legs.
 '
 ' UPDATED
-'   2026-10-25
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2323,7 +2346,7 @@ Private Sub BuildTransactions()
 ' DECLARE
 '------------------------------------------------------------------------------
     Dim LegInvalid()   As Boolean    'Per transaction: some leg is invalid
-    Dim CountedFor()   As Long       'Per netting set: last rejected transaction counted
+    Dim RejectedKeys   As Collection 'Transaction|netting set pairs counted as rejected
     Dim t              As Long       'Transaction
     Dim i              As Long       'Leg
     Dim Ns             As Long       'Netting set
@@ -2376,11 +2399,9 @@ Private Sub BuildTransactions()
         Next t
 
 '------------------------------------------------------------------------------
-' MARK THE LEGS OF REJECTED TRANSACTIONS
+' MARK THE LEGS OF REJECTED TRANSACTIONS AND COUNT THEM IN THEIR OTHER NETTING SETS
 '------------------------------------------------------------------------------
-        If mNsCount > 0 Then
-            ReDim CountedFor(1 To mNsCount)
-        End If
+        Set RejectedKeys = New Collection
         For i = 1 To mLegCount
             t = mLegs(i).TxIndex
             If mTx(t).Rejected Then
@@ -2391,8 +2412,8 @@ Private Sub BuildTransactions()
                 End If
                 Ns = mLegs(i).NsIndex
                 If Ns > 0 And Ns <> mTx(t).NsIndex Then
-                    If CountedFor(Ns) <> t Then
-                        CountedFor(Ns) = t
+                    If KeyIndex(RejectedKeys, t & "|" & Ns) = 0 Then
+                        KeyAdd RejectedKeys, t & "|" & Ns, 1
                         With mNS(Ns)
                             .TxCount = .TxCount + 1
                             .TxRejected = .TxRejected + 1
@@ -2572,11 +2593,11 @@ Private Sub CheckNettingSets()
 ' PURPOSE
 '   For every netting set: its transaction types, whether every transaction
 '   is short-term, the zero-haircut conditions, the consistency of each
-'   security issue across its legs, the risk-weight key, and then its
-'   status.
+'   security issue across its legs, the holding period override, the
+'   risk-weight key, and then its status.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2638,7 +2659,7 @@ Private Sub CheckZeroHaircut()
 '   CRE22.60, 22.36-22.37; CRR Art. 227.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2646,7 +2667,7 @@ Private Sub CheckZeroHaircut()
 ' DECLARE
 '------------------------------------------------------------------------------
     Dim Failures()   As String    'Per netting set: conditions not met
-    Dim FirstCcy()   As String    'Per netting set: currency of the first recognised leg
+    Dim FirstCcy()   As String    'Per netting set: currency the next leg is compared with
     Dim Ns           As Long      'Netting set
     Dim i            As Long      'Leg
 
@@ -2758,11 +2779,14 @@ Private Sub CheckHoldingOverride( _
 '                             CheckHoldingOverride
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Warn when a holding period override is shorter than the minimum that
-'   applies to the netting set: the override can only lengthen it.
+'   Warn when a holding period override is shorter than the minimum of the
+'   netting set's transaction types taken together: the override can only
+'   lengthen it. Without netting the minimum is set per transaction, so an
+'   override between the repo-style and the capital-market minimum still
+'   lengthens the repo-style transactions.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2805,7 +2829,7 @@ Private Sub FindRiskWeight( _
 '   CRE20.7, 20.18-20.21, CRE54.7; CRR Art. 114, 120-122, 306(1)(a).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -2877,7 +2901,7 @@ Private Sub SetStatus( _
 '   set receives an exposure value.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
         With mNS(Ns)
@@ -2915,7 +2939,7 @@ Private Sub ComputeNettingSets()
 '   funds requirement, and the totals per regime.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -2950,8 +2974,9 @@ Private Sub ComputeNettingSets()
 '------------------------------------------------------------------------------
 ' LEGS
 '------------------------------------------------------------------------------
-    'Every leg of a known netting set gets its haircut, so that LegCalc
-    'shows it; only recognised legs of VALID netting sets enter the sums.
+    'Every leg of a known netting set gets its haircut. LegCalc shows it for
+    'the recognised legs of transactions not rejected; only recognised legs
+    'of VALID netting sets enter the sums.
         For i = 1 To mLegCount
             Ns = mLegs(i).NsIndex
             If Ns > 0 Then
@@ -2965,9 +2990,10 @@ Private Sub ComputeNettingSets()
                     If Ns = mTx(t).NsIndex Then
                         ApplyHaircut i, mTx(t).HoldingBD, mTx(t).LentCcy
                     Else
-                    'A leg filed under another netting set than its first leg: its
-                    'transaction is rejected and has no holding period of its own,
-                    'so LegCalc shows the haircut of the leg's netting set.
+                    'A leg filed under another netting set than its transaction's
+                    'first leg: the transaction is rejected, and any holding period
+                    'it has is the first leg's netting set's, so the leg takes its
+                    'own. The haircut is neither shown on LegCalc nor summed.
                         ApplyHaircut i, HoldingFor(Ns, mTx(t).TxType <> TT_MARGINLEND, _
                                                    mTx(t).TxType = TT_MARGINLEND), mTx(t).LentCcy
                     End If
@@ -3024,10 +3050,11 @@ Private Function MinimumHolding( _
 '   transactions, and the longer of the two when both are present.
 '
 ' REFERENCE
-'   CRE22.57-22.58; CRR Art. 224(2).
+'   CRE22.57-22.58; CRR Art. 224(2). The rule for both present is in
+'   CRE22.58 only; the CRR does not state it (PROTOTYPE.md, assumption 1).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
         If CapitalMarket And RepoStyle Then
@@ -3060,7 +3087,7 @@ Private Function HoldingFor( _
 '   CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
         With mNS(Ns)
@@ -3133,7 +3160,7 @@ Private Sub AddToPositions( _
 '   the position of its issue.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3183,7 +3210,7 @@ Private Function PositionFor( _
 '   Index of a position of a netting set, created when new.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3293,7 +3320,7 @@ Private Sub FinishNetted()
 '   CRE22.62-22.65; CRR Art. 220.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3358,7 +3385,7 @@ Private Sub FinishOneNetted( _
 '   CRE22.64-22.65; CRR Art. 220(3).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3455,7 +3482,7 @@ Private Sub FinishSingles()
 '   CRE22.46, 22.55; CRR Art. 223.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3577,7 +3604,7 @@ Private Sub WriteResults()
 '   that is not VALID shows its identity and status only.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
@@ -3662,12 +3689,12 @@ Private Sub WritePositions()
 '                                WritePositions
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Write the Positions sheet: for a netting set with netting, one row per
-'   security issue and per currency; without netting, one row per
-'   transaction.
+'   Write the Positions sheet: for a VALID netting set with netting, one row
+'   per security issue and per currency; without netting, one row per
+'   transaction not rejected, filed under its first leg's netting set.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 

@@ -166,8 +166,9 @@ A VBA `Public` declaration is not automatically supported API.
 
 ### Inventory convention
 
-`docs/PUBLIC_API.txt` is the inventory of supported declarations. It has no
-entries yet. Each supported declaration gets two lines:
+`docs/PUBLIC_API.txt` is the inventory of supported declarations. It lists
+the prototype's eight `SFT_*` functions. Each supported declaration gets two
+lines:
 
 ```text
 <component><TAB><kind><TAB><name>

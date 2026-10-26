@@ -22,6 +22,7 @@ with these departures; each is resolved in a later milestone
 | Formulas and tables transcribed from CRR Art. 220-227 and CRE22 | Source register: formulas and tables not yet transcribed or checked against the registered copies | Check against `sources/` with page locators |
 | Demo expected values in `tests/derivations/prototype/` | Test cases in the format of [TEST_CASES.md](TEST_CASES.md) | Convert to `tests/fixtures/` and `tests/expected/` |
 | `CORE_Engine` and `CORE_Util` read and write sheets | `src/core/` never touches Excel | Split into core and host glue |
+| `CORE_Engine` calls `SFT_Formulas` in `src/modules/`, which holds the formulas, keeps module-level run state, and `M_Main` calls it directly | The dependency direction of [REPOSITORY_STRUCTURE.md](../REPOSITORY_STRUCTURE.md#-dependency-direction) | Move the formulas to the core and route the workbook through the facade |
 
 ## Contents
 
@@ -46,7 +47,7 @@ K-SFTs calculates, per netting set of securities financing transactions
 3. the **risk-weighted exposure amount** (RWA = E\* × RW) and the **own funds
    requirement** (8% × RWA).
 
-SA-CCR does not apply to SFTs (CRR Art. 271(1), 273; Basel CRE50/CRE22): the
+SA-CCR does not apply to SFTs (CRR Art. 271(1), 273; Basel CRE51.8): the
 derivatives of the same counterparty are out of scope.
 Both regimes are supported per netting set: **CRR** (Regulation (EU) No 575/2013,
 consolidated text of 26.06.2026, i.e. with CRR3) and **BCBS** (CRE22 effective
@@ -84,13 +85,13 @@ Hfx = 8%  × sqrt((N_R + T_M − 1) / 10)                         [CRE22.52; Art
 - **Eligibility.** A leg whose key is not in the table for its regime is not
   eligible. Lent, it takes `NonEligibleHaircut` (30%, scaled) [CRE22.54;
   Art. 224(4)]; received, it is **not recognised**: excluded from C and from the
-  positions. Unrated debt of an institution is treated as CQS 2-3 [CRE22.49
-  (unrated bank securities); Art. 197(4), 224(6)].
+  positions. Unrated debt of an institution is treated as CQS 2-3
+  [CRE22.34(3)(b), 22.49 (unrated bank securities); Art. 197(4), 224(6)].
 - **0% haircut** (declared per netting set): H = Hfx = 0. The engine checks the
   conditions visible in the inputs — repo-style only, cash and eligible central
   government debt, one currency, daily remargining — and takes the others
-  (core market participant, documentation, settlement) as declared
-  [CRE22.60, 22.36-22.37; Art. 227].
+  (the 0% risk weight of the securities, core market participant,
+  documentation, settlement) as declared [CRE22.60, 22.36-22.37; Art. 227].
 
 ### Exposure value
 
@@ -198,7 +199,7 @@ limited to one of them.
 | --- | --- | --- | --- |
 | Netted exposure value | `SFT_ExposureNetted`, `CORE_Engine.FinishOneNetted` | Art. 220(3) | CRE22.64-22.65 |
 | Net and gross exposure, N | `SFT_NetExposure`, `SFT_GrossExposure`, `SFT_IssueCount` | Art. 220(3) | CRE22.65 |
-| Single-transaction exposure value | `SFT_ExposureSingle`, `CORE_Engine.FinishSingles` | Art. 223(2), (5) | CRE22.46, 22.55 |
+| Single-transaction exposure value | `SFT_ExposureSingle`, `CORE_Engine.FinishSingles` | Art. 223(2), (3), (5) | CRE22.46, 22.55 |
 | Haircut scaling | `SFT_ScaledHaircut`, `CORE_Engine.ApplyHaircut` | Art. 226 | CRE22.59 |
 | Holding period | `SFT_HoldingPeriod`, `CORE_Engine.HoldingFor` | Art. 224(2), 285(3)-(4) | CRE22.57-22.58 |
 | Haircut key and eligibility | `CORE_Engine.FindHaircut` | Art. 197, 224(1), (4)-(6) | CRE22.49, 22.54 |

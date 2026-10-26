@@ -16,22 +16,23 @@ Attribute VB_Name = "SFT_Formulas"
 '   API change.
 '
 ' DEPENDENCIES
-'   VBA runtime only; no WorksheetFunction, so results do not depend on the
-'   Excel version or the locale.
+'   VBA runtime and the Excel error constants (xlErrNum, xlErrValue,
+'   xlErrRef); no WorksheetFunction, so results do not depend on the Excel
+'   version or the locale.
 '
 ' STATE OWNERSHIP
 '   Stateless. Results depend only on the arguments.
 '
 ' ERROR POLICY
 '   Each function checks the domain of its inputs, stated in its INPUTS
-'   section, and returns a worksheet error
-'   value instead of raising or returning a misleading number: #NUM! for a
-'   number outside its domain, #VALUE! for a value that is not a number
-'   where one is needed, #REF! for ranges of different sizes, and the error
-'   itself for an error value in a range. A VBA caller receives the same
-'   error value in the Variant result and tests it with IsError;
-'   CORE_Engine stops the run when it receives one. An overflow beyond the
-'   range of a Double also gives #NUM!.
+'   section, and returns a worksheet error value instead of raising or
+'   returning a misleading number: #NUM! for a number outside its domain,
+'   #VALUE! for a value that is not a number where one is needed, #REF! for
+'   ranges of different sizes, and the error itself for an error value in a
+'   range. A VBA caller receives the same error value in the Variant result
+'   and tests it with IsError; CORE_Engine stops the run when it receives
+'   one. An overflow beyond the range of a Double also gives #NUM!, except
+'   in SFT_HoldingPeriod and SFT_IssueCount, which have no overflow handler.
 '
 ' REFERENCE
 '   BCBS CRE22 (paragraph numbers in brackets); EU CRR Art. 220, 223, 224,
@@ -86,8 +87,8 @@ Public Function SFT_HoldingPeriod( _
 '      holds both.
 '   LargeOrIlliquid: True for a netting set with more than 5,000
 '      transactions in the previous quarter or with illiquid collateral.
-'   Disputes: True after more than two margin-call disputes lasting longer
-'      than the holding period in the previous two quarters.
+'   Disputes: True after more than two margin-call disputes in the previous
+'      two quarters lasting longer than the margin period of risk estimate.
 '   OverrideBD: a longer holding period required by the supervisor or the
 '      bank, business days, 0 or more; 0 for none. It never shortens T.
 '   LargeBD: the holding period for LargeOrIlliquid, 1 or more; 20 by
@@ -97,10 +98,11 @@ Public Function SFT_HoldingPeriod( _
 '   T_M in business days; #NUM! for an input outside its domain.
 '
 ' REFERENCE
-'   CRE22.57-22.58; CRR Art. 224(2), Art. 285(3)-(4).
+'   CRE22.57-22.58; CRR Art. 224(2), Art. 285(3)-(4). The longest minimum
+'   for a netting set holding both types is in CRE22.58 only.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -166,12 +168,13 @@ Public Function SFT_ScaledHaircut( _
 '   overflow.
 '
 ' REFERENCE
-'   CRE22.59; CRR Art. 226, which gives the same figure from the column of
-'   Art. 224 Table 1 for the liquidation period, since that column is H10
-'   scaled by sqrt(T_M / 10).
+'   CRE22.59; CRR Art. 226, which gives the same figure, to the tables'
+'   rounding, from the column of Art. 224 Table 1 for the liquidation
+'   period, since that column is H10 scaled by sqrt(T_M / 10). The CRR has
+'   columns for 5, 10 and 20 days only; other periods extend the formula.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -236,10 +239,10 @@ Public Function SFT_ExposureSingle( _
 '   an overflow.
 '
 ' REFERENCE
-'   CRE22.46; CRR Art. 223(2), (5).
+'   CRE22.46; CRR Art. 223(2), (3), (5).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -737,7 +740,7 @@ Private Function Flatten( _
 '   The array; one element for a scalar.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-25
 '==============================================================================
 '
 
