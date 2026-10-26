@@ -15,7 +15,9 @@ against the candidate commit, without Excel:
   last case and fails only harness.completeness; all three come from one
   64-bit host;
 - host.txt: the Windows build, the references (exactly the four supported
-  ones) and that Debug > Compile VBAProject completed.
+  ones) and that Debug > Compile VBAProject completed. When the folder has
+  none and the check runs on Windows, it writes one: the Windows build read
+  from this machine, the four supported references and compile=PASS.
 
 It proves only that this evidence is consistent with the commit. It does not
 run Excel, and a PASS validates no SFT calculation.
@@ -28,7 +30,7 @@ import hashlib
 import re
 import subprocess
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -81,6 +83,7 @@ class Evidence:
     hashes: dict[str, str] = field(default_factory=dict)
     environment: dict[str, str] = field(default_factory=dict)
     host: dict[str, str] = field(default_factory=dict)
+    host_written: bool = False
 
 
 def git(root: Path, *args: str) -> bytes:
@@ -302,11 +305,44 @@ def check_logs(folder: Path, suite: Suite, evidence: Evidence) -> None:
         evidence.environment = environments[0]
 
 
-def check_host(folder: Path, evidence: Evidence) -> None:
+def windows_name(product: str, display_version: str, build: str, revision: str) -> str:
+    """The Windows build as winver shows it, e.g. Windows 11 Pro, version 24H2, OS build 26100.4061.
+
+    The registry's ProductName still says Windows 10 on Windows 11, whose builds start at 22000.
+    """
+    if build.isdigit() and int(build) >= 22000:
+        product = product.replace("Windows 10", "Windows 11", 1)
+    return f"{product}, version {display_version}, OS build {build}.{revision}"
+
+
+def local_windows() -> str | None:
+    """The Windows build of this machine, or None when it is not Windows or cannot be read."""
+    if sys.platform != "win32":
+        return None
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion") as key:
+            values = [str(winreg.QueryValueEx(key, name)[0])
+                      for name in ("ProductName", "DisplayVersion", "CurrentBuild", "UBR")]
+    except OSError:
+        return None
+    return windows_name(*values)
+
+
+def write_host(path: Path, windows: str) -> None:
+    lines = [f"windows={windows}", f"references={'; '.join(REFERENCES)}", "compile=PASS"]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def check_host(folder: Path, evidence: Evidence, windows: Callable[[], str | None]) -> None:
     path = folder / HOST
     if not path.is_file():
-        evidence.findings.append(f"{HOST}: missing")
-        return
+        build = windows()
+        if build is None:
+            evidence.findings.append(f"{HOST}: missing, and not written: no Windows build to read here")
+            return
+        write_host(path, build)
+        evidence.host_written = True
     host = {}
     for text in path.read_text(encoding="utf-8").splitlines():
         key, separator, value = text.partition("=")
@@ -325,7 +361,8 @@ def check_host(folder: Path, evidence: Evidence) -> None:
         evidence.findings.append("not the supported target: Office is not 64-bit")
 
 
-def check(root: Path, commit: str, folder: Path) -> Evidence:
+def check(root: Path, commit: str, folder: Path,
+          windows: Callable[[], str | None] = local_windows) -> Evidence:
     evidence = Evidence()
     sources = check_sources(root, commit, folder, evidence)
     suite = read_suite(sources.get(Path(EXAMPLES).name, b""))
@@ -335,7 +372,7 @@ def check(root: Path, commit: str, folder: Path) -> Evidence:
         evidence.findings.append(f"{EXAMPLES} at {commit[:12]}: INJECTED_FAILURE must change "
                                  f"exactly one assertion, found {suite.injected}")
     check_logs(folder, suite, evidence)
-    check_host(folder, evidence)
+    check_host(folder, evidence, windows)
     return evidence
 
 
@@ -347,6 +384,8 @@ def report(commit: str, evidence: Evidence) -> str:
              f"Windows: {evidence.host.get('windows', '')}",
              f"References: {evidence.host.get('references', '')}",
              f"Compile: {evidence.host.get('compile', '')}",
+             *([f"{HOST}: written by this check (Windows read from this machine)"]
+               if evidence.host_written else []),
              "Imported components (Git blob ids at the commit):"]
     lines += [f"  {name} {blob}" for name, blob in sorted(evidence.hashes.items())]
     lines += [f"FAIL: {finding}" for finding in evidence.findings]

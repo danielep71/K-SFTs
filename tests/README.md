@@ -2,17 +2,20 @@
 
 Verification source, synthetic fixtures and expected results. **No real case
 is here yet**: the only case, `illustrative-format-example`, shows the file
-format and validates nothing. There is no calculation to test until the
+format and validates nothing. The 0.2.0 prototype is checked by its own
+illustrative expected values in `derivations/prototype/`, through the
+template's TestCatalogue and `tools/lo_regression.py`; cases in the format
+of [TEST_CASES.md](../docs/methodology/TEST_CASES.md) wait for the
 methodology decisions in
-[docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md) are taken.
+[docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md).
 The repository tooling has its own tests in [tools/](../tools/README.md).
 
 | Location | Will hold |
 | --- | --- |
-| `modules/` | VBA test modules: the harness `TEST_Harness` and the neutral example suite `TEST_Examples`; the case runner and the SFT suites come with the calculation |
+| `modules/` | VBA test modules: the harness `TEST_Harness` and the neutral example suite `TEST_Examples`; the case runner and the SFT suites come with the methodology of record; the prototype's tests are the template's TestCatalogue and FormulaTest sheets |
 | `fixtures/` | Synthetic inputs: transactions, collateral, netting sets |
 | `expected/` | Expected results, each with its provenance |
-| `derivations/` | Python reference derivations that compute expected results from the documented method; evidence for tests, never shipped |
+| `derivations/` | Python reference derivations that compute expected results from the documented method; evidence for tests, never shipped. `sft_reference.py` and its data in `derivations/prototype/` give the expected values of the 0.2.0 prototype's demo portfolio |
 
 The fixture schema, tolerances, reference classes and completeness rules are
 defined in [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md)

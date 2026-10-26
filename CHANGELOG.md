@@ -56,10 +56,15 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
-Planned as 0.1.0, *Repo setup*: repository infrastructure only. It contains no
-SFT calculation, public API or workbook.
+No version is planned yet. This holds *v0.1.0 - Repo setup*, the repository
+infrastructure, closed without a release (#13), and *v0.2.0 - Prototype
+setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
+
+- A counterparty credit risk framework diagram in the root README, showing
+  the calculator K-SFTs belongs beside, in editable SVG and PNG, shared with
+  K-SACCR and K-Risk Engines (#151).
 
 - A K-SFTs banner in the root README, with a reusable 1280 x 640 image
   in `docs/assets/` (#113, #117).
@@ -81,8 +86,11 @@ SFT calculation, public API or workbook.
   configuration, the test-case format, static checks of the exported VBA
   source and the workflows ([tools/README.md](tools/README.md); #5, #6).
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
-  and a procedure and checker for recording an Excel run against its commit
-  ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9).
+  and a procedure and checker for recording an Excel run against its commit.
+  On Windows the checker writes the host record itself, and a development
+  synchronization exports the modules into the evidence folder
+  ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9, #147,
+  #149).
 - The macro-free workbook template `src/workbook/SFT_Template.xlsx` (a Readme
   sheet only), and an optional script that imports the repository's VBA into
   a workbook built from it, with its component manifest and the
@@ -96,6 +104,14 @@ SFT calculation, public API or workbook.
 - Repository traffic history kept beyond GitHub's 14 days
   ([docs/TRAFFIC.md](docs/TRAFFIC.md); #36).
 - This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
+- The SFT prototype, as it is: E\* of each netting set under the Financial
+  Collateral Comprehensive Method with supervisory haircuts, its risk weight,
+  RWA and own funds, in an 11-sheet workbook template with a demo portfolio,
+  whose every input cell explains its entry and refuses values outside the
+  engine's limits; eight `SFT_*` worksheet functions; an independent Python
+  reference and a LibreOffice regression. It is not the methodology of
+  record, and departs from recorded decisions where
+  [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 
 ### Validation
 
@@ -107,13 +123,23 @@ SFT calculation, public API or workbook.
 - On the same host, `tools/Sync-KSFT-VBA.ps1` imported the test modules into
   a workbook built from the template, in development mode, and the example
   suite passed in it (#102).
+- The prototype at `fbaee34`, built on the same host with
+  `tools/Sync-KSFT-VBA.ps1`, compiled and ran on the demo portfolio: the
+  TestCatalogue's 107 checks against the reference and the 25 formula tests
+  passed, the example suite passed, and `tools/check_excel_run.py` passed on
+  the evidence (#135). The expected values are illustrative: an independent
+  implementation of the specification, not published worked examples.
 
 ### Known limitations
 
 - Excel has been run on one host only; 32-bit Office and other builds are
   untested.
-- There is no calculation, public API, workbook or numerical test case; the
-  product, collateral and output decisions are open
-  ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md)).
+- The calculation is a prototype, not the methodology of record. Its
+  departures (a BCBS regime, a QCCP class, the open product, collateral and
+  output decisions, formulas not yet checked against the registered copies,
+  no test case in the format of TEST_CASES.md, `src/core` modules that touch
+  Excel) are left to later milestones
+  ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)).
+- There is no production workbook.
 
 [Unreleased]: https://github.com/danielep71/K-SFTs/commits/main

@@ -4,16 +4,19 @@ This document is authoritative for **the supported Excel hosts and how the
 VBA source is imported into and exported from Excel**. How the source is
 written is in [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md); where each
 component lives in [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
-Its host and import sections are adapted from K-SACCR's `INSTALLATION.md`
-(see [NOTICE.md](NOTICE.md)).
 
 > [!IMPORTANT]
-> **Status on 2026-10-24: repository setup only.** The only VBA components
-> are the test modules in `tests/modules/`; no production component exists,
-> and the workbook template holds only a Readme sheet. The import, compile
-> and harness steps below were first run on a host on 2026-10-24, recorded
-> in [tested environments](#tested-environments) and
-> [#9](https://github.com/danielep71/K-SFTs/issues/9). The
+> **Status on 2026-10-25: working prototype.** The production components
+> are the five prototype modules in `src/`, listed in
+> `tools/vba-projects.json`, and the workbook template holds the prototype's
+> 11 sheets with a demo portfolio
+> ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)); the prototype is not the
+> methodology of record. The import, compile and harness steps below were
+> first run on a host on 2026-10-24
+> ([#9](https://github.com/danielep71/K-SFTs/issues/9)), and with the
+> prototype on 2026-10-25
+> ([#135](https://github.com/danielep71/K-SFTs/pull/135)), both recorded in
+> [tested environments](#tested-environments). The
 > [developer setup](#developer-setup) has been run from a fresh clone on
 > Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -46,6 +49,7 @@ below, each with its evidence.
 | Host | Excel build | Windows | Bitness | Commit | Evidence |
 | --- | --- | --- | --- | --- | --- |
 | Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
+| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `fbaee34` | [#135](https://github.com/danielep71/K-SFTs/pull/135): the prototype built with `Sync-KSFT-VBA.ps1` (Development), compiled and run on the demo portfolio (TestCatalogue 107 of 107, FormulaTest 25 of 25), and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
 
 <a id="get-the-source"></a>
 
@@ -87,6 +91,8 @@ and from a fresh clone; on Windows they are untested, so use WSL or CI there.
 | Ruff, mypy | 0.16.6, 2.3.1 | the `ruff` and `mypy` gates |
 | actionlint | 1.7.12 | the `actionlint` gate |
 | shellcheck | optional | the shell scripts inside workflows, through actionlint; CI's runner has it |
+| LibreOffice, its Python UNO bridge, openpyxl | optional; run with 24.2.7.2 and openpyxl 3.1.5 | `tools/lo_regression.py`, the prototype's headless regression; not a gate and not Excel evidence |
+| xlsxwriter | optional; run with 3.2.9 | `tools/build_template.py`, which regenerates `src/workbook/SFT_Template.xlsx` |
 | Excel | a [supported host](#supported-hosts) | importing, compiling and running the VBA only |
 
 From the root of the checkout, on CPython 3.13 and Linux x86_64:
@@ -145,9 +151,9 @@ The gates and modes are described in [tools/README.md](tools/README.md).
    `src/workbook/SFT_Template.xlsx` and save it with **File → Save As** as
    **Excel Macro-Enabled Workbook (`.xlsm`)**, outside the checkout or in
    the ignored `test-results/` directory. Built workbooks are never
-   committed, and nothing is ever saved over the template. Today the
-   template holds only a Readme sheet; sheets come with the input and output
-   contract.
+   committed, and nothing is ever saved over the template. The template
+   holds the prototype's 11 sheets, with a demo portfolio, and is generated
+   by `tools/build_template.py`; it is regenerated, never edited by hand.
 3. **Check the references.** Open the VBE (**Alt+F11**) and check that
    **Tools → References** shows only the four listed under
    [supported hosts](#supported-hosts).
@@ -193,9 +199,7 @@ convenience, not a requirement:
   (**File → Options → Trust Center → Trust Center Settings → Macro
   Settings**), which the manual steps above do not. Switch it on only as
   your organization's policy allows.
-- The manual import stays the route for
-  [recording an Excel run](#recording-an-excel-run): the evidence of an
-  Excel run never depends on it.
+- Either route can [record an Excel run](#recording-an-excel-run).
 
 With the workbook closed, drag the `.xlsm` onto `tools/Sync-KSFT-VBA.cmd`,
 or run:
@@ -209,6 +213,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 | Imports the components of one workbook | `-Mode Production`: those under `src/`; `-Mode Development`: those and `tests/modules/`. Without `-Mode` it asks. The lists are in `tools/vba-projects.json`, which the `vba-manifest` gate keeps equal to the tracked components. |
 | Replaces document-module code, if you agree | It asks, unless `-IncludeSheets` or `-SkipSheets` answers; the workbook's sheet objects are kept. |
 | Imports from a folder | `-SourceDir` (or `tools/Sync-KSFT-VBA-Downloads.cmd`, which asks for one and defaults to `Downloads`) takes only the `.bas` and `.cls` files found there, by their `Attribute VB_Name`, after listing them for confirmation. |
+| Prepares an Excel run's evidence | A `-Mode Development` synchronization, after saving, removes the files an earlier run left in `test-results\excel-run` (or `-EvidenceDir`): the three logs, `host.txt` and the modules in `exported\`. It then exports every standard, class and form module of the workbook into `exported\`. Production and `-SourceDir` synchronizations leave the folder alone. |
 | Protects the workbook | A backup copy first, removed after a successful save. It writes no cells, formulas, names or formatting, and before saving it checks that no sheet was added, removed, renamed or reordered. The workbook is closed unsaved on any error. |
 
 It never writes to the repository. After it, compile as in step 6.
@@ -285,35 +290,49 @@ more entry points show the failure paths and are expected to fail:
 The evidence that a commit's VBA was imported, compiled and run on a host,
 for [#9](https://github.com/danielep71/K-SFTs/issues/9) and for every
 later issue or pull request that cites an Excel run. It needs no
-self-hosted runner, no change to the macro-security level and no *Trust
-access to the VBA project object model*.
+self-hosted runner and no change to the macro-security level. Built by
+hand, it needs no *Trust access to the VBA project object model*; built with
+[the synchronization script](#synchronizing-vba), it needs that setting and
+takes fewer steps.
 
 1. **Fix the candidate.** In a clone with no local changes
    (`git status --short` prints nothing), type `git switch --detach <commit>`,
    then `git rev-parse HEAD` for the full SHA.
-2. **Make the evidence folder**, for example `test-results\excel-run\` in the
-   checkout (ignored by Git), with an empty `exported\` folder inside.
-3. **Build a development workbook** from that checkout as in
-   [building a workbook from source](#building-a-workbook-from-source),
-   with the modules of `tests/modules/`.
-4. **Compile** with **Debug → Compile VBAProject**.
-5. **Run.** In the Immediate window type, with the full path of the folder
+2. **Build a development workbook** from that checkout, with the modules of
+   `tests/modules/`, and its evidence folder `test-results\excel-run\`
+   (ignored by Git):
+   - **With the script:** save the template as `.xlsm` and run a
+     [`-Mode Development` synchronization](#synchronizing-vba). It also
+     empties the evidence folder of an earlier run and exports the
+     workbook's modules into its `exported\` folder.
+   - **By hand:** build it as in
+     [building a workbook from source](#building-a-workbook-from-source).
+     After step 3, export each module into an empty `exported\` folder
+     inside the evidence folder, under its own name (VBE: right-click →
+     **Export File**), without editing it.
+3. **Run.** In the Immediate window type, with the full path of the folder
    and no trailing backslash:
 
    ```text
    TEST_Examples.SaveExampleEvidence "C:\path\to\test-results\excel-run"
    ```
 
-   It runs the suite normally, with the injected failure and with the
+   It creates the folder when missing (its parent must exist) and removes
+   the logs and `host.txt` of an earlier run, leaving `exported\` as it is.
+   It then runs the suite normally, with the injected failure and with the
    skipped case, and saves each complete log as `examples.log`,
    `injected.log` and `skipped.log`. Each run prints a `SAVED=` line: the
    normal run with `error=0`, the two failure runs with the error *Suite
    examples did not pass*. The errors are printed, not raised, so that all
-   three logs are written.
-6. **Export the modules back.** In the VBE, right-click each module →
-   **Export File**, into `exported\`, under its own name
-   (`TEST_Examples.bas`, `TEST_Harness.bas`). Do not edit the exported files.
-7. **Write `host.txt`** in the folder:
+   three logs are written. No separate **Debug → Compile VBAProject** is
+   needed: a run that reaches the three `SAVED=` lines is recorded as
+   compiled.
+4. **The host record, `host.txt`,** is written by the check in step 5 when
+   it runs on the Excel host's Windows and the folder has none: the Windows
+   build read from the machine, the four supported references and
+   `compile=PASS`. Write it yourself only when the project reported a
+   compile error, other references are ticked, or the check runs off
+   Windows:
 
    ```text
    windows=Windows 11 Pro, version 24H2, OS build 26100.4061
@@ -322,9 +341,9 @@ access to the VBA project object model*.
    ```
 
    `windows` is what `winver` shows. `references` lists the boxes ticked
-   in **Tools → References**, separated by `; `. Write `compile=PASS` only if
-   step 4 completed with no error; otherwise write what it reported.
-8. **Check** the folder against the commit, with Python 3.12 or later and Git
+   in **Tools → References**, separated by `; `. `compile` is `PASS` only if
+   no compile error was reported; otherwise it is the error.
+5. **Check** the folder against the commit, with Python 3.12 or later and Git
    (run on Linux and, for #9, on Windows 11; from WSL or a Linux checkout if
    it fails on another host):
 
@@ -334,7 +353,7 @@ access to the VBA project object model*.
 
    It must end with `excel-run: PASS`. It prints the commit, the host and
    the Git blob id of every imported component.
-9. **Record.** Copy the report into the issue or pull request and add a row
+6. **Record.** Copy the report into the issue or pull request and add a row
    to [tested environments](#tested-environments). The logs stay outside Git.
 
 `check_excel_run.py` reads only the folder and the commit:
@@ -348,10 +367,11 @@ access to the VBA project object model*.
 | `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
 | The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |
 | `ENVIRONMENT` lacks a field, differs between the logs, or Office is not 64-bit | The host is unknown or not the supported target |
-| `host.txt` lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
+| `host.txt` is missing off Windows, lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
 
 It cannot see Excel: the compile result, the references and the Windows
-build are the runner's own record. A PASS says the evidence is consistent
+build are the runner's own record, written by hand or, on Windows, by
+running the check. A PASS says the evidence is consistent
 with the commit; it validates no SFT calculation.
 
 ## 📚 Related documents

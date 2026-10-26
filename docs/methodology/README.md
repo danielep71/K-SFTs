@@ -5,9 +5,8 @@ authority**: the controlling and reference texts with their dates, the
 primary-source provenance of every rule, the scope decisions, assumptions,
 and the trace from each rule to its formula, code and tests. The numerical
 test-case contract is in [TEST_CASES.md](TEST_CASES.md); copies of the texts
-relied on are in [sources/](sources/README.md). The structure is adapted from
-K-SACCR's `docs/methodology/` (see [NOTICE.md](../../NOTICE.md)); none of
-K-SACCR's derivative SA-CCR content applies here.
+relied on are in [sources/](sources/README.md). No derivative SA-CCR content
+applies here.
 
 > [!IMPORTANT]
 > **Status on 2026-10-24: skeleton only.** The sources, their roles and the
@@ -149,7 +148,7 @@ are non-binding.
 | Supervisory parameters | Taken only from a registered controlling text, recorded with its locator, and never typed in code without a `REFERENCE` |
 | Numeric conventions | `Double` arithmetic, no intermediate rounding; tolerances are explicit on every expected value ([TEST_CASES.md](TEST_CASES.md#tolerance)) (D8) |
 | Calculation outputs and reporting | A calculation output (such as the fully adjusted exposure value E*) is kept distinct from any reporting measure; the reporting Q&As in the register are used to draw that line, not as calculation rules |
-| Derivative SA-CCR | Out of scope. No K-SACCR formula, supervisory factor, bucket, threshold or example is a default or a reference here |
+| Derivative SA-CCR | Out of scope. No SA-CCR formula, supervisory factor, bucket, threshold or example is a default or a reference here |
 
 <a id="open-decisions"></a>
 
@@ -199,7 +198,6 @@ table when code first implements it.
 
 - Every formula, parameter or threshold used later cites its registered
   controlling source and locator here.
-- No derivative SA-CCR content, from K-SACCR or elsewhere, is a default for
-  SFTs.
+- No derivative SA-CCR content is a default for SFTs.
 - Source documents are copied only under their publishers' terms, recorded
   in [sources/README.md](sources/README.md), and never edited.

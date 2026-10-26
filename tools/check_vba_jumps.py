@@ -5,8 +5,7 @@
 name a label defined in the same procedure, labels must be unique within a
 procedure, and every procedure must be closed. Each compilation environment
 of check_vba_conditionals.py is checked separately, so that mutually
-exclusive ``#If`` branches are never combined. Adapted from K-SACCR; see
-NOTICE.md.
+exclusive ``#If`` branches are never combined.
 """
 
 from __future__ import annotations

@@ -3,9 +3,7 @@
 This document defines how K-SFTs's numerical test cases are written:
 files, inputs and their units, expected results and their provenance,
 tolerances, case categories, invalid inputs and when a rule counts as
-validated. Sources and rule IDs come from the [methodology](README.md). Its
-structure is adapted from K-SACCR's `docs/methodology/TEST_CASES.md` (see
-[NOTICE.md](../../NOTICE.md)); no K-SACCR case, value or threshold is reused.
+validated. Sources and rule IDs come from the [methodology](README.md).
 
 > [!IMPORTANT]
 > **Status on 2026-10-24: format only.** The one case,
@@ -174,9 +172,9 @@ numerical-validation references.
   computed the value; it must exist.
 - `reviewed_by` may be `null`: the code under test and its expected values
   come from the same maintainer, and no independent reviewer is required.
-- **Examples are never benchmarks.** Derivative SA-CCR examples or thresholds,
-  from K-SACCR or elsewhere, are not SFT references; the register holds no
-  such source, so no case can cite one.
+- **Examples are never benchmarks.** Derivative SA-CCR examples or thresholds
+  are not SFT references; the register holds no such source, so no case can
+  cite one.
 - Test output reports `illustrative` results separately and never as
   validation.
 

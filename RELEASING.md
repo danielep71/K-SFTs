@@ -18,7 +18,7 @@ version and changelog rules are in
 | --- | --- |
 | Released versions | None |
 | `VERSION` | Does not exist yet: it is created when the first release is prepared |
-| Planned first version | 0.1.0, *Repo setup*: infrastructure only, no calculation, public API or workbook |
+| Planned first version | Not decided. *v0.1.0 - Repo setup* closed without a release ([#13](https://github.com/danielep71/K-SFTs/issues/13)); *v0.2.0 - Prototype setup* is in progress, and later milestones lead to v1.0.0 |
 | Active branch | `release/0.2.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
 
 <a id="versioning"></a>
@@ -33,7 +33,7 @@ version and changelog rules are in
 | `VERSION` | One `X.Y.Z` line at the root. Created in the release-preparation pull request, never before; afterwards it always names the newest released version |
 | Changelog | Work stays under `## [Unreleased]`; preparation moves it to `## [X.Y.Z] - YYYY-MM-DD` |
 | Tag | Annotated `vX.Y.Z` on the candidate commit on `main`; the `v*` tag ruleset blocks its deletion, force pushes and updates |
-| GitHub Release | Created from the tag. For 0.1.0: release notes only, with no asset, since no workbook or other artifact exists |
+| GitHub Release | Created from the tag. Until a production workbook is packaged: release notes only, with no asset |
 
 The `changelog` gate of `python tools/check.py` enforces the link between the
 two files: no `VERSION` before a dated release, and from then on `VERSION`
@@ -147,8 +147,8 @@ met. Copy results from the runs themselves.
 ### 6. Publish and verify
 
 Create the GitHub Release from the tag, titled `vX.Y.Z - <milestone title>`,
-with the changelog section and the evidence summary as notes. For 0.1.0,
-attach nothing. Then check that a fresh clone of the tag passes
+with the changelog section and the evidence summary as notes. Until a
+production workbook is packaged, attach nothing. Then check that a fresh clone of the tag passes
 `python tools/check.py`, and that the release page names the tag and the
 candidate SHA.
 

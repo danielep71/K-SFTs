@@ -5,9 +5,10 @@ decides scope, priorities and what is integrated
 ([docs/GOVERNANCE.md](docs/GOVERNANCE.md)). The repository is public.
 Every change starts from an issue and arrives through a pull request.
 
-The repository is in **setup**: there is no calculation engine, workbook or
-validated method yet ([README.md](README.md)). Contributions today are to
-the setup itself: tooling, tests, documentation and governance.
+The repository holds a **prototype**, not a validated method
+([README.md](README.md)): milestone *v0.2.0 - Prototype setup* takes it in as
+it is. Contributions today are to that setup: tooling, tests, documentation
+and governance; changes to the calculation belong to later milestones.
 
 Never disclose a suspected vulnerability in an issue or pull request; follow
 [SECURITY.md](SECURITY.md).

@@ -2,10 +2,8 @@
 
 This document is authoritative for **the project boundary, the project
 profile, where every durable artifact belongs and the boundary between the
-calculation core, the public interface and the Excel host**. Its structure is
-adapted from K-SACCR's `docs/REPOSITORY_STRUCTURE.md` (see
-[NOTICE.md](../NOTICE.md)); none of K-SACCR's calculation content applies here.
-Governance is in [GOVERNANCE.md](GOVERNANCE.md).
+calculation core, the public interface and the Excel host**. Governance is in
+[GOVERNANCE.md](GOVERNANCE.md).
 
 ## 🎯 Scope and status
 
@@ -20,16 +18,19 @@ Comprehensive Method with supervisory volatility adjustments; products,
 collateral and outputs are still
 [open decisions](#-open-product-and-methodology-decisions).
 
-**Out of scope:** derivatives exposure, which K-SACCR covers with SA-CCR;
+**Out of scope:** derivatives exposure under SA-CCR;
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
 the exposure measure, unless a later decision adds them.
 
-**Status on 2026-10-24: repository setup only.** The milestone
-*v0.1.0 - Repo setup* builds tooling, governance and conventions. There is no
-calculation engine, public API, workbook or validated SFT method yet, and
-nothing in this repository should be used to compute exposure. Production
-calculations, numerical certification and workbook packaging belong to later
-milestones.
+**Status on 2026-10-25: working prototype.** *v0.1.0 - Repo setup* built
+tooling, governance and conventions; *v0.2.0 - Prototype setup* adds a
+prototype as it is ([PROTOTYPE.md](methodology/PROTOTYPE.md)). The prototype
+is not the methodology of record and departs from this document where
+[PROTOTYPE.md](methodology/PROTOTYPE.md) lists it, among them `src/core`
+modules that read and write sheets; nothing in this repository should be
+used to compute regulatory exposure. Resolving the departures, production
+calculations, numerical certification and workbook packaging belong to
+later milestones.
 
 <a id="profile-decision"></a>
 
@@ -165,8 +166,9 @@ A VBA `Public` declaration is not automatically supported API.
 
 ### Inventory convention
 
-`docs/PUBLIC_API.txt` is the inventory of supported declarations. It has no
-entries yet. Each supported declaration gets two lines:
+`docs/PUBLIC_API.txt` is the inventory of supported declarations. It lists
+the prototype's eight `SFT_*` functions. Each supported declaration gets two
+lines:
 
 ```text
 <component><TAB><kind><TAB><name>
@@ -207,7 +209,7 @@ it cannot be fixed before the approach, products and outputs are chosen.
 
 No regulatory formula, haircut, factor, bucket or netting assumption is a
 default of this project until a decision below records it, with its source,
-in `docs/methodology/`. In particular, K-SACCR's derivative SA-CCR formulas,
+in `docs/methodology/`. In particular, derivative SA-CCR formulas,
 supervisory factors, asset-class buckets and netting-set assumptions **do not
 apply to SFTs** and are never imported as defaults.
 

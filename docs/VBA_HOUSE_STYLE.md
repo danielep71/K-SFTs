@@ -4,14 +4,13 @@ This document is authoritative for **how K-SFTs's VBA is written**:
 naming, module rules, procedure contracts, errors, Excel-state handling and
 source presentation. Where a component lives is owned by
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md); the supported hosts and
-the import and export steps by [INSTALLATION.md](../INSTALLATION.md). Its
-structure is adapted from K-SACCR's `docs/VBA_HOUSE_STYLE.md` (see
-[NOTICE.md](../NOTICE.md)); none of K-SACCR's components, formulas or
-parameters apply here.
+the import and export steps by [INSTALLATION.md](../INSTALLATION.md).
 
-**Status on 2026-10-24:** the only VBA components are the test modules in
-`tests/modules/`; no production component exists yet. These rules apply to
-every component. The `vba-*` gates of `python tools/check.py` enforce the
+**Status on 2026-10-25:** the VBA components are the test modules in
+`tests/modules/` and the five prototype modules in `src/`
+([PROTOTYPE.md](methodology/PROTOTYPE.md)), which pass the gates below but
+depart from the module rules where PROTOTYPE.md lists it: `src/core`
+modules read and write sheets. These rules apply to every component. The `vba-*` gates of `python tools/check.py` enforce the
 mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 of whatever VBA would otherwise make public, and the public API inventory.

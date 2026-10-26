@@ -13,9 +13,10 @@ automation work within the scope authorized by the maintainer.
 This is an independent personal project.
 
 K-SFTs covers counterparty credit risk for securities financing
-transactions. The current milestone, **v0.1.0 - Repo setup**, prepares the
-repository infrastructure only. Production SFT calculations, numerical
-certification and workbook packaging belong to later milestones; the project
+transactions. *v0.1.0 - Repo setup* prepared the repository infrastructure;
+the current milestone, **v0.2.0 - Prototype setup**, adds the SFT prototype
+as it is. Further development, numerical certification and workbook
+packaging belong to later milestones; the project
 boundary and architecture are defined in
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/K-SFTs/issues/2)), and the
 VBA conventions, supported hosts and import steps in

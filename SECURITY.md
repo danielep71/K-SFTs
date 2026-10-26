@@ -56,8 +56,9 @@ workbook template and tests.
 
 ## ⚙️ Automation risk surface
 
-The repository holds no calculation code yet. Its automation runs with the
-workflow token, except the traffic collection, which also reads
+The calculation prototype in VBA runs only in a workbook a user builds and
+opens; no workflow runs it. The automation runs with the workflow token,
+except the traffic collection, which also reads
 `TRAFFIC_TOKEN`: a fine-grained token limited to this repository with
 *Administration: read*, stored in the `analytics` environment, which only
 `main` may use. Only the step that calls the traffic API receives it, and that
