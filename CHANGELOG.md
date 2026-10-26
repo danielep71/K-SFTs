@@ -62,9 +62,10 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
 
-- An SFT netting-set aggregation diagram in editable SVG and high-resolution
-  PNG, embedded in the root README with its methodological scope and
-  limitations (#142).
+- Three SFT visual references in editable SVG and high-resolution PNG:
+  netting-set aggregation, EU CRR uses and exposure calculation formulas
+  with supervisory haircut tables. Embedded in the root README with
+  methodological scope and prototype limitations (#142).
 
 - A K-SFTs banner in the root README, with a reusable 1280 x 640 image
   in `docs/assets/` (#113, #117).

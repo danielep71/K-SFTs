@@ -202,6 +202,30 @@ transactions outside an eligible agreement follow a separate route. See the
 [methodology scope](docs/methodology/README.md#scope) and
 [prototype limitations](docs/methodology/PROTOTYPE.md).
 
+### Where SFT exposures are used in the EU CRR
+
+The map distinguishes the risk-based exposure from large-exposure, CCP,
+CVA, leverage-ratio and output-floor requirements. It identifies the current
+prototype coverage; a regulatory use does not imply an implemented module.
+
+[![Where SFT exposures are used in the EU CRR, with separate calculation frameworks and prototype coverage](docs/assets/SFT_CRR_uses.svg)](docs/assets/SFT_CRR_uses.svg)
+
+[Editable SVG](docs/assets/SFT_CRR_uses.svg) ·
+[High-resolution PNG](docs/assets/SFT_CRR_uses.png)
+
+### SFT calculation reference
+
+A compact reference for the netted and single-transaction formulas, haircut
+scaling, 10-day supervisory haircut tables, risk weights and capital.
+Prototype conventions and limitations are marked explicitly; the
+[prototype specification](docs/methodology/PROTOTYPE.md) remains the detailed
+implementation reference.
+
+[![SFT exposure calculation reference: formulas, supervisory haircuts, capital and prototype limitations](docs/assets/SFT_calculation_reference.svg)](docs/assets/SFT_calculation_reference.svg)
+
+[Editable SVG](docs/assets/SFT_calculation_reference.svg) ·
+[High-resolution PNG](docs/assets/SFT_calculation_reference.png)
+
 ---
 
 <a id="validation"></a>

@@ -78,3 +78,9 @@ authored for K-SFTs on 2026-10-26 at the maintainer's request (#142). The SVG
 contains editable text and vector shapes; the PNG is its rendered export.
 The diagram is a simplified methodological illustration, not a screenshot
 or evidence of validated calculations.
+
+The companion pairs `docs/assets/SFT_CRR_uses.svg` / `.png` and
+`docs/assets/SFT_calculation_reference.svg` / `.png` were authored on
+2026-10-26 for the same request (#142). Both are editable vector diagrams
+with PNG exports. Regulatory-use labels distinguish separate frameworks;
+calculation details identify prototype conventions and limitations.
