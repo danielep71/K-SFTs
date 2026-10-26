@@ -13,10 +13,13 @@ import contextlib
 import io
 import re
 import subprocess
+import sys
 import tempfile
+import types
 import unittest
 from collections.abc import Callable, Iterator
 from pathlib import Path
+from unittest import mock
 
 import check_excel_run
 from check_excel_run import EXAMPLES, Suite, components, read_suite
@@ -107,7 +110,7 @@ def edit(path: str, old: str, new: str) -> Callable[[Path], None]:
 
 def findings(change: Callable[[Path], None] | None = None) -> list[str]:
     with evidence(change) as folder:
-        return check_excel_run.check(ROOT, COMMIT, folder).findings
+        return check_excel_run.check(ROOT, COMMIT, folder, lambda: None).findings
 
 
 class EvidenceTest(unittest.TestCase):
@@ -231,6 +234,51 @@ class EvidenceTest(unittest.TestCase):
                            "references must be exactly")
         self.assertFinding(edit("host.txt", "windows=Windows 11 Pro 24H2, OS build 26100.4061\n",
                                 ""), "no windows=")
+
+    def test_a_missing_host_record_is_written_on_windows(self) -> None:
+        build = "Windows 11 Enterprise, version 25H2, OS build 26200.9711"
+        with evidence(lambda folder: (folder / "host.txt").unlink()) as folder:
+            result = check_excel_run.check(ROOT, COMMIT, folder, lambda: build)
+            self.assertEqual(result.findings, [])
+            self.assertEqual((folder / "host.txt").read_text(encoding="utf-8").splitlines(),
+                             [f"windows={build}",
+                              "references=Visual Basic For Applications; Microsoft Excel 16.0 "
+                              "Object Library; OLE Automation; Microsoft Office 16.0 Object Library",
+                              "compile=PASS"])
+            self.assertIn("host.txt: written by this check", check_excel_run.report(COMMIT, result))
+
+    def test_an_existing_host_record_is_kept(self) -> None:
+        with evidence() as folder:
+            result = check_excel_run.check(ROOT, COMMIT, folder, lambda: "Windows 11 Home")
+            self.assertEqual(result.findings, [])
+            self.assertFalse(result.host_written)
+            self.assertEqual((folder / "host.txt").read_text(encoding="utf-8"), HOST)
+
+    def test_local_windows_reads_the_registry(self) -> None:
+        values: dict[str, object] = {"ProductName": "Windows 10 Enterprise", "DisplayVersion": "25H2",
+                                     "CurrentBuild": "26200", "UBR": 9711}
+
+        def query(key: str, name: str) -> tuple[object, int]:
+            if name not in values:
+                raise FileNotFoundError(name)
+            return values[name], 1
+
+        registry = types.SimpleNamespace(HKEY_LOCAL_MACHINE=0, QueryValueEx=query,
+                                         OpenKey=lambda *args: contextlib.nullcontext("key"))
+        with mock.patch.object(sys, "platform", "win32"), mock.patch.dict(sys.modules, {"winreg": registry}):
+            self.assertEqual(check_excel_run.local_windows(),
+                             "Windows 11 Enterprise, version 25H2, OS build 26200.9711")
+            del values["DisplayVersion"]
+            self.assertIsNone(check_excel_run.local_windows())
+        with mock.patch.object(sys, "platform", "linux"):
+            self.assertIsNone(check_excel_run.local_windows())
+
+    def test_windows_name_matches_winver(self) -> None:
+        name = check_excel_run.windows_name
+        self.assertEqual(name("Windows 10 Enterprise", "25H2", "26200", "9711"),
+                         "Windows 11 Enterprise, version 25H2, OS build 26200.9711")
+        self.assertEqual(name("Windows 10 Pro", "22H2", "19045", "5011"),
+                         "Windows 10 Pro, version 22H2, OS build 19045.5011")
 
 
 class SuiteTest(unittest.TestCase):
