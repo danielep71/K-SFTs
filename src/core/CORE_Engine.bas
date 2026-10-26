@@ -1126,14 +1126,15 @@ Private Function LoadFXTable() As Boolean
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read the FX table below its header down to the first blank currency:
-'   units of reporting currency per unit of each currency.
+'   units of reporting currency per unit of each currency. A currency cell
+'   holding a worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable and the reporting currency is listed at
 '   1; otherwise False with each problem logged, and the run stops.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1154,10 +1155,13 @@ Private Function LoadFXTable() As Boolean
         ReDim mFxCcy(1 To 16)
         ReDim mFxRate(1 To 16)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, 0).Value)
+        Do While Not IsBlankCell(Header.Offset(r, 0).Value) Or IsError(Header.Offset(r, 0).Value)
             Ccy = UTxt(Header.Offset(r, 0).Value)
             Rate = Header.Offset(r, 2).Value2
-            If Len(Ccy) <> 3 Then
+            If IsError(Header.Offset(r, 0).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "FX currency holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf Len(Ccy) <> 3 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Ccy, "FX currency must be a 3-letter code.", Header.Row + r
                 Problems = Problems + 1
             ElseIf KeyIndex(mFxIndex, Ccy) > 0 Then
@@ -1206,7 +1210,8 @@ Private Function LoadHaircutTable() As Boolean
 ' PURPOSE
 '   Read the supervisory haircut table below its header down to the first
 '   blank key: key, H10 and the regimes each row applies to. A key that is
-'   not in the table makes the asset not eligible.
+'   not in the table makes the asset not eligible. A key cell holding a
+'   worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable; otherwise False and the run stops.
@@ -1215,7 +1220,7 @@ Private Function LoadHaircutTable() As Boolean
 '   CRE22.49; CRR Art. 224 Tables 1 and 3.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1237,11 +1242,14 @@ Private Function LoadHaircutTable() As Boolean
         ReDim mHcValues(1 To 64)
         ReDim mHcRegimes(1 To 64)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, HC_KEY - 1).Value)
+        Do While Not IsBlankCell(Header.Offset(r, HC_KEY - 1).Value) Or IsError(Header.Offset(r, HC_KEY - 1).Value)
             Key = UTxt(Header.Offset(r, HC_KEY - 1).Value)
             Value = Header.Offset(r, HC_H10 - 1).Value2
             Regimes = UTxt(Header.Offset(r, HC_REGIMES - 1).Value)
-            If KeyIndex(mHcIndex, Key) > 0 Then
+            If IsError(Header.Offset(r, HC_KEY - 1).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "Haircut key holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf KeyIndex(mHcIndex, Key) > 0 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Haircut key listed twice.", Header.Row + r
                 Problems = Problems + 1
             ElseIf Not IsNum(Value) Then
@@ -1283,7 +1291,8 @@ Private Function LoadRiskWeightTable() As Boolean
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read the risk-weight table below its header down to the first blank
-'   key: key, risk weight and the regimes each row applies to.
+'   key: key, risk weight and the regimes each row applies to. A key cell
+'   holding a worksheet error value is reported, not read as blank.
 '
 ' RETURNS
 '   True when every row is usable; otherwise False and the run stops.
@@ -1292,7 +1301,7 @@ Private Function LoadRiskWeightTable() As Boolean
 '   CRE20.7, 20.18-20.21, CRE54.7; CRR Art. 114, 120-122, 306(1)(a).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1314,11 +1323,14 @@ Private Function LoadRiskWeightTable() As Boolean
         ReDim mRwValues(1 To 64)
         ReDim mRwRegimes(1 To 64)
         r = 1
-        Do While Not IsBlankCell(Header.Offset(r, RW_KEY - 1).Value)
+        Do While Not IsBlankCell(Header.Offset(r, RW_KEY - 1).Value) Or IsError(Header.Offset(r, RW_KEY - 1).Value)
             Key = UTxt(Header.Offset(r, RW_KEY - 1).Value)
             Value = Header.Offset(r, RW_WEIGHT - 1).Value2
             Regimes = UTxt(Header.Offset(r, RW_REGIMES - 1).Value)
-            If KeyIndex(mRwIndex, Key) > 0 Then
+            If IsError(Header.Offset(r, RW_KEY - 1).Value) Then
+                LogMsg SEV_ERROR, SH_PARAMS, "", "Risk-weight key holds a worksheet error value.", Header.Row + r
+                Problems = Problems + 1
+            ElseIf KeyIndex(mRwIndex, Key) > 0 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Risk-weight key listed twice.", Header.Row + r
                 Problems = Problems + 1
             ElseIf Not IsNum(Value) Then
