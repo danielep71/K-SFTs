@@ -72,3 +72,9 @@ on the same date to match the repository name (#117). The panels are conceptual 
 not screenshots of an implemented application or evidence of validated calculations.
 The generated image was exported as a 1280 x 640 JPEG for README and
 social-preview use (#113).
+
+`docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
+authored for K-SFTs on 2026-10-26 at the maintainer's request (#142). The SVG
+contains editable text and vector shapes; the PNG is its rendered export.
+The diagram is a simplified methodological illustration, not a screenshot
+or evidence of validated calculations.
