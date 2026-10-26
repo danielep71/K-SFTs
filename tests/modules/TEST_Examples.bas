@@ -27,7 +27,8 @@ Attribute VB_Name = "TEST_Examples"
 '   As TEST_Harness.EndRun: a run that does not pass raises ERR_TEST_FAILED,
 '   or the unexpected error that escaped the runner. A refused start raises
 '   TEST_Harness.ERR_TEST_DIRTY_START. SaveExampleEvidence prints those
-'   errors instead of raising them, after saving each run's log.
+'   errors instead of raising them, after saving each run's log; an error
+'   preparing its folder propagates.
 '
 ' USAGE
 '   In a development workbook holding the modules of tests/modules/, type
@@ -36,7 +37,7 @@ Attribute VB_Name = "TEST_Examples"
 '   (INSTALLATION.md, Recording an Excel run).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '
 ' AUTHOR
 '   Daniele Penza
@@ -143,22 +144,45 @@ Public Sub SaveExampleEvidence( _
 ' PURPOSE
 '   Run the suite in its three modes and save each complete log in Folder:
 '   examples.log, injected.log and skipped.log, which
-'   tools/check_excel_run.py checks against the commit.
+'   tools/check_excel_run.py checks against the commit. Folder is created
+'   when missing, and the logs and host.txt of an earlier run are removed
+'   first; its exported\ folder is left as it is.
 '
 ' INPUTS
-'   Folder: an existing folder outside the checkout or in the ignored
-'   test-results/ directory, without a trailing backslash.
+'   Folder: a folder outside the checkout or in the ignored test-results/
+'   directory, whose parent exists, without a trailing backslash.
 '
 ' ERROR POLICY
 '   The error that ends each run is its reported outcome: it is printed
 '   after the log is saved, not raised, so that all three logs are written.
 '   Whether the runs ended as documented is judged by check_excel_run.py,
-'   never here. An error of SaveLog propagates.
+'   never here. An error of MkDir, Kill or SaveLog propagates.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '==============================================================================
 '
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim Leftover   As Variant   'File name an earlier run left in Folder
+
+'------------------------------------------------------------------------------
+' START A NEW EVIDENCE FOLDER
+'------------------------------------------------------------------------------
+        If Len(Dir$(Folder, vbDirectory)) = 0 Then
+            MkDir Folder
+        End If
+        For Each Leftover In Array("examples.log", "injected.log", "skipped.log", "host.txt")
+            If Len(Dir$(Folder & "\" & Leftover)) > 0 Then
+                Kill Folder & "\" & Leftover
+            End If
+        Next Leftover
+
+'------------------------------------------------------------------------------
+' RUN AND SAVE
+'------------------------------------------------------------------------------
         SaveRun "NORMAL", Folder & "\examples.log"
         SaveRun "INJECTED_FAILURE", Folder & "\injected.log"
         SaveRun "SKIPPED_CASE", Folder & "\skipped.log"

@@ -21,6 +21,14 @@ objects and only their code text is replaced. The script
 does not write cells, formulas, names, formatting, tables, worksheets, or
 workbook structure.
 
+A full Development synchronization also prepares the evidence folder of an
+Excel run (INSTALLATION.md, Recording an Excel run): test-results\excel-run
+in the repository, or -EvidenceDir. After saving the workbook it removes the
+files an earlier run left there (examples.log, injected.log, skipped.log,
+host.txt and the modules in exported\) and exports every standard, class and
+form module of the workbook into exported\. Production and -SourceDir
+synchronizations leave the folder alone.
+
 Before the workbook is opened the script lists the worksheet and ThisWorkbook
 modules in the source and asks whether to replace their code as well. Answer
 N for a workbook built from a newer template, whose sheet code must stay as
@@ -34,7 +42,7 @@ Requirements:
 - VBA project not password-locked.
 
 The script is optional. The manual import of INSTALLATION.md needs no such
-setting and remains the route for recording an Excel run.
+setting; either route can record an Excel run.
 
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm"
@@ -101,7 +109,10 @@ param(
 
     [Parameter(Mandatory = $false)]
     [ValidateSet("Production", "Development")]
-    [string]$Mode
+    [string]$Mode,
+
+    [Parameter(Mandatory = $false)]
+    [string]$EvidenceDir
 )
 
 Set-StrictMode -Version Latest
@@ -550,12 +561,49 @@ function Sync-VbaSource {
     }
 }
 
+function Export-RunEvidence {
+    # Start a new evidence folder: remove what an earlier run left, then
+    # export the workbook's modules for check_excel_run.py.
+    param(
+        [Parameter(Mandatory = $true)]$VBProject,
+        [Parameter(Mandatory = $true)][string]$FolderPath
+    )
+
+    $exportedPath = Join-Path $FolderPath "exported"
+    $null = New-Item -ItemType Directory -Force -Path $exportedPath
+    foreach ($name in @("examples.log", "injected.log", "skipped.log", "host.txt")) {
+        $path = Join-Path $FolderPath $name
+        if (Test-Path -LiteralPath $path -PathType Leaf) {
+            Remove-Item -LiteralPath $path -Force
+        }
+    }
+    Get-ChildItem -LiteralPath $exportedPath -File |
+        Where-Object { $_.Extension.ToLowerInvariant() -in @(".bas", ".cls", ".frm", ".frx") } |
+        Remove-Item -Force
+
+    $extensions = @{
+        $vbext_ct_StdModule   = ".bas"
+        $vbext_ct_ClassModule = ".cls"
+        $vbext_ct_MSForm      = ".frm"
+    }
+    $count = 0
+    foreach ($component in $VBProject.VBComponents) {
+        $type = [int]$component.Type
+        if ($extensions.ContainsKey($type)) {
+            $component.Export((Join-Path $exportedPath ($component.Name + $extensions[$type])))
+            $count++
+        }
+    }
+    return $count
+}
+
 $excel = $null
 $workbook = $null
 $saved = $false
 $backupPath = $null
 $stagePath = $null
 $syncMode = $null
+$evidencePath = $null
 
 try {
     $workbookFullPath = Resolve-FullPath -PathValue $WorkbookPath
@@ -617,6 +665,9 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($SourceDir) -and -not [string]::IsNullOrWhiteSpace($Mode)) {
         throw "Use -Mode only for a full synchronization, not with -SourceDir."
     }
+    if (-not [string]::IsNullOrWhiteSpace($SourceDir) -and -not [string]::IsNullOrWhiteSpace($EvidenceDir)) {
+        throw "Use -EvidenceDir only with a Development synchronization, not with -SourceDir."
+    }
 
     if ([string]::IsNullOrWhiteSpace($SourceDir)) {
         $syncMode = $Mode
@@ -630,6 +681,17 @@ try {
                 Write-Host "Cancelled: the workbook was not changed."
                 exit 2
             }
+        }
+
+        if ($syncMode -eq "Development") {
+            $evidencePath = $EvidenceDir
+            if ([string]::IsNullOrWhiteSpace($evidencePath)) {
+                $evidencePath = Join-Path $repoFullPath "test-results\excel-run"
+            }
+            $evidencePath = Resolve-FullPath -PathValue $evidencePath
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($EvidenceDir)) {
+            throw "Use -EvidenceDir only with a Development synchronization."
         }
 
         $sourceFiles = @(Get-ManifestSources -RepoPath $repoFullPath -Mode $syncMode)
@@ -785,6 +847,11 @@ try {
         (Test-Path -LiteralPath $backupPath -PathType Leaf)) {
         Remove-Item -LiteralPath $backupPath -Force
         Write-Host "Backup removed: $backupPath"
+    }
+
+    if ($null -ne $evidencePath) {
+        $exportedCount = Export-RunEvidence -VBProject $vbProject -FolderPath $evidencePath
+        Write-Host "Evidence:   $exportedCount modules exported to $(Join-Path $evidencePath 'exported'); earlier run files removed"
     }
 
     Write-Host ""
