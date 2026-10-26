@@ -158,7 +158,8 @@ repository's harness.
 `check_excel_run.py` checks the evidence folder of an Excel run against the
 commit the workbook was built from: the exported modules against the
 commit's components, the three harness logs against the commit's example
-suite, and the host record. It is not a gate, since the evidence comes from
+suite, and the host record, which it writes when the folder has none and
+it runs on Windows. It is not a gate, since the evidence comes from
 a host run; the procedure is in
 [INSTALLATION.md](../INSTALLATION.md#recording-an-excel-run).
 

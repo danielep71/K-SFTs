@@ -319,7 +319,11 @@ access to the VBA project object model*.
 6. **Export the modules back.** In the VBE, right-click each module →
    **Export File**, into `exported\`, under its own name
    (`TEST_Examples.bas`, `TEST_Harness.bas`). Do not edit the exported files.
-7. **Write `host.txt`** in the folder:
+7. **The host record, `host.txt`,** is written by the check in step 8 when
+   it runs on the Excel host's Windows and the folder has none: the Windows
+   build read from the machine, the four supported references and
+   `compile=PASS`. Write it yourself only when step 4 reported an error,
+   other references are ticked, or the check runs off Windows:
 
    ```text
    windows=Windows 11 Pro, version 24H2, OS build 26100.4061
@@ -328,8 +332,8 @@ access to the VBA project object model*.
    ```
 
    `windows` is what `winver` shows. `references` lists the boxes ticked
-   in **Tools → References**, separated by `; `. Write `compile=PASS` only if
-   step 4 completed with no error; otherwise write what it reported.
+   in **Tools → References**, separated by `; `. `compile` is `PASS` only if
+   step 4 completed with no error; otherwise it is what step 4 reported.
 8. **Check** the folder against the commit, with Python 3.12 or later and Git
    (run on Linux and, for #9, on Windows 11; from WSL or a Linux checkout if
    it fails on another host):
@@ -354,10 +358,11 @@ access to the VBA project object model*.
 | `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
 | The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |
 | `ENVIRONMENT` lacks a field, differs between the logs, or Office is not 64-bit | The host is unknown or not the supported target |
-| `host.txt` lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
+| `host.txt` is missing off Windows, lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
 
 It cannot see Excel: the compile result, the references and the Windows
-build are the runner's own record. A PASS says the evidence is consistent
+build are the runner's own record, written by hand or, on Windows, by
+running the check. A PASS says the evidence is consistent
 with the commit; it validates no SFT calculation.
 
 ## 📚 Related documents
