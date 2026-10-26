@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1528" viewBox="0 0 1600 1528" font-family="'Segoe UI', 'Helvetica Neue', Arial, 'DejaVu Sans', sans-serif">
+<title>Counterparty credit risk: from exposures to capital requirements</title>
+<rect width="1600" height="1528" fill="#FFFFFF"/>
+<text x="800.0" y="54" font-size="34" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="middle">COUNTERPARTY CREDIT RISK</text>
+<text x="800.0" y="92" font-size="24" font-weight="bold" font-style="normal" fill="#1F5AA6" text-anchor="middle">From exposures to capital requirements</text>
+<text x="800.0" y="120" font-size="17" font-weight="normal" font-style="normal" fill="#0B2A5B" text-anchor="middle">EAD, RWA and capital are distinct measures</text>
+<rect x="300" y="136" width="102" height="28" rx="14" fill="#FFFFFF" stroke="#1F5AA6" stroke-width="1.5"/>
+<text x="351.0" y="155" font-size="14.5" font-weight="bold" font-style="normal" fill="#1F5AA6" text-anchor="middle">EAD / E*</text>
+<text x="412" y="155" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">exposure value</text>
+<rect x="570" y="136" width="57" height="28" rx="14" fill="#FFFFFF" stroke="#1F5AA6" stroke-width="1.5"/>
+<text x="598.5" y="155" font-size="14.5" font-weight="bold" font-style="normal" fill="#1F5AA6" text-anchor="middle">RWA</text>
+<text x="637" y="155" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">risk-weighted exposure amount</text>
+<rect x="915" y="136" width="39" height="28" rx="14" fill="#FFFFFF" stroke="#1F5AA6" stroke-width="1.5"/>
+<text x="934.5" y="155" font-size="14.5" font-weight="bold" font-style="normal" fill="#1F5AA6" text-anchor="middle">K</text>
+<text x="964" y="155" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">own funds requirement = 8% × RWA</text>
+<rect x="22" y="182" width="1556" height="38" rx="4" fill="#1F4E8C"/>
+<rect x="22" y="182" width="46" height="38" rx="4" fill="#0B2A5B"/>
+<text x="45" y="208" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">1</text>
+<text x="84" y="208" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="start">CALCULATE EXPOSURES — two engines by transaction type</text>
+<text x="1560" y="207" font-size="15" font-weight="normal" font-style="italic" fill="#DCE7F5" text-anchor="end">one exposure per netting set</text>
+<rect x="30" y="234" width="760" height="214" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="48" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SA-CCR | DERIVATIVES</text>
+<text x="772" y="268" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE52; CRR Art. 274-280f</text>
+<text x="48" y="302" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Transactions, netting sets, margin and collateral</text>
+<text x="48" y="328" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">EAD = α × (RC + PFE), with α = 1.4</text>
+<text x="48" y="354" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RC: replacement cost; PFE: multiplier × aggregate add-on</text>
+<text x="48" y="380" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Margined netting set: EAD capped at the unmargined EAD</text>
+<text x="48" y="428" font-size="13.5" font-weight="bold" font-style="normal" fill="#5B6B80" text-anchor="start">Output</text>
+<rect x="112" y="409" width="191" height="28" rx="14" fill="#1F4E8C"/>
+<text x="207.5" y="428" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">EAD per netting set</text>
+<rect x="810" y="234" width="760" height="214" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="828" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SFT | SECURITIES FINANCING</text>
+<text x="1552" y="268" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE22; CRR Art. 220-227</text>
+<text x="828" y="302" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Repos, reverse repos, securities lending and margin lending</text>
+<text x="828" y="328" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Financial collateral comprehensive method, supervisory haircuts</text>
+<text x="828" y="354" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Single transaction: E* = max(0, E(1 + He) − C(1 − Hc − Hfx))</text>
+<text x="828" y="380" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Master netting agreement: net, gross and FX terms over security issues</text>
+<text x="828" y="428" font-size="13.5" font-weight="bold" font-style="normal" fill="#5B6B80" text-anchor="start">Output</text>
+<rect x="892" y="409" width="182" height="28" rx="14" fill="#1F4E8C"/>
+<text x="983.0" y="428" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">E* per netting set</text>
+<line x1="410.0" y1="448" x2="410.0" y2="458.0" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="417.0,458.0 403.0,458.0 410.0,470" fill="#1F4E8C"/>
+<line x1="1190.0" y1="448" x2="1190.0" y2="458.0" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="1197.0,458.0 1183.0,458.0 1190.0,470" fill="#1F4E8C"/>
+<rect x="22" y="470" width="1556" height="38" rx="4" fill="#1F4E8C"/>
+<rect x="22" y="470" width="46" height="38" rx="4" fill="#0B2A5B"/>
+<text x="45" y="496" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">2</text>
+<text x="84" y="496" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="start">CLASSIFY — by counterparty: both engines feed both branches</text>
+<text x="1560" y="495" font-size="15" font-weight="normal" font-style="italic" fill="#DCE7F5" text-anchor="end">bilateral counterparty → ordinary branch   •   CCP → CCP branch</text>
+<line x1="410.0" y1="512" x2="300.6" y2="570.4" stroke="#1F5AA6" stroke-width="2.5"/>
+<polygon points="303.9,576.5 297.3,564.2 290.0,576" fill="#1F5AA6"/>
+<line x1="410.0" y1="512" x2="1058.1" y2="574.8" stroke="#1F5AA6" stroke-width="2.5"/>
+<polygon points="1058.7,567.9 1057.4,581.8 1070.0,576" fill="#1F5AA6"/>
+<line x1="1190.0" y1="512" x2="541.9" y2="574.8" stroke="#1F5AA6" stroke-width="2.5"/>
+<polygon points="542.6,581.8 541.3,567.9 530.0,576" fill="#1F5AA6"/>
+<line x1="1190.0" y1="512" x2="1299.4" y2="570.4" stroke="#1F5AA6" stroke-width="2.5"/>
+<polygon points="1302.7,564.2 1296.1,576.5 1310.0,576" fill="#1F5AA6"/>
+<rect x="30" y="580" width="760" height="166" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="48" y="616" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">ORDINARY TREATMENT</text>
+<text x="48" y="648" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Bilateral counterparties: institutions, corporates, sovereigns</text>
+<text x="48" y="674" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">and others, under the ordinary counterparty credit risk rules</text>
+<text x="48" y="700" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Includes a clearing member&#x27;s exposures to its clients</text>
+<text x="48" y="726" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">(shorter margin period of risk, or a scalar)</text>
+<rect x="810" y="580" width="760" height="166" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="828" y="616" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">SPECIFIC CCP TREATMENT</text>
+<text x="828" y="648" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Exposures to CCPs: trade exposures and default fund</text>
+<text x="828" y="674" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">contributions, split by qualifying (QCCP) or not</text>
+<text x="828" y="700" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Includes a client&#x27;s trade exposures to the CCP through</text>
+<text x="828" y="726" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">its clearing member (CRE54; CRR Art. 300-311)</text>
+<text x="800.0" y="776" font-size="17" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="middle">CCPs are counterparties to both derivatives and SFTs: they are not a third transaction type.</text>
+<rect x="22" y="794" width="1556" height="38" rx="4" fill="#1F4E8C"/>
+<rect x="22" y="794" width="46" height="38" rx="4" fill="#0B2A5B"/>
+<text x="45" y="820" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">3</text>
+<text x="84" y="820" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="start">CALCULATE CAPITAL — two branches, no double counting</text>
+<rect x="30" y="846" width="760" height="292" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="48" y="882" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">ORDINARY CAPITAL ENGINE</text>
+<text x="48" y="914" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Risk weight RW of the counterparty, from its class and rating:</text>
+<text x="48" y="940" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">• SA: CRE20; CRR Art. 111-141 (e.g. CQS, SCRA grade)</text>
+<text x="48" y="966" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">• IRB: CRE30-36; CRR Art. 142-191 (PD, LGD, M)</text>
+<text x="48" y="992" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RWA = EAD × RW (SA), or from the IRB formula</text>
+<text x="48" y="1018" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">K ordinary = 8% × ordinary RWA</text>
+<text x="48" y="1054" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Risk weights come from SA or IRB, not from the exposure engines.</text>
+<text x="48" y="1118" font-size="13.5" font-weight="bold" font-style="normal" fill="#5B6B80" text-anchor="start">Output</text>
+<rect x="112" y="1099" width="182" height="28" rx="14" fill="#1F4E8C"/>
+<text x="203.0" y="1118" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">RWA and K ordinary</text>
+<rect x="810" y="846" width="760" height="292" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
+<text x="828" y="882" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-CCP | CCP CAPITAL</text>
+<text x="1552" y="880" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE54; CRR Art. 306-309</text>
+<rect x="822" y="892" width="736" height="28" rx="3" fill="#D6E3F4"/>
+<text x="1110" y="912" font-size="15" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">Qualifying CCP</text>
+<text x="1330" y="912" font-size="15" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">Non-qualifying CCP</text>
+<text x="828" y="942" font-size="15.5" font-weight="bold" font-style="normal" fill="#2B3A4E" text-anchor="start">Trade exposures</text>
+<text x="1110" y="942" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RW 2%</text>
+<text x="1330" y="942" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RW of the counterparty (SA)</text>
+<line x1="822" y1="951" x2="1558" y2="951" stroke="#A9C1E3" stroke-width="1"/>
+<text x="828" y="970" font-size="15.5" font-weight="bold" font-style="normal" fill="#2B3A4E" text-anchor="start">Client, through its member</text>
+<text x="1110" y="970" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RW 2% or 4%</text>
+<text x="1330" y="970" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">as above</text>
+<line x1="822" y1="979" x2="1558" y2="979" stroke="#A9C1E3" stroke-width="1"/>
+<text x="828" y="998" font-size="15.5" font-weight="bold" font-style="normal" fill="#2B3A4E" text-anchor="start">Default fund contribution</text>
+<text x="1110" y="998" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">K_CM from the CCP&#x27;s K_CCP</text>
+<text x="1330" y="998" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">RW 1250%</text>
+<line x1="822" y1="1007" x2="1558" y2="1007" stroke="#A9C1E3" stroke-width="1"/>
+<text x="828" y="1030" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">QCCP: K trade + K default fund capped at the non-qualifying amount (Basel CRE54)</text>
+<text x="828" y="1056" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">The contribution is an input; K is the required capital.</text>
+<text x="828" y="1118" font-size="13.5" font-weight="bold" font-style="normal" fill="#5B6B80" text-anchor="start">Output</text>
+<rect x="892" y="1099" width="139" height="28" rx="14" fill="#1F4E8C"/>
+<text x="961.5" y="1118" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">RWA and K CCP</text>
+<line x1="410.0" y1="1138" x2="410.0" y2="1148.0" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="417.0,1148.0 403.0,1148.0 410.0,1160" fill="#1F4E8C"/>
+<line x1="1190.0" y1="1138" x2="1190.0" y2="1148.0" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="1197.0,1148.0 1183.0,1148.0 1190.0,1160" fill="#1F4E8C"/>
+<rect x="22" y="1160" width="1556" height="38" rx="4" fill="#1F4E8C"/>
+<rect x="22" y="1160" width="46" height="38" rx="4" fill="#0B2A5B"/>
+<text x="45" y="1186" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">4</text>
+<text x="84" y="1186" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="start">AGGREGATE — capital requirement for counterparty default risk</text>
+<text x="800.0" y="1242" font-size="26" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="middle">K total = K ordinary + K CCP, after the QCCP cap where it applies</text>
+<text x="800.0" y="1276" font-size="20" font-weight="bold" font-style="normal" fill="#1F5AA6" text-anchor="middle">Total RWA = 12.5 × K total</text>
+<rect x="22" y="1298" width="1556" height="160" rx="6" fill="#FFF7EF" stroke="#E07B26" stroke-width="2" stroke-dasharray="8 5"/>
+<text x="40" y="1332" font-size="20" font-weight="bold" font-style="normal" fill="#C2500A" text-anchor="start">MEMO ITEM ONLY: CVA RISK (K-CVA) — market risk, not part of counterparty default risk</text>
+<text x="40" y="1364" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">CVA risk belongs to market risk (Basel MAR50; CRR Part Three, Title VI, Art. 381-386). It is shown for completeness only: it uses the EAD</text>
+<text x="40" y="1389" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">of step 1 as an input, but is excluded from K total and Total RWA above. Total own funds add it separately: K total + K CVA.</text>
+<text x="40" y="1414" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">BA-CVA: EAD, effective maturity, counterparty data and hedges.   SA-CVA: CVA sensitivities and hedges.   CRR: also a simplified approach.</text>
+<text x="40" y="1439" font-size="15.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Scope: derivatives; SFTs only where CVA risk is material; exposures to QCCPs and the CRR exemptions are excluded.</text>
+<text x="24" y="1488" font-size="13.5" font-weight="normal" font-style="normal" fill="#0B2A5B" text-anchor="start">Architecture diagram: does not certify implemented functionality. Minimum Pillar 1 capital; buffers and Pillar 2 excluded.</text>
+<text x="24" y="1510" font-size="13.5" font-weight="normal" font-style="normal" fill="#0B2A5B" text-anchor="start">References: Basel CRE20, CRE22, CRE30-36, CRE51-54, MAR50; CRR Art. 111-191 (risk weights), 192-241 (credit risk mitigation), 271-311 (counterparty credit risk; CCPs from Art. 300), 381-386 (CVA).</text>
+</svg>

@@ -72,3 +72,13 @@ on the same date to match the repository name (#117). The panels are conceptual 
 not screenshots of an implemented application or evidence of validated calculations.
 The generated image was exported as a 1280 x 640 JPEG for README and
 social-preview use (#113).
+
+`docs/assets/CCR_framework.svg` and `docs/assets/CCR_framework.png` were
+authored on 2026-10-26 at the maintainer's request (#151), and the same
+pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
+vector shapes; the PNG is its rendered export, at twice the SVG's size and
+reduced to 256 colours. The diagram names the sister calculators K-SACCR,
+K-CCP and K-CVA by the maintainer's decision of 2026-10-26: an explicit
+exception, for this diagram, to the rule of #137 that no file names
+K-SACCR. It is an architecture illustration, not evidence of an implemented
+or validated calculation.
