@@ -80,6 +80,28 @@ It is built for people who need to **check** an SFT exposure figure rather
 than only produce one. Derivatives exposure, under SA-CCR, is out of scope
 here.
 
+<a id="where-k-sfts-belongs"></a>
+
+### Where K-SFTs belongs
+
+K-SFTs is one calculator of a counterparty credit risk framework: it
+produces the exposure value E\* of securities financing transactions, the
+**K-SFT** box of step 1. The derivatives exposure belongs to
+[K-SACCR](https://github.com/danielep71/VBA-SACCR-Toolkit); the capital
+steps, ordinary and CCP, and the CVA memo item belong to the wider framework
+of [K-Risk Engines](https://github.com/danielep71/K-Risk-Engines).
+
+[![Counterparty credit risk from exposures to capital requirements: two exposure engines, ordinary and CCP capital branches, aggregation, and CVA as a separate market-risk memo item](docs/assets/CCR_framework.svg)](docs/assets/CCR_framework.svg)
+
+[Editable SVG](docs/assets/CCR_framework.svg) ·
+[High-resolution PNG](docs/assets/CCR_framework.png)
+
+This is an architecture diagram, not evidence of an implemented or validated
+calculation. Today the [prototype](docs/methodology/PROTOTYPE.md) covers the
+K-SFT box and the standardised risk weight, RWA and own funds of each
+netting set, a QCCP taking the 2% trade-exposure weight. Default-fund
+capital and CVA are not implemented here.
+
 ---
 
 <a id="what-exists-today"></a>

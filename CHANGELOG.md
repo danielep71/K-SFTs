@@ -62,6 +62,10 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
 
+- A counterparty credit risk framework diagram in the root README, showing
+  the calculator K-SFTs belongs beside, in editable SVG and PNG, shared with
+  K-SACCR and K-Risk Engines (#151).
+
 - A K-SFTs banner in the root README, with a reusable 1280 x 640 image
   in `docs/assets/` (#113, #117).
 
