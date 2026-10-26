@@ -86,6 +86,18 @@ F: dict[str, Any] = {
     "rd_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True),
     "rd_k": fmt(font_size=10, bold=True, text_wrap=True, bottom=3, bottom_color=GREY),
     "rd_v": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY),
+    # README tables: each section is boxed, with a rule between label and text
+    # and dashed lines between items; the last item closes the box.
+    "rm_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True,
+                valign="vcenter"),
+    "rm_k": fmt(font_size=10, bold=True, text_wrap=True, valign="vcenter", left=1, left_color=NAVY, right=1,
+                right_color=NAVY, bottom=3, bottom_color=GREY),
+    "rm_v": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=3,
+                bottom_color=GREY),
+    "rm_k_last": fmt(font_size=10, bold=True, text_wrap=True, valign="vcenter", left=1, left_color=NAVY,
+                     right=1, right_color=NAVY, bottom=1, bottom_color=NAVY),
+    "rm_v_last": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=1,
+                     bottom_color=NAVY),
     "rd_link": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY, font_color="#0563C1", underline=1),
     "cf_bad": wb.add_format({"bg_color": "#F8CBAD"}),
     "cf_warn": wb.add_format({"bg_color": "#FFE699"}),
@@ -161,14 +173,15 @@ def ccy3(cell: str) -> dict[str, Any]:
 # ----------------------------------------------------------------------------
 readme = wb.add_worksheet("README")
 readme.set_tab_color(TAB_DOC)
-banner(readme, "ReadMe", 4)
-readme.set_column(2, 2, 46)
-readme.set_column(3, 3, 140)
-readme.set_column(4, 4, 4)
+banner(readme, "ReadMe", 5)
+readme.set_column(2, 2, 55.43)
+readme.set_column(3, 3, 162.72)
+readme.set_column(4, 4, 14)
+readme.set_column(5, 5, 5)
 readme.write(2, 2, "Exposure value E*, risk-weighted exposure amount and own funds requirement of securities "
              "financing transactions under the financial collateral comprehensive method with supervisory "
              "haircuts: EU CRR (Art. 220-227), the default, and Basel CRE22, chosen per netting set.", F["note"])
-readme.set_row(2, 34)
+readme.set_row(2, 30)
 README = [
     ("How to use", None),
     ("1. Enable macros", "This file is the macro-free template. Save it as an Excel Macro-Enabled Workbook "
@@ -271,16 +284,23 @@ README = [
      "CORE_Config (layout constants and the regulatory parameter set), CORE_Util (helpers). No external "
      "references: no Scripting.Dictionary, no WorksheetFunction."),
 ]
-r = 4
-for key, value in README:
+# Each section: a spacer row, its heading, then its items grouped under the
+# heading (collapsible, with the button on the heading row).
+readme.outline_settings(True, False, True, False)
+r = 3
+for i, (key, value) in enumerate(README):
     if value is None:
-        readme.set_row(r, 30)
-        readme.write(r, 2, key, F["rd_h"])
-        readme.write_blank(r, 3, None, F["rd_h"])
+        readme.set_row(r, 9.95)
+        r += 1
+        readme.set_row(r, 50.1)
+        readme.write(r, 2, key, F["rm_h"])
+        readme.write_blank(r, 3, None, F["rm_h"])
     else:
-        readme.set_row(r, 30 if len(value) < 170 else 44 if len(value) < 340 else 58)
-        readme.write(r, 2, key, F["rd_k"])
-        readme.write(r, 3, value, F["rd_v"])
+        last = i + 1 == len(README) or README[i + 1][1] is None
+        lines = -(-len(value) // 190)
+        readme.set_row(r, max(30, 12 * lines + 6), None, {"level": 1})
+        readme.write(r, 2, key, F["rm_k_last" if last else "rm_k"])
+        readme.write(r, 3, value, F["rm_v_last" if last else "rm_v"])
     r += 1
 readme.freeze_panes(3, 0)
 
