@@ -120,14 +120,11 @@ and a project `#Const` fail closed, because their value cannot be known.
   [public API boundary](../docs/REPOSITORY_STRUCTURE.md#-public-api-boundary)
   is a contract, not an access control.
 
-**Source and adaptations.** The checks are adapted from K-SACCR
-([NOTICE.md](../NOTICE.md)), which took the jump, conditional-compilation
-and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
+**Design notes.**
 
-- one shared lexer and this repository's finding and exit format instead of
-  K-SACCR's report library, JSON reports and `--self-test` fixtures; the
-  valid and invalid fixtures are in `test_check_vba.py`, run by `tool-tests`;
-- ASCII only instead of the Windows-1252 code page;
+- One shared lexer and one finding and exit format; the valid and invalid
+  fixtures are in `test_check_vba.py`, run by `tool-tests`;
+- ASCII only, not a Windows code page;
 - this repository's homes, role prefixes (`CORE_`, `SFT_`, `C`, `ThisWorkbook`
   or `sh`, `M_`, `frm`, `TEST_`, `Example`), component kinds per home and the
   31-character name limit; `Option Private Module` in `tests/modules/` too;
@@ -144,19 +141,15 @@ and public-API checks from EXCEL-VBA-PROJECT-TEMPLATE. Changed here:
 - an apostrophe or a colon inside `[...]`, as in `['Sheet 1'!A1]` or
   `[A1:B2]`, read as part of the expression, and every target of
   `On <expression> GoTo` and `GoSub` checked, not only the first;
-- `VBA6` true under VBA7, as Microsoft documents it (false there in
-  K-SACCR), and no `Declare` keyword test on procedure lines, which also
-  matched text inside string literals;
-- none of K-SACCR's module names, component counts, workbook template or
-  synchronizer checks, changelog and version checks, and no financial
-  assertion.
+- `VBA6` true under VBA7, as Microsoft documents it, and no `Declare`
+  keyword test on procedure lines, which would also match text inside string
+  literals;
+- no financial assertion.
 
-Not adopted: K-SACCR's advisory call checker (`check_vba_calls.py`), which is
-not a gate there, does not resolve dynamic calls and depends on a project
-manifest of K-SACCR's modules; its committed-whitespace check, since
-`vba-source` covers VBA source and `.editorconfig` the other files; and its
-CSV, Excel-evidence and case-generation tools, which serve K-SACCR's engine.
-`check_excel_run.py` is written for this repository's harness instead.
+Not checked by a gate: calls between procedures, since a static check cannot
+resolve dynamic calls; and white space in files other than VBA source, which
+`.editorconfig` covers. `check_excel_run.py` is written for this
+repository's harness.
 
 <a id="excel-run-evidence"></a>
 
@@ -193,11 +186,10 @@ run it for a workbook dragged onto them. It is optional and needs *Trust
 access to the VBA project object model*; the procedure and its safeguards
 are in [INSTALLATION.md](../INSTALLATION.md#synchronizing-vba).
 
-It is adapted from K-SACCR's `Sync-SACCR-VBA.ps1` ([NOTICE.md](../NOTICE.md)):
-this repository's prefixes and homes, homes that do not exist yet skipped,
-a stop without saving when a mode lists nothing, forms imported from the
-repository only, and no retired-component list. No test runs it: it needs
-Windows Excel, and K-SACCR's PowerShell tests were not adopted. It is
+It uses this repository's prefixes and homes, skips homes that do not exist
+yet, stops without saving when a mode lists nothing, imports forms from the
+repository only, and keeps no retired-component list. No test runs it: it
+needs Windows Excel. It is
 validated by running it on a host: first on 2026-10-24, in development mode
 in Windows PowerShell 5.1
 ([#102](https://github.com/danielep71/K-SFTs/issues/102)).

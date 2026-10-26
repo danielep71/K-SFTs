@@ -28,7 +28,7 @@ Attribute VB_Name = "M_Main"
 '   flag mRunning.
 '
 ' ERROR POLICY
-'   As in K-SACCR's M_Main: the primary error is copied before cleanup.
+'   The primary error is copied before cleanup.
 '   Each setting is restored by its own helper, so one failed restoration
 '   does not stop the others, and a cleanup failure is reported separately
 '   from the primary error. With gSilent False the outcome is shown in a
@@ -36,8 +36,8 @@ Attribute VB_Name = "M_Main"
 '   the inputs are not VBA errors: the engine lists them on Checks.
 '
 ' KNOWN DEVIATION
-'   As in K-SACCR, this standard module lives in src/workbook because the
-'   sheet buttons call it.
+'   This standard module lives in src/workbook because the sheet buttons
+'   call it.
 '
 ' COMPATIBILITY
 '   Excel VBA; no references beyond the defaults.

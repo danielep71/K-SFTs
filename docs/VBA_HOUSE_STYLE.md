@@ -4,10 +4,7 @@ This document is authoritative for **how K-SFTs's VBA is written**:
 naming, module rules, procedure contracts, errors, Excel-state handling and
 source presentation. Where a component lives is owned by
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md); the supported hosts and
-the import and export steps by [INSTALLATION.md](../INSTALLATION.md). Its
-structure is adapted from K-SACCR's `docs/VBA_HOUSE_STYLE.md` (see
-[NOTICE.md](../NOTICE.md)); none of K-SACCR's components, formulas or
-parameters apply here.
+the import and export steps by [INSTALLATION.md](../INSTALLATION.md).
 
 **Status on 2026-10-25:** the VBA components are the test modules in
 `tests/modules/` and the five prototype modules in `src/`

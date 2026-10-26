@@ -23,8 +23,8 @@ Attribute VB_Name = "SFT_Formulas"
 '   Stateless. Results depend only on the arguments.
 '
 ' ERROR POLICY
-'   As in K-SACCR's SACCR_Formulas: each function checks the domain of its
-'   inputs, stated in its INPUTS section, and returns a worksheet error
+'   Each function checks the domain of its inputs, stated in its INPUTS
+'   section, and returns a worksheet error
 '   value instead of raising or returning a misleading number: #NUM! for a
 '   number outside its domain, #VALUE! for a value that is not a number
 '   where one is needed, #REF! for ranges of different sizes, and the error

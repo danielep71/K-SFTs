@@ -219,7 +219,7 @@ README = [
     ("SFT_ExposureNetted(SumE, SumC, Net, Gross, N, [FXTerm], [NetWeight], [GrossWeight])", "E* of a netting set"),
     ("SFT_CapitalRequirement(EAD, RiskWeight, [CapitalRatio])", "Own funds requirement; RWA with ratio 1"),
     ("Scope and limitations", None),
-    ("Not covered", "SA-CCR and derivatives (see K-SACCR); internal models (IMM, VaR, own-estimate haircuts); "
+    ("Not covered", "SA-CCR and derivatives; internal models (IMM, VaR, own-estimate haircuts); "
      "the simple approach; secured lending and commodity repos; haircut floors for non-centrally cleared "
      "SFTs (CRE56, not in the CRR); maturity mismatch; credit risk mitigation on the exposure side other "
      "than collateral; cross-product netting with derivatives; CVA; the SCRA sovereign floor; capital "
@@ -231,8 +231,8 @@ README = [
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
     ("Code", None),
     ("Modules", "M_Main (macros), CORE_Engine (calculation), SFT_Formulas (public SFT_* functions), "
-     "CORE_Config (layout constants and the regulatory parameter set), CORE_Util (helpers, shared with "
-     "K-SACCR). No external references: no Scripting.Dictionary, no WorksheetFunction."),
+     "CORE_Config (layout constants and the regulatory parameter set), CORE_Util (helpers). No external "
+     "references: no Scripting.Dictionary, no WorksheetFunction."),
 ]
 r = 4
 for key, value in README:

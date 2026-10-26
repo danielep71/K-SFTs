@@ -6,9 +6,7 @@ Attribute VB_Name = "CORE_Util"
 '   Provide the small helpers the engine uses everywhere: tolerant conversion
 '   of cell values to text, numbers, dates and Booleans; keyed lookups built
 '   on a VBA Collection; and the sheet helpers that read parameters and input
-'   columns and write output blocks. Taken from K-SACCR's CORE_Util with the
-'   SA-CCR specific helpers left out, so that both workbooks read and write
-'   their sheets the same way.
+'   columns and write output blocks.
 '
 ' PUBLIC SURFACE
 '   None outside this VBA project. Every procedure is Public for in-project use
@@ -32,8 +30,8 @@ Attribute VB_Name = "CORE_Util"
 '   error, for example a missing worksheet, propagates to the caller.
 '
 ' KNOWN DEVIATION
-'   As in K-SACCR, this module lives in src/core but reads and writes
-'   worksheets, which the repository structure reserves for src/workbook.
+'   This module lives in src/core but reads and writes worksheets, which
+'   the repository structure reserves for src/workbook.
 '
 ' COMPATIBILITY
 '   Excel VBA; no references beyond the defaults.
@@ -246,7 +244,7 @@ Public Function ToSerial( _
 '   Content: a date, a number already holding a serial, or text in the ISO
 '      form yyyy-mm-dd. Other text, such as 31/03/2027, 03/31/2027 or a serial
 '      written as text, is not read: its meaning depends on the Windows
-'      regional settings (K-SACCR #40).
+'      regional settings.
 '
 ' RETURNS
 '   The date serial as a Double; -1 when Content is missing or not a date.
@@ -312,8 +310,8 @@ Public Function TryBool( _
 '                                   TryBool
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Read a Y/N style cell value strictly: unlike ToBool, an unrecognised
-'   value is reported instead of silently taking the default (K-SACCR #35).
+'   Read a Y/N style cell value strictly: an unrecognised value is
+'   reported instead of silently taking the default.
 '
 ' INPUTS
 '   Content: a Boolean, blank, or text such as Y, YES, TRUE, 1, N, NO,
@@ -367,7 +365,7 @@ Public Function TryDbl( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read a numeric cell value strictly: unlike ToDbl, text that is not a
-'   number is reported instead of silently taking the default (K-SACCR #35).
+'   number is reported instead of silently taking the default.
 '
 ' INPUTS
 '   Content: a number, blank, or anything else.
@@ -994,8 +992,7 @@ Public Function LastDataRowAny( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Find the last row with a value in any of the first ColumnCount columns,
-'   so
-'   that a row whose ID is blank is still found (K-SACCR #35).
+'   so that a row whose ID is blank is still found.
 '
 ' INPUTS
 '   Sheet: the worksheet to scan.
@@ -1107,7 +1104,7 @@ Public Function GetParam( _
 '
 ' RETURNS
 '   The stored value of the name's top-left cell (Value2, so that a
-'   Currency or date format does not convert or round it, K-SACCR #196); Empty
+'   Currency or date format does not convert or round it); Empty
 '   when the name is missing or broken, which CORE_Engine.ValidateSchema
 '   reports before any parameter is read.
 '

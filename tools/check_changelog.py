@@ -6,7 +6,7 @@ release. CHANGELOG.md starts with an ``## [Unreleased]`` section; each release
 heading is ``## [X.Y.Z] - YYYY-MM-DD`` with a real date, newest first by
 version and date, with a link reference to its tag. VERSION does not exist
 before the first dated release; from then on it holds one ``X.Y.Z`` line,
-the newest release. Adapted from K-SACCR; see NOTICE.md.
+the newest release.
 """
 
 from __future__ import annotations

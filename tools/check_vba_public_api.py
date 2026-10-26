@@ -6,8 +6,7 @@ make public (Enum, Type, Event, Declare), states its visibility. The public
 declarations of src/modules/ (the facade) and the inventory must match
 one to one, with the same normalized signatures, and no two public names may
 collide (docs/REPOSITORY_STRUCTURE.md, Public API boundary). Each compilation
-environment of check_vba_conditionals.py is read separately. Adapted from
-K-SACCR; see NOTICE.md.
+environment of check_vba_conditionals.py is read separately.
 """
 
 from __future__ import annotations
