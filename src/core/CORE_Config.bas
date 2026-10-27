@@ -29,7 +29,7 @@ Attribute VB_Name = "CORE_Config"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-26
 '
 ' AUTHOR
 '   Daniele Penza
@@ -109,7 +109,8 @@ Attribute VB_Name = "CORE_Config"
 '------------------------------------------------------------------------------
     'The values a regulatory run uses, as listed in the methodology: CRE22
     '(effective 1 January 2023) and the consolidated CRR of 26.06.2026,
-    'checked on 2026-10-24. A run whose parameters, haircut table, risk-
+    'transcribed on 2026-10-24 and not yet checked against the registered
+    'copies (PROTOTYPE.md). A run whose parameters, haircut table, risk-
     'weight table and risk-weight overrides all agree with this set is
     'REGULATORY and names REF_SET_ID; any difference makes it WHAT-IF
     '(CORE_Engine.ClassifyRun). DaysPerYear is a convention and does not
@@ -165,8 +166,8 @@ Attribute VB_Name = "CORE_Config"
 ' TRANSACTION CODES
 '------------------------------------------------------------------------------
     'Transaction types. The first four are repo-style transactions, the
-    'last an other capital-market-driven transaction [CRE22.57; CRR Art.
-    '224(2)]. Secured lending is out of scope.
+    'last an other capital-market-driven transaction [CRE22.56-22.57; CRR
+    'Art. 224(2)]. Secured lending is out of scope.
         Public Const TT_REPO        As String = "REPO"          'Securities sold under repurchase, cash received
         Public Const TT_REVREPO     As String = "REVREPO"       'Cash lent, securities bought under resale
         Public Const TT_SECLEND     As String = "SECLEND"       'Securities lent against collateral
@@ -303,14 +304,15 @@ Attribute VB_Name = "CORE_Config"
 ' OUTPUT TABLE COLUMNS
 '------------------------------------------------------------------------------
     'Number of columns the engine clears and writes on each output sheet,
-    'and the columns that other procedures read back.
+    'and the position of the main Results columns (WriteResults writes them
+    'by literal index; no procedure reads these constants).
         Public Const RS_NCOLS       As Long = 24    'Results
         Public Const RS_ID          As Long = 1     'Results: NettingSetID, or TOTAL CRR / TOTAL BCBS
         Public Const RS_REGIME      As Long = 3     'Results: BCBS or CRR
         Public Const RS_ESTAR       As Long = 18    'Results: E*, the exposure value
         Public Const RS_RWA         As Long = 22    'Results: risk-weighted exposure amount
         Public Const RS_OWNFUNDS    As Long = 23    'Results: own funds requirement
-        Public Const RS_STATUS      As Long = 24    'Results: VALID, INVALID, INCOMPLETE or NO TRANSACTIONS
+        Public Const RS_STATUS      As Long = 24    'Results: status; on a TOTAL row, the VALID and withheld count
         Public Const PS_NCOLS       As Long = 18    'Positions
         Public Const LC_NCOLS       As Long = 20    'LegCalc
         Public Const CK_NCOLS       As Long = 5     'Checks

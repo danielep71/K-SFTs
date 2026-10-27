@@ -199,9 +199,7 @@ convenience, not a requirement:
   (**File → Options → Trust Center → Trust Center Settings → Macro
   Settings**), which the manual steps above do not. Switch it on only as
   your organization's policy allows.
-- The manual import stays the route for
-  [recording an Excel run](#recording-an-excel-run): the evidence of an
-  Excel run never depends on it.
+- Either route can [record an Excel run](#recording-an-excel-run).
 
 With the workbook closed, drag the `.xlsm` onto `tools/Sync-KSFT-VBA.cmd`,
 or run:
@@ -215,6 +213,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 | Imports the components of one workbook | `-Mode Production`: those under `src/`; `-Mode Development`: those and `tests/modules/`. Without `-Mode` it asks. The lists are in `tools/vba-projects.json`, which the `vba-manifest` gate keeps equal to the tracked components. |
 | Replaces document-module code, if you agree | It asks, unless `-IncludeSheets` or `-SkipSheets` answers; the workbook's sheet objects are kept. |
 | Imports from a folder | `-SourceDir` (or `tools/Sync-KSFT-VBA-Downloads.cmd`, which asks for one and defaults to `Downloads`) takes only the `.bas` and `.cls` files found there, by their `Attribute VB_Name`, after listing them for confirmation. |
+| Prepares an Excel run's evidence | A `-Mode Development` synchronization, after saving, removes the files an earlier run left in `test-results\excel-run` (or `-EvidenceDir`): the three logs, `host.txt` and the modules in `exported\`. It then exports every standard, class and form module of the workbook into `exported\`. Production and `-SourceDir` synchronizations leave the folder alone. |
 | Protects the workbook | A backup copy first, removed after a successful save. It writes no cells, formulas, names or formatting, and before saving it checks that no sheet was added, removed, renamed or reordered. The workbook is closed unsaved on any error. |
 
 It never writes to the repository. After it, compile as in step 6.
@@ -291,35 +290,49 @@ more entry points show the failure paths and are expected to fail:
 The evidence that a commit's VBA was imported, compiled and run on a host,
 for [#9](https://github.com/danielep71/K-SFTs/issues/9) and for every
 later issue or pull request that cites an Excel run. It needs no
-self-hosted runner, no change to the macro-security level and no *Trust
-access to the VBA project object model*.
+self-hosted runner and no change to the macro-security level. Built by
+hand, it needs no *Trust access to the VBA project object model*; built with
+[the synchronization script](#synchronizing-vba), it needs that setting and
+takes fewer steps.
 
 1. **Fix the candidate.** In a clone with no local changes
    (`git status --short` prints nothing), type `git switch --detach <commit>`,
    then `git rev-parse HEAD` for the full SHA.
-2. **Make the evidence folder**, for example `test-results\excel-run\` in the
-   checkout (ignored by Git), with an empty `exported\` folder inside.
-3. **Build a development workbook** from that checkout as in
-   [building a workbook from source](#building-a-workbook-from-source),
-   with the modules of `tests/modules/`.
-4. **Compile** with **Debug → Compile VBAProject**.
-5. **Run.** In the Immediate window type, with the full path of the folder
+2. **Build a development workbook** from that checkout, with the modules of
+   `tests/modules/`, and its evidence folder `test-results\excel-run\`
+   (ignored by Git):
+   - **With the script:** save the template as `.xlsm` and run a
+     [`-Mode Development` synchronization](#synchronizing-vba). It also
+     empties the evidence folder of an earlier run and exports the
+     workbook's modules into its `exported\` folder.
+   - **By hand:** build it as in
+     [building a workbook from source](#building-a-workbook-from-source).
+     After step 3, export each module into an empty `exported\` folder
+     inside the evidence folder, under its own name (VBE: right-click →
+     **Export File**), without editing it.
+3. **Run.** In the Immediate window type, with the full path of the folder
    and no trailing backslash:
 
    ```text
    TEST_Examples.SaveExampleEvidence "C:\path\to\test-results\excel-run"
    ```
 
-   It runs the suite normally, with the injected failure and with the
+   It creates the folder when missing (its parent must exist) and removes
+   the logs and `host.txt` of an earlier run, leaving `exported\` as it is.
+   It then runs the suite normally, with the injected failure and with the
    skipped case, and saves each complete log as `examples.log`,
    `injected.log` and `skipped.log`. Each run prints a `SAVED=` line: the
    normal run with `error=0`, the two failure runs with the error *Suite
    examples did not pass*. The errors are printed, not raised, so that all
-   three logs are written.
-6. **Export the modules back.** In the VBE, right-click each module →
-   **Export File**, into `exported\`, under its own name
-   (`TEST_Examples.bas`, `TEST_Harness.bas`). Do not edit the exported files.
-7. **Write `host.txt`** in the folder:
+   three logs are written. No separate **Debug → Compile VBAProject** is
+   needed: a run that reaches the three `SAVED=` lines is recorded as
+   compiled.
+4. **The host record, `host.txt`,** is written by the check in step 5 when
+   it runs on the Excel host's Windows and the folder has none: the Windows
+   build read from the machine, the four supported references and
+   `compile=PASS`. Write it yourself only when the project reported a
+   compile error, other references are ticked, or the check runs off
+   Windows:
 
    ```text
    windows=Windows 11 Pro, version 24H2, OS build 26100.4061
@@ -328,9 +341,9 @@ access to the VBA project object model*.
    ```
 
    `windows` is what `winver` shows. `references` lists the boxes ticked
-   in **Tools → References**, separated by `; `. Write `compile=PASS` only if
-   step 4 completed with no error; otherwise write what it reported.
-8. **Check** the folder against the commit, with Python 3.12 or later and Git
+   in **Tools → References**, separated by `; `. `compile` is `PASS` only if
+   no compile error was reported; otherwise it is the error.
+5. **Check** the folder against the commit, with Python 3.12 or later and Git
    (run on Linux and, for #9, on Windows 11; from WSL or a Linux checkout if
    it fails on another host):
 
@@ -340,7 +353,7 @@ access to the VBA project object model*.
 
    It must end with `excel-run: PASS`. It prints the commit, the host and
    the Git blob id of every imported component.
-9. **Record.** Copy the report into the issue or pull request and add a row
+6. **Record.** Copy the report into the issue or pull request and add a row
    to [tested environments](#tested-environments). The logs stay outside Git.
 
 `check_excel_run.py` reads only the folder and the commit:
@@ -354,10 +367,11 @@ access to the VBA project object model*.
 | `CLEANUP` is not `PASS` or `RECOVERY` is not `NONE` in any of the three logs | Cleanup failed |
 | The two failure runs do not end as [documented](#running-the-harness), or fail anything but their own failure: the injected run its one designated assertion, the skipped-case run only `harness.completeness` | The failure paths did not behave |
 | `ENVIRONMENT` lacks a field, differs between the logs, or Office is not 64-bit | The host is unknown or not the supported target |
-| `host.txt` lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
+| `host.txt` is missing off Windows, lacks a field, the references are not exactly the four [supported](#supported-hosts) ones, or `compile` is not `PASS` | The host record is incomplete |
 
 It cannot see Excel: the compile result, the references and the Windows
-build are the runner's own record. A PASS says the evidence is consistent
+build are the runner's own record, written by hand or, on Windows, by
+running the check. A PASS says the evidence is consistent
 with the commit; it validates no SFT calculation.
 
 ## 📚 Related documents

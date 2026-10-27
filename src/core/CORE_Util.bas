@@ -106,7 +106,7 @@ Public Function UTxt( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Convert a cell value to trimmed upper-case text, so that codes such as
-'   "long", "Long" and " LONG " compare equal.
+'   "lent", "Lent" and " LENT " compare equal.
 '
 ' INPUTS
 '   Content: any cell value.
@@ -115,7 +115,7 @@ Public Function UTxt( _
 '   UCase$ of SafeStr(Content).
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -250,7 +250,7 @@ Public Function ToSerial( _
 '   The date serial as a Double; -1 when Content is missing or not a date.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -324,7 +324,7 @@ Public Function TryBool( _
 '   error value or unrecognised text, with Result left as Fallback.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -377,7 +377,7 @@ Public Function TryDbl( _
 '   for an error value or non-numeric text, with Result left as Fallback.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -940,8 +940,8 @@ Public Function ColumnValues( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Read one column range in a single call, always as a 2-D array, also
-'   for a single row, where Range.Value gives a scalar. Public because
-'   the engine reads every input column with it.
+'   for a single row, where Range.Value gives a scalar. Not called at
+'   present: the engine reads its input blocks with TableRange.
 '
 ' INPUTS
 '   Sheet: the worksheet to read.
@@ -953,7 +953,7 @@ Public Function ColumnValues( _
 '   row FirstRow + r - 1.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1005,7 +1005,7 @@ Public Function LastDataRowAny( _
 '   Row number of the last such row; FirstRow - 1 when there is none.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1065,7 +1065,7 @@ Public Function RowHasData( _
 '   none.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-25
 '==============================================================================
 '
 
@@ -1100,7 +1100,7 @@ Public Function GetParam( _
 '   Read one parameter value through the workbook name equal to its code.
 '
 ' INPUTS
-'   Code: a PRM_ code from CORE_Config, for example "Alpha".
+'   Code: a PRM_ code from CORE_Config, for example "AsOfDate" (PRM_ASOF).
 '
 ' RETURNS
 '   The stored value of the name's top-left cell (Value2, so that a
@@ -1109,7 +1109,7 @@ Public Function GetParam( _
 '   reports before any parameter is read.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-26
 '==============================================================================
 '
 
@@ -1232,7 +1232,7 @@ Public Sub FormatColumns( _
 '      by "|". An empty entry leaves that column unchanged.
 '
 ' UPDATED
-'   2026-10-17
+'   2026-10-25
 '==============================================================================
 '
 

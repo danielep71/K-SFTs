@@ -77,7 +77,7 @@ second implementation to be kept in step.
 ```text
 .github/            workflows, issue and pull-request templates, label catalogue
                     and its scripts, Dependabot
-docs/               governance, architecture, contracts, methodology
+docs/               project website, governance, architecture, contracts, methodology
   methodology/      regulatory basis, decisions, provenance, fixture contract,
     sources/        copies of the regulatory texts relied on
 src/                production VBA source and the workbook template: the only inputs to the workbook
@@ -96,7 +96,7 @@ configuration (`.editorconfig`, `.gitattributes`, `.gitignore`,
 | `src/` | Production components that go into the workbook, and the workbook template | Tests, examples, built workbooks |
 | `tests/` | Test modules, synthetic fixtures, reviewed expected values and their reference derivations | Production entry points, run output |
 | `examples/` | Examples that use only the public API | Tests, real data |
-| `docs/` | Governance, architecture, contracts and [methodology](methodology/README.md) | Copies of root documents, generated output |
+| `docs/` | Project website, governance, architecture, contracts and [methodology](methodology/README.md) | Copies of root documents, generated output |
 | `tools/` | Deterministic checks, build and evidence scripts | Calculation logic |
 
 `src/`, `tests/`, `tools/` and `docs/methodology/` each have a `README.md`.
@@ -166,8 +166,9 @@ A VBA `Public` declaration is not automatically supported API.
 
 ### Inventory convention
 
-`docs/PUBLIC_API.txt` is the inventory of supported declarations. It has no
-entries yet. Each supported declaration gets two lines:
+`docs/PUBLIC_API.txt` is the inventory of supported declarations. It lists
+the prototype's eight `SFT_*` functions. Each supported declaration gets two
+lines:
 
 ```text
 <component><TAB><kind><TAB><name>

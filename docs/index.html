@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>K-SFTs — Traceable securities financing exposure</title>
+  <meta name="description" content="Explore K-SFTs: an open-source Excel/VBA prototype for securities financing exposure, supervisory haircuts and transparent netting-set calculations.">
+  <meta name="theme-color" content="#00338d">
+  <link rel="canonical" href="https://danielep71.github.io/K-SFTs/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="K-SFTs — Traceable securities financing exposure">
+  <meta property="og:description" content="Follow transactions and collateral through haircuts and netting to exposure. Review the source, methodology and evidence.">
+  <meta property="og:url" content="https://danielep71.github.io/K-SFTs/">
+  <meta property="og:image" content="https://danielep71.github.io/K-SFTs/assets/K-SFTs-social-preview.jpg">
+  <meta property="og:image:alt" content="Conceptual K-SFTs project dashboard illustration">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header><nav class="wrap" aria-label="Main navigation">
+  <a class="brand" href="./"><span aria-hidden="true">K</span> K-SFTs</a>
+  <div class="nav-links"><a href="#calculation">How it works</a><a href="#start">Get started</a><a href="#evidence">Validation</a><a href="https://github.com/danielep71/K-SFTs/wiki">Wiki ↗</a><a href="https://github.com/danielep71/K-SFTs">GitHub ↗</a></div>
+</nav></header>
+<main id="main">
+<section class="hero"><div class="wrap hero-grid">
+  <div><p class="eyebrow">K-Risk Engines / Counterparty credit risk</p>
+    <h1>From collateral<br>to exposure.<br><em>Every step visible.</em></h1>
+    <p class="lead">Securities financing transactions, explained through an open-source Excel/VBA prototype.</p>
+    <p class="hero-copy">Inspect transactions, supervisory haircuts and netting-set results. Follow the calculation from the assets given and received to the fully adjusted exposure value, E*.</p>
+    <div class="actions"><a class="button primary" href="#start">Explore the prototype ↓</a><a class="button secondary" href="https://github.com/danielep71/K-SFTs/blob/main/docs/methodology/PROTOTYPE.md">Read the specification ↗</a></div>
+  </div>
+  <figure class="hero-art"><img src="assets/K-SFTs-social-preview.jpg" width="1280" height="640" alt="Conceptual illustration of the K-SFTs project, with exposure and collateral dashboard panels"><figcaption>Project illustration · not a screenshot or validation evidence</figcaption></figure>
+</div><div class="wrap principles"><span>Reviewable VBA source</span><span>Supervisory haircuts</span><span>Independent Python reference</span><span>MPL-2.0 licensed</span></div></section>
+<div class="wrap"><aside class="status" aria-label="Prototype status"><strong>Working prototype · not a validated method.</strong> The prototype is available for inspection and experimentation. It departs from recorded scope and methodology decisions and must not be used to compute regulatory exposure. <a href="https://github.com/danielep71/K-SFTs/blob/main/docs/methodology/PROTOTYPE.md">Read the departures and limitations ↗</a></aside></div>
+<section id="calculation" class="wrap"><p class="eyebrow">01 / The calculation</p><h2>Transactions. Haircuts. Netting.</h2>
+  <p class="intro">The prototype covers repos and reverse repos, securities lending and borrowing, and margin lending. Its financial collateral comprehensive method makes the exposure and collateral adjustments visible.</p>
+  <ol class="steps">
+    <li><span class="number">01 / INPUT</span><h3>Describe both sides</h3><p>Record cash and securities given or received, link the legs to transactions, and assign transactions to their netting sets.</p></li>
+    <li><span class="number">02 / ADJUST</span><h3>Apply supervisory haircuts</h3><p>Use the collateral classification, holding period and applicable currency adjustment. Inspect the parameters and the assumptions behind them.</p></li>
+    <li><span class="number">03 / AGGREGATE</span><h3>Follow the exposure</h3><p>Calculate E* under an eligible master netting agreement, or calculate each transaction separately and sum the results.</p></li>
+  </ol>
+  <div class="result-strip"><span>Prototype outputs</span><strong>E*</strong><span>Exposure value</span><strong>RW</strong><span>Risk weight</span><strong>RWA</strong><span>Risk-weighted exposure</span><strong>8% × RWA</strong><span>Own funds requirement</span></div>
+  <p class="note">The EU CRR controls the intended methodology, with the Basel Framework as reference. The prototype currently offers both CRR and BCBS regimes; that departure remains documented. The outputs above describe the prototype, not a complete bank capital framework.</p>
+</section>
+<section class="tint"><div class="wrap"><p class="eyebrow">02 / The wider framework</p><h2>One exposure engine in a larger picture.</h2><p class="intro">K-SFTs provides the securities financing exposure component. The prototype also calculates standardised risk-weighted exposure and own funds per netting set, including a QCCP trade-exposure class. Default-fund capital and CVA are not implemented here.</p>
+  <figure class="diagram"><a href="assets/CCR_framework.svg" aria-label="Open the counterparty credit risk framework diagram at full size"><img src="assets/CCR_framework.svg" loading="lazy" alt="Counterparty credit risk framework: SFT and derivatives exposure engines feed ordinary and CCP capital branches; CVA appears as a separate memo item"></a><figcaption>Architecture illustration, not evidence of implemented or validated calculations. <a href="assets/CCR_framework.svg">Open the full-size diagram ↗</a></figcaption></figure>
+  <a href="https://danielep71.github.io/K-Risk-Engines/">Explore K-Risk Engines ↗</a>
+</div></section>
+<section id="start" class="wrap"><p class="eyebrow">03 / Get started</p><h2>Build from source. Inspect in Excel.</h2><div class="split">
+  <div><h3>1. Clone the active development branch</h3><p>A Git clone preserves the checkout conventions expected by the VBA editor.</p><pre><code>git clone --branch release/0.2.0 https://github.com/danielep71/K-SFTs.git
+cd K-SFTs</code></pre><h3>2. Assemble a development workbook</h3><p>Start from the macro-free template and import the exported VBA using the documented setup. Compile and run the checks in desktop Excel for Windows.</p><p>The repository does not distribute a released macro-enabled workbook.</p><a href="https://github.com/danielep71/K-SFTs/blob/main/INSTALLATION.md">Open the installation guide ↗</a></div>
+  <div class="resources"><h3>Choose your starting point</h3><a href="https://github.com/danielep71/K-SFTs/tree/main/src"><strong>VBA source</strong><span>Review the implementation and workbook template.</span></a><a href="https://github.com/danielep71/K-SFTs/blob/main/docs/methodology/PROTOTYPE.md"><strong>Prototype specification</strong><span>Read formulas, parameter choices and known departures.</span></a><a href="https://github.com/danielep71/K-SFTs/blob/main/tests/derivations/sft_reference.py"><strong>Independent Python reference</strong><span>Inspect a separate derivation used for reconciliation.</span></a><a href="https://github.com/danielep71/K-SFTs/wiki"><strong>Project wiki</strong><span>Browse the project's wiki space.</span></a></div>
+</div></section>
+<section id="evidence" class="tint"><div class="wrap"><p class="eyebrow">04 / Evidence and boundaries</p><h2>Know what each check proves.</h2><div class="cards">
+  <article><p class="number">SOURCE CHECKS</p><h3>Repository integrity</h3><p>Static gates check source conventions, tooling, workflow configuration and test-data contracts. They do not execute Excel or certify regulatory calculations.</p><a href="https://github.com/danielep71/K-SFTs/blob/main/tools/README.md">Read the check definitions ↗</a></article>
+  <article><p class="number">HOST &amp; NUMERICAL EVIDENCE</p><h3>Trace results to their record</h3><p>Inspect the documented Excel host runs, harness evidence and independent reference. Each record applies to its stated scope and revision.</p><a href="https://github.com/danielep71/K-SFTs/blob/main/INSTALLATION.md#tested-environments">Read the Excel evidence ↗</a><a href="https://github.com/danielep71/K-SFTs/blob/main/tests/README.md">Explore the test structure ↗</a></article>
+  <article><p class="number">OPEN WORK</p><h3>Methodology still to settle</h3><p>Products, collateral eligibility, outputs and prototype departures need reviewed decisions. Implementation and test results do not establish regulatory validation.</p><a href="https://github.com/danielep71/K-SFTs/blob/main/docs/methodology/README.md">Read the methodology of record ↗</a><a href="https://github.com/danielep71/K-SFTs/issues">Follow open work ↗</a></article>
+</div></div></section>
+<section class="closing"><div class="wrap"><div><p class="eyebrow">Open source / Open to inspection</p><h2>Explore the model behind the number.</h2></div><a class="button primary" href="https://github.com/danielep71/K-SFTs">Open K-SFTs on GitHub ↗</a></div></section>
+</main>
+<footer><div class="wrap"><p><strong>K-SFTs</strong> · An independent project by Daniele Penza.</p><p><a href="https://github.com/danielep71/K-SFTs">Source</a> · <a href="https://github.com/danielep71/K-SFTs/wiki">Wiki</a> · <a href="https://github.com/danielep71/K-SFTs/blob/main/LICENSE">MPL-2.0</a> · <a href="https://github.com/danielep71/K-SFTs/blob/main/CONTRIBUTING.md">Contribute</a></p><p>Prototype for research and development. Not validated for regulatory use.</p></div></footer>
+</body>
+</html>

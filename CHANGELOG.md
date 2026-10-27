@@ -67,6 +67,14 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   with supervisory haircut tables. Embedded in the root README with
   methodological scope and prototype limitations (#142).
 
+- A responsive K-SFTs project web page with prototype scope, calculation
+  flow, framework artwork, setup resources and validation boundaries;
+  Website followed by Wiki in the root README navigation (#155).
+
+- A counterparty credit risk framework diagram in the root README, showing
+  the calculator K-SFTs belongs beside, in editable SVG and PNG, shared with
+  K-SACCR and K-Risk Engines (#151).
+
 - A K-SFTs banner in the root README, with a reusable 1280 x 640 image
   in `docs/assets/` (#113, #117).
 
@@ -87,8 +95,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   configuration, the test-case format, static checks of the exported VBA
   source and the workflows ([tools/README.md](tools/README.md); #5, #6).
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
-  and a procedure and checker for recording an Excel run against its commit
-  ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9).
+  and a procedure and checker for recording an Excel run against its commit.
+  On Windows the checker writes the host record itself, and a development
+  synchronization exports the modules into the evidence folder
+  ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9, #147,
+  #149).
 - The macro-free workbook template `src/workbook/SFT_Template.xlsx` (a Readme
   sheet only), and an optional script that imports the repository's VBA into
   a workbook built from it, with its component manifest and the
@@ -104,11 +115,12 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
 - The SFT prototype, as it is: E\* of each netting set under the Financial
   Collateral Comprehensive Method with supervisory haircuts, its risk weight,
-  RWA and own funds, in an 11-sheet workbook template with a demo portfolio;
-  eight `SFT_*` worksheet functions; an independent Python reference and a
-  LibreOffice regression. It is not the methodology of record, and departs
-  from recorded decisions where
-  [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135).
+  RWA and own funds, in an 11-sheet workbook template with a demo portfolio,
+  whose every input cell explains its entry and refuses values outside the
+  engine's limits; eight `SFT_*` worksheet functions; an independent Python
+  reference and a LibreOffice regression. It is not the methodology of
+  record, and departs from recorded decisions where
+  [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 
 ### Validation
 

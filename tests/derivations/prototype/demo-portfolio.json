@@ -1,5 +1,5 @@
 {
-  "description": "Synthetic demonstration portfolio of the K-SFT template. Illustrative counterparties, securities and amounts; no real data.",
+  "description": "Synthetic demonstration portfolio of the K-SFTs template. Illustrative counterparties, securities and amounts; no real data.",
   "params": {
     "AsOfDate": "2026-09-30",
     "ReportingCcy": "EUR",

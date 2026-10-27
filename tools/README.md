@@ -58,8 +58,6 @@ The label gates run on every pull request here, although the label workflows
 run on a pull request only when it changes label files. Live label
 reconciliation and drift detection stay in those workflows.
 
-<a id="vba-static-checks"></a>
-
 ## 🧪 Prototype scripts
 
 Not gates of `tools/check.py`:
@@ -68,6 +66,8 @@ Not gates of `tools/check.py`:
 | --- | --- |
 | `build_template.py` | Writes `src/workbook/SFT_Template.xlsx` from `tests/derivations/prototype/`; needs `xlsxwriter` |
 | `lo_regression.py` | Runs the exported VBA headless in LibreOffice (VBA compatibility mode), compares Results with the derivation and runs the `SFT_*` unit tests. Not Excel evidence; its harness-only shims are listed in its docstring |
+
+<a id="vba-static-checks"></a>
 
 ## 🔤 VBA static checks
 
@@ -158,7 +158,8 @@ repository's harness.
 `check_excel_run.py` checks the evidence folder of an Excel run against the
 commit the workbook was built from: the exported modules against the
 commit's components, the three harness logs against the commit's example
-suite, and the host record. It is not a gate, since the evidence comes from
+suite, and the host record, which it writes when the folder has none and
+it runs on Windows. It is not a gate, since the evidence comes from
 a host run; the procedure is in
 [INSTALLATION.md](../INSTALLATION.md#recording-an-excel-run).
 
@@ -182,7 +183,9 @@ log format, not a recorded run.
 `Sync-KSFT-VBA.ps1` imports the repository's VBA into a workbook built from
 `src/workbook/SFT_Template.xlsx`, by Excel's VBA object model, in the mode
 and with the components that `vba-projects.json` lists. The `.cmd` files
-run it for a workbook dragged onto them. It is optional and needs *Trust
+run it for a workbook dragged onto them. A development synchronization
+also prepares an Excel run's evidence folder: it removes an earlier run's
+files and exports the workbook's modules. It is optional and needs *Trust
 access to the VBA project object model*; the procedure and its safeguards
 are in [INSTALLATION.md](../INSTALLATION.md#synchronizing-vba).
 

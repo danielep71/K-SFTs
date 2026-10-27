@@ -84,3 +84,13 @@ The companion pairs `docs/assets/SFT_CRR_uses.svg` / `.png` and
 2026-10-26 for the same request (#142). Both are editable vector diagrams
 with PNG exports. Regulatory-use labels distinguish separate frameworks;
 calculation details identify prototype conventions and limitations.
+
+`docs/assets/CCR_framework.svg` and `docs/assets/CCR_framework.png` were
+authored on 2026-10-26 at the maintainer's request (#151), and the same
+pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
+vector shapes; the PNG is its rendered export, at twice the SVG's size and
+reduced to 256 colours. The diagram names the sister calculators K-SACCR,
+K-CCP and K-CVA by the maintainer's decision of 2026-10-26: an explicit
+exception, for this diagram, to the rule of #137 that no file names
+K-SACCR. It is an architecture illustration, not evidence of an implemented
+or validated calculation.

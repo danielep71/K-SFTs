@@ -1,6 +1,7 @@
 """Build the macro-free K-SFTs workbook template.
 
-Writes src/workbook/SFT_Template.xlsx from the fixtures, in the layout that
+Writes src/workbook/SFT_Template.xlsx from the demo portfolio, regulatory tables
+and expected values in tests/derivations/prototype/, in the layout that
 src/core/CORE_Config.bas describes: every table in column C, located through
 the workbook name of its first header cell; every parameter read through the
 workbook name equal to its code. The template holds no VBA: save it as .xlsm
@@ -85,6 +86,18 @@ F: dict[str, Any] = {
     "rd_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True),
     "rd_k": fmt(font_size=10, bold=True, text_wrap=True, bottom=3, bottom_color=GREY),
     "rd_v": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY),
+    # README tables: each section is boxed, with a rule between label and text
+    # and dashed lines between items; the last item closes the box.
+    "rm_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True,
+                valign="vcenter"),
+    "rm_k": fmt(font_size=10, bold=True, text_wrap=True, valign="vcenter", left=1, left_color=NAVY, right=1,
+                right_color=NAVY, bottom=3, bottom_color=GREY),
+    "rm_v": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=3,
+                bottom_color=GREY),
+    "rm_k_last": fmt(font_size=10, bold=True, text_wrap=True, valign="vcenter", left=1, left_color=NAVY,
+                     right=1, right_color=NAVY, bottom=1, bottom_color=NAVY),
+    "rm_v_last": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=1,
+                     bottom_color=NAVY),
     "rd_link": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY, font_color="#0563C1", underline=1),
     "cf_bad": wb.add_format({"bg_color": "#F8CBAD"}),
     "cf_warn": wb.add_format({"bg_color": "#FFE699"}),
@@ -121,19 +134,54 @@ def date(text: str) -> dt.datetime | None:
     return dt.datetime.fromisoformat(text) if text else None
 
 
+def validate(ws: Any, cells: str, title: str, prompt: str, rule: dict[str, Any] | None = None,
+             error: tuple[str, str] | None = None) -> None:
+    """Add a data-validation rule with its input message; a rule without error is free text."""
+    opts = dict(rule) if rule else {"validate": "any"}
+    opts.update(input_title=title, input_message=prompt)
+    if error:
+        opts.update(error_title=error[0], error_message=error[1])
+    if len(title) > 32 or len(prompt) > 255 or (error and (len(error[0]) > 32 or len(error[1]) > 255)):
+        raise ValueError(f"validation text of {cells} longer than Excel allows")
+    if ws.data_validation(cells, opts) != 0:
+        raise ValueError(f"validation of {cells} rejected")
+
+
+YN = {"validate": "list", "source": ["Y", "N"]}
+CQS = {"validate": "list", "source": ["1", "2", "3", "4", "5", "6"]}
+REGIME = {"validate": "list", "source": ["CRR", "BCBS"]}
+REGIMES = {"validate": "list", "source": ["BOTH", "CRR", "BCBS"]}
+SHARE = {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 1}
+DAYS = {"validate": "decimal", "criteria": "between", "minimum": 1, "maximum": 250}
+ANY_DATE = {"validate": "date", "criteria": ">", "value": 0}
+
+
+def unique(cells: str) -> dict[str, Any]:
+    """Custom rule: the first cell of cells appears once in cells."""
+    first, last = cells.split(":")
+    col = first.rstrip("0123456789")
+    return {"validate": "custom", "value": f"=COUNTIF(${col}${first[len(col):]}:${col}${last[len(col):]},{first})=1"}
+
+
+def ccy3(cell: str) -> dict[str, Any]:
+    """Custom rule: a three-letter code once trimmed, as the engine reads it."""
+    return {"validate": "custom", "value": f"=LEN(TRIM({cell}))=3"}
+
+
 # ----------------------------------------------------------------------------
 # README
 # ----------------------------------------------------------------------------
 readme = wb.add_worksheet("README")
 readme.set_tab_color(TAB_DOC)
-banner(readme, "ReadMe", 4)
-readme.set_column(2, 2, 46)
-readme.set_column(3, 3, 140)
-readme.set_column(4, 4, 4)
+banner(readme, "ReadMe", 5)
+readme.set_column(2, 2, 55.43)
+readme.set_column(3, 3, 162.72)
+readme.set_column(4, 4, 14)
+readme.set_column(5, 5, 5)
 readme.write(2, 2, "Exposure value E*, risk-weighted exposure amount and own funds requirement of securities "
              "financing transactions under the financial collateral comprehensive method with supervisory "
              "haircuts: EU CRR (Art. 220-227), the default, and Basel CRE22, chosen per netting set.", F["note"])
-readme.set_row(2, 34)
+readme.set_row(2, 30)
 README = [
     ("How to use", None),
     ("1. Enable macros", "This file is the macro-free template. Save it as an Excel Macro-Enabled Workbook "
@@ -166,7 +214,7 @@ README = [
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
      "5 business days. MARGINLEND: other capital-market-driven transaction, 10 business days. A netting set "
-     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2)]."),
+     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2) sets the periods by type only]."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
@@ -174,7 +222,7 @@ README = [
      "agreement."),
     ("Eligibility", "A leg whose haircut key is not in the haircut table is not eligible: lent, it takes "
      "NonEligibleHaircut (30%) [CRE22.54; Art. 224(4)]; received, it is not recognised as collateral. "
-     "Unrated debt of an institution is treated as CQS 2-3 [CRE22.39(d); Art. 197(4), 224(6)]."),
+     "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
     ("Methodology (per netting set)", None),
     ("Netting (eligible MNA)", "E* = max(0, sum E - sum C + 0.4 x net + 0.6 x gross / sqrt(N) + sum |E_fx| x "
      "Hfx); net = |sum E_s H_s|, gross = sum |E_s| H_s over security issues s, N = issues with |E_s| at "
@@ -188,8 +236,8 @@ README = [
      "transactions in the previous quarter or illiquid collateral; doubled after margin disputes; an "
      "override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
-     "cash and central government securities, one currency, daily remargining) and takes the rest as "
-     "declared [CRE22.60; CRR Art. 227]."),
+     "cash and central government securities, one currency, daily remargining) and takes the rest, "
+     "including the 0% risk weight of the securities, as declared [CRE22.60, 22.36; CRR Art. 227]."),
     ("Capital", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA [CRE22.48, RBC20.1; CRR "
      "Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when unrated, short-term "
      "weights when every transaction has an original maturity of 3 months or less [CRE20.18-20.21; Art. "
@@ -216,7 +264,8 @@ README = [
     ("SFT_NetExposure(Es, Hs)", "Net exposure |sum E_s H_s|"),
     ("SFT_GrossExposure(Es, Hs)", "Gross exposure sum |E_s| H_s"),
     ("SFT_IssueCount(Es, [Threshold])", "N: issues of at least one tenth of the largest"),
-    ("SFT_ExposureNetted(SumE, SumC, Net, Gross, N, [FXTerm], [NetWeight], [GrossWeight])", "E* of a netting set"),
+    ("SFT_ExposureNetted(SumE, SumC, NetExposure, GrossExposure, N, [FXTerm], [NetWeight], [GrossWeight])",
+     "E* of a netting set"),
     ("SFT_CapitalRequirement(EAD, RiskWeight, [CapitalRatio])", "Own funds requirement; RWA with ratio 1"),
     ("Scope and limitations", None),
     ("Not covered", "SA-CCR and derivatives; internal models (IMM, VaR, own-estimate haircuts); "
@@ -224,9 +273,10 @@ README = [
      "SFTs (CRE56, not in the CRR); maturity mismatch; credit risk mitigation on the exposure side other "
      "than collateral; cross-product netting with derivatives; CVA; the SCRA sovereign floor; capital "
      "buffers and Pillar 2."),
-    ("Status", "Prototype. Implements the regulatory set CRE22-CRR-2026-10-24, checked against CRE22 "
-     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026. Expected values are reproduced by "
-     "an independent Python derivation, not by published worked examples."),
+    ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
+     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026; its formulas and tables are not "
+     "yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
+     "reproduced by an independent Python derivation, not by published worked examples."),
     ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
     ("Code", None),
@@ -234,16 +284,23 @@ README = [
      "CORE_Config (layout constants and the regulatory parameter set), CORE_Util (helpers). No external "
      "references: no Scripting.Dictionary, no WorksheetFunction."),
 ]
-r = 4
-for key, value in README:
+# Each section: a spacer row, its heading, then its items grouped under the
+# heading (collapsible, with the button on the heading row).
+readme.outline_settings(True, False, True, False)
+r = 3
+for i, (key, value) in enumerate(README):
     if value is None:
-        readme.set_row(r, 30)
-        readme.write(r, 2, key, F["rd_h"])
-        readme.write_blank(r, 3, None, F["rd_h"])
+        readme.set_row(r, 9.95)
+        r += 1
+        readme.set_row(r, 50.1)
+        readme.write(r, 2, key, F["rm_h"])
+        readme.write_blank(r, 3, None, F["rm_h"])
     else:
-        readme.set_row(r, 30 if len(value) < 170 else 44 if len(value) < 340 else 58)
-        readme.write(r, 2, key, F["rd_k"])
-        readme.write(r, 3, value, F["rd_v"])
+        last = i + 1 == len(README) or README[i + 1][1] is None
+        lines = -(-len(value) // 190)
+        readme.set_row(r, max(30, 12 * lines + 6), None, {"level": 1})
+        readme.write(r, 2, key, F["rm_k_last" if last else "rm_k"])
+        readme.write(r, 3, value, F["rm_v_last" if last else "rm_v"])
     r += 1
 readme.freeze_panes(3, 0)
 
@@ -278,6 +335,56 @@ PARAMS = [
     ("CapitalRatio", "Own funds requirement per unit of RWA", P["CapitalRatio"], "in_pct",
      "RBC20.1 / CRR Art. 92(1)(c)"),
 ]
+PARAM_RULES: dict[str, tuple[str, str, dict[str, Any], tuple[str, str]]] = {
+    "AsOfDate": ("Reporting date", "Date the exposures are calculated for. Residual maturities of debt "
+                 "securities are measured from it.",
+                 {"validate": "date", "criteria": ">", "value": dt.datetime(2000, 1, 1)},
+                 ("Invalid reporting date", "Enter a date after 1 January 2000.")),
+    "ReportingCcy": ("Reporting currency", "Three-letter code, e.g. EUR. Every amount is converted into it; "
+                     "the FX table below lists it with the rate 1.", {},
+                     ("Invalid currency", "Enter a three-letter currency code, e.g. EUR.")),
+    "Regime": ("Default regime", "CRR = EU rules (Art. 220-227); BCBS = Basel CRE22. Used for every netting "
+               "set without a regime override.", REGIME, ("Invalid regime", "Choose CRR or BCBS.")),
+    "DaysPerYear": ("Days per year", "Calendar days per year for the residual maturity of debt securities. "
+                    "Normally 365.", {"validate": "decimal", "criteria": "between", "minimum": 360, "maximum": 366},
+                    ("Invalid day count", "Enter a number from 360 to 366. Normally 365.")),
+    "HaircutBaseBD": ("Haircut holding period", "Holding period of the haircut table, in business days. "
+                      "Regulatory value 10 (CRE22.49; CRR Art. 224 Table 1).", DAYS,
+                      ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                       "value: 10.")),
+    "HoldingRepoBD": ("Minimum holding, repo-style", "Minimum holding period of repo-style transactions, in "
+                      "business days. Regulatory value 5 (CRE22.57; CRR Art. 224(2)).", DAYS,
+                      ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                       "value: 5.")),
+    "HoldingCapitalMarketBD": ("Minimum holding, capital market", "Minimum holding period of other "
+                               "capital-market-driven transactions, in business days. Regulatory value 10 "
+                               "(CRE22.57; CRR Art. 224(2)).", DAYS,
+                               ("Invalid holding period", "Enter a number of business days from 1 to 250. "
+                                "Regulatory value: 10.")),
+    "HoldingLargeBD": ("Holding period, large set", "Holding period of a netting set with more than 5,000 "
+                       "transactions or illiquid collateral, in business days. Regulatory value 20 (CRE22.58; "
+                       "CRR Art. 224(2), 285(3)).", DAYS,
+                       ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                        "value: 20.")),
+    "FXHaircut": ("Currency-mismatch haircut", "Haircut Hfx for a currency mismatch at 10 business days. "
+                  "Regulatory value 8% (CRE22.52; CRR Art. 224 Table 4).", SHARE,
+                  ("Invalid haircut", "Enter a percentage from 0% to 100%. Regulatory value: 8%.")),
+    "NonEligibleHaircut": ("Non-eligible haircut", "Haircut of a non-eligible security lent, at 10 business "
+                           "days. Regulatory value 30% (CRE22.54; CRR Art. 224(4)).", SHARE,
+                           ("Invalid haircut", "Enter a percentage from 0% to 100%. Regulatory value: 30%.")),
+    "NetWeight": ("Net exposure weight", "Weight of the net exposure, the systematic term of the netting "
+                  "formula. Regulatory value 0.4 (CRE22.65; CRR Art. 220(3)).", SHARE,
+                  ("Invalid weight", "Enter a number from 0 to 1. Regulatory value: 0.4.")),
+    "GrossWeight": ("Gross exposure weight", "Weight of the gross exposure, the idiosyncratic term of the "
+                    "netting formula. Regulatory value 0.6 (CRE22.65; CRR Art. 220(3)).", SHARE,
+                    ("Invalid weight", "Enter a number from 0 to 1. Regulatory value: 0.6.")),
+    "IssueCountThreshold": ("Issue-count threshold", "Issues whose |E_s| is below this share of the largest "
+                            "|E_s| are not counted in N. Regulatory value 0.1 (CRE22.65; CRR Art. 220(3)).",
+                            SHARE, ("Invalid threshold", "Enter a number from 0 to 1. Regulatory value: 0.1.")),
+    "CapitalRatio": ("Capital ratio", "Own funds requirement per unit of risk-weighted exposure amount. "
+                     "Regulatory value 8% (RBC20.1; CRR Art. 92(1)(c)).", SHARE,
+                     ("Invalid capital ratio", "Enter a percentage from 0% to 100%. Regulatory value: 8%.")),
+}
 prm = wb.add_worksheet("Params")
 prm.set_tab_color(TAB_IN)
 banner(prm, "Parameters", 10)
@@ -305,9 +412,10 @@ for code, desc, value, style, ref in PARAMS:
         prm.write(r, 4, value, F[style])
     prm.write(r, 5, ref, F["ref"])
     name(code, "Params", r, 4)
+    cell = xl_rowcol_to_cell(r, 4)
+    title, prompt, rule, error = PARAM_RULES[code]
+    validate(prm, cell, title, prompt, rule or ccy3(cell), error)
     r += 1
-prm.data_validation("E6", {"validate": "date", "criteria": ">", "value": dt.datetime(2000, 1, 1)})
-prm.data_validation("E8", {"validate": "list", "source": ["CRR", "BCBS"]})
 
 r += 1
 prm.set_row(r, 26)
@@ -320,6 +428,7 @@ for c, h in enumerate(["HC_Key", "Asset type", "Issuer category", "Credit qualit
     prm.write(r, 2 + c, h, F["hdr_prm"])
 name("HC_Table", "Params", r, 2)
 r += 1
+first = r
 for key, asset, issuer, cq, band, h10, regimes, ref in TABLES["haircuts"]:
     prm.write(r, 2, key, F["code"])
     prm.write(r, 3, asset, F["desc"])
@@ -330,6 +439,15 @@ for key, asset, issuer, cq, band, h10, regimes, ref in TABLES["haircuts"]:
     prm.write(r, 8, regimes, F["in_ctr"])
     prm.write(r, 9, ref, F["ref"])
     r += 1
+keys = f"C{first + 1}:C{r}"
+validate(prm, keys, "Haircut key", "Key the engine builds from the asset type, issuer, credit quality and "
+         "residual maturity of a leg, e.g. DEBT_SOV_CQS1_LE1. Listed once; a key not in the table is not "
+         "eligible.", unique(keys), ("Duplicate key", "This key is already in the table. Enter it once."))
+validate(prm, f"H{first + 1}:H{r}", "Haircut H10", "Supervisory haircut at 10 business days with daily "
+         "remargining (CRE22.49; CRR Art. 224 Table 1).", SHARE,
+         ("Invalid haircut", "Enter a percentage from 0% to 100%."))
+validate(prm, f"I{first + 1}:I{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
+         "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
 prm.write(r, 3, "Keys not in this table are not eligible. Add rows directly below the last one (no blank rows).",
           F["ref"])
 
@@ -342,6 +460,7 @@ for c, h in enumerate(["RW_Key", "Exposure class", "Grade", "Risk weight", "Regi
     prm.write(r, 2 + c, h, F["hdr_prm"])
 name("RW_Table", "Params", r, 2)
 r += 1
+first = r
 for key, cls, grade, weight, regimes, ref in TABLES["risk_weights"]:
     prm.write(r, 2, key, F["code"])
     prm.write(r, 3, cls, F["desc"])
@@ -350,6 +469,16 @@ for key, cls, grade, weight, regimes, ref in TABLES["risk_weights"]:
     prm.write(r, 6, regimes, F["in_ctr"])
     prm.write(r, 7, ref, F["ref"])
     r += 1
+keys = f"C{first + 1}:C{r}"
+validate(prm, keys, "Risk-weight key", "Key the engine builds from the counterparty class and its CQS, SCRA "
+         "grade or short-term status, e.g. INST_CQS2. Listed once.", unique(keys),
+         ("Duplicate key", "This key is already in the table. Enter it once."))
+validate(prm, f"F{first + 1}:F{r}", "Risk weight", "Risk weight of the counterparty, from 0% to 1250% "
+         "(CRE20; CRR Art. 114, 120-122; QCCP CRE54.7, Art. 306(1)(a)).",
+         {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 12.5},
+         ("Invalid risk weight", "Enter a percentage from 0% to 1250%."))
+validate(prm, f"G{first + 1}:G{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
+         "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
 prm.write(r, 3, "ST_ = every transaction of the netting set has an original maturity of 3 months or less. "
           "A_ENH = SCRA grade A with CET1 >= 14% and leverage ratio >= 5%.", F["ref"])
 
@@ -362,12 +491,23 @@ for c, h in enumerate(["FX_Ccy", "Currency", "Units of reporting ccy per 1 unit"
     prm.write(r, 2 + c, h, F["hdr_prm"])
 name("FX_Table", "Params", r, 2)
 r += 1
+first = r
 CCY_NAMES = {"EUR": "Euro", "USD": "US dollar", "GBP": "Pound sterling", "JPY": "Japanese yen", "CHF": "Swiss franc"}
 for ccy, rate in FIXTURE["fx"].items():
     prm.write(r, 2, ccy, F["code"])
     prm.write(r, 3, CCY_NAMES.get(ccy, ""), F["desc"])
     prm.write(r, 4, rate, F["in_rate"])
     r += 1
+keys = f"C{first + 1}:C{r}"
+validate(prm, keys, "Currency", "Three-letter code, e.g. USD, listed once. Add currencies directly below the "
+         "last row.", {"validate": "custom", "value": f"=AND({ccy3(f'C{first + 1}')['value'][1:]},"
+                                                      f"{unique(keys)['value'][1:]})"},
+         ("Invalid or duplicate currency", "Enter a three-letter code that is not already in the table."))
+validate(prm, f"E{first + 1}:E{r}", "FX rate", "Units of the reporting currency per 1 unit of this currency. "
+         "The reporting currency has the rate 1.",
+         {"validate": "custom", "value": f"=AND(ISNUMBER(E{first + 1}),E{first + 1}>0,OR(UPPER(TRIM(C{first + 1}))"
+                                         f"<>UPPER(TRIM(ReportingCcy)),E{first + 1}=1))"},
+         ("Invalid FX rate", "Enter a number above 0; the reporting currency has the rate 1."))
 prm.write(r, 3, "Add currencies directly below the last row (no blank rows in column C).", F["ref"])
 prm.freeze_panes(5, 0)
 
@@ -421,17 +561,47 @@ def ns_range(col: int) -> str:
 
 
 rng = ns_range
-ns.data_validation(rng(2), {"validate": "custom", "value": f"=COUNTIF($C${HDR_NS + 2}:$C${last_ns + 1},C{HDR_NS + 2})=1",
-                            "error_message": "Netting-set IDs must be unique."})
-for col in (4, 10, 11, 13):
-    ns.data_validation(rng(col), {"validate": "list", "source": ["Y", "N"]})
-ns.data_validation(rng(6), {"validate": "list", "source": ["SOV", "INST", "CORP", "QCCP"]})
-ns.data_validation(rng(7), {"validate": "list", "source": ["1", "2", "3", "4", "5", "6"]})
-ns.data_validation(rng(8), {"validate": "list", "source": ["A", "A_ENH", "B", "C"]})
-ns.data_validation(rng(9), {"validate": "decimal", "criteria": ">=", "value": 1})
-ns.data_validation(rng(12), {"validate": "decimal", "criteria": ">=", "value": 0})
-ns.data_validation(rng(14), {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 12.5})
-ns.data_validation(rng(15), {"validate": "list", "source": ["CRR", "BCBS"]})
+top = HDR_NS + 2
+validate(ns, rng(2), "Netting-set ID", "Unique ID of the netting set. Transactions refer to it in their "
+         "NettingSetID column.", unique(rng(2)),
+         ("Duplicate ID", "This netting-set ID is already used. Enter a unique ID."))
+validate(ns, rng(3), "Counterparty", "Name of the counterparty, shown on Results.")
+validate(ns, rng(4), "Master netting agreement", "Required. Y: the transactions are netted under an eligible "
+         "master netting agreement (CRE22.62-22.65; CRR Art. 220). N: each transaction is calculated on its own "
+         "(CRE22.46; Art. 223).", YN, ("Invalid choice", "Choose Y or N."))
+validate(ns, rng(5), "Settlement currency", "Currency the netting set settles in, for the currency-mismatch "
+         "haircut; blank = the reporting currency. It must be in the Params FX table.", ccy3(f"F{top}"),
+         ("Invalid currency", "Enter a three-letter code from the FX table, or leave blank."))
+validate(ns, rng(6), "Counterparty class", "SOV = sovereign, INST = institution, CORP = corporate, QCCP = "
+         "qualifying central counterparty. Selects the risk weight (CRE20; CRR Art. 114, 120-122, 306).",
+         {"validate": "list", "source": ["SOV", "INST", "CORP", "QCCP"]},
+         ("Invalid class", "Choose SOV, INST, CORP or QCCP."))
+validate(ns, rng(7), "Counterparty CQS", "Credit quality step 1 to 6 of the counterparty; blank = unrated.",
+         CQS, ("Invalid CQS", "Choose a whole number from 1 to 6, or leave blank."))
+validate(ns, rng(8), "SCRA grade", "Unrated institutions only: A, A_ENH (grade A with CET1 >= 14% and leverage "
+         "ratio >= 5%), B or C (CRE20.18-20.21; CRR Art. 120-121).",
+         {"validate": "list", "source": ["A", "A_ENH", "B", "C"]},
+         ("Invalid grade", "Choose A, A_ENH, B or C, or leave blank."))
+validate(ns, rng(9), "Remargin frequency N_R", "Business days between remargining; blank = 1, daily. Scales "
+         "the haircuts (CRE22.59; CRR Art. 226).", {"validate": "decimal", "criteria": ">=", "value": 1},
+         ("Invalid frequency", "Enter a number of business days of 1 or more, or leave blank."))
+validate(ns, rng(10), "Large or illiquid", "Y if the netting set had more than 5,000 transactions in the "
+         "previous quarter or holds illiquid collateral: holding period 20 days (CRE22.58; CRR Art. 285(3)). "
+         "Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
+validate(ns, rng(11), "Margin disputes", "Y if margin disputes double the holding period (CRE22.58; CRR Art. "
+         "285(4)). Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
+validate(ns, rng(12), "Holding period override", "Optional holding period in business days. It can only "
+         "lengthen the regulatory one. Blank = none.", {"validate": "decimal", "criteria": ">=", "value": 0},
+         ("Invalid override", "Enter a number of business days of 0 or more, or leave blank."))
+validate(ns, rng(13), "0% haircut conditions", "Y declares that the conditions of CRE22.60 / CRR Art. 227 are "
+         "met; the engine checks the ones it can see. Blank = N.", YN,
+         ("Invalid choice", "Choose Y or N, or leave blank."))
+validate(ns, rng(14), "Risk weight override", "Optional risk weight from 0% to 1250%, used instead of the "
+         "risk-weight table. Blank = none.",
+         {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 12.5},
+         ("Invalid risk weight", "Enter a percentage from 0% to 1250%, or leave blank."))
+validate(ns, rng(15), "Regime override", "CRR or BCBS for this netting set; blank = the Params Regime.", REGIME,
+         ("Invalid regime", "Choose CRR or BCBS, or leave blank."))
 ns.autofilter(HDR_NS, 2, last_ns, 2 + len(NS_COLS) - 1)
 ns.freeze_panes(HDR_NS + 1, 3)
 buttons(ns, 3, 4)
@@ -488,16 +658,50 @@ def tx_range(col: int) -> str:
 
 
 rng = tx_range
-tx.data_validation(rng(2), {"validate": "custom", "value": f"=COUNTIF($C${HDR_TX + 2}:$C${last_tx + 1},C{HDR_TX + 2})=1",
-                            "error_message": "Leg IDs must be unique."})
-tx.data_validation(rng(5), {"validate": "list", "source": ["REPO", "REVREPO", "SECLEND", "SECBORROW", "MARGINLEND"]})
-tx.data_validation(rng(8), {"validate": "list", "source": ["LENT", "RECEIVED"]})
-tx.data_validation(rng(9), {"validate": "list", "source": ["CASH", "DEBT", "EQUITY", "GOLD", "FUND", "OTHER"]})
-tx.data_validation(rng(11), {"validate": "list", "source": ["SOV", "INST", "CORP", "SEC"]})
-tx.data_validation(rng(12), {"validate": "list", "source": ["1", "2", "3", "4", "5", "6"]})
-tx.data_validation(rng(14), {"validate": "list", "source": ["MAIN", "LISTED", "OTHER"]})
-tx.data_validation(rng(15), {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 1})
-tx.data_validation(rng(16), {"validate": "decimal", "criteria": ">", "value": 0})
+top = HDR_TX + 2
+validate(tx, rng(2), "Leg ID", "Unique ID of the leg. A row with data but no Leg ID is rejected.",
+         unique(rng(2)), ("Duplicate Leg ID", "This Leg ID is already used. Enter a unique ID."))
+validate(tx, rng(3), "Transaction ID", "Legs sharing this ID form one transaction, with at least one leg LENT "
+         "and one RECEIVED.")
+validate(tx, rng(4), "Netting set", "NettingSetID of a row on NettingSets. Every leg of a transaction repeats "
+         "it.")
+validate(tx, rng(5), "Transaction type", "REPO, REVREPO (reverse repo), SECLEND (securities lent), SECBORROW "
+         "(securities borrowed) or MARGINLEND (margin lending). Every leg of a transaction repeats it.",
+         {"validate": "list", "source": ["REPO", "REVREPO", "SECLEND", "SECBORROW", "MARGINLEND"]},
+         ("Invalid type", "Choose REPO, REVREPO, SECLEND, SECBORROW or MARGINLEND."))
+validate(tx, rng(6), "Start date", "Start date of the transaction. Every leg of a transaction repeats it.",
+         ANY_DATE, ("Invalid date", "Enter a date."))
+validate(tx, rng(7), "Maturity date", "Maturity date of the transaction, not before its start date; blank = "
+         "open. Every leg of a transaction repeats it.",
+         {"validate": "custom", "value": f"=AND(ISNUMBER(H{top}),H{top}>0,OR(NOT(ISNUMBER(G{top})),H{top}>=G{top}))"},
+         ("Invalid maturity date", "Enter a date on or after the start date, or leave blank."))
+validate(tx, rng(8), "Side", "LENT: given by the bank (E). RECEIVED: received by the bank (C).",
+         {"validate": "list", "source": ["LENT", "RECEIVED"]}, ("Invalid side", "Choose LENT or RECEIVED."))
+validate(tx, rng(9), "Asset type", "CASH, DEBT (debt security), EQUITY, GOLD, FUND (collective investment "
+         "undertaking) or OTHER.", {"validate": "list", "source": ["CASH", "DEBT", "EQUITY", "GOLD", "FUND", "OTHER"]},
+         ("Invalid asset type", "Choose CASH, DEBT, EQUITY, GOLD, FUND or OTHER."))
+validate(tx, rng(10), "Issue ID", "Required for every non-cash leg, e.g. the ISIN. Legs of one issue are "
+         "netted under a master netting agreement and must describe it the same way.")
+validate(tx, rng(11), "Issuer type", "Debt securities only: SOV = sovereign, INST = institution, CORP = "
+         "corporate, SEC = securitisation.", {"validate": "list", "source": ["SOV", "INST", "CORP", "SEC"]},
+         ("Invalid issuer type", "Choose SOV, INST, CORP or SEC."))
+validate(tx, rng(12), "Issue CQS", "Debt securities only: credit quality step 1 to 6 of the issue; blank = "
+         "unrated.", CQS, ("Invalid CQS", "Choose a whole number from 1 to 6, or leave blank."))
+validate(tx, rng(13), "Security maturity date", "Debt securities only: maturity date of the security, after the "
+         "reporting date. It sets the residual-maturity band of the haircut.", ANY_DATE,
+         ("Invalid date", "Enter a date."))
+validate(tx, rng(14), "Equity listing", "Equities only: MAIN = main index, LISTED = recognised exchange, OTHER "
+         "= other equity.", {"validate": "list", "source": ["MAIN", "LISTED", "OTHER"]},
+         ("Invalid listing", "Choose MAIN, LISTED or OTHER."))
+validate(tx, rng(15), "Fund haircut H10", "Funds only: haircut at 10 business days, by look-through or the "
+         "highest haircut of any asset the fund may invest in.", SHARE,
+         ("Invalid haircut", "Enter a percentage from 0% to 100%."))
+validate(tx, rng(16), "Market value", "Market value of the leg in its currency, above 0. The side gives the "
+         "sign.", {"validate": "decimal", "criteria": ">", "value": 0},
+         ("Invalid market value", "Enter a number above 0."))
+validate(tx, rng(17), "Currency", "Three-letter code of the leg's currency. It must be in the Params FX table.",
+         ccy3(f"R{top}"), ("Invalid currency", "Enter a three-letter code from the FX table."))
+validate(tx, rng(18), "Comment", "Free text, not read by the engine.")
 tx.autofilter(HDR_TX, 2, last_tx, 2 + len(TX_COLS) - 1)
 tx.freeze_panes(HDR_TX + 1, 4)
 buttons(tx, 2, 9)
@@ -638,6 +842,8 @@ ft.write(2, 2, "Each row calls one SFT_* function; Result compares it with a han
 ft.set_row(2, 30)
 ft.write(3, 2, "Tolerance", F["code"])
 ft.write(3, 3, 1e-9, F["in_num"])
+validate(ft, "D4", "Tolerance", "Largest difference between Value and Expected for which a test passes.",
+         {"validate": "decimal", "criteria": ">=", "value": 0}, ("Invalid tolerance", "Enter a number of 0 or more."))
 wb.define_name("FormulaTest_Tolerance", "='FormulaTest'!$D$4")
 ft.set_row(5, 30)
 for c, h in enumerate(["TestID", "Formula", "Value", "Expected", "Result", "Hand calculation"]):
@@ -695,8 +901,8 @@ bc.set_tab_color(TAB_DOC)
 banner(bc, "Basel vs CRR", 7)
 for c, w in enumerate([22, 46, 46, 14, 46, 26]):
     bc.set_column(2 + c, 2 + c, w)
-bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026, "
-         "checked on 2026-10-24.", F["note"])
+bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026; "
+         "not yet checked against the registered copies.", F["note"])
 bc.set_row(2, 30)
 bc.set_row(4, 34)
 for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in both?", "Workbook treatment",
@@ -705,8 +911,8 @@ for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in bot
 BVC = [
     ("Exposure method", "Comprehensive approach with supervisory haircuts; VaR models and IMM as alternatives; "
      "SA-CCR does not apply to SFTs.", "Financial collateral comprehensive method with supervisory volatility "
-     "adjustments; own estimates, VaR and IMM as alternatives.", "Yes", "Supervisory haircuts only.",
-     "CRE22.40-22.65; CRR Art. 220-227, 271(1)"),
+     "adjustments (Art. 223(6); Art. 225, own estimates, is deleted); VaR and IMM as alternatives.", "Yes",
+     "Supervisory haircuts only.", "CRE22.40-22.65, CRE51.8; CRR Art. 220-227, 271(1)"),
     ("Haircut table", "10-day haircuts by rating, residual maturity and issuer (sovereign, other, "
      "securitisation).", "Art. 224 Table 1 with 20-, 10- and 5-day columns; the 10-day column equals CRE22.49 "
      "since CRR3.", "Yes", "One H10 table on Params, scaled by the holding period.", "CRE22.49; Art. 224 Table 1"),
