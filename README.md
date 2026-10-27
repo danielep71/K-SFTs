@@ -20,6 +20,10 @@
 
 **Plain exported VBA · Macro-free workbook template · Four default VBA references · Each implemented rule cites its CRR article**
 
+[Website](https://danielep71.github.io/K-SFTs/)
+&nbsp;·&nbsp;
+[Wiki](https://github.com/danielep71/K-SFTs/wiki)
+&nbsp;·&nbsp;
 [Quick start](#quick-start)
 &nbsp;·&nbsp;
 [What exists today](#what-exists-today)

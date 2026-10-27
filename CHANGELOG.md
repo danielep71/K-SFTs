@@ -62,6 +62,10 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
 
+- A responsive K-SFTs project web page with prototype scope, calculation
+  flow, framework artwork, setup resources and validation boundaries;
+  Website followed by Wiki in the root README navigation (#155).
+
 - A counterparty credit risk framework diagram in the root README, showing
   the calculator K-SFTs belongs beside, in editable SVG and PNG, shared with
   K-SACCR and K-Risk Engines (#151).
