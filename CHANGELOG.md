@@ -62,6 +62,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 
 ### Added
 
+- Three SFT visual references in editable SVG and high-resolution PNG:
+  netting-set aggregation, EU CRR uses and exposure calculation formulas
+  with supervisory haircut tables. Embedded in the root README with
+  methodological scope and prototype limitations (#142).
+
 - A responsive K-SFTs project web page with prototype scope, calculation
   flow, framework artwork, setup resources and validation boundaries;
   Website followed by Wiki in the root README navigation (#155).

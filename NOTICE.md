@@ -73,6 +73,18 @@ not screenshots of an implemented application or evidence of validated calculati
 The generated image was exported as a 1280 x 640 JPEG for README and
 social-preview use (#113).
 
+`docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
+authored for K-SFTs on 2026-10-26 at the maintainer's request (#142). The SVG
+contains editable text and vector shapes; the PNG is its rendered export.
+The diagram is a simplified methodological illustration, not a screenshot
+or evidence of validated calculations.
+
+The companion pairs `docs/assets/SFT_CRR_uses.svg` / `.png` and
+`docs/assets/SFT_calculation_reference.svg` / `.png` were authored on
+2026-10-26 for the same request (#142). Both are editable vector diagrams
+with PNG exports. Regulatory-use labels distinguish separate frameworks;
+calculation details identify prototype conventions and limitations.
+
 `docs/assets/CCR_framework.svg` and `docs/assets/CCR_framework.png` were
 authored on 2026-10-26 at the maintainer's request (#151), and the same
 pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
