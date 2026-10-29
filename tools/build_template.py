@@ -786,7 +786,7 @@ def output_sheet(title: str, tab_title: str, header_row: int, columns: Sequence[
     return ws
 
 
-RS_COLS = [("NettingSetID", 16), ("Counterparty", 40), ("Regime", 8), ("MNA", 6), ("Transactions used", 11),
+RS_COLS = [("NettingSetID", 16), ("Counterparty", 64), ("Regime", 8), ("MNA", 6), ("Transactions used", 11),
            ("Legs used", 8), ("Holding period T_M (BD)", 9), ("Remargin N_R (BD)", 9), ("Haircut scale", 9),
            ("Sum E (lent)", 15), ("Sum C (received)", 15), ("Net exposure", 13), ("Gross exposure", 13),
            ("N (issues)", 7), ("0.4 x net", 13), ("0.6 x gross / sqrt(N)", 13), ("FX term", 13), ("E* (EAD)", 15),
@@ -881,24 +881,31 @@ for nsid, res_ in EXPECTED.items():
             rows.append((nsid, res_["regime"], m, res_[MEASURES[m][1]]))
 r = 6
 num = fmt(font_size=10, num_format="#,##0.00", align="center")
+# Tolerances down to 1E-12: General shows them as written, not as 0.00.
+tol_fmt = fmt(font_size=10, num_format="General", align="center")
+# A long expected text, such as an INCOMPLETE status, wraps on two lines.
+txt_wrap = fmt(font_size=10, num_format="@", align="center", text_wrap=True)
 for k, (nsid, regime, measure, expected) in enumerate(rows, 1):
     header, _, tol = MEASURES[measure]
     tc.write(r, 2, f"SFT-{k:03d}", F["out_txt"])
     tc.write(r, 3, nsid, F["out_txt"])
     tc.write(r, 4, regime, F["out_txt_c"])
     tc.write(r, 5, measure, F["out_txt"])
-    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else F["out_txt_c"])
+    long_text = isinstance(expected, str) and len(expected) > 20
+    if long_text:
+        tc.set_row(r, 26.1)
+    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else txt_wrap if long_text else F["out_txt_c"])
     # Row by netting-set ID in the first column, column by header text, both
     # from Results_Header; "~" keeps * and ? of a header literal for MATCH.
     pattern = header.replace("~", "~~").replace("*", "~*").replace("?", "~?")
     calc = (f'=IFERROR(INDEX(Results!$A:$XFD,MATCH($D{r + 1},INDEX(Results!$A:$XFD,0,COLUMN(Results_Header)),0),'
             f'MATCH("{pattern}",INDEX(Results!$A:$XFD,ROW(Results_Header),0),0)),"")')
-    tc.write_formula(r, 7, calc, num if tol is not None else F["out_txt_c"], "")
+    tc.write_formula(r, 7, calc, num if tol is not None else txt_wrap if long_text else F["out_txt_c"], "")
     if tol is None:
         tc.write(r, 8, "exact", F["out_txt_c"])
         res_f = f'=IF(H{r + 1}="","NOT RUN",IF(H{r + 1}=G{r + 1},"PASS","FAIL"))'
     else:
-        tc.write(r, 8, tol, num)
+        tc.write(r, 8, tol, tol_fmt)
         res_f = (f'=IF(H{r + 1}="","NOT RUN",IF(ISNUMBER(H{r + 1}),IF(ABS(H{r + 1}-G{r + 1})<=I{r + 1},'
                  f'"PASS","FAIL"),"FAIL"))')
     tc.write_formula(r, 9, res_f, F["out_txt"], "NOT RUN")
