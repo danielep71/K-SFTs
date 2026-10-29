@@ -71,7 +71,10 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - Three SFT visual references in editable SVG and high-resolution PNG:
   netting-set aggregation, EU CRR uses and exposure calculation formulas
   with supervisory haircut tables. Embedded in the root README with
-  methodological scope and prototype limitations (#142).
+  methodological scope and prototype limitations (#142). The calculation
+  reference also closes the workbook's README sheet, linked from its
+  methodology heading. The README sheet is read-only, and its sections
+  still expand and collapse (#138).
 
 - A responsive K-SFTs project web page with prototype scope, calculation
   flow, framework artwork, setup resources and validation boundaries;
@@ -107,9 +110,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
   and a procedure and checker for recording an Excel run against its commit.
   On Windows the checker writes the host record itself, and a development
-  synchronization exports the modules into the evidence folder
+  synchronization exports the modules into the evidence folder. With
+  `-RecordRun`, or `tools/Record-KSFT-ExcelRun.cmd`, one command synchronizes,
+  runs the suite and checks the run against `HEAD`
   ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9, #147,
-  #149).
+  #149, #168).
 - The macro-free workbook template `src/workbook/SFT_Template.xlsx` (a Readme
   sheet only), and an optional script that imports the repository's VBA into
   a workbook built from it, with its component manifest and the
@@ -126,9 +131,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - The SFT prototype, as it is: E\* of each netting set under the Financial
   Collateral Comprehensive Method with supervisory haircuts, its risk weight,
   RWA and own funds, in an 11-sheet workbook template with a demo portfolio,
-  whose every input cell explains its entry and refuses values outside the
-  engine's limits; eight `SFT_*` worksheet functions; an independent Python
-  reference and a LibreOffice regression. It is not the methodology of
+  whose every input cell explains its entry and refuses typed values outside
+  the engine's limits; eight `SFT_*` worksheet functions; an independent Python
+  reference and a LibreOffice regression. Tables, the run summary and the
+  TestCatalogue lookups are reached through workbook names and header texts,
+  not fixed rows and columns (#171). It is not the methodology of
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 
