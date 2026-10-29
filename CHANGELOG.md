@@ -126,8 +126,8 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - The SFT prototype, as it is: E\* of each netting set under the Financial
   Collateral Comprehensive Method with supervisory haircuts, its risk weight,
   RWA and own funds, in an 11-sheet workbook template with a demo portfolio,
-  whose every input cell explains its entry and refuses values outside the
-  engine's limits; eight `SFT_*` worksheet functions; an independent Python
+  whose every input cell explains its entry and refuses typed values outside
+  the engine's limits; eight `SFT_*` worksheet functions; an independent Python
   reference and a LibreOffice regression. It is not the methodology of
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
