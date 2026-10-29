@@ -56,6 +56,12 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
+### Changed
+
+- Dependabot proposes grouped weekly Python quality-tool updates from `/tools`
+  after a 14-day cooldown, targeting the active release branch; package
+  provenance, platform and hash review remain required (#187).
+
 ### Added
 
 - Portable non-default settings register with glyphs, badges and documented
