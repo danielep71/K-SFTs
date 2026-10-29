@@ -29,6 +29,15 @@ host.txt and the modules in exported\) and exports every standard, class and
 form module of the workbook into exported\. Production and -SourceDir
 synchronizations leave the folder alone.
 
+-RecordRun records the Excel run in one step: a Development synchronization
+as above, then the run itself. The script reopens the saved workbook in its
+own Excel instance with macros enabled, runs
+TEST_Examples.SaveExampleEvidence on the evidence folder, closes the
+workbook without saving, and runs tools\check_excel_run.py on the folder
+against the checked-out commit (HEAD), which needs Python 3.12 or later and
+Git on PATH. tools\Record-KSFT-ExcelRun.cmd does the same for a workbook
+dropped onto it.
+
 Before the workbook is opened the script lists the worksheet and ThisWorkbook
 modules in the source and asks whether to replace their code as well. Answer
 N for a workbook built from a newer template, whose sheet code must stay as
@@ -53,6 +62,13 @@ their code as well.
 
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -Mode Development -SkipSheets
+
+.EXAMPLE
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -RecordRun
+
+Synchronizes in Development mode, saves the three logs of the Excel run and
+checks them against HEAD. Exit code 3: synchronized, but the run was not
+recorded.
 
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SourceDir "$env:USERPROFILE\Downloads"
@@ -112,7 +128,10 @@ param(
     [string]$Mode,
 
     [Parameter(Mandatory = $false)]
-    [string]$EvidenceDir
+    [string]$EvidenceDir,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$RecordRun
 )
 
 Set-StrictMode -Version Latest
@@ -136,6 +155,7 @@ $vbext_ct_MSForm = 3
 $vbext_ct_Document = 100
 $xlCalculationManual = -4135
 $xlCalculationAutomatic = -4105
+$msoAutomationSecurityLow = 1
 $msoAutomationSecurityForceDisable = 3
 
 # With -SourceDir, a standard module the repository checkout does not have
@@ -660,6 +680,17 @@ try {
         }
     }
 
+    # -RecordRun runs the test suite, which only a Development workbook has.
+    if ($RecordRun) {
+        if (-not [string]::IsNullOrWhiteSpace($SourceDir)) {
+            throw "Use -RecordRun only with a Development synchronization, not with -SourceDir."
+        }
+        if ($Mode -eq "Production") {
+            throw "Use -RecordRun only with a Development synchronization."
+        }
+        $Mode = "Development"
+    }
+
     # Full synchronization: the production or the development component set.
     # -SourceDir instead takes what the folder holds.
     if (-not [string]::IsNullOrWhiteSpace($SourceDir) -and -not [string]::IsNullOrWhiteSpace($Mode)) {
@@ -688,7 +719,8 @@ try {
             if ([string]::IsNullOrWhiteSpace($evidencePath)) {
                 $evidencePath = Join-Path $repoFullPath "test-results\excel-run"
             }
-            $evidencePath = Resolve-FullPath -PathValue $evidencePath
+            # The folder need not exist yet: Export-RunEvidence creates it.
+            $evidencePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($evidencePath)
         }
         elseif (-not [string]::IsNullOrWhiteSpace($EvidenceDir)) {
             throw "Use -EvidenceDir only with a Development synchronization."
@@ -854,6 +886,24 @@ try {
         Write-Host "Evidence:   $exportedCount modules exported to $(Join-Path $evidencePath 'exported'); earlier run files removed"
     }
 
+    # -RecordRun: run the suite in the saved workbook. Macros are enabled for
+    # this Excel instance only; the workbook is opened read-only and closed
+    # without saving, so the run leaves it as synchronized.
+    if ($RecordRun) {
+        $workbook.Close($false)
+        $workbook = $null
+        $excel.AutomationSecurity = $msoAutomationSecurityLow
+        $workbook = $excel.Workbooks.Open($workbookFullPath, 0, $true)
+        $macro = "'" + $workbook.Name.Replace("'", "''") + "'!TEST_Examples.SaveExampleEvidence"
+        $null = $excel.Run($macro, $evidencePath)
+        foreach ($name in @("examples.log", "injected.log", "skipped.log")) {
+            if (-not (Test-Path -LiteralPath (Join-Path $evidencePath $name) -PathType Leaf)) {
+                throw "SaveExampleEvidence did not save $name in $evidencePath."
+            }
+        }
+        Write-Host "Run:        examples.log, injected.log and skipped.log saved in $evidencePath"
+    }
+
     Write-Host ""
     Write-Host "SUCCESS: VBA synchronized. Workbook sheets were not removed or recreated."
 }
@@ -894,4 +944,32 @@ finally {
 
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers()
+}
+
+# -RecordRun: check the evidence against the checked-out commit, after Excel
+# has closed. A failed check leaves the workbook synchronized: exit code 3.
+if ($RecordRun) {
+    Write-Host ""
+    $commit = (& git -C $repoFullPath rev-parse HEAD 2>$null)
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($commit)) {
+        Write-Warning "RUN NOT RECORDED: cannot read the commit with git rev-parse HEAD in $repoFullPath."
+        exit 3
+    }
+    $commit = $commit.Trim()
+
+    $python = @(Get-Command python, py -CommandType Application -ErrorAction SilentlyContinue)
+    if ($python.Count -eq 0) {
+        Write-Warning ("RUN NOT RECORDED: Python not found. Run: python tools\check_excel_run.py " +
+            "`"$evidencePath`" --commit $commit")
+        exit 3
+    }
+
+    Write-Host "Check:      tools\check_excel_run.py against $commit"
+    & $python[0].Path (Join-Path (Join-Path $repoFullPath "tools") "check_excel_run.py") $evidencePath --commit $commit
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "RUN NOT RECORDED: check_excel_run.py did not pass (exit code $LASTEXITCODE)."
+        exit 3
+    }
+    Write-Host ""
+    Write-Host "RECORDED: the Excel run at $commit passed check_excel_run.py."
 }
