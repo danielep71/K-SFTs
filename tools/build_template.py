@@ -947,7 +947,7 @@ TESTS = [
     ("SFT_HoldingPeriod(10,FALSE,FALSE,15)", 15, "override lengthens"),
     ("SFT_HoldingPeriod(10,FALSE,FALSE,7)", 10, "override never shortens"),
     ("SFT_HoldingPeriod(0)", "#NUM!", "minimum below 1"),
-    ("SFT_HoldingPeriod(1E+308,FALSE,TRUE)", "#NUM!", "doubled beyond the range of a number"),
+    ("SFT_HoldingPeriod(9E+307,FALSE,TRUE)", "#NUM!", "doubled beyond the range of a number"),
     ("SFT_ScaledHaircut(0.02,5)", 0.02 * (5 / 10) ** 0.5, "0.02 x sqrt(5/10): Art. 224 5-day column 1.414%"),
     ("SFT_ScaledHaircut(0.04,20,3)", 0.04 * (22 / 10) ** 0.5, "0.04 x sqrt((3+20-1)/10)"),
     ("SFT_ScaledHaircut(0.08,10)", 0.08, "Hfx at 10 days"),
