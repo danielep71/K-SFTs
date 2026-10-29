@@ -88,7 +88,7 @@ and from a fresh clone; on Windows they are untested, so use WSL or CI there.
 | Git | any recent | the checkout; the checks read the tracked files through `git` |
 | Python | 3.12 or later (CI uses 3.13) | `tools/check.py` and every Python gate |
 | Node.js | 22 | the label synchronizer and drift-detector self-tests |
-| Ruff, mypy | 0.16.6, 2.3.1 | the `ruff` and `mypy` gates |
+| Ruff, mypy | 0.17.1, 2.4.0 | the `ruff` and `mypy` gates |
 | actionlint | 1.7.12 | the `actionlint` gate |
 | shellcheck | optional | the shell scripts inside workflows, through actionlint; CI's runner has it |
 | LibreOffice, its Python UNO bridge, openpyxl | optional; run with 24.2.7.2 and openpyxl 3.1.5 | `tools/lo_regression.py`, the prototype's headless regression; not a gate and not Excel evidence |
@@ -116,7 +116,7 @@ python tools/check.py
   untracked file.
 - The lock in `tools/requirements-quality-ci.txt` covers CPython 3.13 on
   Linux x86_64 only. Elsewhere, install the same versions without it
-  (`pip install ruff==0.16.6 mypy==2.3.1`); CI remains the reference run.
+  (`pip install ruff==0.17.1 mypy==2.4.0`); CI remains the reference run.
 - The checksum is the one the workflow verifies
   (`.github/workflows/repository-integrity.yml`).
 

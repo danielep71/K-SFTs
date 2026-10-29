@@ -243,7 +243,7 @@ covers them in `tool-tests`.
 | --- | --- | --- |
 | Python | 3.13 in CI; 3.12 or later locally | `actions/setup-python` |
 | Node.js | 22 | `actions/setup-node` |
-| Ruff, mypy | 0.16.6, 2.3.1 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
+| Ruff, mypy | 0.17.1, 2.4.0 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
 | actionlint | 1.7.12 | Release archive verified by SHA-256 in the workflow |
 
 Install the same quality tools locally, on CPython 3.13 and Linux x86_64:
@@ -253,7 +253,7 @@ python -m pip install --only-binary=:all: --require-hashes -r tools/requirements
 ```
 
 On another platform, install the same versions without the lock
-(`pip install ruff==0.16.6 mypy==2.3.1`); CI remains the reference run.
+(`pip install ruff==0.17.1 mypy==2.4.0`); CI remains the reference run.
 actionlint is available from its
 [1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12).
 
