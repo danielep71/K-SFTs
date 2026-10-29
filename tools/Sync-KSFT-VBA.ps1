@@ -25,7 +25,7 @@ A full Development synchronization also prepares the evidence folder of an
 Excel run (INSTALLATION.md, Recording an Excel run): test-results\excel-run
 in the repository, or -EvidenceDir. After saving the workbook it removes the
 files an earlier run left there (examples.log, injected.log, skipped.log,
-host.txt and the modules in exported\) and exports every standard, class and
+host.txt and every file in exported\) and exports every standard, class and
 form module of the workbook into exported\. Production and -SourceDir
 synchronizations leave the folder alone.
 
@@ -597,9 +597,9 @@ function Export-RunEvidence {
             Remove-Item -LiteralPath $path -Force
         }
     }
-    Get-ChildItem -LiteralPath $exportedPath -File |
-        Where-Object { $_.Extension.ToLowerInvariant() -in @(".bas", ".cls", ".frm", ".frx") } |
-        Remove-Item -Force
+    # exported\ holds only this export: any file left there, a module or
+    # not, would fail check_excel_run.py.
+    Get-ChildItem -LiteralPath $exportedPath -File | Remove-Item -Force
 
     $extensions = @{
         $vbext_ct_StdModule   = ".bas"
