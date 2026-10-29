@@ -1,4 +1,4 @@
-# Proposes updates to the SHA-pinned GitHub Actions used by the workflows.
+# Proposes updates to SHA-pinned GitHub Actions and hash-locked Python tools.
 # Every update arrives as a pull request for maintainer review; nothing merges
 # automatically. See tools/README.md, "Dependency updates".
 # target-branch must name the active release branch in docs/GOVERNANCE.md.
@@ -23,5 +23,28 @@ updates:
       prefix: ci
     groups:
       github-actions:
+        patterns:
+          - "*"
+  - package-ecosystem: pip
+    directory: /tools
+    target-branch: release/0.2.0
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Rome
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    labels:
+      - ci
+      - P3
+    assignees:
+      - danielep71
+    commit-message:
+      prefix: ci
+    groups:
+      python-tools:
+        applies-to: version-updates
         patterns:
           - "*"

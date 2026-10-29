@@ -94,9 +94,11 @@ Hfx = 8%  × sqrt((N_R + T_M − 1) / 10)                         [CRE22.52; Art
   equities; gold; cash 0) [CRE22.49; Art. 224 Tables 1 and 3]. A fund takes the
   look-through or highest haircut entered on its leg [Art. 224(5)].
 - `T_M`, holding period: 5 BD for repo-style transactions, 10 BD for margin
-  lending, 10 BD when a netting set holds both; at least 20 BD for a netting set
-  with more than 5,000 transactions or illiquid collateral; an override can only
-  lengthen it; doubled after margin-call disputes [CRE22.57-22.58; Art. 224(2),
+  lending, 10 BD when a netting set under an eligible master netting agreement
+  holds both (without one, each transaction takes its own); at least 20 BD for
+  a netting set with more than 5,000 transactions or illiquid collateral; an
+  override can only lengthen it, and one that lengthens nothing is a WARNING;
+  doubled after margin-call disputes [CRE22.57-22.58; Art. 224(2),
   285(3)-(4)].
 - `N_R`: business days between remargining; 1 when blank.
 - **Eligibility.** A leg whose key is not in the table for its regime is not
@@ -109,6 +111,10 @@ Hfx = 8%  × sqrt((N_R + T_M − 1) / 10)                         [CRE22.52; Art
   government debt, one currency, daily remargining — and takes the others
   (the 0% risk weight of the securities, core market participant,
   documentation, settlement) as declared [CRE22.60, 22.36-22.37; Art. 227].
+  The 0% risk weight under Chapter 2 [Art. 227(2)(a)] is not derived from the
+  CQS: debt of a Member State's central government denominated and funded in
+  its domestic currency takes 0% at any CQS [Art. 114(4)], and the inputs do
+  not show that (maintainer decision, #141).
 
 ### Exposure value
 
@@ -164,8 +170,10 @@ and makes the run WHAT-IF.
 | `INCOMPLETE: k of n transaction(s) rejected` | A transaction with a leg in the netting set was rejected; a leg holding a worksheet error value is rejected with it | Withheld |
 | `NO TRANSACTIONS` | No leg refers to it | — |
 
-A layout change (moved column, broken workbook name), an unusable parameter or
-Params table, or no usable netting set stops the run.
+A layout change (moved column, broken workbook name, missing sheet), an
+unusable parameter or Params table, or no usable netting set stops the run; the
+problem is listed on Checks. A netting set that is not VALID has no figures on
+Results and no rows on Positions.
 
 <a id="regulatory-parameter-set"></a>
 
