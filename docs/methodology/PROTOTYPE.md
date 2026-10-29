@@ -72,8 +72,15 @@ every value on Run.
 - Date cells take Excel dates, so a typed `2026-09-30` becomes one. The engine
   also reads text in the form `yyyy-mm-dd` (`CORE_Util.ToSerial`), for example
   pasted or imported; the rules do not accept it typed as text.
+- Every sheet is protected without a password
+  ([#197](https://github.com/danielep71/K-SFTs/issues/197)). Only the input
+  cells can be edited: the yellow cells and the rows of the Params tables. The
+  input sheets can still be filtered, sorted and extended by inserted rows.
+  The macros protect every sheet again, for the user interface only, when the
+  workbook opens and before each operation, so that they can write the
+  outputs.
 - Rows of a Params table keep its rules when they are inserted inside the
-  table (right-click a row, Insert), not when appended below it.
+  table (right-click a row, Insert); the cells below a table are locked.
 - Business-day inputs are whole numbers, in the rules and in the engine
   ([#138](https://github.com/danielep71/K-SFTs/issues/138)): `HaircutBaseBD`,
   the three holding periods on Params, and the remargining frequency and
