@@ -962,7 +962,9 @@ r = 6
 for k, (formula, expected, note) in enumerate(TESTS, 1):
     ft.write(r, 2, f"F-{k:02d}", F["out_txt"])
     ft.write_string(r, 3, "=" + formula, F["out_txt"])
-    ft.write_formula(r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
+    # A dynamic-array formula: Excel shows a plain formula calling a UDF as
+    # =@SFT_..., since the function might return an array.
+    ft.write_dynamic_array_formula(r, 4, r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
     ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000", align="right") if not isinstance(expected, str)
              else F["out_txt_r"])
     rr = r + 1
