@@ -136,7 +136,10 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   the engine's limits; eight `SFT_*` worksheet functions; an independent Python
   reference and a LibreOffice regression. Tables, the run summary and the
   TestCatalogue lookups are reached through workbook names and header texts,
-  not fixed rows and columns (#171). It is not the methodology of
+  not fixed rows and columns (#171). A missing output sheet or header name
+  is listed on Checks instead of raised, a netting set that is not VALID has
+  no Positions rows, and the worksheet functions return an error value for a
+  Boolean, an overflow or an empty array (#141). It is not the methodology of
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 

@@ -40,6 +40,7 @@ MODULES = ["src/core/CORE_Config.bas", "src/core/CORE_Util.bas", "src/modules/SF
 RESULT_COLUMNS = {7: "holding_bd", 10: "sum_e", 11: "sum_c", 12: "net", 13: "gross", 14: "n", 15: "systematic",
                   16: "idiosyncratic", 17: "fx_term", 18: "e_star", 20: "rw_key", 21: "rw", 22: "rwa",
                   23: "own_funds", 24: "status"}
+ERROR_CODES = {"#NUM!": 2036, "#VALUE!": 2015}  # CVErr numbers of the worksheet errors a FormulaTest row expects
 
 
 def prop(name: str, value: Any) -> Any:
@@ -69,9 +70,10 @@ def formula_tests() -> tuple[str, int]:
         call = re.sub(r"\{([^}]*)\}", lambda m: "Array(" + m.group(1) + ")", formula)
         call = call.replace("TRUE", "True").replace("FALSE", "False")
         lines.append(f"    v = {call}")
-        if expected == "#NUM!":
-            lines.append(f'    If IsError(v) Then\n        If CLng(v) = 2036 Then passed = passed + 1 Else '
-                         f'failed = failed & " F-{k:02d}"\n    Else\n        failed = failed & " F-{k:02d}"\n    End If')
+        if expected in ERROR_CODES:
+            lines.append(f'    If IsError(v) Then\n        If CLng(v) = {ERROR_CODES[expected]} Then passed = passed + 1 '
+                         f'Else failed = failed & " F-{k:02d}"\n    Else\n        failed = failed & " F-{k:02d}"\n'
+                         f'    End If')
         else:
             lines.append(f'    If IsError(v) Then\n        failed = failed & " F-{k:02d}"\n    ElseIf Abs(v - '
                          f'({expected!r})) <= 1E-9 Then\n        passed = passed + 1\n    Else\n        '
