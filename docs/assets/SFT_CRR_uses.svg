@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080"><rect width="1600" height="1080" fill="white"/>
+<text x="800" y="58" font-family="Arial, sans-serif" font-size="37" fill="#203D65" font-weight="bold" text-anchor="middle">Where SFT exposures are used in the EU CRR</text>
+<text x="800" y="99" font-family="Arial, sans-serif" font-size="21" fill="#536B86" font-weight="normal" text-anchor="middle">Six prudential contexts: the risk-based exposure is an input, not a universal measure</text>
+<line x1="540" y1="340" x2="640" y2="410" stroke="#9DB2CC" stroke-width="3"/>
+<line x1="1060" y1="340" x2="960" y2="410" stroke="#9DB2CC" stroke-width="3" stroke-dasharray="10 8"/>
+<line x1="540" y1="530" x2="565" y2="530" stroke="#9DB2CC" stroke-width="3"/>
+<line x1="1035" y1="530" x2="1060" y2="530" stroke="#9DB2CC" stroke-width="3" stroke-dasharray="10 8"/>
+<line x1="540" y1="760" x2="640" y2="650" stroke="#9DB2CC" stroke-width="3" stroke-dasharray="10 8"/>
+<line x1="1060" y1="760" x2="960" y2="650" stroke="#9DB2CC" stroke-width="3" stroke-dasharray="10 8"/>
+<rect x="60" y="155" width="500" height="195" rx="18" fill="#E8F0FA" stroke="#286CC0" stroke-width="1.5"/>
+<text x="84" y="193" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">Counterparty credit risk</text>
+<text x="84" y="229" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Under the standardised approach: RWA = E* × RW.</text>
+<text x="84" y="255" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Under IRB, the applicable credit-risk rules govern.</text>
+<text x="84" y="302" font-family="Arial, sans-serif" font-size="16" fill="#286CC0" font-weight="bold" text-anchor="start">Arts. 107, 220, 223; Chapters 2–4</text>
+<text x="84" y="331" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: E*, SA risk weights, RWA and 8% capital prototype</text>
+<rect x="1040" y="155" width="500" height="195" rx="18" fill="#E8F0FA" stroke="#286CC0" stroke-width="1.5"/>
+<text x="1064" y="193" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">Exposures to CCPs</text>
+<text x="1064" y="229" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Cleared SFTs follow the CCP framework.</text>
+<text x="1064" y="255" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Trade exposures and default-fund contributions</text>
+<text x="1064" y="281" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">have distinct treatments; QCCP status matters.</text>
+<text x="1064" y="302" font-family="Arial, sans-serif" font-size="16" fill="#286CC0" font-weight="bold" text-anchor="start">Arts. 301–311</text>
+<text x="1064" y="331" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: a 2% QCCP class, not a full clearing framework</text>
+<rect x="40" y="430" width="500" height="195" rx="18" fill="#E8F0FA" stroke="#286CC0" stroke-width="1.5"/>
+<text x="64" y="468" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">Large exposures</text>
+<text x="64" y="504" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Apply large-exposure valuation and CRM rules,</text>
+<text x="64" y="530" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">including connected-client aggregation and</text>
+<text x="64" y="556" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">collateral substitution where required.</text>
+<text x="64" y="577" font-family="Arial, sans-serif" font-size="16" fill="#286CC0" font-weight="bold" text-anchor="start">Arts. 390, 395, 399–403</text>
+<text x="64" y="606" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: no large-exposure limit or substitution engine</text>
+<rect x="1060" y="430" width="500" height="195" rx="18" fill="#E8F0FA" stroke="#286CC0" stroke-width="1.5"/>
+<text x="1084" y="468" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">Leverage ratio</text>
+<text x="1084" y="504" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Asset exposure plus a separate CCR add-on.</text>
+<text x="1084" y="530" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Use the leverage rules for cash netting and</text>
+<text x="1084" y="556" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">SFT netting; do not substitute risk-based E*.</text>
+<text x="1084" y="577" font-family="Arial, sans-serif" font-size="16" fill="#286CC0" font-weight="bold" text-anchor="start">Arts. 429b and 429e</text>
+<text x="1084" y="606" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: not implemented</text>
+<rect x="60" y="720" width="500" height="195" rx="18" fill="#EAF6EF" stroke="#258653" stroke-width="1.5"/>
+<text x="84" y="758" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">CVA risk</text>
+<text x="84" y="794" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Fair-valued SFTs enter the CVA framework</text>
+<text x="84" y="820" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">when their CVA risk is material, subject to</text>
+<text x="84" y="846" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">the applicable exclusions and method rules.</text>
+<text x="84" y="867" font-family="Arial, sans-serif" font-size="16" fill="#258653" font-weight="bold" text-anchor="start">Art. 382(2), (6); Arts. 383–386</text>
+<text x="84" y="896" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: not implemented</text>
+<rect x="1040" y="720" width="500" height="195" rx="18" fill="#EAF6EF" stroke="#258653" stroke-width="1.5"/>
+<text x="1064" y="758" font-family="Arial, sans-serif" font-size="25" fill="#203D65" font-weight="bold" text-anchor="start">Output floor</text>
+<text x="1064" y="794" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Standardised SFT RWA feeds standardised TREA.</text>
+<text x="1064" y="820" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">The floor applies to aggregate TREA, not to</text>
+<text x="1064" y="846" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">an individual trade or netting-set E*.</text>
+<text x="1064" y="867" font-family="Arial, sans-serif" font-size="16" fill="#258653" font-weight="bold" text-anchor="start">Arts. 92 and 465 · 55% in 2026 → 72.5% in 2030</text>
+<text x="1064" y="896" font-family="Arial, sans-serif" font-size="15" fill="#536B86" font-weight="normal" text-anchor="start">K-SFTs: no bank-wide output-floor calculation</text>
+<rect x="565" y="405" width="470" height="250" rx="28" fill="#203D65" stroke="#203D65" stroke-width="1.5"/>
+<text x="800" y="452" font-family="Arial, sans-serif" font-size="29" fill="white" font-weight="bold" text-anchor="middle">SFT risk-based exposure</text>
+<text x="800" y="494" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="normal" text-anchor="middle">Fully adjusted exposure value E*</text>
+<text x="800" y="536" font-family="Arial, sans-serif" font-size="22" fill="#D7E4F4" font-weight="normal" text-anchor="middle">FCCM with supervisory haircuts</text>
+<text x="800" y="570" font-family="Arial, sans-serif" font-size="21" fill="#D7E4F4" font-weight="normal" text-anchor="middle">CRR Arts. 220 and 223–227</text>
+<text x="800" y="616" font-family="Arial, sans-serif" font-size="22" fill="#80D8B4" font-weight="bold" text-anchor="middle">K-SFTs: working prototype</text>
+<line x1="60" y1="962" x2="112" y2="962" stroke="#9DB2CC" stroke-width="3"/>
+<text x="124" y="969" font-family="Arial, sans-serif" font-size="17" fill="#536B86" font-weight="normal" text-anchor="start">Core exposure / CRM link</text>
+<line x1="480" y1="962" x2="532" y2="962" stroke="#9DB2CC" stroke-width="3" stroke-dasharray="10 8"/>
+<text x="544" y="969" font-family="Arial, sans-serif" font-size="17" fill="#536B86" font-weight="normal" text-anchor="start">Separate framework, scope or calculation</text>
+<text x="60" y="1010" font-family="Arial, sans-serif" font-size="17" fill="#536B86" font-weight="normal" text-anchor="start">Scope: FCCM supervisory-haircut route. This map does not cover liquidity ratios, SFTR reporting or every permitted SFT method.</text>
+<text x="60" y="1040" font-family="Arial, sans-serif" font-size="16" fill="#536B86" font-weight="normal" text-anchor="start">Sources: CRR provisions cited above; EBA Q&amp;A 2020_5496; K-SFTs PROTOTYPE.md (v0.2.0). Reviewed 26 October 2026.</text>
+</svg>

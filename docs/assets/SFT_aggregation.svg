@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1320" viewBox="0 0 1600 1320"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#829DBB"/></marker></defs><rect width="1600" height="1320" fill="white"/>
+<text x="60" y="45" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#24558D" text-anchor="start">K-SFTs  /  METHODOLOGY</text>
+<text x="800" y="96" font-family="Georgia, serif" font-size="39" font-weight="bold" fill="#102C50" text-anchor="middle">How SFTs aggregate a netting set</text>
+<text x="800" y="132" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#24558D" text-anchor="middle">Assign positions top-down, then aggregate bottom-up to the fully adjusted exposure value</text>
+<text x="800" y="163" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#587086" text-anchor="middle">Supervisory volatility adjustments • Eligible master netting agreements • CRR Article 220</text>
+<rect x="60" y="195" width="325" height="45" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="75" y="224" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">1  Netting set</text>
+<rect x="445" y="195" width="325" height="45" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="460" y="224" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">2  Aggregation keys</text>
+<rect x="830" y="195" width="325" height="45" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="845" y="224" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">3  Net positions</text>
+<rect x="1215" y="195" width="325" height="45" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="1230" y="224" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">4  Trade / collateral legs</text>
+<text x="60" y="272" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#587086" text-anchor="start">ASSIGN  →</text>
+<rect x="60" y="290" width="325" height="155" rx="5" fill="#24558D" stroke="#24558D" stroke-width="1"/>
+<text x="75" y="319" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Netting agreement</text>
+<text x="75" y="347" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="white" text-anchor="start">One enforceable agreement.</text>
+<text x="75" y="371" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="white" text-anchor="start">Include eligible SFT exposures</text>
+<text x="75" y="395" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="white" text-anchor="start">and collateral within its scope.</text>
+<text x="75" y="419" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="white" text-anchor="start">Keep separate sets separate.</text>
+<rect x="445" y="290" width="325" height="155" rx="5" fill="#24558D" stroke="#24558D" stroke-width="1"/>
+<text x="460" y="319" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Two parallel groupings</text>
+<text x="460" y="347" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Security group / commodity type</text>
+<text x="460" y="371" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">and currency of denomination.</text>
+<text x="460" y="395" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Use consistent reporting values</text>
+<text x="460" y="419" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">and a defined settlement currency.</text>
+<rect x="830" y="290" width="325" height="155" rx="5" fill="#24558D" stroke="#24558D" stroke-width="1"/>
+<text x="845" y="319" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Netting dimensions</text>
+<text x="845" y="347" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Net securities within each group.</text>
+<text x="845" y="371" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Net FX positions by currency.</text>
+<text x="845" y="395" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Cash contributes to exposure</text>
+<text x="845" y="419" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">and, where relevant, FX risk.</text>
+<rect x="1215" y="290" width="325" height="155" rx="5" fill="#24558D" stroke="#24558D" stroke-width="1"/>
+<text x="1230" y="319" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Position data</text>
+<text x="1230" y="347" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Cash, securities or commodities;</text>
+<text x="1230" y="371" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">posted or received; value,</text>
+<text x="1230" y="395" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">currency, security attributes</text>
+<text x="1230" y="419" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">and margining frequency.</text>
+<polyline points="387,367 443,367" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="772,367 828,367" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="1157,367 1213,367" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<text x="60" y="480" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#587086" text-anchor="start">CALCULATE &amp; AGGREGATE  ←</text>
+<rect x="1215" y="500" width="325" height="120" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="1230" y="529" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Value each leg</text>
+<text x="1230" y="557" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Eᵢ: lent / posted exposure</text>
+<text x="1230" y="581" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Cⱼ: borrowed / received value</text>
+<text x="1230" y="605" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Convert to a common currency.</text>
+<polyline points="1377,500 1377,489 222,489 222,500" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="1215" y="645" width="325" height="145" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="1230" y="674" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Set supervisory haircuts</text>
+<text x="1230" y="702" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">hₗ: security / commodity haircut</text>
+<text x="1230" y="726" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">HFX,k: currency mismatch haircut</text>
+<text x="1230" y="750" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Apply the relevant holding period</text>
+<text x="1230" y="774" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">and remargining adjustments.</text>
+<polyline points="1377,620 1377,645" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="1215" y="815" width="325" height="95" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="1230" y="844" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Positions ready to aggregate</text>
+<text x="1230" y="872" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="white" text-anchor="start">Values + grouping keys + haircuts</text>
+<polyline points="1377,790 1377,815" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="830" y="500" width="325" height="120" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="845" y="529" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Net securities / commodities</text>
+<text x="845" y="557" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">qₗ = postedₗ − receivedₗ</text>
+<text x="845" y="581" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Retain the sign of each position.</text>
+<text x="845" y="605" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">hₗ ≥ 0 in this diagram.</text>
+<rect x="830" y="645" width="325" height="145" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="845" y="674" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Currency netting</text>
+<text x="845" y="702" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">fₖ = postedₖ − receivedₖ</text>
+<text x="845" y="726" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Include cash and non-cash legs.</text>
+<text x="845" y="750" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Only currencies other than the</text>
+<text x="845" y="774" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">agreement’s settlement currency.</text>
+<polyline points="1215,855 1186,855 1186,560 1155,560" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="1186,715 1155,715" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="445" y="500" width="325" height="120" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="460" y="529" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Net / gross haircut exposure</text>
+<text x="460" y="557" font-family="Arial, sans-serif" font-size="21" font-weight="normal" fill="#203B5A" text-anchor="start">E_net = |Σₗ qₗ hₗ|</text>
+<text x="460" y="581" font-family="Arial, sans-serif" font-size="21" font-weight="normal" fill="#203B5A" text-anchor="start">E_gross = Σₗ |qₗ| hₗ</text>
+<polyline points="830,560 770,560" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="445" y="645" width="325" height="145" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="460" y="674" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Diversification count N</text>
+<text x="460" y="702" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Count groups with</text>
+<text x="460" y="726" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">|qₗ| ≥ 0.1 × maxₘ |qₘ|.</text>
+<text x="460" y="750" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">The threshold affects the count,</text>
+<text x="460" y="774" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">not the sums above.</text>
+<polyline points="830,602 800,602 800,715 770,715" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="445" y="815" width="325" height="95" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="460" y="844" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Security adjustment</text>
+<text x="460" y="872" font-family="Arial, sans-serif" font-size="15" font-weight="normal" fill="white" text-anchor="start">A_sec = 0.4 E_net + 0.6 E_gross / √N</text>
+<polyline points="607,620 785,620 785,800 607,800 607,815" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="607,790 607,815" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="830" y="815" width="325" height="95" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="845" y="844" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">FX adjustment</text>
+<text x="845" y="872" font-family="Arial, sans-serif" font-size="21" font-weight="normal" fill="white" text-anchor="start">A_FX = Σₖ |fₖ| HFX,k</text>
+<polyline points="992,790 992,815" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="60" y="500" width="325" height="120" rx="5" fill="#E8EFF8" stroke="#829DBB" stroke-width="1"/>
+<text x="75" y="529" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="#203B5A" text-anchor="start">Net value before haircuts</text>
+<text x="75" y="557" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">V = Σᵢ Eᵢ − Σⱼ Cⱼ</text>
+<text x="75" y="581" font-family="Arial, sans-serif" font-size="17" font-weight="normal" fill="#203B5A" text-anchor="start">Keep V signed until the final floor.</text>
+<text x="60" y="680" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#102C50" text-anchor="start">Reading the picture</text>
+<rect x="60" y="705" width="30" height="21" rx="3" fill="#24558D" stroke="#829DBB"/>
+<text x="102" y="721" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Assignment / input scope</text>
+<rect x="60" y="745" width="30" height="21" rx="3" fill="#E8EFF8" stroke="#829DBB"/>
+<text x="102" y="761" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Calculation step</text>
+<rect x="60" y="785" width="30" height="21" rx="3" fill="#102C50" stroke="#829DBB"/>
+<text x="102" y="801" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#203B5A" text-anchor="start">Result carried forward</text>
+<text x="60" y="851" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#587086" text-anchor="start">Follow the lower arrows from</text>
+<text x="60" y="875" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#587086" text-anchor="start">the trade legs to the set result.</text>
+<polyline points="607,910 607,960 600,960 600,990" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="992,910 992,960 1000,960 1000,990" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<polyline points="60,560 40,560 40,947 280,947 280,990" fill="none" stroke="#829DBB" stroke-width="2.2" marker-end="url(#arrow)"/>
+<rect x="60" y="990" width="1480" height="140" rx="5" fill="#102C50" stroke="#102C50" stroke-width="1"/>
+<text x="75" y="1019" font-family="Arial, sans-serif" font-size="19" font-weight="bold" fill="white" text-anchor="start">Fully adjusted exposure value</text>
+<text x="800" y="1075" font-family="Georgia, serif" font-size="35" font-weight="normal" fill="white" text-anchor="middle">E* = max { 0,  V + A_sec + A_FX }</text>
+<text x="800" y="1110" font-family="Arial, sans-serif" font-size="18" font-weight="normal" fill="white" text-anchor="middle">Apply the zero floor once, at netting-set level. E* feeds the applicable credit-risk capital calculation.</text>
+<text x="60" y="1170" font-family="Arial, sans-serif" font-size="17" font-weight="bold" fill="#102C50" text-anchor="start">Scope &amp; conventions</text>
+<text x="60" y="1200" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#587086" text-anchor="start">Signed qₗ and non-negative hₗ are an equivalent notation for the signed-haircut formulation. The securities term shown assumes N &gt; 0.</text>
+<text x="60" y="1226" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#587086" text-anchor="start">This diagram covers the supervisory haircut route; internal-model methods and transactions outside an eligible agreement require separate treatment.</text>
+<text x="60" y="1266" font-family="Arial, sans-serif" font-size="15" font-weight="normal" fill="#587086" text-anchor="start">References: CRR Arts. 206, 220, 223–227; Basel Framework CRE22.62–22.65. Simplified process illustration.</text>
+<text x="1540" y="1298" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#24558D" text-anchor="end">K-SFTs  •  AGGREGATION</text>
+</svg>

@@ -209,6 +209,49 @@ flowchart LR
 | Master netting agreement: exposure of the netting set | CRR Articles 206 and 220(2)–(3); Basel CRE22.64–22.65 | Registered, not transcribed |
 | Output measures | D7 | Open decision |
 
+### Netting-set aggregation at a glance
+
+The diagram follows positions from trade and collateral legs to the fully
+adjusted exposure value under an **eligible master netting agreement**
+(CRR Article 220; Basel CRE22.62–22.65). It covers the supervisory volatility
+adjustments route, with security/commodity and currency netting, the net
+and gross haircut terms, the diversification count and the final zero floor.
+
+[![SFT netting-set aggregation: trade legs, net positions, security and FX adjustments, and fully adjusted exposure E*](docs/assets/SFT_aggregation.svg)](docs/assets/SFT_aggregation.svg)
+
+[Editable SVG](docs/assets/SFT_aggregation.svg) ·
+[High-resolution PNG](docs/assets/SFT_aggregation.png)
+
+This is a simplified methodological illustration, not evidence of a
+validated implementation. The securities adjustment shown assumes `N > 0`;
+transactions outside an eligible agreement follow a separate route. See the
+[methodology scope](docs/methodology/README.md#scope) and
+[prototype limitations](docs/methodology/PROTOTYPE.md).
+
+### Where SFT exposures are used in the EU CRR
+
+The map distinguishes the risk-based exposure from large-exposure, CCP,
+CVA, leverage-ratio and output-floor requirements. It identifies the current
+prototype coverage; a regulatory use does not imply an implemented module.
+
+[![Where SFT exposures are used in the EU CRR, with separate calculation frameworks and prototype coverage](docs/assets/SFT_CRR_uses.svg)](docs/assets/SFT_CRR_uses.svg)
+
+[Editable SVG](docs/assets/SFT_CRR_uses.svg) ·
+[High-resolution PNG](docs/assets/SFT_CRR_uses.png)
+
+### SFT calculation reference
+
+A compact reference for the netted and single-transaction formulas, haircut
+scaling, 10-day supervisory haircut tables, risk weights and capital.
+Prototype conventions and limitations are marked explicitly; the
+[prototype specification](docs/methodology/PROTOTYPE.md) remains the detailed
+implementation reference.
+
+[![SFT exposure calculation reference: formulas, supervisory haircuts, capital and prototype limitations](docs/assets/SFT_calculation_reference.svg)](docs/assets/SFT_calculation_reference.svg)
+
+[Editable SVG](docs/assets/SFT_calculation_reference.svg) ·
+[High-resolution PNG](docs/assets/SFT_calculation_reference.png)
+
 ---
 
 <a id="validation"></a>
@@ -268,9 +311,13 @@ The full layout, the dependency direction and the public API boundary are in
 - **Regulatory texts registered, not yet checked against the prototype.**
   The prototype's formulas and tables are not yet checked against the
   registered copies, page by page.
-- **Security scanning not enabled.** Secret scanning, push protection,
-  code scanning and Dependabot security updates are off; vulnerabilities
-  are reported privately on GitHub or by email ([SECURITY.md](SECURITY.md)).
+- **No code scanning of the VBA.** Secret scanning, push protection,
+  Dependabot security updates and CodeQL are enabled; CodeQL covers the
+  Python tools and the workflows, not the VBA, which the static gates and
+  Excel runs check. Coverage and merge gating are still being confirmed
+  ([repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings)).
+  Vulnerabilities are reported privately on GitHub or by email
+  ([SECURITY.md](SECURITY.md)).
 - **CI artifacts expire after 30 days.**
 - **Windows desktop Excel only.**
 

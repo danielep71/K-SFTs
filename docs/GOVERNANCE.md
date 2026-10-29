@@ -153,27 +153,10 @@ required checks, or unrelated pull requests cannot merge.
 
 ### Configured controls
 
-Recorded on **2026-10-23**, updated on **2026-10-24**. *Verified* means read
-back from GitHub; *pending* means not yet configured or not yet verified. A
-verified setting is not by itself demonstrated enforcement: what GitHub was
-seen to enforce on a real pull request is listed under
-[Demonstrated enforcement](#demonstrated-enforcement).
-
-| Control | Status |
-| --- | --- |
-| Repository visibility | Public since 2026-10-25, by the maintainer's decision ([#123](https://github.com/danielep71/K-SFTs/issues/123)); read back from the API. It was private until then. |
-| Account plan | GitHub Pro (maintainer-reported). Rulesets and branch protection apply on public repositories under any plan. |
-| `main` and `release/0.1.0` branches | Verified on 2026-10-23: both exist; `release/0.1.0` was created from `main` at `85b2b3b`. |
-| Rulesets for `main` and `release/**` | Verified on 2026-10-24 (read back through the API, [#12](https://github.com/danielep71/K-SFTs/issues/12)): active, no bypass. Both block deletion and force pushes and require a pull request with 0 approvals, resolved review threads and a passing, up-to-date `Repository integrity`. A separate ruleset also blocks deleting `release/**`, and another protects `v*` tags from deletion, force pushes and updates. Accepted exception: a new `release/**` branch may be created before its check runs. Required check, up-to-date and merge-method rules demonstrated on `release/**` ([#12](https://github.com/danielep71/K-SFTs/issues/12), [below](#demonstrated-enforcement)); the other rules are verified only. |
-| `Repository integrity` check | Configured ([#5](https://github.com/danielep71/K-SFTs/issues/5)): runs `tools/check.py --ci` on every pull request and push to `main` and `release/**`, without a path filter. Verified on 2026-10-24 as the required check of both rulesets. |
-| Merge methods | Verified on 2026-10-24: the repository allows merge commits, squash and rebase. The rulesets allow **merge commits only** into `main`, and **squash or merge commits** into `release/**`, matching [Integration](#-integration). Observed: task pull requests squash-merged into `release/0.1.0` (#40, #43), the release integrated into `main` with a merge commit (#41), and the sync back with a merge commit (#44). Head branches are deleted automatically after merge. |
-| Label workflows | Verified as installed: `Validate label manifest` and `Label drift fixtures` run on pull requests into `main` and `release/**` that change label files; live label reconciliation runs on pushes to `main` that change them; live drift detection runs daily. |
-| Codex code review | Enabled: observed on [#14](https://github.com/danielep71/K-SFTs/pull/14), on opening and on an `@codex review` request. |
-| Dependency updates | Configured for GitHub Actions ([#5](https://github.com/danielep71/K-SFTs/issues/5)): weekly grouped pull requests against the active release branch. Dependabot reads its configuration from `main`, where it has been since [#15](https://github.com/danielep71/K-SFTs/pull/15). Active: verified on 2026-10-24 by its first pull request, [#18](https://github.com/danielep71/K-SFTs/pull/18). |
-| Security features | Read on 2026-10-25 ([#123](https://github.com/danielep71/K-SFTs/issues/123)): private vulnerability reporting enabled; Dependabot alerts enabled (maintainer-reported); Dependabot security updates, secret scanning, push protection and code scanning not enabled, by the maintainer's decision. Recorded in [SECURITY.md](../SECURITY.md) ([#3](https://github.com/danielep71/K-SFTs/issues/3)). |
-| Issue forms and PR template | Configured ([#11](https://github.com/danielep71/K-SFTs/issues/11)): Bug report, Enhancement and Documentation forms; blank issues disabled. |
-| Issue triage workflow | Configured ([#11](https://github.com/danielep71/K-SFTs/issues/11)): read-only audit of open issues on issue events and manual dispatch. Issue events run it from `main`, where it has been since [#19](https://github.com/danielep71/K-SFTs/pull/19). Active: verified on 2026-10-24 by its runs on issue events, for example run [40104872758](https://github.com/danielep71/K-SFTs/actions/runs/40104872758). |
-| Traffic history | Configured ([#36](https://github.com/danielep71/K-SFTs/issues/36)): `traffic-history` created as orphan commit `8560b31`; workflow on `main` since #41, scheduled daily. Verified on 2026-10-24: its ruleset is active, targets only `traffic-history`, blocks deletion and force pushes, and has no bypass. The `analytics` environment allows only `main` and holds `TRAFFIC_TOKEN` (read back in Settings by the maintainer). The first manual collection succeeded (run 40079797041). Pending: the first scheduled run. |
+The dated settings, evidence, historical snapshots and unverified controls are
+maintained in [REPOSITORY_SETTINGS_EVIDENCE.md](REPOSITORY_SETTINGS_EVIDENCE.md).
+The portable non-default settings reference is [REPOSITORY_SETTINGS.md](REPOSITORY_SETTINGS.md). GitHub's live settings remain authoritative. Intended
+working rules remain above; demonstrated enforcement remains below.
 
 <a id="demonstrated-enforcement"></a>
 
@@ -226,8 +209,8 @@ check but was not exercised with a failing one.
   not been triggered on a real pull request is recorded as verified, not as
   enforced.
 
-Update this section, with its date, whenever a control is configured,
-verified or changed.
+Update [the evidence snapshot](REPOSITORY_SETTINGS_EVIDENCE.md), with its date and
+evidence, whenever a control is configured, verified or changed.
 
 ## 🗂️ Issues
 

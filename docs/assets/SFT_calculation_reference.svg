@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1510" viewBox="0 0 1800 1510"><rect width="1800" height="1510" fill="white"/>
+<text x="900" y="57" font-family="Georgia, serif" font-size="42" fill="#203D65" font-weight="bold" text-anchor="middle">K-SFTs | SFT exposure calculation reference</text>
+<text x="900" y="94" font-family="Arial, sans-serif" font-size="23" fill="#286CC0" font-weight="bold" text-anchor="middle">FCCM with supervisory haircuts • EU CRR Arts. 220–227 • Basel CRE22 • Prototype v0.2.0</text>
+<rect x="30" y="122" width="1740" height="42" rx="3" fill="#24558D" stroke="#24558D" stroke-width="1.5"/>
+<rect x="30" y="122" width="56" height="42" rx="0" fill="#203D65" stroke="#203D65" stroke-width="1.5"/>
+<text x="58" y="151" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="middle">1</text>
+<text x="103" y="151" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="start">Exposure value: choose the route before aggregating</text>
+<rect x="30" y="164" width="870" height="214" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<rect x="900" y="164" width="870" height="214" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="48" y="195" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="start">Eligible master netting agreement — Art. 220</text>
+<text x="48" y="234" font-family="Georgia, serif" font-size="23" fill="#293F58" font-weight="normal" text-anchor="start">E* = max {0, ΣEᵢ − ΣCⱼ + 0.4 E_net + 0.6 E_gross / √N + A_FX}</text>
+<text x="48" y="273" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="start">E_net = |Σₗ qₗ hₗ|       E_gross = Σₗ |qₗ| hₗ       A_FX = Σₖ |fₖ| HFX,k</text>
+<text x="48" y="300" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="start">qₗ: signed net security position; hₗ ≥ 0. fₖ: net non-settlement currency position.</text>
+<text x="48" y="327" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="start">N counts non-zero groups with |qₗ| ≥ 10% of the largest |q|; small groups stay in sums.</text>
+<text x="48" y="354" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="start">Prototype: if N = 0, gross must be 0 and its contribution is set to 0.</text>
+<text x="920" y="195" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="start">No eligible agreement — Art. 223</text>
+<text x="920" y="234" font-family="Georgia, serif" font-size="25" fill="#293F58" font-weight="normal" text-anchor="start">E*ₜ = max {0, E(1 + H_E) − C(1 − H_C − H_FX)}</text>
+<text x="920" y="273" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Calculate each transaction separately, then sum E*ₜ; no cross-trade offset.</text>
+<text x="920" y="300" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Use value-weighted basket haircuts and the applicable FX mismatch adjustment.</text>
+<text x="920" y="327" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">E: exposure before protection. C: recognised collateral. Values in one currency.</text>
+<text x="920" y="354" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Shown without maturity mismatch; that adjustment is outside the prototype.</text>
+<rect x="30" y="394" width="1740" height="42" rx="3" fill="#24558D" stroke="#24558D" stroke-width="1.5"/>
+<rect x="30" y="394" width="56" height="42" rx="0" fill="#203D65" stroke="#203D65" stroke-width="1.5"/>
+<text x="58" y="423" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="middle">2</text>
+<text x="103" y="423" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="start">Haircut scaling, holding periods and eligibility</text>
+<rect x="30" y="436" width="1740" height="193" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="48" y="475" font-family="Georgia, serif" font-size="28" fill="#293F58" font-weight="normal" text-anchor="start">H = H₁₀ × √((N_R + T_M − 1) / 10)</text>
+<text x="48" y="511" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">H₁₀: 10-day base haircut. FX base: 8%.</text>
+<text x="48" y="538" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">CRR Art. 226: N_R is days between revaluations;</text>
+<text x="48" y="565" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">the prototype uses its remargining-frequency input.</text>
+<text x="48" y="592" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Use the applicable minimum T_M before scaling.</text>
+<text x="645" y="475" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="start">Holding period T_M (business days)</text>
+<text x="645" y="511" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Repo-style: 5; margin lending: 10.</text>
+<text x="645" y="538" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Mixed sets: 10 in the prototype (Basel convention).</text>
+<text x="645" y="565" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Large / illiquid sets: at least 20; disputes may double it.</text>
+<text x="645" y="592" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">CRR Art. 224(2), Art. 285; Basel CRE22.57–22.59.</text>
+<text x="1245" y="475" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="start">Recognition conditions</text>
+<text x="1245" y="511" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Eligible collateral and enforceable netting required.</text>
+<text x="1245" y="538" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Non-eligible collateral received: not recognised.</text>
+<text x="1245" y="565" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Non-eligible securities lent: 30% base haircut.</text>
+<text x="1245" y="592" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">0% haircut only if all Art. 227 conditions hold.</text>
+<rect x="30" y="645" width="1740" height="42" rx="3" fill="#24558D" stroke="#24558D" stroke-width="1.5"/>
+<rect x="30" y="645" width="56" height="42" rx="0" fill="#203D65" stroke="#203D65" stroke-width="1.5"/>
+<text x="58" y="674" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="middle">3</text>
+<text x="103" y="674" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="start">Supervisory base haircuts — percentages, 10 business days, daily revaluation</text>
+<rect x="30" y="687" width="170" height="39" rx="0" fill="#E8F0FA" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="713" font-family="Arial, sans-serif" font-size="17" fill="#203D65" font-weight="bold" text-anchor="middle">Debt CQS</text>
+<rect x="200" y="687" width="220" height="39" rx="0" fill="#E8F0FA" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="713" font-family="Arial, sans-serif" font-size="17" fill="#203D65" font-weight="bold" text-anchor="middle">Residual maturity</text>
+<rect x="420" y="687" width="240" height="39" rx="0" fill="#E8F0FA" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="713" font-family="Arial, sans-serif" font-size="17" fill="#203D65" font-weight="bold" text-anchor="middle">Sovereign-type¹</text>
+<rect x="660" y="687" width="240" height="39" rx="0" fill="#E8F0FA" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="713" font-family="Arial, sans-serif" font-size="17" fill="#203D65" font-weight="bold" text-anchor="middle">Other issuer¹</text>
+<rect x="900" y="687" width="240" height="39" rx="0" fill="#E8F0FA" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="713" font-family="Arial, sans-serif" font-size="17" fill="#203D65" font-weight="bold" text-anchor="middle">Securitisation¹</text>
+<rect x="30" y="726" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="747" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="200" y="726" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="747" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">≤ 1 year</text>
+<rect x="420" y="726" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="747" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">0.5</text>
+<rect x="660" y="726" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="747" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="900" y="726" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="747" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2</text>
+<rect x="30" y="755" width="170" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="776" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="200" y="755" width="220" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="776" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 1 to ≤ 3</text>
+<rect x="420" y="755" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="776" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2</text>
+<rect x="660" y="755" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="776" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">3</text>
+<rect x="900" y="755" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="776" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">8</text>
+<rect x="30" y="784" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="805" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="200" y="784" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="805" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 3 to ≤ 5</text>
+<rect x="420" y="784" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="805" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2</text>
+<rect x="660" y="784" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="805" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="900" y="784" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="805" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">8</text>
+<rect x="30" y="813" width="170" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="834" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="200" y="813" width="220" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="834" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 5 to ≤ 10</text>
+<rect x="420" y="813" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="834" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="660" y="813" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="834" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">6</text>
+<rect x="900" y="813" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="834" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">16</text>
+<rect x="30" y="842" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="863" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="200" y="842" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="863" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 10 years</text>
+<rect x="420" y="842" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="863" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="660" y="842" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="863" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">12</text>
+<rect x="900" y="842" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="863" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">16</text>
+<rect x="30" y="871" width="170" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="892" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2–3</text>
+<rect x="200" y="871" width="220" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="892" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">≤ 1 year</text>
+<rect x="420" y="871" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="892" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">1</text>
+<rect x="660" y="871" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="892" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2</text>
+<rect x="900" y="871" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="892" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="30" y="900" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="921" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2–3</text>
+<rect x="200" y="900" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="921" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 1 to ≤ 3</text>
+<rect x="420" y="900" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="921" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">3</text>
+<rect x="660" y="900" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="921" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="900" y="900" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="921" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">12</text>
+<rect x="30" y="929" width="170" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="950" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2–3</text>
+<rect x="200" y="929" width="220" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="950" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 3 to ≤ 5</text>
+<rect x="420" y="929" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="950" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">3</text>
+<rect x="660" y="929" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="950" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">6</text>
+<rect x="900" y="929" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="950" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">12</text>
+<rect x="30" y="958" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="979" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2–3</text>
+<rect x="200" y="958" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="979" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 5 to ≤ 10</text>
+<rect x="420" y="958" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="979" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">6</text>
+<rect x="660" y="958" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="979" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">12</text>
+<rect x="900" y="958" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="979" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">24</text>
+<rect x="30" y="987" width="170" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="1008" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">2–3</text>
+<rect x="200" y="987" width="220" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="1008" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">&gt; 10 years</text>
+<rect x="420" y="987" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="1008" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">6</text>
+<rect x="660" y="987" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="1008" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">20</text>
+<rect x="900" y="987" width="240" height="29" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="1008" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">24</text>
+<rect x="30" y="1016" width="170" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="115.0" y="1037" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">4</text>
+<rect x="200" y="1016" width="220" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="310.0" y="1037" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">All maturities</text>
+<rect x="420" y="1016" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="540.0" y="1037" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">15</text>
+<rect x="660" y="1016" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="780.0" y="1037" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">Not eligible</text>
+<rect x="900" y="1016" width="240" height="29" rx="0" fill="#F4F7FB" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1020.0" y="1037" font-family="Arial, sans-serif" font-size="17" fill="#293F58" font-weight="normal" text-anchor="middle">Not eligible</text>
+<rect x="1140" y="687" width="630" height="358" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="1160" y="720" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="start">Other exposures / collateral — Art. 224</text>
+<text x="1160" y="760" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Main-index equities / convertible bonds</text>
+<text x="1745" y="760" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="end">20%</text>
+<text x="1160" y="798" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Other eligible listed equities / convertibles</text>
+<text x="1745" y="798" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="end">30%</text>
+<text x="1160" y="836" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Gold bullion</text>
+<text x="1745" y="836" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="end">20%</text>
+<text x="1160" y="874" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Cash</text>
+<text x="1745" y="874" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="end">0%</text>
+<text x="1160" y="912" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">FX mismatch (separate adjustment)</text>
+<text x="1745" y="912" font-family="Arial, sans-serif" font-size="21" fill="#203D65" font-weight="bold" text-anchor="end">8%</text>
+<text x="1160" y="969" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Eligible funds: weighted underlying haircut; if unknown,</text>
+<text x="1160" y="996" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">the highest permitted-asset haircut (Art. 224(5)).</text>
+<text x="1160" y="1023" font-family="Arial, sans-serif" font-size="18" fill="#293F58" font-weight="normal" text-anchor="start">Unrated eligible institution debt: CQS 2–3 (Art. 224(6)).</text>
+<text x="45" y="1072" font-family="Arial, sans-serif" font-size="17" fill="#536B86" font-weight="normal" text-anchor="start">¹ Art. 224 Table 1: issuer categories in Art. 197(1)(b), (c)/(d), and (h), respectively. Eligibility conditions still apply; short-term ratings are not shown.</text>
+<rect x="30" y="1090" width="1740" height="42" rx="3" fill="#24558D" stroke="#24558D" stroke-width="1.5"/>
+<rect x="30" y="1090" width="56" height="42" rx="0" fill="#203D65" stroke="#203D65" stroke-width="1.5"/>
+<text x="58" y="1119" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="middle">4</text>
+<text x="103" y="1119" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold" text-anchor="start">Risk weights, capital and implementation boundaries</text>
+<rect x="30" y="1132" width="870" height="162" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<rect x="900" y="1132" width="870" height="162" rx="0" fill="white" stroke="#B9CEE5" stroke-width="1.5"/>
+<text x="48" y="1174" font-family="Georgia, serif" font-size="27" fill="#293F58" font-weight="normal" text-anchor="start">RWA = E* × RW;     minimum total capital = 8% × RWA</text>
+<text x="48" y="1210" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">RW comes from the counterparty credit-risk rules, not the haircut table.</text>
+<text x="48" y="1238" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Prototype classes: sovereign, institution, corporate and QCCP.</text>
+<text x="48" y="1266" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">8% excludes capital buffers, Pillar 2 and other prudential requirements.</text>
+<text x="920" y="1170" font-family="Arial, sans-serif" font-size="22" fill="#203D65" font-weight="bold" text-anchor="start">Prototype controls</text>
+<text x="920" y="1208" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">INVALID or INCOMPLETE sets: exposure is withheld.</text>
+<text x="920" y="1236" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Parameter or risk-weight overrides: WHAT-IF classification.</text>
+<text x="920" y="1264" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">REGULATORY is a parameter-match label, not regulatory certification.</text>
+<rect x="30" y="1310" width="1740" height="125" rx="5" fill="#FFF6EA" stroke="#CB7C32" stroke-width="1.5"/>
+<text x="50" y="1342" font-family="Arial, sans-serif" font-size="22" fill="#A75B16" font-weight="bold" text-anchor="start">CRR / Basel and prototype limits</text>
+<text x="50" y="1374" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">The prototype carries both CRR and BCBS regimes and a QCCP class, although the recorded first scope is CRR bilateral SFTs. Mixed sets use 10 BD in both regimes.</text>
+<text x="50" y="1404" font-family="Arial, sans-serif" font-size="19" fill="#293F58" font-weight="normal" text-anchor="start">Commodity repos, maturity mismatch, VaR / IMM, leverage ratio, CVA and CRE56 haircut floors are not implemented. Source-by-source certification remains outstanding.</text>
+<text x="30" y="1470" font-family="Arial, sans-serif" font-size="16" fill="#536B86" font-weight="normal" text-anchor="start">Sources: CRR consolidated 26 June 2026, Arts. 92, 197, 206, 220, 223–227, 285; Basel CRE22; docs/methodology/PROTOTYPE.md and SFT_Formulas.bas.</text>
+<text x="30" y="1495" font-family="Arial, sans-serif" font-size="16" fill="#536B86" font-weight="normal" text-anchor="start">Simplified calculation reference • Prototype v0.2.0 • Reviewed 26 October 2026 • No claim of a validated regulatory method.</text>
+</svg>
