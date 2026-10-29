@@ -88,7 +88,6 @@ F: dict[str, Any] = {
     "in_txt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@"),
     "in_ctr": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@", align="center"),
     "in_amt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="#,##0"),
-    "in_num": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####"),
     "in_num_c": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####", align="center"),
     "in_int": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0", align="center"),
     # A number shown as entered, e.g. 365.25 days per year.
@@ -578,7 +577,7 @@ NS_COLS = [
     ("Remargin frequency N_R (BD)", 11, "in_int", "remargin_bd"),
     (">5,000 trades or illiquid collateral (Y/N)", 13, "in_bool", "large"),
     ("Margin disputes (Y/N)", 10, "in_bool", "disputes"),
-    ("Holding period override (BD)", 11, "in_num", "holding_override"),
+    ("Holding period override (BD)", 11, "in_int", "holding_override"),
     ("0% haircut conditions met (Y/N)", 11, "in_bool", "zero_haircut"),
     ("Risk weight override", 11, "in_pct", "rw_override"),
     ("Regime override (blank = Params)", 11, "in_ctr", "regime"),
