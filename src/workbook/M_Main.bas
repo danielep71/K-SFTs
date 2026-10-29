@@ -14,8 +14,9 @@ Attribute VB_Name = "M_Main"
 '   RunSFT_Silent: RunSFT for automation. Returns a machine-readable result
 '   line and raises errors instead of showing them.
 '   gSilent: Public flag for silent mode, set by RunSFT_Silent.
-'   Auto_Open: run by Excel when the workbook opens; lets the row groups
-'   of the protected README sheet expand and collapse.
+'   Auto_Open: run by Excel when the workbook opens; protects every sheet
+'   for the user interface only and lets the row groups of the README sheet
+'   expand and collapse.
 '   The sheet buttons call the first three by name. These macros are not
 '   listed in docs/PUBLIC_API.txt.
 '
@@ -24,11 +25,12 @@ Attribute VB_Name = "M_Main"
 '   CORE_Config for the output sheets and the error numbers.
 '
 ' STATE OWNERSHIP
-'   Each operation captures calculation mode, events and screen updating,
-'   changes them for the run, and restores the captured values on success
-'   and on failure. Owns gSilent (messages to the Immediate window instead
-'   of message boxes, and errors raised to the caller) and the re-entry
-'   flag mRunning.
+'   Protects every sheet for the user interface only when the workbook
+'   opens and before each operation. Each operation captures calculation
+'   mode, events and screen updating, changes them for the run, and
+'   restores the captured values on success and on failure. Owns gSilent
+'   (messages to the Immediate window instead of message boxes, and errors
+'   raised to the caller) and the re-entry flag mRunning.
 '
 ' ERROR POLICY
 '   The primary error is copied before cleanup.
@@ -211,14 +213,37 @@ Public Sub Auto_Open()
 '                                  Auto_Open
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Run by Excel when the user opens the workbook. Protects the README
-'   sheet again, without a password, for the user interface only, and
-'   enables outlining, so its sections can be expanded and collapsed.
-'   Excel does not save EnableOutlining with the file.
+'   Run by Excel when the user opens the workbook: protects every sheet
+'   again for the user interface only (ProtectSheets).
 '
 ' ERROR POLICY
-'   Never raises: a missing README sheet, or one protected with a
-'   password, stays as it is.
+'   Never raises.
+'
+' UPDATED
+'   2026-10-29
+'==============================================================================
+'
+        ProtectSheets
+
+End Sub
+
+
+Private Sub ProtectSheets()
+'
+'==============================================================================
+'                                ProtectSheets
+'------------------------------------------------------------------------------
+' PURPOSE
+'   Protect every sheet again, without a password and for the user
+'   interface only, so that the macros can write the output sheets while
+'   the user can change only the unlocked input cells. The input sheets
+'   keep filtering, sorting and inserting rows, as in the template; the
+'   README sheet keeps its row groups. Excel saves neither
+'   UserInterfaceOnly nor EnableOutlining with the file, so this runs when
+'   the workbook opens and before each operation.
+'
+' ERROR POLICY
+'   Never raises: a sheet protected with a password stays as it is.
 '
 ' UPDATED
 '   2026-10-29
@@ -228,15 +253,46 @@ Public Sub Auto_Open()
 '------------------------------------------------------------------------------
 ' DECLARE
 '------------------------------------------------------------------------------
-    Dim Readme    As Worksheet    'The README sheet
+    Dim Sheet   As Worksheet    'Each worksheet
 
 '------------------------------------------------------------------------------
 ' PROTECT
 '------------------------------------------------------------------------------
+        For Each Sheet In ThisWorkbook.Worksheets
+            ProtectSheet Sheet
+        Next Sheet
+
+End Sub
+
+
+Private Sub ProtectSheet( _
+    ByVal Sheet As Worksheet)
+'
+'==============================================================================
+'                                 ProtectSheet
+'------------------------------------------------------------------------------
+' PURPOSE
+'   Protect one sheet for the user interface only, with the options the
+'   template gives it (tools/build_template.py).
+'
+' ERROR POLICY
+'   Never raises: a sheet protected with a password stays as it is.
+'
+' UPDATED
+'   2026-10-29
+'==============================================================================
+'
         On Error GoTo Failed
-        Set Readme = ThisWorkbook.Worksheets(SH_README)
-        Readme.Protect DrawingObjects:=True, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True
-        Readme.EnableOutlining = True
+        Select Case Sheet.Name
+            Case SH_PARAMS, SH_NS, SH_TX
+                Sheet.Protect DrawingObjects:=True, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True, _
+                              AllowSorting:=True, AllowFiltering:=True, AllowInsertingRows:=True
+            Case Else
+                Sheet.Protect DrawingObjects:=True, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True
+        End Select
+        If Sheet.Name = SH_README Then
+            Sheet.EnableOutlining = True
+        End If
         Exit Sub
 Failed:
 
@@ -259,8 +315,8 @@ Private Function ExecuteOperation( _
 '                               ExecuteOperation
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Run one operation with Excel prepared for speed, restore Excel, then
-'   report the outcome.
+'   Protect every sheet for the user interface only, run one operation
+'   with Excel prepared for speed, restore Excel, then report the outcome.
 '
 ' INPUTS
 '   Operation: OP_RUN, OP_VALIDATE or OP_CLEAR.
@@ -280,7 +336,7 @@ Private Function ExecuteOperation( _
 '   with it, or on its own when the operation succeeded.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
@@ -306,6 +362,13 @@ Private Function ExecuteOperation( _
         End If
         mRunning = True
         On Error GoTo Failed
+
+'------------------------------------------------------------------------------
+' PROTECT FOR THE USER INTERFACE ONLY
+'------------------------------------------------------------------------------
+    'The protection Excel restores on opening blocks the macros as well;
+    'protected again for the user interface only, the sheets can be written.
+        ProtectSheets
 
 '------------------------------------------------------------------------------
 ' CAPTURE AND PREPARE EXCEL
