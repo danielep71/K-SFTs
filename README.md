@@ -11,7 +11,7 @@
 [![Excel VBA](https://img.shields.io/badge/Excel_VBA-64--bit-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white)](#requirements)
 [![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](#requirements)
 [![Basis](https://img.shields.io/badge/Basis-EU_CRR_%C2%B7_Basel_reference-1f3a5f?style=for-the-badge)](docs/methodology/README.md#regulatory-basis)
-[![Status](https://img.shields.io/badge/Status-Repository_setup-BF8700?style=for-the-badge)](#status)
+[![Status](https://img.shields.io/badge/Status-Prototype-BF8700?style=for-the-badge)](#status)
 [![Harness](https://img.shields.io/badge/Excel_harness-9_cases_%C2%B7_18_assertions_PASS-2ea44f?style=for-the-badge)](#validation)
 [![Static gates](https://img.shields.io/badge/Static_gates-17-2ea44f?style=for-the-badge)](tools/README.md)
 [![License](https://img.shields.io/badge/License-MPL_2.0-2ea44f?style=for-the-badge)](LICENSE)
@@ -113,7 +113,8 @@ capital and CVA are not implemented here.
 ## 🎯 What exists today
 
 The first milestone, *v0.1.0 - Repo setup*, built the foundation the
-calculation stands on; *v0.2.0 - Prototype setup* adds the prototype as it is:
+calculation stands on; *v0.2.0 - Prototype setup* adds the prototype, with the
+fixes of its audit:
 
 | Area | Delivered |
 | --- | --- |
@@ -129,9 +130,9 @@ calculation stands on; *v0.2.0 - Prototype setup* adds the prototype as it is:
 | Prototype | E\* under the FCCM with supervisory haircuts (CRR Articles 220, 223, 224, 226, 227), risk weight, RWA and own funds per netting set; eight `SFT_*` worksheet functions; an 11-sheet template with a demo portfolio, a test catalogue and formula tests; an independent Python reference and a LibreOffice regression ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)) |
 | Releases | SemVer, a changelog with its own gate, and a release procedure that separates preparation from publication ([RELEASING.md](RELEASING.md)) |
 
-Not available yet: an exposure calculation, a public API, a production
-workbook or a release. No figure produced from this repository should be
-relied on.
+Not available yet: the methodology of record and a validated calculation,
+a production workbook or a release. No figure produced from this repository
+should be relied on.
 
 ---
 
@@ -165,6 +166,11 @@ pinned tool versions are in the
    the VBA project object model*.
 3. Open the VBE (**Alt+F11**) and run **Debug → Compile VBAProject**.
 
+With that setting on, double-clicking `tools/Record-KSFT-ExcelRun.cmd` does
+all three: it builds `test-results/K-SFT_Development.xlsm` from the template,
+imports every module and records an Excel run
+([recording an Excel run](INSTALLATION.md#recording-an-excel-run)).
+
 ## 3. Run the harness
 
 In the Immediate window (**Ctrl+G**):
@@ -187,9 +193,10 @@ The suite exercises the harness itself and contains no SFT calculation.
 
 # 🔄 How a calculation will work
 
-This is the **planned** flow of the first scope. No step is implemented, and
-no formula or haircut is transcribed until it is checked against the CRR
-text ([traceability](docs/methodology/README.md#traceability)).
+This is the flow of the first scope. The
+[prototype](docs/methodology/PROTOTYPE.md) implements it, outside the
+methodology of record: a rule enters the methodology only once it is checked
+against the CRR text ([traceability](docs/methodology/README.md#traceability)).
 
 ```mermaid
 flowchart LR
@@ -203,11 +210,11 @@ flowchart LR
 
 | Step | Source | Status |
 | --- | --- | --- |
-| Transaction and collateral records | Products (D4) and collateral (D6) | Open decisions |
-| Supervisory volatility adjustments | CRR Articles 224, 226, 227; Basel CRE22 | Registered, not transcribed |
-| Single transaction: fully adjusted exposure value E* | CRR Article 223 | Registered, not transcribed |
-| Master netting agreement: exposure of the netting set | CRR Articles 206 and 220(2)–(3); Basel CRE22.64–22.65 | Registered, not transcribed |
-| Output measures | D7 | Open decision |
+| Transaction and collateral records | Products (D4) and collateral (D6) | Open decisions; the prototype takes five types and six asset types |
+| Supervisory volatility adjustments | CRR Articles 224, 226, 227; Basel CRE22 | In the prototype; its haircut table matches CRE22.49 and Article 224 Tables 1, 3 and 4 (#197) |
+| Single transaction: fully adjusted exposure value E* | CRR Article 223 | In the prototype; not yet checked against the text |
+| Master netting agreement: exposure of the netting set | CRR Articles 206 and 220(2)–(3); Basel CRE22.64–22.65 | In the prototype; not yet checked against the text |
+| Output measures | D7 | Open decision; the prototype gives E\*, RWA and own funds |
 
 ### Netting-set aggregation at a glance
 
@@ -263,7 +270,9 @@ implementation reference.
 | Static gates | 17 gates, required to PASS on every pull request and run on pushes to `main` and `release/**`: tooling tests, labels, issue forms, test cases, changelog, VBA source rules, workflows, Ruff and strict mypy | [tools/README.md](tools/README.md) |
 | Excel host run | Harness and example suite at `1a6f0f7` imported, compiled and run in Excel 16.0 (build 20430, 64-bit, VBA7) on Windows 11 Enterprise 25H2: the normal run passed, both failure paths ended as documented, `check_excel_run.py` PASS | [tested environments](INSTALLATION.md#tested-environments), #9 |
 | Workbook synchronization | The sync script imported the test modules into a workbook built from the template, and the suite passed in it | #102 |
-| SFT calculation | Nothing to validate yet | — |
+| Prototype in Excel | At `134656f`, on the same host: built and recorded with `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS); TestCatalogue 107 of 107 against the independent reference, FormulaTest 28 of 28, and all 11 sheets checked after a run and a rerun | [tested environments](INSTALLATION.md#tested-environments), #138 |
+| Prototype in LibreOffice | `tools/lo_regression.py`: the engine and the `SFT_*` tests headless, 146 figures equal to the reference | [tools/README.md](tools/README.md#-prototype-scripts) |
+| SFT calculation | Not validated: the expected values are illustrative, from an independent implementation of the specification, not from published worked examples | [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) |
 
 Static checks never stand in for Excel evidence: since the first host run,
 changed VBA merges only after an Excel run
@@ -312,9 +321,9 @@ The full layout, the dependency direction and the public API boundary are in
   The prototype's formulas and tables are not yet checked against the
   registered copies, page by page.
 - **No code scanning of the VBA.** Secret scanning, push protection,
-  Dependabot security updates and CodeQL are enabled; CodeQL covers the
-  Python tools and the workflows, not the VBA, which the static gates and
-  Excel runs check. Coverage and merge gating are still being confirmed
+  Dependabot security updates and CodeQL are enabled. CodeQL analyses the
+  Python tools and the workflows on pull requests into `main`, not the VBA,
+  which the static gates and Excel runs check, and it is not a required check
   ([repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings)).
   Vulnerabilities are reported privately on GitHub or by email
   ([SECURITY.md](SECURITY.md)).
@@ -330,7 +339,7 @@ The full layout, the dependency direction and the public API boundary are in
 | Step | Scope |
 | --- | --- |
 | v0.1.0 - Repo setup | Tooling, governance, conventions, the harness and its Excel evidence; closed by a certification from a fresh checkout, without a release (#13) |
-| v0.2.0 - Prototype setup | The prototype as it is, working in Excel and included into `main`, with no further development (#131 to #134) |
+| v0.2.0 - Prototype setup | The prototype, working in Excel and integrated into `main`, with the robustness fixes of its audit (#141), the workbook checks (#138, #197) and a closeout from a fresh checkout (#134); no change to E\* for valid inputs |
 | Open decisions | Products in scope (D4), collateral (D6), output measures (D7) ([open decisions](docs/REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)) |
 | Later milestones, up to v1.0.0 | The prototype's departures resolved, the first-scope calculation, its numerical certification, and the production workbook |
 

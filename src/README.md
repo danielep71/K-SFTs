@@ -10,7 +10,7 @@ prototype, `CORE_Engine` and `CORE_Util` still read and write worksheets,
 which the rule below reserves for `workbook/`, and the dependency direction
 differs where [PROTOTYPE.md](../docs/methodology/PROTOTYPE.md) lists it.
 
-| Location | Will hold | Rule |
+| Location | Holds | Rule |
 | --- | --- | --- |
 | `core/` | Calculation engine | Never touches Excel; every standard module declares `Option Private Module` |
 | `modules/` | Public facade | Validates inputs and delegates to `core/`; supported declarations are listed in [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) |

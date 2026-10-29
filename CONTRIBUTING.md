@@ -6,9 +6,11 @@ decides scope, priorities and what is integrated
 Every change starts from an issue and arrives through a pull request.
 
 The repository holds a **prototype**, not a validated method
-([README.md](README.md)): milestone *v0.2.0 - Prototype setup* takes it in as
-it is. Contributions today are to that setup: tooling, tests, documentation
-and governance; changes to the calculation belong to later milestones.
+([README.md](README.md)): milestone *v0.2.0 - Prototype setup* takes it in,
+with the robustness fixes of its audit
+([#141](https://github.com/danielep71/K-SFTs/issues/141)). Contributions today
+are to that setup: tooling, tests, documentation and governance; other
+changes to the calculation belong to later milestones.
 
 Never disclose a suspected vulnerability in an issue or pull request; follow
 [SECURITY.md](SECURITY.md).
@@ -35,7 +37,7 @@ once rather than editing it out quietly; the [data rules](SECURITY.md#-data-and-
 apply.
 
 Each issue gets an assignee, exactly one priority and a milestone at triage
-([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-issues)).
+([docs/GOVERNANCE.md](docs/GOVERNANCE.md#issues)).
 
 <a id="development-workflow"></a>
 
@@ -115,7 +117,7 @@ were not checked in a commit message.
 | Setup, Excel hosts, import and export, the harness | [INSTALLATION.md](INSTALLATION.md) |
 | Test layout and the harness log | [tests/README.md](tests/README.md) |
 | Checks and CI | [tools/README.md](tools/README.md) |
-| Settings, evidence, verification gaps | [docs/REPOSITORY_SETTINGS.md](docs/REPOSITORY_SETTINGS.md) |
+| Settings, evidence, verification gaps | [docs/REPOSITORY_SETTINGS.md](docs/REPOSITORY_SETTINGS.md), [docs/REPOSITORY_SETTINGS_EVIDENCE.md](docs/REPOSITORY_SETTINGS_EVIDENCE.md) |
 | Branches, review, protection, issues | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 | Pull request checklist | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 | Vulnerabilities and data | [SECURITY.md](SECURITY.md) |
