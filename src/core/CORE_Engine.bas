@@ -1060,10 +1060,10 @@ Private Function LoadParams() As Boolean
 ' NUMBERS
 '------------------------------------------------------------------------------
         Problems = Problems + NumParam(PRM_DAYSYEAR, 360#, 366#, pDaysYear)
-        Problems = Problems + NumParam(PRM_HCBASE, 1#, 250#, pHcBase)
-        Problems = Problems + NumParam(PRM_HOLD_REPO, 1#, 250#, pHoldRepo)
-        Problems = Problems + NumParam(PRM_HOLD_CMT, 1#, 250#, pHoldCMT)
-        Problems = Problems + NumParam(PRM_HOLD_LARGE, 1#, 250#, pHoldLarge)
+        Problems = Problems + NumParam(PRM_HCBASE, 1#, 250#, pHcBase, True)
+        Problems = Problems + NumParam(PRM_HOLD_REPO, 1#, 250#, pHoldRepo, True)
+        Problems = Problems + NumParam(PRM_HOLD_CMT, 1#, 250#, pHoldCMT, True)
+        Problems = Problems + NumParam(PRM_HOLD_LARGE, 1#, 250#, pHoldLarge, True)
         Problems = Problems + NumParam(PRM_HFX, 0#, 1#, pHfx)
         Problems = Problems + NumParam(PRM_NONELIG, 0#, 1#, pNonElig)
         Problems = Problems + NumParam(PRM_NETW, 0#, 1#, pNetW)
@@ -1079,20 +1079,22 @@ Private Function NumParam( _
     ByVal Code As String, _
     ByVal Lowest As Double, _
     ByVal Highest As Double, _
-    ByRef Result As Double) _
+    ByRef Result As Double, _
+    Optional ByVal WholeNumber As Boolean = False) _
     As Long
 '
 '==============================================================================
 '                                   NumParam
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Read one numeric parameter and check it lies in [Lowest, Highest].
+'   Read one numeric parameter and check it lies in [Lowest, Highest] and,
+'   when WholeNumber is True, that it is a whole number (business days).
 '
 ' RETURNS
 '   0 when usable, with Result set; 1 with the problem logged otherwise.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -1113,6 +1115,9 @@ Private Function NumParam( _
         Result = CDbl(Content)
         If Result < Lowest Or Result > Highest Then
             LogMsg SEV_ERROR, SH_PARAMS, Code, "Parameter " & Result & " outside [" & Lowest & ", " & Highest & "]."
+            NumParam = 1
+        ElseIf WholeNumber And Result <> Int(Result) Then
+            LogMsg SEV_ERROR, SH_PARAMS, Code, "Parameter " & Result & " is not a whole number of business days."
             NumParam = 1
         End If
 
@@ -1638,7 +1643,7 @@ Private Function LoadNettingSets() As Boolean
 '   run stops.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -1784,6 +1789,8 @@ Private Sub ReadNettingSet( _
             If TryDbl(Block(r, NS_FREQ), 1#, Number) Then
                 If Number < 1# Then
                     NsError NsIndex, "Remargin frequency must be 1 business day or more"
+                ElseIf Number <> Int(Number) Then
+                    NsError NsIndex, "Remargin frequency must be a whole number of business days"
                 Else
                     .RemarginBD = Number
                 End If
@@ -1803,6 +1810,8 @@ Private Sub ReadNettingSet( _
             If TryDbl(Block(r, NS_HOLDOVR), 0#, Number) Then
                 If Number < 0# Then
                     NsError NsIndex, "Holding period override must be 0 or more"
+                ElseIf Number <> Int(Number) Then
+                    NsError NsIndex, "Holding period override must be a whole number of business days"
                 Else
                     .HoldingOverride = Number
                 End If
