@@ -91,7 +91,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   ([docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md); #2).
 - Licensing under MPL 2.0, the provenance register and the security policy,
   with private vulnerability reporting on GitHub now that the repository is
-  public ([NOTICE.md](NOTICE.md), [SECURITY.md](SECURITY.md); #3, #123).
+  public, and Dependabot security updates, secret scanning, push protection
+  and CodeQL code scanning since 2026-10-29
+  ([NOTICE.md](NOTICE.md), [SECURITY.md](SECURITY.md),
+  [settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings);
+  #3, #123, #160, #162).
 - Source conventions: exported VBA as the source, ASCII only, CRLF checkout,
   the VBA house style, supported hosts and the import and export steps
   ([docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md),
