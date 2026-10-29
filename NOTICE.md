@@ -44,12 +44,13 @@ copied into the repository; each keeps its own licence.
 | Tool | Version | Licence | Use |
 | --- | --- | --- | --- |
 | `actions/checkout`, `actions/setup-python`, `actions/setup-node`, `actions/upload-artifact` | Pinned by full SHA in the workflows | MIT | GitHub Actions steps |
-| Ruff | 0.16.6 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
-| mypy | 2.3.1 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
+| Ruff | 0.17.1 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
+| mypy | 2.4.0 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
 | actionlint | 1.7.12 | MIT | Workflow check, downloaded and verified by SHA-256 |
 
 The licences were checked on 2026-10-24 against the upstream licence files and
-package metadata.
+package metadata, and again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
+against their package metadata.
 
 ## 🚫 Data
 
