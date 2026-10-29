@@ -321,12 +321,15 @@ for i, (key, value) in enumerate(README):
         readme.write(r, 3, value, F["rm_v_last" if last else "rm_v"])
     r += 1
 # The calculation reference closes the sheet, below its own heading; the
-# methodology heading links to it.
+# methodology heading links to it. A link scrolls the sheet only until its
+# target is in view, near the bottom of the window, so it points 38 rows
+# below the heading, as on the K-SACCR README sheet: the heading and the
+# picture are then on screen.
 readme.set_row(r, 9.95)
 readme.set_row(r + 1, 30)
 readme.write(r + 1, 2, "Calculation reference", F["rm_h"])
 readme.write_blank(r + 1, 3, None, F["rm_h"])
-readme.write_url(heads["Methodology (per netting set)"], 3, f"internal:'README'!C{r + 2}", F["rm_link"],
+readme.write_url(heads["Methodology (per netting set)"], 3, f"internal:'README'!C{r + 2 + 38}", F["rm_link"],
                  "One-page calculation reference: formulas, haircuts and capital (below, on this sheet)")
 readme.insert_image(r + 2, 2, str(CARD), {
     "x_scale": 0.85, "y_scale": 0.85, "y_offset": 10, "object_position": 2,
