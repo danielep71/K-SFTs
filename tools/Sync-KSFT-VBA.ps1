@@ -29,6 +29,11 @@ host.txt and every file in exported\) and exports every standard, class and
 form module of the workbook into exported\. Production and -SourceDir
 synchronizations leave the folder alone.
 
+-FromTemplate builds the workbook first: it saves
+src\workbook\SFT_Template.xlsx as an .xlsm at -WorkbookPath, replacing a file
+of that name, so its sheets are the current template's. Without it, the
+workbook's sheets are left as they are.
+
 -RecordRun records the Excel run in one step: a Development synchronization
 as above, then the run itself. The script reopens the saved workbook in its
 own Excel instance with macros enabled, runs
@@ -36,7 +41,9 @@ TEST_Examples.SaveExampleEvidence on the evidence folder, closes the
 workbook without saving, and runs tools\check_excel_run.py on the folder
 against the checked-out commit (HEAD), which needs Python 3.12 or later and
 Git on PATH. tools\Record-KSFT-ExcelRun.cmd does the same for a workbook
-dropped onto it.
+dropped onto it; started without one, it builds
+test-results\K-SFT_Development.xlsm from the template (-FromTemplate) and
+records the run with that.
 
 Before the workbook is opened the script lists the worksheet and ThisWorkbook
 modules in the source and asks whether to replace their code as well. Answer
@@ -69,6 +76,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 Synchronizes in Development mode, saves the three logs of the Excel run and
 checks them against HEAD. Exit code 3: synchronized, but the run was not
 recorded.
+
+.EXAMPLE
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath ".\test-results\K-SFT_Development.xlsm" -FromTemplate -RecordRun
+
+Builds a fresh development workbook from the template, then records the run
+with it.
 
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SourceDir "$env:USERPROFILE\Downloads"
@@ -131,7 +144,10 @@ param(
     [string]$EvidenceDir,
 
     [Parameter(Mandatory = $false)]
-    [switch]$RecordRun
+    [switch]$RecordRun,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$FromTemplate
 )
 
 Set-StrictMode -Version Latest
@@ -157,6 +173,7 @@ $xlCalculationManual = -4135
 $xlCalculationAutomatic = -4105
 $msoAutomationSecurityLow = 1
 $msoAutomationSecurityForceDisable = 3
+$xlOpenXMLWorkbookMacroEnabled = 52
 
 # With -SourceDir, a standard module the repository checkout does not have
 # is offered for import when its name has a project prefix; any other
@@ -581,6 +598,45 @@ function Sync-VbaSource {
     }
 }
 
+function New-WorkbookFromTemplate {
+    # Save the macro-free template as an .xlsm at TargetPath, in an Excel
+    # instance of its own. A file already at TargetPath is replaced.
+    param(
+        [Parameter(Mandatory = $true)][string]$TemplatePath,
+        [Parameter(Mandatory = $true)][string]$TargetPath
+    )
+
+    if (-not (Test-Path -LiteralPath $TemplatePath -PathType Leaf)) {
+        throw "Template not found: $TemplatePath"
+    }
+    $null = New-Item -ItemType Directory -Force -Path ([System.IO.Path]::GetDirectoryName($TargetPath))
+    if (Test-Path -LiteralPath $TargetPath -PathType Leaf) {
+        Remove-Item -LiteralPath $TargetPath -Force
+    }
+
+    $builder = $null
+    $book = $null
+    try {
+        $builder = New-Object -ComObject Excel.Application
+        $builder.Visible = $false
+        $builder.DisplayAlerts = $false
+        $builder.AutomationSecurity = $msoAutomationSecurityForceDisable
+        $book = $builder.Workbooks.Open($TemplatePath, 0, $true)
+        $book.SaveAs($TargetPath, $xlOpenXMLWorkbookMacroEnabled)
+        $book.Close($false)
+        $book = $null
+    }
+    finally {
+        if ($null -ne $book) {
+            try { $book.Close($false) } catch {}
+        }
+        if ($null -ne $builder) {
+            try { $builder.Quit() } catch {}
+            try { [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($builder) } catch {}
+        }
+    }
+}
+
 function Export-RunEvidence {
     # Start a new evidence folder: remove what an earlier run left, then
     # export the workbook's modules for check_excel_run.py.
@@ -626,7 +682,13 @@ $syncMode = $null
 $evidencePath = $null
 
 try {
-    $workbookFullPath = Resolve-FullPath -PathValue $WorkbookPath
+    # A workbook built from the template need not exist yet.
+    if ($FromTemplate) {
+        $workbookFullPath = [System.IO.Path]::GetFullPath($ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($WorkbookPath))
+    }
+    else {
+        $workbookFullPath = Resolve-FullPath -PathValue $WorkbookPath
+    }
     $repoFullPath = Resolve-FullPath -PathValue $RepoRoot
 
     if ([System.IO.Path]::GetExtension($workbookFullPath).ToLowerInvariant() -ne ".xlsm") {
@@ -678,6 +740,10 @@ try {
         if (-not $listed.ContainsKey($file.FullName.ToLowerInvariant())) {
             throw "Component not listed in tools\vba-projects.json: $($file.FullName)"
         }
+    }
+
+    if ($FromTemplate -and -not [string]::IsNullOrWhiteSpace($SourceDir)) {
+        throw "Use -FromTemplate only with a full synchronization, not with -SourceDir."
     }
 
     # -RecordRun runs the test suite, which only a Development workbook has.
@@ -791,7 +857,13 @@ try {
         Write-Host ""
     }
 
-    if (-not $NoBackup) {
+    # -FromTemplate: the workbook is built anew, so there is nothing to back up.
+    if ($FromTemplate) {
+        $templatePath = Join-Path (Join-Path (Join-Path $repoFullPath "src") "workbook") "SFT_Template.xlsx"
+        New-WorkbookFromTemplate -TemplatePath $templatePath -TargetPath $workbookFullPath
+        Write-Host "Template:   $templatePath saved as $workbookFullPath"
+    }
+    elseif (-not $NoBackup) {
         $directory = [System.IO.Path]::GetDirectoryName($workbookFullPath)
         $baseName = [System.IO.Path]::GetFileNameWithoutExtension($workbookFullPath)
         $extension = [System.IO.Path]::GetExtension($workbookFullPath)
