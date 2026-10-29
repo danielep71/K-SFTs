@@ -383,17 +383,29 @@ Private Sub ClearAllOutputs()
 '
 ' ERROR POLICY
 '   Raises ERR_OUTPUT_LAYOUT through OutputFirstRow when a table cannot be
-'   located.
+'   located. Without the run-summary name the summary is not written.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim Info   As Range    'Run summary cell, named NM_RUNINFO
+
+'------------------------------------------------------------------------------
+' CLEAR
+'------------------------------------------------------------------------------
         ClearOutputBlock GetSheet(SH_RESULTS), OutputFirstRow(SH_RESULTS), RS_NCOLS
         ClearOutputBlock GetSheet(SH_POSITIONS), OutputFirstRow(SH_POSITIONS), PS_NCOLS
         ClearOutputBlock GetSheet(SH_LEGCALC), OutputFirstRow(SH_LEGCALC), LC_NCOLS
         ClearOutputBlock GetSheet(SH_CHECKS), OutputFirstRow(SH_CHECKS), CK_NCOLS
-        GetSheet(SH_RESULTS).Range(RUNINFO_CELL).Value = "Outputs cleared " & Format$(Now, "yyyy-mm-dd hh:mm:ss")
+        Set Info = NamedCell(NM_RUNINFO)
+        If Not Info Is Nothing Then
+            Info.Value = "Outputs cleared " & Format$(Now, "yyyy-mm-dd hh:mm:ss")
+        End If
 
 End Sub
 

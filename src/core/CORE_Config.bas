@@ -65,9 +65,10 @@ Attribute VB_Name = "CORE_Config"
     'TableFirstRow and, for the output tables, OutputFirstRow), so its rows
     'can move. Column numbers in this module (NS_, TX_, RS_ and the others)
     'count from the first table column; CORE_Util.TableCell and TableRange
-    'add COL_OFFSET. The run summary is written to cell C4 of Results.
+    'add COL_OFFSET. The run summary is written to the cell of the workbook
+    'name NM_RUNINFO on Results.
         Public Const COL_OFFSET       As Long = 2         'Margin columns left of every table
-        Public Const RUNINFO_CELL     As String = "C4"    'Cell receiving the run summary line
+        Public Const NM_RUNINFO       As String = "Results_RunInfo"        'Results cell receiving the run summary line
         Public Const NM_NS_HEADER     As String = "NettingSets_Header"     'NettingSets header cell "NettingSetID"
         Public Const NM_TX_HEADER     As String = "Transactions_Header"    'Transactions header cell "LegID"
         Public Const NM_RS_HEADER     As String = "Results_Header"         'Results header cell "NettingSetID"

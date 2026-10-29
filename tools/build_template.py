@@ -792,13 +792,28 @@ RS_COLS = [("NettingSetID", 16), ("Counterparty", 40), ("Regime", 8), ("MNA", 6)
            ("N (issues)", 7), ("0.4 x net", 13), ("0.6 x gross / sqrt(N)", 13), ("FX term", 13), ("E* (EAD)", 15),
            ("Exposure class", 9), ("Risk weight key", 16), ("Risk weight", 9), ("RWA", 15),
            ("Own funds requirement", 14), ("Status", 40)]
-res = output_sheet("Results", "Results", 5, RS_COLS, None, "Results_Header", run_buttons=True)
+HDR_RS = 5
+res = output_sheet("Results", "Results", HDR_RS, RS_COLS, None, "Results_Header", run_buttons=True)
 res.write(3, 2, "No results yet: press Run SFT.", F["runinfo"])
+name("Results_RunInfo", "Results", 3, 2)
 res.write(4, 2, "Withheld netting sets (INVALID, INCOMPLETE) are shaded; totals add VALID netting sets of one "
           "regime only.", F["runinfo"])
-res.conditional_format("C7:Z100000", {"type": "formula",
-                                      "criteria": '=OR(LEFT($Z7,7)="INVALID",LEFT($Z7,10)="INCOMPLETE")',
-                                      "format": F["cf_bad"]})
+
+
+def table_rows(header_row: int, columns: Sequence[tuple[str, float]]) -> str:
+    """Address of a table's data rows, from its header row to row 100000."""
+    return str(xl_rowcol_to_cell(header_row + 1, 2)) + ":" + str(xl_rowcol_to_cell(99999, 2 + len(columns) - 1))
+
+
+def table_column(header_row: int, columns: Sequence[tuple[str, float]], header: str) -> str:
+    """First data cell of a table column, found by its header, with the column absolute."""
+    col = 2 + [h for h, _ in columns].index(header)
+    return str(xl_rowcol_to_cell(header_row + 1, col, col_abs=True))
+
+
+status = table_column(HDR_RS, RS_COLS, "Status")
+withheld = f'=OR(LEFT({status},7)="INVALID",LEFT({status},10)="INCOMPLETE")'
+res.conditional_format(table_rows(HDR_RS, RS_COLS), {"type": "formula", "criteria": withheld, "format": F["cf_bad"]})
 
 PS_COLS = [("NettingSetID", 16), ("Kind", 13), ("Position", 18), ("Asset type / transaction type", 12),
            ("Currency", 9), ("Legs", 6), ("Holding period T_M (BD)", 9), ("Lent / posted (E)", 15),
@@ -818,22 +833,29 @@ output_sheet("Leg-level calculation", "LegCalc", 4, LC_COLS,
              "Every leg with its haircut; excluded legs show the reason in Messages.", "LegCalc_Header")
 
 CK_COLS = [("Severity", 14.86), ("Sheet", 15.86), ("Row", 7), ("Reference", 34.71), ("Message", 174)]
-ck = output_sheet("Checks", "Checks", 4, CK_COLS,
+HDR_CK = 4
+ck = output_sheet("Checks", "Checks", HDR_CK, CK_COLS,
                   "ERROR: input rejected; the netting set's E* is withheld (INCOMPLETE or INVALID) or the run "
                   "stops. WARNING: accepted with an assumption. INFO: information only.", "Checks_Header", 3)
 ck.write(4, 6, "Message", F["hdr_out_l"])
-ck.conditional_format("C6:G100000", {"type": "formula", "criteria": '=$C6="ERROR"', "format": F["cf_bad"]})
-ck.conditional_format("C6:G100000", {"type": "formula", "criteria": '=$C6="WARNING"', "format": F["cf_warn"]})
+severity = table_column(HDR_CK, CK_COLS, "Severity")
+ck.conditional_format(table_rows(HDR_CK, CK_COLS), {"type": "formula", "criteria": f'={severity}="ERROR"',
+                                                    "format": F["cf_bad"]})
+ck.conditional_format(table_rows(HDR_CK, CK_COLS), {"type": "formula", "criteria": f'={severity}="WARNING"',
+                                                    "format": F["cf_warn"]})
 
 # ----------------------------------------------------------------------------
 # TEST CATALOGUE
 # ----------------------------------------------------------------------------
-MEASURES: dict[str, tuple[str, str, float | None]] = {  # measure: (Results column letter, expected key, tolerance)
-    "E*": ("T", "e_star", 0.01), "RWA": ("X", "rwa", 0.01), "Own funds": ("Y", "own_funds", 0.01),
-    "Status": ("Z", "status", None), "Holding period": ("I", "holding_bd", 1e-9), "N": ("P", "n", 0),
-    "Net exposure": ("N", "net", 0.01), "Gross exposure": ("O", "gross", 0.01), "FX term": ("S", "fx_term", 0.01),
-    "Risk weight": ("W", "rw", 1e-12), "Risk weight key": ("V", "rw_key", None),
+MEASURES: dict[str, tuple[str, str, float | None]] = {  # measure: (Results header, expected key, tolerance)
+    "E*": ("E* (EAD)", "e_star", 0.01), "RWA": ("RWA", "rwa", 0.01),
+    "Own funds": ("Own funds requirement", "own_funds", 0.01), "Status": ("Status", "status", None),
+    "Holding period": ("Holding period T_M (BD)", "holding_bd", 1e-9), "N": ("N (issues)", "n", 0),
+    "Net exposure": ("Net exposure", "net", 0.01), "Gross exposure": ("Gross exposure", "gross", 0.01),
+    "FX term": ("FX term", "fx_term", 0.01), "Risk weight": ("Risk weight", "rw", 1e-12),
+    "Risk weight key": ("Risk weight key", "rw_key", None),
 }
+assert all(header in [h for h, _ in RS_COLS] for header, _, _ in MEASURES.values())
 tc = wb.add_worksheet("TestCatalogue")
 tc.set_tab_color(TAB_TEST)
 banner(tc, "Test catalogue", 10)
@@ -860,13 +882,17 @@ for nsid, res_ in EXPECTED.items():
 r = 6
 num = fmt(font_size=10, num_format="#,##0.00", align="center")
 for k, (nsid, regime, measure, expected) in enumerate(rows, 1):
-    letter, _, tol = MEASURES[measure]
+    header, _, tol = MEASURES[measure]
     tc.write(r, 2, f"SFT-{k:03d}", F["out_txt"])
     tc.write(r, 3, nsid, F["out_txt"])
     tc.write(r, 4, regime, F["out_txt_c"])
     tc.write(r, 5, measure, F["out_txt"])
     tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else F["out_txt_c"])
-    calc = f'=IFERROR(INDEX(Results!${letter}:${letter},MATCH($D{r + 1},Results!$C:$C,0)),"")'
+    # Row by netting-set ID in the first column, column by header text, both
+    # from Results_Header; "~" keeps * and ? of a header literal for MATCH.
+    pattern = header.replace("~", "~~").replace("*", "~*").replace("?", "~?")
+    calc = (f'=IFERROR(INDEX(Results!$A:$XFD,MATCH($D{r + 1},INDEX(Results!$A:$XFD,0,COLUMN(Results_Header)),0),'
+            f'MATCH("{pattern}",INDEX(Results!$A:$XFD,ROW(Results_Header),0),0)),"")')
     tc.write_formula(r, 7, calc, num if tol is not None else F["out_txt_c"], "")
     if tol is None:
         tc.write(r, 8, "exact", F["out_txt_c"])
@@ -936,7 +962,9 @@ r = 6
 for k, (formula, expected, note) in enumerate(TESTS, 1):
     ft.write(r, 2, f"F-{k:02d}", F["out_txt"])
     ft.write_string(r, 3, "=" + formula, F["out_txt"])
-    ft.write_formula(r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
+    # A dynamic-array formula: Excel shows a plain formula calling a UDF as
+    # =@SFT_..., since the function might return an array.
+    ft.write_dynamic_array_formula(r, 4, r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
     ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000", align="right") if not isinstance(expected, str)
              else F["out_txt_r"])
     rr = r + 1
