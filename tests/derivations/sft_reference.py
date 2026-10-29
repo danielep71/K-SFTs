@@ -241,8 +241,8 @@ def calculate(fixture, tables):
             res.update(holding_bd=t_max, sum_e=sum_e, sum_c=sum_c, fx_term=fx_term)
         key = risk_weight_key(ns, short_term)
         if ns["rw_override"] in ("", None) and key not in rw:
-            res["status"] = "INVALID: 1 input error(s)"
-            results[ns["id"]] = res
+            # as the engine, an INVALID netting set keeps no figures
+            results[ns["id"]] = {"regime": regime, "status": "INVALID: 1 input error(s)"}
             continue
         weight = float(ns["rw_override"]) if ns["rw_override"] not in ("", None) else rw[key]
         res.update(e_star=e_star, rw_key=key, rw=weight, rwa=e_star * weight,
