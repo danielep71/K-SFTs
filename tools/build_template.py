@@ -50,8 +50,12 @@ _cache: dict[tuple[tuple[str, Any], ...], Any] = {}
 def fmt(**kw: Any) -> Any:
     key = tuple(sorted(kw.items()))
     if key not in _cache:
-        base = {"font_name": FONT, "valign": "vcenter"}
+        base: dict[str, Any] = {"font_name": FONT, "valign": "vcenter"}
         base.update(kw)
+        # An input cell, known by its fill, is the only kind left editable on
+        # the protected sheets.
+        if kw.get("bg_color") == INPUT:
+            base["locked"] = False
         _cache[key] = wb.add_format(base)
     return _cache[key]
 
@@ -81,6 +85,12 @@ F: dict[str, Any] = {
     "hdr_out_l": fmt(font_size=10, bold=True, font_color="#FFFFFF", bg_color=BLUE, text_wrap=True, border=1,
                      border_color=GREY),
     "code": fmt(font_size=10, bold=True),
+    # The same, unlocked, for the rows of the Params tables, which the user
+    # edits and extends by inserted rows.
+    "code_in": fmt(font_size=10, bold=True, locked=False),
+    "desc_in": fmt(font_size=9, locked=False),
+    "desc_c_in": fmt(font_size=9, align="center", locked=False),
+    "ref_in": fmt(font_size=9, font_color="#595959", locked=False),
     "desc": fmt(font_size=9),
     "desc_c": fmt(font_size=9, align="center"),
     "ref": fmt(font_size=9, font_color="#595959"),
@@ -237,8 +247,9 @@ README = [
      "securities borrowed, bought under reverse repo or received as collateral (C). A reverse repo is "
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
-     "5 business days. MARGINLEND: other capital-market-driven transaction, 10 business days. A netting set "
-     "holding both uses 10, in both regimes [CRE22.56-22.58]; CRR Art. 224(2) sets the periods by type only."),
+     "5 business days; MARGINLEND: other capital-market-driven transaction, 10 [CRE22.56-22.57; CRR Art. "
+     "224(2)]. A netting set with an eligible MNA holding both uses 10, in both regimes [CRE22.58]; without "
+     "one, each transaction takes its own."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
@@ -251,6 +262,9 @@ README = [
      "not eligible: lent, it takes NonEligibleHaircut (30%) [CRE22.54; CRR Art. 224(4)]; received, it is not "
      "recognised as collateral. A fund takes the H10 entered on its leg. "
      "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
+    ("Protection", "Every sheet is protected against accidental changes, without a password: only the yellow "
+     "cells and the rows of the Params tables can be edited. The input sheets can still be filtered, sorted "
+     "and extended by inserted rows; the macros write the outputs."),
     ("Methodology (per netting set)", None),
     ("Netting (eligible MNA)", "E* = max(0, sum E - sum C + 0.4 x net + 0.6 x gross / sqrt(N) + sum |E_fx| x "
      "Hfx); net = |sum E_s H_s|, gross = sum |E_s| H_s over security issues s, N = issues with |E_s| at "
@@ -262,8 +276,9 @@ README = [
      "remargining [CRE22.59; CRR Art. 226]. Currency mismatch Hfx = 8% scaled the same way [CRE22.52; "
      "Art. 224 Table 4]."),
     ("Holding period", "5 BD repo-style, 10 BD margin lending; 20 BD for a netting set with more than 5,000 "
-     "transactions in the previous quarter or illiquid collateral; doubled after more than two margin-call "
-     "disputes; an override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
+     "transactions at any point in the previous quarter or with illiquid collateral; doubled after more than "
+     "two margin-call disputes; an override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), "
+     "285(3)-(4)]."),
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
      "cash and eligible central government or central bank debt, one currency, daily remargining) and takes the "
      "rest, including the 0% risk weight of the securities, as declared [CRE22.60, 22.36-22.37; CRR Art. 227]."),
@@ -277,8 +292,8 @@ README = [
     ("Transactions", "Inputs - transaction legs"),
     ("Results", "Output - E*, RWA and own funds per netting set, and TOTAL CRR / TOTAL BCBS over the VALID "
      "netting sets of each regime"),
-    ("Positions", "Output - per netting set with netting: each security issue (E_s, H_s, counted in N) and "
-     "each currency (FX term); without netting: each transaction"),
+    ("Positions", "Output - per VALID netting set: with netting, each security issue (E_s, H_s, counted in N) "
+     "and each currency (FX term); without netting, each transaction"),
     ("LegCalc", "Output - every leg: haircut key, eligibility, residual maturity, H10, holding period, scale, "
      "H, Hfx, adjusted value"),
     ("Checks", "Output - errors (transaction rejected, netting set withheld, run stopped), warnings and "
@@ -349,8 +364,7 @@ readme.insert_image(r + 2, 2, str(CARD), {
     "description": "K-SFTs calculation reference: SFT exposure formulas, supervisory haircuts, holding periods, "
                    "capital and prototype limits under the EU CRR and Basel CRE22"})
 readme.freeze_panes(3, 0)
-# Read-only: every cell is locked and the sheet protected, without a password.
-readme.protect()
+# Read-only: every cell is locked; the sheet is protected with the others, below.
 
 # ----------------------------------------------------------------------------
 # PARAMS
@@ -442,8 +456,8 @@ prm.set_column(3, 3, 52)
 prm.set_column(4, 4, 16)
 prm.set_column(5, 8, 14)
 prm.set_column(9, 9, 37.71)
-prm.write(2, 2, "Codes in column C are read by the engine through the workbook name equal to each code; only the "
-          "yellow values are meant to be changed.", F["note"])
+prm.write(2, 2, "Codes in column C are read by the engine through the workbook name equal to each code. The sheet "
+          "is protected: only the yellow values and the rows of the three tables can be changed.", F["note"])
 prm.set_row(2, 30)
 prm.set_row(4, 30)
 for c, h in enumerate(["Code", "Description", "Value", "Reference"]):
@@ -479,21 +493,21 @@ name("HC_Table", "Params", r, 2)
 r += 1
 first = r
 for key, asset, issuer, cq, band, h10, regimes, ref in TABLES["haircuts"]:
-    prm.write(r, 2, key, F["code"])
-    prm.write(r, 3, asset, F["desc"])
-    prm.write(r, 4, issuer, F["desc_c"])
-    prm.write(r, 5, cq, F["desc_c"])
-    prm.write(r, 6, band, F["desc_c"])
+    prm.write(r, 2, key, F["code_in"])
+    prm.write(r, 3, asset, F["desc_in"])
+    prm.write(r, 4, issuer, F["desc_c_in"])
+    prm.write(r, 5, cq, F["desc_c_in"])
+    prm.write(r, 6, band, F["desc_c_in"])
     prm.write(r, 7, h10, F["in_pct3"])
     prm.write(r, 8, regimes, F["in_ctr"])
-    prm.write(r, 9, ref, F["ref"])
+    prm.write(r, 9, ref, F["ref_in"])
     r += 1
 keys = f"C{first + 1}:C{r}"
 validate(prm, keys, "Haircut key", "Key the engine builds from the asset type, issuer, credit quality and "
          "residual maturity of a leg, e.g. DEBT_SOV_CQS1_LE1. Listed once; a key not in the table is not "
          "eligible.", unique(keys), ("Duplicate key", "This key is already in the table. Enter it once."))
 validate(prm, f"H{first + 1}:H{r}", "Haircut H10", "Supervisory haircut at 10 business days with daily "
-         "remargining (CRE22.49; CRR Art. 224 Table 1).", SHARE,
+         "remargining (CRE22.49; CRR Art. 224 Tables 1 and 3).", SHARE,
          ("Invalid haircut", "Enter a percentage from 0% to 100%."))
 validate(prm, f"I{first + 1}:I{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
          "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
@@ -512,12 +526,12 @@ name("RW_Table", "Params", r, 2)
 r += 1
 first = r
 for key, cls, grade, weight, regimes, ref in TABLES["risk_weights"]:
-    prm.write(r, 2, key, F["code"])
-    prm.write(r, 3, cls, F["desc"])
-    prm.write(r, 4, grade, F["desc_c"])
+    prm.write(r, 2, key, F["code_in"])
+    prm.write(r, 3, cls, F["desc_in"])
+    prm.write(r, 4, grade, F["desc_c_in"])
     prm.write(r, 5, weight, F["in_pct"])
     prm.write(r, 6, regimes, F["in_ctr"])
-    prm.write(r, 7, ref, F["ref"])
+    prm.write(r, 7, ref, F["ref_in"])
     r += 1
 keys = f"C{first + 1}:C{r}"
 validate(prm, keys, "Risk-weight key", "Key the engine builds from the counterparty class and its CQS, SCRA "
@@ -545,8 +559,8 @@ r += 1
 first = r
 CCY_NAMES = {"EUR": "Euro", "USD": "US dollar", "GBP": "Pound sterling", "JPY": "Japanese yen", "CHF": "Swiss franc"}
 for ccy, rate in FIXTURE["fx"].items():
-    prm.write(r, 2, ccy, F["code"])
-    prm.write(r, 3, CCY_NAMES.get(ccy, ""), F["desc"])
+    prm.write(r, 2, ccy, F["code_in"])
+    prm.write(r, 3, CCY_NAMES.get(ccy, ""), F["desc_in"])
     prm.write(r, 4, rate, F["in_rate"])
     r += 1
 keys = f"C{first + 1}:C{r}"
@@ -626,8 +640,9 @@ validate(ns, rng(3), "Counterparty", "Name of the counterparty, shown on Results
 validate(ns, rng(4), "Master netting agreement", "Required. Y: the transactions are netted under an eligible "
          "master netting agreement (CRE22.62-22.65; CRR Art. 220). N: each transaction is calculated on its own "
          "(CRE22.46; Art. 223).", YN, ("Invalid choice", "Choose Y or N."))
-validate(ns, rng(5), "Settlement currency", "Currency the netting set settles in, for the currency-mismatch "
-         "haircut; blank = the reporting currency. It must be in the Params FX table.", ccy3(f"F{top}"),
+validate(ns, rng(5), "Settlement currency", "Currency the netting set settles in; with netting, positions in "
+         "other currencies take the currency-mismatch haircut. Blank = the reporting currency. It must be in "
+         "the Params FX table.", ccy3(f"F{top}"),
          ("Invalid currency", "Enter a three-letter code from the FX table, or leave blank."))
 validate(ns, rng(6), "Counterparty class", "SOV = sovereign, INST = institution, CORP = corporate, QCCP = "
          "qualifying central counterparty. Selects the risk weight (CRE20; CRR Art. 114, 120-122, 306).",
@@ -642,11 +657,12 @@ validate(ns, rng(8), "SCRA grade", "Unrated institutions only: A, A_ENH (grade A
 validate(ns, rng(9), "Remargin frequency N_R", "Business days between remargining; blank = 1, daily. Scales "
          "the haircuts (CRE22.59; CRR Art. 226).", {"validate": "integer", "criteria": ">=", "value": 1},
          ("Invalid frequency", "Enter a whole number of business days of 1 or more, or leave blank."))
-validate(ns, rng(10), "Large or illiquid", "Y if the netting set had more than 5,000 transactions in the "
-         "previous quarter or holds illiquid collateral: holding period 20 days (CRE22.58; CRR Art. 285(3)). "
-         "Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
-validate(ns, rng(11), "Margin disputes", "Y if margin disputes double the holding period (CRE22.58; CRR Art. "
-         "285(4)). Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
+validate(ns, rng(10), "Large or illiquid", "Y if the netting set had more than 5,000 transactions at any "
+         "point in the previous quarter or holds illiquid collateral: holding period 20 business days "
+         "(CRE22.58; CRR Art. 285(3)). Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
+validate(ns, rng(11), "Margin disputes", "Y after more than two margin-call disputes in the previous two "
+         "quarters that lasted longer than the margin period of risk: the holding period is doubled "
+         "(CRE22.58; CRR Art. 285(4)). Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
 validate(ns, rng(12), "Holding period override", "Optional holding period in business days. It can only "
          "lengthen the regulatory one. Blank = none.", {"validate": "integer", "criteria": ">=", "value": 0},
          ("Invalid override", "Enter a whole number of business days of 0 or more, or leave blank."))
@@ -822,8 +838,8 @@ PS_COLS = [("NettingSetID", 16), ("Kind", 13), ("Position", 18), ("Asset type / 
            ("|E_s| x H_s", 13), ("Counted in N / currency role", 13), ("FX term", 13), ("E x (1 + H)", 15),
            ("C x (1 - H - Hfx)", 15), ("E* (transaction)", 15)]
 output_sheet("Positions", "Positions", 4, PS_COLS,
-             "With netting: one row per security issue and per currency of each VALID netting set. Without "
-             "netting: one row per transaction (single-transaction formula).", "Positions_Header")
+             "Each VALID netting set: with netting, one row per security issue and per currency; without "
+             "netting, one row per transaction (single-transaction formula).", "Positions_Header")
 
 LC_COLS = [("LegID", 13), ("TransactionID", 13), ("NettingSetID", 16), ("Status", 13), ("Transaction type", 11),
            ("Side", 10), ("Asset type", 9), ("Haircut key", 22), ("Eligible", 8), ("Residual maturity (years)", 10),
@@ -999,8 +1015,9 @@ bc.set_tab_color(TAB_DOC)
 banner(bc, "Basel vs CRR", 7)
 for c, w in enumerate([22, 46, 46, 14, 46, 26]):
     bc.set_column(2 + c, 2 + c, w)
-bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026; "
-         "not yet checked against the registered copies.", F["note"])
+bc.write(2, 2, "Basel CRE22 (effective 1 January 2023), CRE20 and CRE54 against the consolidated CRR of "
+         "26.06.2026. Checked against the registered copies (#197): CRE22, CRE54, CRE56 and CRR Art. 192-227 "
+         "only.", F["note"])
 bc.set_row(2, 30)
 bc.set_row(4, 33.95)
 for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in both?", "Workbook treatment",
@@ -1022,8 +1039,8 @@ BVC = [
     ("Holding periods", "5 BD repo-style, 10 BD other capital market, 20 BD secured lending; 10 BD when a "
      "netting set mixes repo-style and other capital market transactions.", "5, 10 and 20 BD; aligned with "
      "the margin period of risk of Art. 285(2)-(4) for large or illiquid netting sets.", "Yes, except the "
-     "mixed rule", "The longer minimum (10) for mixed netting sets in both regimes; secured lending out of "
-     "scope.", "CRE22.57-22.58; Art. 224(2)"),
+     "mixed rule", "The longer minimum (10) for a mixed netting set with an eligible MNA, in both regimes; "
+     "without one, each transaction takes its own. Secured lending out of scope.", "CRE22.57-22.58; Art. 224(2)"),
     ("20-day holding period and disputes", "More than 5,000 trades, illiquid collateral; doubled after more "
      "than two disputes.", "Through Art. 285(3)-(4).", "Yes", "Flags on NettingSets.",
      "CRE22.58; Art. 224(2), 285(3)-(4)"),
@@ -1072,6 +1089,17 @@ CODE_NAMES = {"README": "shReadme", "Params": "shParams", "NettingSets": "shNett
 wb.set_vba_name("ThisWorkbook")
 for sheet in wb.worksheets():
     sheet.set_vba_name(CODE_NAMES[sheet.get_name()])
+
+# Every sheet is protected without a password; only the input cells are
+# unlocked (fmt). The input sheets can still be filtered, sorted and extended
+# by inserted rows. M_Main.ProtectSheets applies the same options again, for
+# the user interface only, so that the macros can write the outputs.
+INPUT_SHEETS = {"Params", "NettingSets", "Transactions"}
+for sheet in wb.worksheets():
+    if sheet.get_name() in INPUT_SHEETS:
+        sheet.protect("", {"autofilter": True, "sort": True, "insert_rows": True})
+    else:
+        sheet.protect()
 
 wb.close()
 print("written", OUT.relative_to(ROOT), "-", len(rows), "catalogue tests,", len(TESTS), "formula tests")
