@@ -333,6 +333,8 @@ readme.insert_image(r + 2, 2, str(CARD), {
     "description": "K-SFTs calculation reference: SFT exposure formulas, supervisory haircuts, holding periods, "
                    "capital and prototype limits under the EU CRR and Basel CRE22"})
 readme.freeze_panes(3, 0)
+# Read-only: every cell is locked and the sheet protected, without a password.
+readme.protect()
 
 # ----------------------------------------------------------------------------
 # PARAMS
