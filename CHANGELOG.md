@@ -107,6 +107,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   workflow on every pull request: tooling tests, label and issue-form
   configuration, the test-case format, static checks of the exported VBA
   source and the workflows ([tools/README.md](tools/README.md); #5, #6).
+- Dependabot version updates against the active release branch, one weekly
+  grouped pull request each for the SHA-pinned GitHub Actions and, after a
+  14-day cooldown, for the hash-locked Python tools in `tools/`; each still
+  needs the provenance, hash and platform review of
+  [tools/README.md](tools/README.md) (#187).
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
   and a procedure and checker for recording an Excel run against its commit.
   On Windows the checker writes the host record itself, and a development
