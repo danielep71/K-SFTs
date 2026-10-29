@@ -130,7 +130,6 @@
 .editorconfig   text eol=lf
 .gitattributes  text eol=lf
 .gitignore      text eol=lf
-.gitkeep        text eol=lf
 LICENSE         text eol=lf
 VERSION         text eol=lf
 

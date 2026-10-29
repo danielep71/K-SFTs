@@ -242,7 +242,8 @@ primary source, in `docs/methodology/` and updates this table.
 4. Fixtures and examples are synthetic. Never commit real transactions,
    counterparties, collateral or portfolios ([SECURITY.md](../SECURITY.md)).
 5. Workbooks are built from source and never committed, except at an exact
-   path explicitly re-included in `.gitignore`; no such path exists yet.
+   path explicitly re-included in `.gitignore`; the only such path is the
+   macro-free template `src/workbook/SFT_Template.xlsx` (#102).
 6. A new location for VBA components, fixtures or the workbook becomes
    contractual only when this document, the directory README and the checks
    are updated together.

@@ -218,7 +218,6 @@ Attribute VB_Name = "CORE_Engine"
         Lent              As Double     'Value lent
         Received          As Double     'Value received
         H                 As Double     'Scaled haircut, or the currency haircut
-        Signature         As String     'Not used
         Counted           As Boolean    'Counted in N
     End Type
 
@@ -2660,14 +2659,15 @@ Private Sub CheckZeroHaircut()
 '   haircut, check those the inputs show: repo-style transactions only,
 '   every recognised leg cash or an eligible debt security of a central
 '   government or central bank, one currency, daily remargining. The other
-'   conditions (core market participant, documentation, settlement) are
-'   declared by the Y on NettingSets and listed as INFO.
+'   conditions (the 0% risk weight of the securities, core market
+'   participant, documentation, settlement) are declared by the Y on
+'   NettingSets and listed as INFO.
 '
 ' REFERENCE
 '   CRE22.60, 22.36-22.37; CRR Art. 227.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
@@ -2727,8 +2727,9 @@ Private Sub CheckZeroHaircut()
                 If Len(Failures(Ns)) > 0 Then
                     NsError Ns, "0% haircut declared but its conditions are not met: " & Failures(Ns)
                 Else
-                    LogMsg SEV_INFO, SH_NS, mNS(Ns).ID, "0% haircut applied: the conditions on the counterparty, " & _
-                           "documentation and settlement are taken as declared.", mNS(Ns).Row
+                    LogMsg SEV_INFO, SH_NS, mNS(Ns).ID, "0% haircut applied: the conditions on the " & _
+                           "0% risk weight of the securities, the counterparty, documentation and " & _
+                           "settlement are taken as declared.", mNS(Ns).Row
                 End If
             End If
         Next Ns

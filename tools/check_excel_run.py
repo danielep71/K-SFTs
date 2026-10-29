@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check the evidence of an Excel run of the VBA harness against one commit.
 
-The harness runs only in Excel, by hand (INSTALLATION.md, Recording an Excel
-run). This reads what that run left in an evidence folder and checks it
+The harness runs only in Excel, by hand or through tools/Sync-KSFT-VBA.ps1
+-RecordRun (INSTALLATION.md, Recording an Excel run). This reads what that run left in an evidence folder and checks it
 against the candidate commit, without Excel:
 
 - source identity: the modules exported back from the workbook equal, line
@@ -15,7 +15,7 @@ against the candidate commit, without Excel:
   last case and fails only harness.completeness; all three come from one
   64-bit host;
 - host.txt: the Windows build, the references (exactly the four supported
-  ones) and that Debug > Compile VBAProject completed. When the folder has
+  ones) and compile=PASS, no compile error reported. When the folder has
   none and the check runs on Windows, it writes one: the Windows build read
   from this machine, the four supported references and compile=PASS.
 

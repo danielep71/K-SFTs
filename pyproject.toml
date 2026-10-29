@@ -1,5 +1,6 @@
-# Quality settings for the repository's Python tooling (tools/). The tooling
-# needs only the standard library; Ruff and mypy are CI and development tools,
+# Quality settings for the repository's Python tooling (tools/). check.py and
+# its gates need only the standard library; build_template.py needs xlsxwriter
+# and lo_regression.py openpyxl. Ruff and mypy are CI and development tools,
 # installed from tools/requirements-quality-ci.txt.
 
 [tool.ruff]

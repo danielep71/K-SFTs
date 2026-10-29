@@ -308,8 +308,8 @@ Public Function SFT_NetExposure( _
 '
 ' RETURNS
 '   The net exposure; #REF! for ranges of different sizes, #VALUE! for
-'   text or a Boolean, #NUM! for a negative haircut, or the first error
-'   value found.
+'   text or a Boolean, #NUM! for a negative haircut, an overflow or an
+'   empty array, or the first error value found.
 '
 ' REFERENCE
 '   CRE22.64-22.65; CRR Art. 220(3).

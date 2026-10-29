@@ -27,7 +27,6 @@ from vba_lexer import Finding, report, tracked_components
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = "tools/vba-projects.json"
-CONFIGURATIONS = ("production", "development")
 
 
 def is_document(path: str) -> bool:

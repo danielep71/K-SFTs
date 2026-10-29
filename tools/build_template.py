@@ -318,8 +318,8 @@ README = [
      "(guarantees, credit derivatives); cross-product netting with derivatives; CVA; the SCRA sovereign floor; "
      "capital buffers and Pillar 2."),
     ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
-     "(effective 1 January 2023), CRE20, CRE54 and the consolidated CRR of 26.06.2026; its formulas and tables are "
-     "not yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
+     "(effective 1 January 2023), CRE20, CRE54 and the consolidated CRR of 26.06.2026; only its haircut table is "
+     "checked against the registered copies (#197; docs/methodology/PROTOTYPE.md). Expected values are "
      "reproduced by an independent Python derivation, not by published worked examples."),
     ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
@@ -351,8 +351,7 @@ for i, (key, value) in enumerate(README):
 # The calculation reference closes the sheet, below its own heading; the
 # methodology heading links to it. A link scrolls the sheet only until its
 # target is in view, near the bottom of the window, so it points 38 rows
-# below the heading, as on the K-SACCR README sheet: the heading and the
-# picture are then on screen.
+# below the heading: the heading and the picture are then on screen.
 readme.set_row(r, 9.95)
 readme.set_row(r + 1, 30)
 readme.write(r + 1, 2, "Calculation reference", F["rm_h"])

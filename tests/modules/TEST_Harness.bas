@@ -37,8 +37,8 @@ Attribute VB_Name = "TEST_Harness"
 '   their order are documented in tests/README.md (Log format).
 '
 ' COMPATIBILITY
-'   Excel VBA on Windows. The log records the host, its version, the Office
-'   bitness and the VBA generation.
+'   Excel VBA on Windows. The log records the host, its version and build,
+'   the Office bitness and the VBA generation.
 '
 ' USAGE
 '   Called by the suites in tests/modules/, for example
@@ -46,7 +46,7 @@ Attribute VB_Name = "TEST_Harness"
 '   the Immediate window. It has no suite of its own.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -1022,11 +1022,12 @@ Private Function EnvironmentSummary() _
 '   Describe the Excel host and the compiled VBA environment.
 '
 ' RETURNS
-'   host, version, os, office (bitness) and runtime (VBA generation); the
-'   last two come from conditional compilation, not from Windows.
+'   host, version, build, os, office (bitness) and runtime (VBA
+'   generation); the last two come from conditional compilation, not from
+'   Windows.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 

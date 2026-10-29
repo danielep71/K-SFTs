@@ -29,7 +29,7 @@ COMMIT = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_o
                         check=True, text=True).stdout.strip()
 ENVIRONMENT = ("ENVIRONMENT=host=Microsoft Excel; version=16.0; build=17928; "
                "os=Windows (64-bit) NT 10.00; office=64-bit; runtime=VBA7")
-HOST = ("windows=Windows 11 Pro 24H2, OS build 26100.4061\n"
+HOST = ("windows=Windows 11 Pro, version 24H2, OS build 26100.4061\n"
         "references=Visual Basic For Applications; Microsoft Excel 16.0 Object Library; "
         "OLE Automation; Microsoft Office 16.0 Object Library\n"
         "compile=PASS\n")
@@ -232,7 +232,7 @@ class EvidenceTest(unittest.TestCase):
         self.assertFinding(edit("host.txt", "compile=PASS\n", ""), "no compile=")
         self.assertFinding(edit("host.txt", "OLE Automation; ", "OLE Automation; Scripting; "),
                            "references must be exactly")
-        self.assertFinding(edit("host.txt", "windows=Windows 11 Pro 24H2, OS build 26100.4061\n",
+        self.assertFinding(edit("host.txt", "windows=Windows 11 Pro, version 24H2, OS build 26100.4061\n",
                                 ""), "no windows=")
 
     def test_a_missing_host_record_is_written_on_windows(self) -> None:

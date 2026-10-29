@@ -37,7 +37,7 @@ Attribute VB_Name = "CORE_Util"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -646,38 +646,6 @@ Public Function NamedCell( _
 End Function
 
 
-Public Function NamedRow( _
-    ByVal NameText As String) _
-    As Long
-'
-'==============================================================================
-'                                   NamedRow
-'------------------------------------------------------------------------------
-' PURPOSE
-'   Return the sheet row of a workbook name's top-left cell; 0 when the
-'   name is missing or broken.
-'
-' UPDATED
-'   2026-10-17
-'==============================================================================
-'
-
-'------------------------------------------------------------------------------
-' DECLARE
-'------------------------------------------------------------------------------
-    Dim Cell   As Range    'The name's top-left cell
-
-'------------------------------------------------------------------------------
-' RESOLVE
-'------------------------------------------------------------------------------
-        Set Cell = NamedCell(NameText)
-        If Not Cell Is Nothing Then
-            NamedRow = Cell.Row
-        End If
-
-End Function
-
-
 Public Function TableHeaderName( _
     ByVal SheetName As String) _
     As String
@@ -838,40 +806,6 @@ Public Function OutputFirstRow( _
 End Function
 
 
-Public Function NamedTableCol( _
-    ByVal NameText As String) _
-    As Long
-'
-'==============================================================================
-'                                NamedTableCol
-'------------------------------------------------------------------------------
-' PURPOSE
-'   Return the column of a workbook name's top-left cell, counted as
-'   TableCell counts table columns, so that the column can be passed to
-'   TableCell and TableRange. Check NamedRow first: a missing name gives 0
-'   here too.
-'
-' UPDATED
-'   2026-10-17
-'==============================================================================
-'
-
-'------------------------------------------------------------------------------
-' DECLARE
-'------------------------------------------------------------------------------
-    Dim Cell   As Range    'The name's top-left cell
-
-'------------------------------------------------------------------------------
-' RESOLVE
-'------------------------------------------------------------------------------
-        Set Cell = NamedCell(NameText)
-        If Not Cell Is Nothing Then
-            NamedTableCol = Cell.Column - COL_OFFSET
-        End If
-
-End Function
-
-
 Public Function TableRange( _
     ByVal Sheet As Worksheet, _
     ByVal FirstRow As Long, _
@@ -924,58 +858,6 @@ Public Function UsedLastRow( _
         With Sheet.UsedRange
             UsedLastRow = .Row + .Rows.Count - 1
         End With
-
-End Function
-
-
-Public Function ColumnValues( _
-    ByVal Sheet As Worksheet, _
-    ByVal FirstRow As Long, _
-    ByVal LastRow As Long, _
-    ByVal Column As Long) _
-    As Variant
-'
-'==============================================================================
-'                                 ColumnValues
-'------------------------------------------------------------------------------
-' PURPOSE
-'   Read one column range in a single call, always as a 2-D array, also
-'   for a single row, where Range.Value gives a scalar. Not called at
-'   present: the engine reads its input blocks with TableRange.
-'
-' INPUTS
-'   Sheet: the worksheet to read.
-'   FirstRow, LastRow: rows to read, FirstRow <= LastRow.
-'   Column: table column number.
-'
-' RETURNS
-'   A 1-based array (1 To rows, 1 To 1). Element (r, 1) holds the value of
-'   row FirstRow + r - 1.
-'
-' UPDATED
-'   2026-10-26
-'==============================================================================
-'
-
-'------------------------------------------------------------------------------
-' DECLARE
-'------------------------------------------------------------------------------
-    Dim Values      As Variant    'Value or array returned by Range.Value
-    Dim Wrapped()   As Variant    'One-cell array built for a single-row range
-
-'------------------------------------------------------------------------------
-' READ
-'------------------------------------------------------------------------------
-    'Range.Value returns a scalar, not an array, for a single cell. Wrap it
-    'so that callers can always index the result as (r, 1).
-        Values = TableRange(Sheet, FirstRow, Column, LastRow, Column).Value
-        If IsArray(Values) Then
-            ColumnValues = Values
-        Else
-            ReDim Wrapped(1 To 1, 1 To 1)
-            Wrapped(1, 1) = Values
-            ColumnValues = Wrapped
-        End If
 
 End Function
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Check CHANGELOG.md and VERSION against the rules of RELEASING.md.
+"""Check CHANGELOG.md and VERSION against their date and version rules.
+
+The rules are in CHANGELOG.md (Date and version rules) and RELEASING.md.
 
 Static: it reads the two files and never publishes, tags or compares a
 release. CHANGELOG.md starts with an ``## [Unreleased]`` section; each release
