@@ -957,15 +957,36 @@ if ($RecordRun) {
     }
     $commit = $commit.Trim()
 
-    $python = @(Get-Command python, py -CommandType Application -ErrorAction SilentlyContinue)
-    if ($python.Count -eq 0) {
-        Write-Warning ("RUN NOT RECORDED: Python not found. Run: python tools\check_excel_run.py " +
+    # The first candidate that runs Python 3.12 or later: "python" can be
+    # the Microsoft Store alias, which runs nothing, beside a "py" launcher.
+    $python = $null
+    foreach ($candidate in @(Get-Command python, py -CommandType Application -ErrorAction SilentlyContinue)) {
+        $usable = $false
+        $previousPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $null = & $candidate.Path -c "import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)" 2>$null
+            $usable = ($LASTEXITCODE -eq 0)
+        }
+        catch {
+            $usable = $false
+        }
+        finally {
+            $ErrorActionPreference = $previousPreference
+        }
+        if ($usable) {
+            $python = $candidate.Path
+            break
+        }
+    }
+    if ($null -eq $python) {
+        Write-Warning ("RUN NOT RECORDED: no Python 3.12 or later found. Run: python tools\check_excel_run.py " +
             "`"$evidencePath`" --commit $commit")
         exit 3
     }
 
-    Write-Host "Check:      tools\check_excel_run.py against $commit"
-    & $python[0].Path (Join-Path (Join-Path $repoFullPath "tools") "check_excel_run.py") $evidencePath --commit $commit
+    Write-Host "Check:      tools\check_excel_run.py against $commit, with $python"
+    & $python (Join-Path (Join-Path $repoFullPath "tools") "check_excel_run.py") $evidencePath --commit $commit
     if ($LASTEXITCODE -ne 0) {
         Write-Warning "RUN NOT RECORDED: check_excel_run.py did not pass (exit code $LASTEXITCODE)."
         exit 3
