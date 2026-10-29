@@ -10,7 +10,7 @@ methodology decisions in
 [docs/REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md).
 The repository tooling has its own tests in [tools/](../tools/README.md).
 
-| Location | Will hold |
+| Location | Holds |
 | --- | --- |
 | `modules/` | VBA test modules: the harness `TEST_Harness` and the neutral example suite `TEST_Examples`; the case runner and the SFT suites come with the methodology of record; the prototype's tests are the template's TestCatalogue and FormulaTest sheets |
 | `fixtures/` | Synthetic inputs: transactions, collateral, netting sets |

@@ -22,9 +22,10 @@ collateral and outputs are still
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
 the exposure measure, unless a later decision adds them.
 
-**Status on 2026-10-25: working prototype.** *v0.1.0 - Repo setup* built
+**Status on 2026-10-29: working prototype.** *v0.1.0 - Repo setup* built
 tooling, governance and conventions; *v0.2.0 - Prototype setup* adds a
-prototype as it is ([PROTOTYPE.md](methodology/PROTOTYPE.md)). The prototype
+prototype, with the robustness fixes of its audit
+([PROTOTYPE.md](methodology/PROTOTYPE.md)). The prototype
 is not the methodology of record and departs from this document where
 [PROTOTYPE.md](methodology/PROTOTYPE.md) lists it, among them `src/core`
 modules that read and write sheets; nothing in this repository should be
@@ -204,6 +205,9 @@ at least:
 
 The contract follows the [open decisions](#-open-product-and-methodology-decisions):
 it cannot be fixed before the approach, products and outputs are chosen.
+The prototype's eight `SFT_*` functions in `src/modules/` predate it: their
+arguments and results are documented in their headers and listed in
+[PUBLIC_API.txt](PUBLIC_API.txt), not in a contract.
 
 ## ❓ Open product and methodology decisions
 

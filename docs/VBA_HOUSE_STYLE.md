@@ -10,8 +10,8 @@ the import and export steps by [INSTALLATION.md](../INSTALLATION.md).
 `tests/modules/` and the five prototype modules in `src/`
 ([PROTOTYPE.md](methodology/PROTOTYPE.md)), which pass the gates below but
 depart from the module rules where PROTOTYPE.md lists it: `src/core`
-modules read and write sheets. These rules apply to every component. The `vba-*` gates of `python tools/check.py` enforce the
-mechanical ones: component names and `VB_Name`, module options, ASCII,
+modules read and write sheets. These rules apply to every component. The
+`vba-*` gates of `python tools/check.py` enforce the mechanical ones: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 of whatever VBA would otherwise make public, and the public API inventory.
 Everything else is enforced by review

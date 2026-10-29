@@ -10,7 +10,10 @@ reviewed change.
 **Where the prototype departs from the recorded decisions.** By maintainer
 decision of 2026-10-25, milestone v0.2.0 integrates the prototype as it is,
 with these departures; each is resolved in a later milestone
-([#131](https://github.com/danielep71/K-SFTs/issues/131)):
+([#131](https://github.com/danielep71/K-SFTs/issues/131)). On 2026-10-29 the
+maintainer moved the robustness fixes of its audit into v0.2.0
+([#141](https://github.com/danielep71/K-SFTs/issues/141)); they change no E\*
+for valid inputs:
 
 | Prototype | Recorded position | Needed |
 | --- | --- | --- |
@@ -19,7 +22,7 @@ with these departures; each is resolved in a later milestone
 | Outputs E\*, RW, RWA, own funds | Outputs open (D7) | Decision D7 |
 | Products REPO, REVREPO, SECLEND, SECBORROW, MARGINLEND | Products open (D4) | Decision D4 |
 | Haircut-table eligibility rules | Collateral eligibility open (D6) | Decision D6 |
-| Formulas and tables transcribed from CRR Art. 220-227 and CRE22 | Source register: formulas and tables not yet transcribed or checked against the registered copies | Check against `sources/` with page locators |
+| Formulas and tables transcribed from CRR Art. 220-227 and CRE22 | Source register: formulas and tables not yet transcribed or checked against the registered copies | Check against `sources/` with page locators. Done for the haircut table only: it equals CRE22.49 and CRR Art. 224 Tables 1, 3 and 4 ([#197](https://github.com/danielep71/K-SFTs/issues/197)) |
 | Demo expected values in `tests/derivations/prototype/` | Test cases in the format of [TEST_CASES.md](TEST_CASES.md) | Convert to `tests/fixtures/` and `tests/expected/` |
 | `CORE_Engine` and `CORE_Util` read and write sheets | `src/core/` never touches Excel | Split into core and host glue |
 | `CORE_Engine` calls `SFT_Formulas` in `src/modules/`, which holds the formulas, keeps module-level run state, and `M_Main` calls it directly | The dependency direction of [REPOSITORY_STRUCTURE.md](../REPOSITORY_STRUCTURE.md#-dependency-direction) | Move the formulas to the core and route the workbook through the facade |
@@ -273,5 +276,6 @@ limited to one of them.
 
 `CRR`, `CRE22`, `CRE54` and `CRE56` are registered, with copies and hashes in
 [sources/](sources/README.md). `CRE20` is cited for the risk weights but is
-not registered yet; the prototype's formulas and tables are not yet checked
-against the registered copies (see the departures above).
+not registered yet; the prototype's formulas and its risk-weight table are
+not yet checked against the registered copies, and its haircut table only in
+#197 (see the departures above).
