@@ -898,7 +898,7 @@ ft.write(2, 2, "Each row calls one SFT_* function; Result compares it with a han
          "tolerance. The cells show #NAME? until the VBA modules are imported.", F["note"])
 ft.set_row(2, 30)
 ft.write(3, 2, "Tolerance", F["code"])
-ft.write(3, 3, 1e-9, fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.0000"))
+ft.write(3, 3, 1e-9, fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.0E+00"))
 validate(ft, "D4", "Tolerance", "Largest difference between Value and Expected for which a test passes.",
          {"validate": "decimal", "criteria": ">=", "value": 0}, ("Invalid tolerance", "Enter a number of 0 or more."))
 wb.define_name("FormulaTest_Tolerance", "='FormulaTest'!$D$4")
@@ -937,7 +937,7 @@ for k, (formula, expected, note) in enumerate(TESTS, 1):
     ft.write(r, 2, f"F-{k:02d}", F["out_txt"])
     ft.write_string(r, 3, "=" + formula, F["out_txt"])
     ft.write_formula(r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
-    ft.write(r, 5, expected, fmt(font_size=10, num_format="0.0000", align="right") if not isinstance(expected, str)
+    ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000", align="right") if not isinstance(expected, str)
              else F["out_txt_r"])
     rr = r + 1
     ft.write_formula(r, 6, f'=IF(ISERROR(E{rr}),IF(F{rr}="#NUM!",IF(ERROR.TYPE(E{rr})=6,"PASS","FAIL"),"FAIL"),'
