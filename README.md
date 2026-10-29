@@ -311,8 +311,11 @@ The full layout, the dependency direction and the public API boundary are in
 - **Regulatory texts registered, not yet checked against the prototype.**
   The prototype's formulas and tables are not yet checked against the
   registered copies, page by page.
-- **No code scanning of the VBA.** CodeQL scans the Python tools and the
-  workflows; the VBA is covered by the static gates and by Excel runs only.
+- **No code scanning of the VBA.** Secret scanning, push protection,
+  Dependabot security updates and CodeQL are enabled; CodeQL covers the
+  Python tools and the workflows, not the VBA, which the static gates and
+  Excel runs check. Coverage and merge gating are still being confirmed
+  ([repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings)).
   Vulnerabilities are reported privately on GitHub or by email
   ([SECURITY.md](SECURITY.md)).
 - **CI artifacts expire after 30 days.**

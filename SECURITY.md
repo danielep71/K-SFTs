@@ -78,22 +78,11 @@ for that command only. No workflow approves, merges or dismisses alerts.
 
 ## 🛡️ Security features
 
-Recorded on **2026-10-29**. The repository is public (since 2026-10-25) on a
-GitHub Pro account. The states marked *API* were read back from the GitHub
-API on that date, after the maintainer enabled the scanning features
-([#160](https://github.com/danielep71/K-SFTs/issues/160); first recorded on
-2026-10-25 in [#123](https://github.com/danielep71/K-SFTs/issues/123)).
-
-| Feature | Status |
-| --- | --- |
-| Private vulnerability reporting | Enabled (API). Reports can be filed on GitHub or by email (above). |
-| Dependabot alerts | Enabled (maintainer-reported on 2026-10-24; not readable through this project's API access). |
-| Dependabot security updates | Enabled (API). Security fixes arrive as pull requests for review. |
-| Dependabot version updates for GitHub Actions | Configured in `.github/dependabot.yml`; updates arrive as pull requests for review. |
-| Secret scanning and push protection | Enabled (API). Pattern-based detection of non-provider secrets and validity checks are not enabled. |
-| Code scanning | Enabled (API): CodeQL default setup for GitHub Actions and Python, on a weekly schedule. It covers the Python tools and the workflows, not the VBA. |
-
-Update this table, with its date, when a feature is enabled or changed.
+Current security-feature observations, verification dates, evidence and
+limitations are maintained in the [repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings).
+Its 2026-10-29 observations supersede the disabled-feature snapshot recorded
+on 2026-10-25. This policy remains authoritative for reporting and handling
+vulnerabilities; a settings record does not establish scan coverage or enforcement.
 
 ## 🔑 Data and secrets
 
