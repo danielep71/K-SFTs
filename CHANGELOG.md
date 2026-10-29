@@ -73,7 +73,8 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   with supervisory haircut tables. Embedded in the root README with
   methodological scope and prototype limitations (#142). The calculation
   reference also closes the workbook's README sheet, linked from its
-  methodology heading (#138).
+  methodology heading. The README sheet is read-only, and its sections
+  still expand and collapse (#138).
 
 - A responsive K-SFTs project web page with prototype scope, calculation
   flow, framework artwork, setup resources and validation boundaries;
