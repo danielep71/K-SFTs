@@ -31,8 +31,8 @@ Attribute VB_Name = "SFT_Formulas"
 '   ranges of different sizes, and the error itself for an error value in a
 '   range. A VBA caller receives the same error value in the Variant result
 '   and tests it with IsError; CORE_Engine stops the run when it receives
-'   one. An overflow beyond the range of a Double also gives #NUM!, except
-'   in SFT_HoldingPeriod and SFT_IssueCount, which have no overflow handler.
+'   one. An overflow beyond the range of a Double also gives #NUM!. A
+'   Boolean is not a number: TRUE or FALSE in a range gives #VALUE!.
 '
 ' REFERENCE
 '   BCBS CRE22 (paragraph numbers in brackets); EU CRR Art. 220, 223, 224,
@@ -42,7 +42,7 @@ Attribute VB_Name = "SFT_Formulas"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -95,14 +95,15 @@ Public Function SFT_HoldingPeriod( _
 '      default.
 '
 ' RETURNS
-'   T_M in business days; #NUM! for an input outside its domain.
+'   T_M in business days; #NUM! for an input outside its domain or a
+'   doubling beyond the range of a Double.
 '
 ' REFERENCE
 '   CRE22.57-22.58; CRR Art. 224(2), Art. 285(3)-(4). The longest minimum
 '   for a netting set holding both types is in CRE22.58 only.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
@@ -124,6 +125,7 @@ Public Function SFT_HoldingPeriod( _
 '------------------------------------------------------------------------------
     'The floors are applied before the doubling, which applies to the
     'holding period that would otherwise be used.
+        On Error GoTo Overflowed
         Holding = MinimumBD
         If LargeOrIlliquid And LargeBD > Holding Then
             Holding = LargeBD
@@ -135,6 +137,13 @@ Public Function SFT_HoldingPeriod( _
             Holding = 2# * Holding
         End If
         SFT_HoldingPeriod = Holding
+        Exit Function
+
+'------------------------------------------------------------------------------
+' HANDLE OVERFLOW
+'------------------------------------------------------------------------------
+Overflowed:
+        SFT_HoldingPeriod = CVErr(xlErrNum)
 
 End Function
 
@@ -299,13 +308,14 @@ Public Function SFT_NetExposure( _
 '
 ' RETURNS
 '   The net exposure; #REF! for ranges of different sizes, #VALUE! for
-'   text, #NUM! for a negative haircut, or the first error value found.
+'   text or a Boolean, #NUM! for a negative haircut, or the first error
+'   value found.
 '
 ' REFERENCE
 '   CRE22.64-22.65; CRR Art. 220(3).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -430,13 +440,14 @@ Public Function SFT_IssueCount( _
 '
 ' RETURNS
 '   N, 0 when every position is 0; #NUM! for a threshold outside its
-'   domain, #VALUE! for text, or the first error value found.
+'   domain or an empty array, #VALUE! for text or a Boolean, or the first
+'   error value found.
 '
 ' REFERENCE
 '   CRE22.65; CRR Art. 220(3).
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -457,6 +468,7 @@ Public Function SFT_IssueCount( _
             SFT_IssueCount = CVErr(xlErrNum)
             Exit Function
         End If
+        On Error GoTo Overflowed
         Problem = ReadPairs(Es, Es, Positions, Haircuts, True)
         If Not IsEmpty(Problem) Then
             SFT_IssueCount = Problem
@@ -477,6 +489,14 @@ Public Function SFT_IssueCount( _
             End If
         Next i
         SFT_IssueCount = Count
+        Exit Function
+
+'------------------------------------------------------------------------------
+' HANDLE OVERFLOW
+'------------------------------------------------------------------------------
+    'Also reached for an empty array, which Flatten cannot size.
+Overflowed:
+        SFT_IssueCount = CVErr(xlErrNum)
 
 End Function
 
@@ -662,11 +682,11 @@ Private Function ReadPairs( _
 '
 ' RETURNS
 '   Empty when both were read; otherwise the worksheet error the caller
-'   returns: #REF! for different sizes, #VALUE! for text, #NUM! for a
-'   negative haircut, or the error value found.
+'   returns: #REF! for different sizes, #VALUE! for text or a Boolean,
+'   #NUM! for a negative haircut, or the error value found.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -681,6 +701,9 @@ Private Function ReadPairs( _
 '------------------------------------------------------------------------------
 ' FLATTEN
 '------------------------------------------------------------------------------
+    'Set explicitly: LibreOffice, which runs tools/lo_regression.py, keeps a
+    'Variant result from the previous call instead of starting with Empty.
+        ReadPairs = Empty
         PositionValues = Flatten(Es)
         HaircutValues = Flatten(Hs)
         Count = UBound(PositionValues)
@@ -816,14 +839,17 @@ Private Function ElementIsNumber( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Tell whether an element of a range is usable as a number: a number, a
-'   blank cell, or an empty string, which both count as 0.
+'   blank cell, or an empty string, which both count as 0. A Boolean is
+'   not, although IsNumeric accepts it.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
         If IsEmpty(Content) Then
             ElementIsNumber = True
+        ElseIf VarType(Content) = vbBoolean Then
+            ElementIsNumber = False
         ElseIf VarType(Content) = vbString Then
             ElementIsNumber = (Len(Content) = 0)
         Else

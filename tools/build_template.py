@@ -88,7 +88,6 @@ F: dict[str, Any] = {
     "in_txt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@"),
     "in_ctr": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@", align="center"),
     "in_amt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="#,##0"),
-    "in_num": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####"),
     "in_num_c": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####", align="center"),
     "in_int": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0", align="center"),
     # A number shown as entered, e.g. 365.25 days per year.
@@ -578,7 +577,7 @@ NS_COLS = [
     ("Remargin frequency N_R (BD)", 11, "in_int", "remargin_bd"),
     (">5,000 trades or illiquid collateral (Y/N)", 13, "in_bool", "large"),
     ("Margin disputes (Y/N)", 10, "in_bool", "disputes"),
-    ("Holding period override (BD)", 11, "in_num", "holding_override"),
+    ("Holding period override (BD)", 11, "in_int", "holding_override"),
     ("0% haircut conditions met (Y/N)", 11, "in_bool", "zero_haircut"),
     ("Risk weight override", 11, "in_pct", "rw_override"),
     ("Regime override (blank = Params)", 11, "in_ctr", "regime"),
@@ -947,6 +946,7 @@ TESTS = [
     ("SFT_HoldingPeriod(10,FALSE,FALSE,15)", 15, "override lengthens"),
     ("SFT_HoldingPeriod(10,FALSE,FALSE,7)", 10, "override never shortens"),
     ("SFT_HoldingPeriod(0)", "#NUM!", "minimum below 1"),
+    ("SFT_HoldingPeriod(9E+307,FALSE,TRUE)", "#NUM!", "doubled beyond the range of a number"),
     ("SFT_ScaledHaircut(0.02,5)", 0.02 * (5 / 10) ** 0.5, "0.02 x sqrt(5/10): Art. 224 5-day column 1.414%"),
     ("SFT_ScaledHaircut(0.04,20,3)", 0.04 * (22 / 10) ** 0.5, "0.04 x sqrt((3+20-1)/10)"),
     ("SFT_ScaledHaircut(0.08,10)", 0.08, "Hfx at 10 days"),
@@ -957,9 +957,11 @@ TESTS = [
     ("SFT_ExposureSingle(-1,0,1,0)", "#NUM!", "negative E"),
     ("SFT_NetExposure({100,-50},{0.02,0.04})", 0, "|100 x 0.02 - 50 x 0.04|"),
     ("SFT_GrossExposure({100,-50},{0.02,0.04})", 4, "100 x 0.02 + 50 x 0.04"),
+    ("SFT_GrossExposure({TRUE},{0.1})", "#VALUE!", "TRUE is not a number"),
     ("SFT_IssueCount({100,-50,5})", 2, "5 < 100 / 10 is not counted"),
     ("SFT_IssueCount({100,-50,10})", 3, "10 = 100 / 10 is counted"),
     ("SFT_IssueCount({0,0})", 0, "no position"),
+    ("SFT_IssueCount({TRUE,5})", "#VALUE!", "TRUE is not a number"),
     ("SFT_ExposureNetted(100,102,2.04,2.04,1)", 100 - 102 + 2.04, "N = 1: equals the single formula"),
     ("SFT_ExposureNetted(0,0,1,4,4,0.5)", 0.4 + 0.6 * 4 / 2 + 0.5, "0.4 x 1 + 0.6 x 4 / sqrt(4) + 0.5"),
     ("SFT_ExposureNetted(0,0,0,1,0)", "#NUM!", "gross > 0 with N = 0"),
@@ -977,7 +979,8 @@ for k, (formula, expected, note) in enumerate(TESTS, 1):
     ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000", align="right") if not isinstance(expected, str)
              else F["out_txt_r"])
     rr = r + 1
-    ft.write_formula(r, 6, f'=IF(ISERROR(E{rr}),IF(F{rr}="#NUM!",IF(ERROR.TYPE(E{rr})=6,"PASS","FAIL"),"FAIL"),'
+    ft.write_formula(r, 6, f'=IF(ISERROR(E{rr}),IF(F{rr}="#NUM!",IF(ERROR.TYPE(E{rr})=6,"PASS","FAIL"),'
+                           f'IF(F{rr}="#VALUE!",IF(ERROR.TYPE(E{rr})=3,"PASS","FAIL"),"FAIL")),'
                            f'IF(ISNUMBER(F{rr}),IF(ABS(E{rr}-F{rr})<=FormulaTest_Tolerance,"PASS","FAIL"),"FAIL"))',
                      F["out_txt_c"], "")
     ft.write(r, 7, note, F["ref"])

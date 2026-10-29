@@ -143,14 +143,15 @@ def calculate(fixture, tables):
     as_of = date(p["AsOfDate"])
     dpy = p["DaysPerYear"]
     fx = fixture["fx"]
-    hc = {r[0]: r[5] for r in tables["haircuts"]}
-    rw = {r[0]: r[3] for r in tables["risk_weights"]}
     results = {}
     legs_by_ns = {}
     for leg in fixture["legs"]:
         legs_by_ns.setdefault(leg["ns"], []).append(leg)
     for ns in fixture["netting_sets"]:
         regime = ns["regime"] or p["Regime"]
+        # a table row applies when its Regimes column is BOTH or this regime
+        hc = {r[0]: r[5] for r in tables["haircuts"] if r[6] in ("BOTH", regime)}
+        rw = {r[0]: r[3] for r in tables["risk_weights"] if r[4] in ("BOTH", regime)}
         legs = legs_by_ns.get(ns["id"], [])
         res = {"regime": regime, "status": "VALID"}
         if not legs:
@@ -239,6 +240,10 @@ def calculate(fixture, tables):
                 e_star += max(0.0, ev - cv)
             res.update(holding_bd=t_max, sum_e=sum_e, sum_c=sum_c, fx_term=fx_term)
         key = risk_weight_key(ns, short_term)
+        if ns["rw_override"] in ("", None) and key not in rw:
+            # as the engine, an INVALID netting set keeps no figures
+            results[ns["id"]] = {"regime": regime, "status": "INVALID: 1 input error(s)"}
+            continue
         weight = float(ns["rw_override"]) if ns["rw_override"] not in ("", None) else rw[key]
         res.update(e_star=e_star, rw_key=key, rw=weight, rwa=e_star * weight,
                    own_funds=e_star * weight * p["CapitalRatio"])

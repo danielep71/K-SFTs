@@ -83,7 +83,7 @@ Attribute VB_Name = "CORE_Engine"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -314,9 +314,8 @@ Public Function Calculate( _
 '   True when the run completed. Individual transactions may still have
 '   been rejected; the Checks sheet lists them. False when an input sheet,
 '   input table or Params layout is not as expected, or a parameter, a
-'   Params table or the netting sets could not be loaded. A missing output
-'   sheet or output header name raises from ClearOutputSheets before the
-'   layout is checked.
+'   Params table or the netting sets could not be loaded, or an output
+'   sheet or output header name is missing.
 '
 ' ERROR POLICY
 '   Raises ERR_CHECKS_WRITE when the Checks sheet cannot be written, after
@@ -328,7 +327,7 @@ Public Function Calculate( _
 '   Resets all module state, then fills it for this run.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
@@ -2788,21 +2787,22 @@ Private Sub CheckHoldingOverride( _
 '                             CheckHoldingOverride
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Warn when a holding period override is shorter than the minimum of the
-'   netting set's transaction types taken together: the override can only
-'   lengthen it. Without netting the minimum is set per transaction, so an
-'   override between the repo-style and the capital-market minimum still
+'   Warn when a holding period override is not used: it can only lengthen
+'   the holding period, and it is shorter than every one it could lengthen.
+'   With netting that is the minimum of the netting set's transaction types
+'   taken together. Without netting the minimum is set per transaction, so
+'   an override between the repo-style and the capital-market minimum still
 '   lengthens the repo-style transactions.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
 '------------------------------------------------------------------------------
 ' DECLARE
 '------------------------------------------------------------------------------
-    Dim Minimum   As Double    'Holding period without override or disputes
+    Dim Minimum   As Double    'Shortest holding period without override or disputes
 
 '------------------------------------------------------------------------------
 ' CHECK
@@ -2811,8 +2811,13 @@ Private Sub CheckHoldingOverride( _
             If .HoldingOverride <= 0# Then
                 Exit Sub
             End If
-            Minimum = Checked(SFT_HoldingPeriod(MinimumHolding(.HasRepoStyle, .HasCapitalMarket), _
-                                                .LargeOrIlliquid, False, 0#, pHoldLarge), "SFT_HoldingPeriod")
+            If .MNA Or Not (.HasRepoStyle And .HasCapitalMarket) Then
+                Minimum = MinimumHolding(.HasRepoStyle, .HasCapitalMarket)
+            Else
+                Minimum = Min2(pHoldRepo, pHoldCMT)
+            End If
+            Minimum = Checked(SFT_HoldingPeriod(Minimum, .LargeOrIlliquid, False, 0#, pHoldLarge), _
+                              "SFT_HoldingPeriod")
             If .HoldingOverride < Minimum Then
                 LogMsg SEV_WARN, SH_NS, .ID, "Holding period override " & .HoldingOverride & _
                        " BD is below the minimum " & Minimum & " BD and is not used.", .Row
@@ -3588,16 +3593,35 @@ Private Sub ClearOutputSheets()
 '   cleared and rewritten by WriteChecks.
 '
 ' ERROR POLICY
-'   Raises ERR_OUTPUT_LAYOUT through OutputFirstRow when a table cannot be
-'   located.
+'   A table whose sheet or header name is missing is skipped, so that
+'   ValidateSchema reports it on Checks and the run stops there.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
-        ClearOutputBlock GetSheet(SH_RESULTS), OutputFirstRow(SH_RESULTS), RS_NCOLS
-        ClearOutputBlock GetSheet(SH_POSITIONS), OutputFirstRow(SH_POSITIONS), PS_NCOLS
-        ClearOutputBlock GetSheet(SH_LEGCALC), OutputFirstRow(SH_LEGCALC), LC_NCOLS
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim SheetNames     As Variant    'Output sheets cleared
+    Dim ColumnCounts   As Variant    'Their table widths
+    Dim FirstRow       As Long       'First data row; 0 when the table cannot be located
+    Dim i              As Long       'Position in the lists
+
+'------------------------------------------------------------------------------
+' CLEAR
+'------------------------------------------------------------------------------
+        SheetNames = Array(SH_RESULTS, SH_POSITIONS, SH_LEGCALC)
+        ColumnCounts = Array(RS_NCOLS, PS_NCOLS, LC_NCOLS)
+        For i = LBound(SheetNames) To UBound(SheetNames)
+            If SheetPresent(CStr(SheetNames(i))) Then
+                FirstRow = TableFirstRow(CStr(SheetNames(i)))
+                If FirstRow > 0 Then
+                    ClearOutputBlock GetSheet(CStr(SheetNames(i))), FirstRow, CLng(ColumnCounts(i))
+                End If
+            End If
+        Next i
 
 End Sub
 
@@ -3698,12 +3722,13 @@ Private Sub WritePositions()
 '                                WritePositions
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Write the Positions sheet: for a VALID netting set with netting, one row
-'   per security issue and per currency; without netting, one row per
-'   transaction not rejected, filed under its first leg's netting set.
+'   Write the Positions sheet for every VALID netting set: with netting, one
+'   row per security issue and per currency; without netting, one row per
+'   transaction, filed under its first leg's netting set. A netting set
+'   that is not VALID has no rows, as on Results it has no figures.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '==============================================================================
 '
 
@@ -3756,7 +3781,7 @@ Private Sub WritePositions()
                         End With
                     End If
                 Next p
-            Else
+            ElseIf mNS(Ns).Status = "VALID" Then
                 For t = 1 To mTxCount
                     If mTx(t).NsIndex = Ns And Not mTx(t).Rejected Then
                         RowCount = RowCount + 1
