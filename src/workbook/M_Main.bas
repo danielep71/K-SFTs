@@ -14,6 +14,8 @@ Attribute VB_Name = "M_Main"
 '   RunSFT_Silent: RunSFT for automation. Returns a machine-readable result
 '   line and raises errors instead of showing them.
 '   gSilent: Public flag for silent mode, set by RunSFT_Silent.
+'   Auto_Open: run by Excel when the workbook opens; lets the row groups
+'   of the protected README sheet expand and collapse.
 '   The sheet buttons call the first three by name. These macros are not
 '   listed in docs/PUBLIC_API.txt.
 '
@@ -47,7 +49,7 @@ Attribute VB_Name = "M_Main"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -191,6 +193,52 @@ Public Sub ClearOutputs()
 '==============================================================================
 '
         ExecuteOperation OP_CLEAR
+
+End Sub
+
+
+'
+'------------------------------------------------------------------------------
+'
+'                                 OPEN MACRO
+'
+'------------------------------------------------------------------------------
+'
+
+Public Sub Auto_Open()
+'
+'==============================================================================
+'                                  Auto_Open
+'------------------------------------------------------------------------------
+' PURPOSE
+'   Run by Excel when the user opens the workbook. Protects the README
+'   sheet again, without a password, for the user interface only, and
+'   enables outlining, so its sections can be expanded and collapsed.
+'   Excel does not save EnableOutlining with the file.
+'
+' ERROR POLICY
+'   Never raises: a missing README sheet, or one protected with a
+'   password, stays as it is.
+'
+' UPDATED
+'   2026-10-29
+'==============================================================================
+'
+
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Dim Readme    As Worksheet    'The README sheet
+
+'------------------------------------------------------------------------------
+' PROTECT
+'------------------------------------------------------------------------------
+        On Error GoTo Failed
+        Set Readme = ThisWorkbook.Worksheets(SH_README)
+        Readme.Protect DrawingObjects:=True, Contents:=True, Scenarios:=True, UserInterfaceOnly:=True
+        Readme.EnableOutlining = True
+        Exit Sub
+Failed:
 
 End Sub
 

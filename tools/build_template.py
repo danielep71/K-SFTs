@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,9 @@ from xlsxwriter.utility import (  # type: ignore[import-untyped,import-not-found
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "src/workbook/SFT_Template.xlsx"
+# The calculation reference of docs/assets, 1,800 pixels wide in 256 colours:
+# SFT_calculation_reference.png halved, so that the template stays small.
+CARD = ROOT / "docs/assets/SFT_calculation_reference_workbook.png"
 
 FIXTURE = json.loads((ROOT / "tests/derivations/prototype/demo-portfolio.json").read_text())
 TABLES = json.loads((ROOT / "tests/derivations/prototype/regulatory-tables.json").read_text())
@@ -53,39 +57,52 @@ def fmt(**kw: Any) -> Any:
 
 
 F: dict[str, Any] = {
-    "brand": fmt(font_size=14, font_color=GOLD, bg_color="#000000"),
+    "brand": fmt(font_size=14, font_color=GOLD, bg_color="#000000", align="left", indent=1),
     "band1": fmt(bg_color="#000000"),
-    "title": fmt(font_size=18, bold=True, font_color="#FFFFFF", bg_color=BAND),
+    "title": fmt(font_size=18, bold=True, font_color="#FFFFFF", bg_color=BAND, align="left", indent=1),
     "band2": fmt(bg_color=BAND),
     "note": fmt(font_size=10, italic=True, font_color="#595959"),
-    "note_wrap": fmt(font_size=9, font_color="#595959", text_wrap=True, valign="top"),
+    "note_wrap": fmt(font_size=9, font_color="#595959", text_wrap=True),
     "runinfo": fmt(font_size=10, italic=True, font_color="#7F6000"),
     "section": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY),
     "hdr_in": fmt(font_size=9, bold=True, font_color="#FFFFFF", bg_color=NAVY, text_wrap=True, border=1,
                   border_color=GREY),
     "hdr_prm": fmt(font_size=11, bold=True, font_color="#FFFFFF", bg_color=NAVY, text_wrap=True, border=1,
                    border_color=GREY),
+    "hdr_prm_c": fmt(font_size=11, bold=True, font_color="#FFFFFF", bg_color=NAVY, text_wrap=True, border=1,
+                     border_color=GREY, align="center"),
+    "hdr_in_c": fmt(font_size=9, bold=True, font_color="#FFFFFF", bg_color=NAVY, text_wrap=True, border=1,
+                    border_color=GREY, align="center"),
+    # Header of an override that makes the run WHAT-IF or bypasses a table.
+    "hdr_in_ovr": fmt(font_size=9, bold=True, font_color="#FFFFFF", bg_color="#C00000", text_wrap=True,
+                      border=1, border_color=GREY, align="center"),
     "hdr_out": fmt(font_size=10, bold=True, font_color="#FFFFFF", bg_color=BLUE, text_wrap=True, border=1,
                    border_color=GREY, align="center"),
     "hdr_out_l": fmt(font_size=10, bold=True, font_color="#FFFFFF", bg_color=BLUE, text_wrap=True, border=1,
                      border_color=GREY),
     "code": fmt(font_size=10, bold=True),
     "desc": fmt(font_size=9),
+    "desc_c": fmt(font_size=9, align="center"),
     "ref": fmt(font_size=9, font_color="#595959"),
     "ref_wrap": fmt(font_size=9, font_color="#595959", text_wrap=True, valign="top"),
     "in_txt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@"),
     "in_ctr": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="@", align="center"),
     "in_amt": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="#,##0"),
     "in_num": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####"),
+    "in_num_c": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####", align="center"),
+    "in_int": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0", align="center"),
     "in_pct": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.00%", align="center"),
     "in_pct3": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.000%", align="center"),
     "in_rate": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.000000"),
     "in_date": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="yyyy-mm-dd", align="center"),
     "in_bool": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, align="center"),
     "out_txt": fmt(font_size=10, num_format="@"),
+    "out_txt_c": fmt(font_size=10, num_format="@", align="center"),
+    "out_txt_r": fmt(font_size=10, num_format="@", align="right"),
     "rd_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True),
     "rd_k": fmt(font_size=10, bold=True, text_wrap=True, bottom=3, bottom_color=GREY),
     "rd_v": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY),
+    "rd_v_c": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY, align="center"),
     # README tables: each section is boxed, with a rule between label and text
     # and dashed lines between items; the last item closes the box.
     "rm_h": fmt(font_size=14, bold=True, font_color=NAVY, bottom=2, bottom_color=NAVY, text_wrap=True,
@@ -99,6 +116,7 @@ F: dict[str, Any] = {
     "rm_v_last": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=1,
                      bottom_color=NAVY),
     "rd_link": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY, font_color="#0563C1", underline=1),
+    "rm_link": fmt(font_size=9, font_color="#0563C1", underline=1, align="right", bottom=2, bottom_color=NAVY),
     "cf_bad": wb.add_format({"bg_color": "#F8CBAD"}),
     "cf_warn": wb.add_format({"bg_color": "#FFE699"}),
     "cf_pass": wb.add_format({"bg_color": "#C6EFCE", "font_color": "#006100"}),
@@ -107,7 +125,9 @@ F: dict[str, Any] = {
 
 
 def banner(ws: Any, title: str, last_col: int) -> None:
+    """Brand and title bands over B:last_col; one spare column, the rest hidden."""
     ws.hide_gridlines(2)
+    ws.set_column(last_col + 2, 16383, None, None, {"hidden": True})
     ws.set_column(0, 0, 4)
     ws.set_column(1, 1, 2.5)
     ws.set_row(0, 24)
@@ -178,6 +198,7 @@ readme.set_column(2, 2, 55.43)
 readme.set_column(3, 3, 162.72)
 readme.set_column(4, 4, 14)
 readme.set_column(5, 5, 5)
+readme.set_column(6, 6, None, None, {"hidden": True})
 readme.write(2, 2, "Exposure value E*, risk-weighted exposure amount and own funds requirement of securities "
              "financing transactions under the financial collateral comprehensive method with supervisory "
              "haircuts: EU CRR (Art. 220-227), the default, and Basel CRE22, chosen per netting set.", F["note"])
@@ -188,13 +209,14 @@ README = [
      "(.xlsm), import the modules of src/core, src/modules and src/workbook (INSTALLATION.md), then open "
      "it and click \"Enable Content\". The SFT_* cells on FormulaTest show #NAME? until the modules are "
      "imported; press Ctrl+Alt+F9 afterwards."),
-    ("2. Parameters", "Params: reporting date, reporting currency, default Regime (CRR or BCBS), holding "
-     "periods, haircut weights, the supervisory haircut table (H10, 10 business days, daily remargining), "
-     "the risk-weight table and FX rates (units of reporting currency per 1 unit). Yellow cells are inputs."),
-    ("3. Netting sets", "NettingSets: one row per netting set - whether an eligible master netting agreement "
-     "covers it, its settlement currency, the counterparty's exposure class, CQS or SCRA grade, the "
-     "remargining frequency, the 20-day and dispute drivers of the holding period, the 0% haircut "
-     "declaration and optional risk-weight and regime overrides."),
+    ("2. Parameters", "Params: reporting date, reporting currency, default Regime (CRR or BCBS), days per "
+     "year, holding periods, the FX and non-eligible haircuts, the netting weights and N threshold, the "
+     "capital ratio, the supervisory haircut table (H10, 10 business days, daily remargining), the "
+     "risk-weight table and FX rates (units of reporting currency per 1 unit). Yellow cells are inputs."),
+    ("3. Netting sets", "NettingSets: one row per netting set - its counterparty, whether an eligible master "
+     "netting agreement covers it, its settlement currency, the counterparty's exposure class, CQS or SCRA "
+     "grade, the remargining frequency, the 20-day and dispute drivers of the holding period, an optional "
+     "holding-period override, the 0% haircut declaration and optional risk-weight and regime overrides."),
     ("4. Transactions", "Transactions: one row per leg. A leg is cash or one security issue the bank lent, "
      "sold or posted (LENT, E) or borrowed, bought or received (RECEIVED, C). Legs sharing a TransactionID "
      "form one transaction and repeat its netting set, type, start and maturity dates. Amounts can be in "
@@ -207,14 +229,15 @@ README = [
      "(WHAT-IF). TestCatalogue compares Results with independently derived values; FormulaTest unit-tests "
      "the SFT_* functions."),
     ("7. Regime", "Basel_vs_CRR lists the differences between CRE22 / CRE20 and the CRR and how the "
-     "workbook treats them. Regime-dependent rows of the Params tables are switched per netting set."),
+     "workbook treats them. Each netting set uses the Params table rows marked BOTH or its regime (every "
+     "shipped row is BOTH); Results totals each regime apart."),
     ("Sign and input conventions", None),
     ("Side", "LENT: cash or securities lent, sold under repo or posted as collateral (E). RECEIVED: cash or "
      "securities borrowed, bought under reverse repo or received as collateral (C). A reverse repo is "
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
      "5 business days. MARGINLEND: other capital-market-driven transaction, 10 business days. A netting set "
-     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2) sets the periods by type only]."),
+     "holding both uses 10, in both regimes [CRE22.56-22.58]; CRR Art. 224(2) sets the periods by type only."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
@@ -223,24 +246,26 @@ README = [
     ("Dates", "Date cells take Excel dates: typing 2026-09-30 enters one. The engine also reads text in the "
      "form yyyy-mm-dd, for example pasted or imported. Cell rules check typed entries only; the engine checks "
      "every value on Run."),
-    ("Eligibility", "A leg whose haircut key is not in the haircut table is not eligible: lent, it takes "
-     "NonEligibleHaircut (30%) [CRE22.54; Art. 224(4)]; received, it is not recognised as collateral. "
+    ("Eligibility", "A leg other than a fund whose haircut key is not in the haircut table for its regime is "
+     "not eligible: lent, it takes NonEligibleHaircut (30%) [CRE22.54; CRR Art. 224(4)]; received, it is not "
+     "recognised as collateral. A fund takes the H10 entered on its leg. "
      "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
     ("Methodology (per netting set)", None),
     ("Netting (eligible MNA)", "E* = max(0, sum E - sum C + 0.4 x net + 0.6 x gross / sqrt(N) + sum |E_fx| x "
      "Hfx); net = |sum E_s H_s|, gross = sum |E_s| H_s over security issues s, N = issues with |E_s| at "
-     "least one tenth of the largest [CRE22.64-22.65; CRR Art. 220(3)]"),
+     "least one tenth of the largest, E_fx = net position in each currency other than the settlement currency "
+     "[CRE22.64-22.65; CRR Art. 220(3)]."),
     ("Single transaction (no MNA)", "E* = max(0, E x (1 + He) - C x (1 - Hc - Hfx)) per transaction, summed "
-     "over the netting set; baskets use value-weighted haircuts [CRE22.46, 22.55; CRR Art. 223]"),
+     "over the netting set; baskets use value-weighted haircuts [CRE22.46, 22.55; CRR Art. 223]."),
     ("Haircuts", "H = H10 x sqrt((N_R + T_M - 1) / 10); T_M = holding period, N_R = business days between "
      "remargining [CRE22.59; CRR Art. 226]. Currency mismatch Hfx = 8% scaled the same way [CRE22.52; "
      "Art. 224 Table 4]."),
     ("Holding period", "5 BD repo-style, 10 BD margin lending; 20 BD for a netting set with more than 5,000 "
-     "transactions in the previous quarter or illiquid collateral; doubled after margin disputes; an "
-     "override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
+     "transactions in the previous quarter or illiquid collateral; doubled after more than two margin-call "
+     "disputes; an override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
-     "cash and central government securities, one currency, daily remargining) and takes the rest, "
-     "including the 0% risk weight of the securities, as declared [CRE22.60, 22.36; CRR Art. 227]."),
+     "cash and eligible central government or central bank debt, one currency, daily remargining) and takes the "
+     "rest, including the 0% risk weight of the securities, as declared [CRE22.60, 22.36-22.37; CRR Art. 227]."),
     ("Capital", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA [CRE22.48, RBC20.1; CRR "
      "Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when unrated, short-term "
      "weights when every transaction has an original maturity of 3 months or less [CRE20.18-20.21; Art. "
@@ -273,12 +298,12 @@ README = [
     ("Scope and limitations", None),
     ("Not covered", "SA-CCR and derivatives; internal models (IMM, VaR, own-estimate haircuts); "
      "the simple approach; secured lending and commodity repos; haircut floors for non-centrally cleared "
-     "SFTs (CRE56, not in the CRR); maturity mismatch; credit risk mitigation on the exposure side other "
-     "than collateral; cross-product netting with derivatives; CVA; the SCRA sovereign floor; capital "
-     "buffers and Pillar 2."),
+     "SFTs (CRE56, not in the CRR); maturity mismatch; short-term issue ratings; unfunded credit protection "
+     "(guarantees, credit derivatives); cross-product netting with derivatives; CVA; the SCRA sovereign floor; "
+     "capital buffers and Pillar 2."),
     ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
-     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026; its formulas and tables are not "
-     "yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
+     "(effective 1 January 2023), CRE20, CRE54 and the consolidated CRR of 26.06.2026; its formulas and tables are "
+     "not yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
      "reproduced by an independent Python derivation, not by published worked examples."),
     ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
@@ -288,24 +313,43 @@ README = [
      "references: no Scripting.Dictionary, no WorksheetFunction."),
 ]
 # Each section: a spacer row, its heading, then its items grouped under the
-# heading (collapsible, with the button on the heading row).
+# heading (collapsible, with the button on the heading row). Every row is 30
+# points high, the spacer rows 10; no item runs over two lines.
 readme.outline_settings(True, False, True, False)
 r = 3
+heads: dict[str, int] = {}
 for i, (key, value) in enumerate(README):
     if value is None:
         readme.set_row(r, 9.95)
         r += 1
-        readme.set_row(r, 50.1)
+        readme.set_row(r, 30)
         readme.write(r, 2, key, F["rm_h"])
         readme.write_blank(r, 3, None, F["rm_h"])
+        heads[key] = r
     else:
         last = i + 1 == len(README) or README[i + 1][1] is None
-        lines = -(-len(value) // 190)
-        readme.set_row(r, max(30, 12 * lines + 6), None, {"level": 1})
+        readme.set_row(r, 30, None, {"level": 1})
         readme.write(r, 2, key, F["rm_k_last" if last else "rm_k"])
         readme.write(r, 3, value, F["rm_v_last" if last else "rm_v"])
     r += 1
+# The calculation reference closes the sheet, below its own heading; the
+# methodology heading links to it. A link scrolls the sheet only until its
+# target is in view, near the bottom of the window, so it points 38 rows
+# below the heading, as on the K-SACCR README sheet: the heading and the
+# picture are then on screen.
+readme.set_row(r, 9.95)
+readme.set_row(r + 1, 30)
+readme.write(r + 1, 2, "Calculation reference", F["rm_h"])
+readme.write_blank(r + 1, 3, None, F["rm_h"])
+readme.write_url(heads["Methodology (per netting set)"], 3, f"internal:'README'!C{r + 2 + 38}", F["rm_link"],
+                 "One-page calculation reference: formulas, haircuts and capital (below, on this sheet)")
+readme.insert_image(r + 2, 2, str(CARD), {
+    "x_scale": 0.85, "y_scale": 0.85, "y_offset": 10, "object_position": 2,
+    "description": "K-SFTs calculation reference: SFT exposure formulas, supervisory haircuts, holding periods, "
+                   "capital and prototype limits under the EU CRR and Basel CRE22"})
 readme.freeze_panes(3, 0)
+# Read-only: every cell is locked and the sheet protected, without a password.
+readme.protect()
 
 # ----------------------------------------------------------------------------
 # PARAMS
@@ -317,24 +361,24 @@ PARAMS = [
     ("Regime", "Default regime: CRR (EU) or BCBS (Basel CRE22); override per netting set", P["Regime"], "in_ctr",
      "see Basel_vs_CRR sheet"),
     ("DaysPerYear", "Calendar days per year for the residual maturity of debt securities", P["DaysPerYear"],
-     "in_num", "convention"),
-    ("HaircutBaseBD", "Holding period of the haircut table (BD)", P["HaircutBaseBD"], "in_num",
+     "in_int", "Year convention"),
+    ("HaircutBaseBD", "Holding period of the haircut table (BD)", P["HaircutBaseBD"], "in_int",
      "CRE22.49 / CRR Art. 224 Table 1 (10-day column)"),
-    ("HoldingRepoBD", "Minimum holding period, repo-style transactions (BD)", P["HoldingRepoBD"], "in_num",
+    ("HoldingRepoBD", "Minimum holding period, repo-style transactions (BD)", P["HoldingRepoBD"], "in_int",
      "CRE22.57 / CRR Art. 224(2)"),
     ("HoldingCapitalMarketBD", "Minimum holding period, other capital-market-driven transactions (BD)",
-     P["HoldingCapitalMarketBD"], "in_num", "CRE22.57 / CRR Art. 224(2)"),
+     P["HoldingCapitalMarketBD"], "in_int", "CRE22.57 / CRR Art. 224(2)"),
     ("HoldingLargeBD", "Holding period, >5,000 transactions or illiquid collateral (BD)", P["HoldingLargeBD"],
-     "in_num", "CRE22.58 / CRR Art. 224(2), 285(3)"),
+     "in_int", "CRE22.58 / CRR Art. 224(2), 285(3)"),
     ("FXHaircut", "Currency-mismatch haircut Hfx, 10 BD", P["FXHaircut"], "in_pct", "CRE22.52 / CRR Art. 224 Table 4"),
     ("NonEligibleHaircut", "Haircut of non-eligible securities lent, 10 BD", P["NonEligibleHaircut"], "in_pct",
      "CRE22.54 / CRR Art. 224(4)"),
-    ("NetWeight", "Weight of the net exposure (systematic term)", P["NetWeight"], "in_num",
+    ("NetWeight", "Weight of the net exposure (systematic term)", P["NetWeight"], "in_num_c",
      "CRE22.64-22.65 / CRR Art. 220(3)"),
-    ("GrossWeight", "Weight of the gross exposure (idiosyncratic term)", P["GrossWeight"], "in_num",
+    ("GrossWeight", "Weight of the gross exposure (idiosyncratic term)", P["GrossWeight"], "in_num_c",
      "CRE22.64-22.65 / CRR Art. 220(3)"),
     ("IssueCountThreshold", "Issues below this share of the largest |E_s| are not counted in N",
-     P["IssueCountThreshold"], "in_num", "CRE22.65 / CRR Art. 220(3)"),
+     P["IssueCountThreshold"], "in_num_c", "CRE22.65 / CRR Art. 220(3)"),
     ("CapitalRatio", "Own funds requirement per unit of RWA", P["CapitalRatio"], "in_pct",
      "RBC20.1 / CRR Art. 92(1)(c)"),
 ]
@@ -390,18 +434,19 @@ PARAM_RULES: dict[str, tuple[str, str, dict[str, Any], tuple[str, str]]] = {
 }
 prm = wb.add_worksheet("Params")
 prm.set_tab_color(TAB_IN)
-banner(prm, "Parameters", 10)
+banner(prm, "Parameters", 9)
+prm.set_paper(9)
 prm.set_column(2, 2, 26)
 prm.set_column(3, 3, 52)
 prm.set_column(4, 4, 16)
-prm.set_column(5, 9, 14)
-prm.set_column(10, 10, 38)
+prm.set_column(5, 8, 14)
+prm.set_column(9, 9, 37.71)
 prm.write(2, 2, "Codes in column C are read by the engine through the workbook name equal to each code; only the "
           "yellow values are meant to be changed.", F["note"])
 prm.set_row(2, 30)
 prm.set_row(4, 30)
 for c, h in enumerate(["Code", "Description", "Value", "Reference"]):
-    prm.write(4, 2 + c, h, F["hdr_prm"])
+    prm.write(4, 2 + c, h, F["hdr_prm_c" if h == "Value" else "hdr_prm"])
 name("Params_Code", "Params", 4, 2)
 name("Params_Value", "Params", 4, 4)
 r = 5
@@ -421,23 +466,23 @@ for code, desc, value, style, ref in PARAMS:
     r += 1
 
 r += 1
-prm.set_row(r, 26)
+prm.set_row(r, 26.1)
 prm.write(r, 2, "Supervisory haircuts H10 (10 business days, daily remargining) - CRE22.49 / CRR Art. 224",
           F["section"])
 r += 1
 prm.set_row(r, 30)
 for c, h in enumerate(["HC_Key", "Asset type", "Issuer category", "Credit quality", "Residual maturity",
                        "Haircut H10", "Regimes", "Reference"]):
-    prm.write(r, 2 + c, h, F["hdr_prm"])
+    prm.write(r, 2 + c, h, F["hdr_prm_c" if 2 <= c <= 6 else "hdr_prm"])
 name("HC_Table", "Params", r, 2)
 r += 1
 first = r
 for key, asset, issuer, cq, band, h10, regimes, ref in TABLES["haircuts"]:
     prm.write(r, 2, key, F["code"])
     prm.write(r, 3, asset, F["desc"])
-    prm.write(r, 4, issuer, F["desc"])
-    prm.write(r, 5, cq, F["desc"])
-    prm.write(r, 6, band, F["desc"])
+    prm.write(r, 4, issuer, F["desc_c"])
+    prm.write(r, 5, cq, F["desc_c"])
+    prm.write(r, 6, band, F["desc_c"])
     prm.write(r, 7, h10, F["in_pct3"])
     prm.write(r, 8, regimes, F["in_ctr"])
     prm.write(r, 9, ref, F["ref"])
@@ -456,19 +501,19 @@ prm.write(r, 3, "Keys not in this table are not eligible. To add a key, right-cl
           F["ref"])
 
 r += 2
-prm.set_row(r, 26)
+prm.set_row(r, 26.1)
 prm.write(r, 2, "Risk weights - CRE20 / CRR Art. 114, 120-122; QCCP CRE54.7 / Art. 306(1)(a)", F["section"])
 r += 1
 prm.set_row(r, 30)
 for c, h in enumerate(["RW_Key", "Exposure class", "Grade", "Risk weight", "Regimes", "Reference"]):
-    prm.write(r, 2 + c, h, F["hdr_prm"])
+    prm.write(r, 2 + c, h, F["hdr_prm_c" if 2 <= c <= 4 else "hdr_prm"])
 name("RW_Table", "Params", r, 2)
 r += 1
 first = r
 for key, cls, grade, weight, regimes, ref in TABLES["risk_weights"]:
     prm.write(r, 2, key, F["code"])
     prm.write(r, 3, cls, F["desc"])
-    prm.write(r, 4, grade, F["desc"])
+    prm.write(r, 4, grade, F["desc_c"])
     prm.write(r, 5, weight, F["in_pct"])
     prm.write(r, 6, regimes, F["in_ctr"])
     prm.write(r, 7, ref, F["ref"])
@@ -488,12 +533,12 @@ prm.write(r, 3, "ST_ = every transaction of the netting set has an original matu
           "the table and Insert: the new row keeps the table's rules.", F["ref"])
 
 r += 2
-prm.set_row(r, 26)
+prm.set_row(r, 26.1)
 prm.write(r, 2, "FX rates (illustrative - replace with market rates)", F["section"])
 r += 1
-prm.set_row(r, 30)
+prm.set_row(r, 50.25)
 for c, h in enumerate(["FX_Ccy", "Currency", "Units of reporting ccy per 1 unit"]):
-    prm.write(r, 2 + c, h, F["hdr_prm"])
+    prm.write(r, 2 + c, h, F["hdr_prm_c" if c == 2 else "hdr_prm"])
 name("FX_Table", "Params", r, 2)
 r += 1
 first = r
@@ -515,20 +560,20 @@ validate(prm, f"E{first + 1}:E{r}", "FX rate", "Units of the reporting currency 
          ("Invalid FX rate", "Enter a number above 0; the reporting currency has the rate 1."))
 prm.write(r, 3, "To add a currency, right-click a row of the table and Insert: the new row keeps the "
           "table's rules. Leave no blank row in column C.", F["ref"])
-prm.freeze_panes(5, 0)
+prm.freeze_panes(3, 0)
 
 # ----------------------------------------------------------------------------
 # NETTING SETS
 # ----------------------------------------------------------------------------
 NS_COLS = [
     ("NettingSetID", 18, "in_txt", "id"),
-    ("Counterparty", 44, "in_txt", "counterparty"),
+    ("Counterparty", 58.29, "in_txt", "counterparty"),
     ("Eligible master netting agreement (Y/N)", 12, "in_bool", "mna"),
     ("Settlement ccy (blank = reporting)", 11, "in_ctr", "settlement_ccy"),
     ("Counterparty class (SOV / INST / CORP / QCCP)", 13, "in_ctr", "class"),
     ("Counterparty CQS (1-6, blank = unrated)", 11, "in_ctr", "cqs"),
     ("SCRA grade (A / A_ENH / B / C)", 11, "in_ctr", "scra"),
-    ("Remargin frequency N_R (BD)", 11, "in_num", "remargin_bd"),
+    ("Remargin frequency N_R (BD)", 11, "in_int", "remargin_bd"),
     (">5,000 trades or illiquid collateral (Y/N)", 13, "in_bool", "large"),
     ("Margin disputes (Y/N)", 10, "in_bool", "disputes"),
     ("Holding period override (BD)", 11, "in_num", "holding_override"),
@@ -540,17 +585,22 @@ NS_ROWS = 200
 ns = wb.add_worksheet("NettingSets")
 ns.set_tab_color(TAB_IN)
 banner(ns, "Netting sets", 2 + len(NS_COLS) - 1)
+ns.set_paper(9)
 ns.merge_range(2, 2, 2, 2 + len(NS_COLS) - 1, "", F["note_wrap"])
 ns.write(2, 2, "One row per netting set. Eligible master netting agreement = Y: all its transactions are netted "
          "(CRE22.62-22.65 / CRR Art. 220); N: each transaction is calculated on its own (CRE22.46 / Art. 223). "
          "An unrated institution needs its SCRA grade. Y in '0% haircut' declares that the conditions of "
          "CRE22.60 / Art. 227 are met.", F["note_wrap"])
-ns.set_row(2, 44)
-ns.set_row(5, 62)
+ns.set_row(2, 44.1)
+ns.set_row(5, 62.1)
 HDR_NS = 5
-for c, (h, w, style, _) in enumerate(NS_COLS):
+# Text columns keep left-aligned headers; the overrides that bypass the
+# risk-weight table or the Params regime are marked red.
+NS_OVERRIDES = {"rw_override", "regime"}
+for c, (h, w, style, key) in enumerate(NS_COLS):
     ns.set_column(2 + c, 2 + c, w)
-    ns.write(HDR_NS, 2 + c, h, F["hdr_in"])
+    head = "hdr_in" if style == "in_txt" else "hdr_in_ovr" if key in NS_OVERRIDES else "hdr_in_c"
+    ns.write(HDR_NS, 2 + c, h, F[head])
 name("NettingSets_Header", "NettingSets", HDR_NS, 2)
 for i in range(NS_ROWS):
     rr = HDR_NS + 1 + i
@@ -611,7 +661,7 @@ validate(ns, rng(15), "Regime override", "CRR or BCBS for this netting set; blan
 ns.autofilter(HDR_NS, 2, last_ns, 2 + len(NS_COLS) - 1)
 ns.freeze_panes(HDR_NS + 1, 3)
 buttons(ns, 3, 4)
-ns.set_row(3, 34)
+ns.set_row(3, 33.95)
 
 # ----------------------------------------------------------------------------
 # TRANSACTIONS
@@ -640,12 +690,12 @@ tx = wb.add_worksheet("Transactions")
 tx.set_tab_color(TAB_IN)
 banner(tx, "Transactions", 2 + len(TX_COLS) - 1)
 tx.write(2, 2, "One row per leg: LENT = given by the bank (E), RECEIVED = received (C).", F["note"])
-tx.set_row(2, 34)
+tx.set_row(2, 33.95)
 HDR_TX = 3
-tx.set_row(HDR_TX, 52)
+tx.set_row(HDR_TX, 51.95)
 for c, (h, w, style, _) in enumerate(TX_COLS):
     tx.set_column(2 + c, 2 + c, w)
-    tx.write(HDR_TX, 2 + c, h, F["hdr_in"])
+    tx.write(HDR_TX, 2 + c, h, F["hdr_in" if style == "in_txt" else "hdr_in_c"])
 name("Transactions_Header", "Transactions", HDR_TX, 2)
 for i in range(TX_ROWS):
     rr = HDR_TX + 1 + i
@@ -717,7 +767,7 @@ buttons(tx, 2, 9)
 # ----------------------------------------------------------------------------
 
 
-def output_sheet(title: str, tab_title: str, header_row: int, columns: list[tuple[str, int]], note: str | None,
+def output_sheet(title: str, tab_title: str, header_row: int, columns: Sequence[tuple[str, float]], note: str | None,
                  header_name: str, freeze_col: int = 4, run_buttons: bool = False) -> Any:
     ws = wb.add_worksheet(tab_title)
     ws.set_tab_color(TAB_OUT)
@@ -725,7 +775,7 @@ def output_sheet(title: str, tab_title: str, header_row: int, columns: list[tupl
     if note:
         ws.write(2, 2, note, F["note"])
     ws.set_row(2, 30)
-    ws.set_row(header_row, 44)
+    ws.set_row(header_row, 44.1)
     for c, (h, w) in enumerate(columns):
         ws.set_column(2 + c, 2 + c, w)
         ws.write(header_row, 2 + c, h, F["hdr_out_l"] if c < 2 else F["hdr_out"])
@@ -767,10 +817,11 @@ LC_COLS = [("LegID", 13), ("TransactionID", 13), ("NettingSetID", 16), ("Status"
 output_sheet("Leg-level calculation", "LegCalc", 4, LC_COLS,
              "Every leg with its haircut; excluded legs show the reason in Messages.", "LegCalc_Header")
 
-CK_COLS = [("Severity", 12), ("Sheet", 14), ("Row", 7), ("Reference", 26), ("Message", 120)]
+CK_COLS = [("Severity", 14.86), ("Sheet", 15.86), ("Row", 7), ("Reference", 34.71), ("Message", 174)]
 ck = output_sheet("Checks", "Checks", 4, CK_COLS,
                   "ERROR: input rejected; the netting set's E* is withheld (INCOMPLETE or INVALID) or the run "
                   "stops. WARNING: accepted with an assumption. INFO: information only.", "Checks_Header", 3)
+ck.write(4, 6, "Message", F["hdr_out_l"])
 ck.conditional_format("C6:G100000", {"type": "formula", "criteria": '=$C6="ERROR"', "format": F["cf_bad"]})
 ck.conditional_format("C6:G100000", {"type": "formula", "criteria": '=$C6="WARNING"', "format": F["cf_warn"]})
 
@@ -785,14 +836,14 @@ MEASURES: dict[str, tuple[str, str, float | None]] = {  # measure: (Results colu
 }
 tc = wb.add_worksheet("TestCatalogue")
 tc.set_tab_color(TAB_TEST)
-banner(tc, "Test catalogue", 11)
-for c, w in enumerate([12, 16, 8, 16, 18, 18, 9, 10, 46]):
+banner(tc, "Test catalogue", 10)
+for c, w in enumerate([12, 20.57, 8, 18.71, 23.57, 18, 12.57, 14.86, 64.86]):
     tc.set_column(2 + c, 2 + c, w)
 tc.write(2, 2, "Expected values from tests/derivations/sft_reference.py (an independent implementation of the "
          "same specification) against Results after Run SFT. Class ILLUSTRATIVE: no published worked example "
          "exists for these portfolios.", F["note"])
 tc.set_row(2, 30)
-tc.set_row(5, 34)
+tc.set_row(5, 33.95)
 HEAD = ["TestID", "NettingSetID", "Regime", "Measure", "Expected", "Calculated", "Tolerance", "Result", "Source"]
 for c, h in enumerate(HEAD):
     tc.write(5, 2 + c, h, F["hdr_out_l"] if c < 2 else F["hdr_out"])
@@ -807,18 +858,18 @@ for nsid, res_ in EXPECTED.items():
         for m in ["Net exposure", "Gross exposure", "N", "FX term"]:
             rows.append((nsid, res_["regime"], m, res_[MEASURES[m][1]]))
 r = 6
-num = fmt(font_size=10, num_format="#,##0.00")
+num = fmt(font_size=10, num_format="#,##0.00", align="center")
 for k, (nsid, regime, measure, expected) in enumerate(rows, 1):
     letter, _, tol = MEASURES[measure]
     tc.write(r, 2, f"SFT-{k:03d}", F["out_txt"])
     tc.write(r, 3, nsid, F["out_txt"])
-    tc.write(r, 4, regime, F["out_txt"])
+    tc.write(r, 4, regime, F["out_txt_c"])
     tc.write(r, 5, measure, F["out_txt"])
-    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else F["out_txt"])
+    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else F["out_txt_c"])
     calc = f'=IFERROR(INDEX(Results!${letter}:${letter},MATCH($D{r + 1},Results!$C:$C,0)),"")'
-    tc.write_formula(r, 7, calc, num if tol is not None else F["out_txt"], "")
+    tc.write_formula(r, 7, calc, num if tol is not None else F["out_txt_c"], "")
     if tol is None:
-        tc.write(r, 8, "exact", F["out_txt"])
+        tc.write(r, 8, "exact", F["out_txt_c"])
         res_f = f'=IF(H{r + 1}="","NOT RUN",IF(H{r + 1}=G{r + 1},"PASS","FAIL"))'
     else:
         tc.write(r, 8, tol, num)
@@ -840,14 +891,14 @@ tc.freeze_panes(6, 4)
 # ----------------------------------------------------------------------------
 ft = wb.add_worksheet("FormulaTest")
 ft.set_tab_color(TAB_TEST)
-banner(ft, "Formula tests", 8)
-for c, w in enumerate([10, 60, 16, 16, 10, 50]):
+banner(ft, "Formula tests", 7)
+for c, w in enumerate([10, 60, 20, 20, 15, 72.29]):
     ft.set_column(2 + c, 2 + c, w)
 ft.write(2, 2, "Each row calls one SFT_* function; Result compares it with a hand-calculated value within the "
          "tolerance. The cells show #NAME? until the VBA modules are imported.", F["note"])
 ft.set_row(2, 30)
 ft.write(3, 2, "Tolerance", F["code"])
-ft.write(3, 3, 1e-9, F["in_num"])
+ft.write(3, 3, 1e-9, fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.0E+00"))
 validate(ft, "D4", "Tolerance", "Largest difference between Value and Expected for which a test passes.",
          {"validate": "decimal", "criteria": ">=", "value": 0}, ("Invalid tolerance", "Enter a number of 0 or more."))
 wb.define_name("FormulaTest_Tolerance", "='FormulaTest'!$D$4")
@@ -886,15 +937,16 @@ for k, (formula, expected, note) in enumerate(TESTS, 1):
     ft.write(r, 2, f"F-{k:02d}", F["out_txt"])
     ft.write_string(r, 3, "=" + formula, F["out_txt"])
     ft.write_formula(r, 4, "=" + formula, fmt(font_size=10, num_format="0.000000000"), "")
-    ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000") if not isinstance(expected, str) else F["out_txt"])
+    ft.write(r, 5, expected, fmt(font_size=10, num_format="0.000000000", align="right") if not isinstance(expected, str)
+             else F["out_txt_r"])
     rr = r + 1
     ft.write_formula(r, 6, f'=IF(ISERROR(E{rr}),IF(F{rr}="#NUM!",IF(ERROR.TYPE(E{rr})=6,"PASS","FAIL"),"FAIL"),'
                            f'IF(ISNUMBER(F{rr}),IF(ABS(E{rr}-F{rr})<=FormulaTest_Tolerance,"PASS","FAIL"),"FAIL"))',
-                     F["out_txt"], "")
+                     F["out_txt_c"], "")
     ft.write(r, 7, note, F["ref"])
     r += 1
 ft.write_formula(3, 5, f'=COUNTIF(G7:G{r},"PASS")&" of "&COUNTA(C7:C{r})&" PASS"',
-                 fmt(font_size=11, bold=True, font_color=NAVY), "")
+                 fmt(font_size=11, bold=True, font_color=NAVY, align="left"), "")
 ft.conditional_format(f"G7:G{r}", {"type": "cell", "criteria": "==", "value": '"PASS"', "format": F["cf_pass"]})
 ft.conditional_format(f"G7:G{r}", {"type": "cell", "criteria": "==", "value": '"FAIL"', "format": F["cf_fail"]})
 ft.freeze_panes(6, 0)
@@ -910,10 +962,10 @@ for c, w in enumerate([22, 46, 46, 14, 46, 26]):
 bc.write(2, 2, "Basel CRE22 (effective 1 January 2023) and CRE20 against the consolidated CRR of 26.06.2026; "
          "not yet checked against the registered copies.", F["note"])
 bc.set_row(2, 30)
-bc.set_row(4, 34)
+bc.set_row(4, 33.95)
 for c, h in enumerate(["Topic", "BCBS (Basel framework)", "EU CRR", "Same in both?", "Workbook treatment",
                        "References"]):
-    bc.write(4, 2 + c, h, F["hdr_in"])
+    bc.write(4, 2 + c, h, F["hdr_in_c" if c == 3 else "hdr_in"])
 BVC = [
     ("Exposure method", "Comprehensive approach with supervisory haircuts; VaR models and IMM as alternatives; "
      "SA-CCR does not apply to SFTs.", "Financial collateral comprehensive method with supervisory volatility "
@@ -964,11 +1016,11 @@ BVC = [
 ]
 r = 5
 for row in BVC:
-    bc.set_row(r, 62)
+    bc.set_row(r, 39.95)
     for c, v in enumerate(row):
-        bc.write(r, 2 + c, v, F["rd_k"] if c == 0 else F["rd_v"])
+        bc.write(r, 2 + c, v, F["rd_k"] if c == 0 else F["rd_v_c"] if c == 3 else F["rd_v"])
     r += 1
-bc.freeze_panes(5, 3)
+bc.freeze_panes(5, 0)
 
 # Code names, sh + noun (docs/VBA_HOUSE_STYLE.md). Without them Excel assigns
 # defaults when the VBA project is first opened, which the import script
