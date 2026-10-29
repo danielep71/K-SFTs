@@ -278,8 +278,10 @@ reports on every pull request and can be made a required check.
 
 ## 📦 Dependency updates
 
-`.github/dependabot.yml` proposes weekly updates to the pinned GitHub Actions,
-grouped into one pull request against the active release branch, with the
+`.github/dependabot.yml` proposes weekly version updates each Monday at 05:00
+Europe/Rome for pinned GitHub Actions and the Python requirements in `/tools`.
+Updates are grouped separately as `github-actions` and `python-tools` against
+the active release branch, with the
 `ci` and `P3` labels and danielep71 as assignee, with no PR milestone.
 During triage, link each PR to an appropriate issue carrying the milestone.
 Dependabot reads this file from the default branch, `main`, where it is
@@ -290,14 +292,25 @@ to issues.
 
 Nothing merges automatically. Before merging an update:
 
-1. Read the release notes between the old and new versions of each action.
-2. Check that each new pin is a full SHA that the upstream tag points to.
+1. Read the release notes between the old and new versions of each action or
+   Python package.
+2. For Actions, check that each new pin is a full SHA that the upstream tag
+   points to. For Python, review package provenance and compare every wheel
+   SHA-256 with PyPI; retain the CPython 3.13 / Linux x86_64 lock contract.
 3. Wait for `Repository integrity` to pass on the pull request; actionlint
-   checks the updated workflows.
+   checks updated workflows, while Python updates must pass the existing
+   hash-required binary installation and quality gates.
 4. Review the final diff and head SHA yourself: the code-review bot does not
    review bot-authored pull requests (`docs/GOVERNANCE.md`, Review).
 
-Dependabot does not update `tools/requirements-quality-ci.txt` or the
-actionlint checksum. Update them by hand: choose releases at least two weeks
-old, download the wheels for CPython 3.13 on Linux x86_64, compare every
-SHA-256 with PyPI, and for actionlint with the release's checksums file.
+Python version updates to `tools/requirements-quality-ci.txt` use a 14-day
+`cooldown.default-days` for all packages. Eligible versions are considered at
+the next weekly check; this is not a promise of a PR exactly on day 14.
+Cooldown applies to version updates, not Dependabot security updates. See the
+[GitHub options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#cooldown).
+
+Dependabot proposals do not replace hash and platform review. If a proposal
+cannot preserve the lock contract, regenerate the affected lock entries by
+hand and verify the CPython 3.13 / Linux x86_64 wheel hashes against PyPI.
+The actionlint checksum still requires manual updates: choose a release at
+least two weeks old and compare the archive with its release checksums file.
