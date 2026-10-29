@@ -115,6 +115,7 @@ were not checked in a commit message.
 | Setup, Excel hosts, import and export, the harness | [INSTALLATION.md](INSTALLATION.md) |
 | Test layout and the harness log | [tests/README.md](tests/README.md) |
 | Checks and CI | [tools/README.md](tools/README.md) |
+| Settings, evidence, verification gaps | [docs/REPOSITORY_SETTINGS.md](docs/REPOSITORY_SETTINGS.md) |
 | Branches, review, protection, issues | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 | Pull request checklist | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 | Vulnerabilities and data | [SECURITY.md](SECURITY.md) |

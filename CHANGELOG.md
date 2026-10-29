@@ -56,6 +56,12 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
+### Added
+
+- Portable non-default settings register with glyphs, badges and documented
+  GitHub default comparisons. Custom rulesets are recorded as additions;
+  repository-specific observations remain in a separate evidence snapshot (#162).
+
 No version is planned yet. This holds *v0.1.0 - Repo setup*, the repository
 infrastructure, closed without a release (#13), and *v0.2.0 - Prototype
 setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
