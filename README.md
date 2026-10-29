@@ -311,9 +311,10 @@ The full layout, the dependency direction and the public API boundary are in
 - **Regulatory texts registered, not yet checked against the prototype.**
   The prototype's formulas and tables are not yet checked against the
   registered copies, page by page.
-- **Security scanning not enabled.** Secret scanning, push protection,
-  code scanning and Dependabot security updates are off; vulnerabilities
-  are reported privately on GitHub or by email ([SECURITY.md](SECURITY.md)).
+- **No code scanning of the VBA.** CodeQL scans the Python tools and the
+  workflows; the VBA is covered by the static gates and by Excel runs only.
+  Vulnerabilities are reported privately on GitHub or by email
+  ([SECURITY.md](SECURITY.md)).
 - **CI artifacts expire after 30 days.**
 - **Windows desktop Excel only.**
 
