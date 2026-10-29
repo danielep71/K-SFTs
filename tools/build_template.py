@@ -91,6 +91,8 @@ F: dict[str, Any] = {
     "in_num": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####"),
     "in_num_c": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.####", align="center"),
     "in_int": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0", align="center"),
+    # A number shown as entered, e.g. 365.25 days per year.
+    "in_gen": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="General", align="center"),
     "in_pct": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.00%", align="center"),
     "in_pct3": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.000%", align="center"),
     "in_rate": fmt(font_size=9, bg_color=INPUT, border=1, border_color=GREY, num_format="0.000000"),
@@ -172,7 +174,7 @@ CQS = {"validate": "list", "source": ["1", "2", "3", "4", "5", "6"]}
 REGIME = {"validate": "list", "source": ["CRR", "BCBS"]}
 REGIMES = {"validate": "list", "source": ["BOTH", "CRR", "BCBS"]}
 SHARE = {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 1}
-DAYS = {"validate": "decimal", "criteria": "between", "minimum": 1, "maximum": 250}
+DAYS = {"validate": "integer", "criteria": "between", "minimum": 1, "maximum": 250}
 ANY_DATE = {"validate": "date", "criteria": ">", "value": 0}
 
 
@@ -361,7 +363,7 @@ PARAMS = [
     ("Regime", "Default regime: CRR (EU) or BCBS (Basel CRE22); override per netting set", P["Regime"], "in_ctr",
      "see Basel_vs_CRR sheet"),
     ("DaysPerYear", "Calendar days per year for the residual maturity of debt securities", P["DaysPerYear"],
-     "in_int", "Year convention"),
+     "in_gen", "Year convention"),
     ("HaircutBaseBD", "Holding period of the haircut table (BD)", P["HaircutBaseBD"], "in_int",
      "CRE22.49 / CRR Art. 224 Table 1 (10-day column)"),
     ("HoldingRepoBD", "Minimum holding period, repo-style transactions (BD)", P["HoldingRepoBD"], "in_int",
@@ -397,21 +399,21 @@ PARAM_RULES: dict[str, tuple[str, str, dict[str, Any], tuple[str, str]]] = {
                     ("Invalid day count", "Enter a number from 360 to 366. Normally 365.")),
     "HaircutBaseBD": ("Haircut holding period", "Holding period of the haircut table, in business days. "
                       "Regulatory value 10 (CRE22.49; CRR Art. 224 Table 1).", DAYS,
-                      ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                      ("Invalid holding period", "Enter a whole number of business days from 1 to 250. Regulatory "
                        "value: 10.")),
     "HoldingRepoBD": ("Minimum holding, repo-style", "Minimum holding period of repo-style transactions, in "
                       "business days. Regulatory value 5 (CRE22.57; CRR Art. 224(2)).", DAYS,
-                      ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                      ("Invalid holding period", "Enter a whole number of business days from 1 to 250. Regulatory "
                        "value: 5.")),
     "HoldingCapitalMarketBD": ("Minimum holding, capital market", "Minimum holding period of other "
                                "capital-market-driven transactions, in business days. Regulatory value 10 "
                                "(CRE22.57; CRR Art. 224(2)).", DAYS,
-                               ("Invalid holding period", "Enter a number of business days from 1 to 250. "
+                               ("Invalid holding period", "Enter a whole number of business days from 1 to 250. "
                                 "Regulatory value: 10.")),
     "HoldingLargeBD": ("Holding period, large set", "Holding period of a netting set with more than 5,000 "
                        "transactions or illiquid collateral, in business days. Regulatory value 20 (CRE22.58; "
                        "CRR Art. 224(2), 285(3)).", DAYS,
-                       ("Invalid holding period", "Enter a number of business days from 1 to 250. Regulatory "
+                       ("Invalid holding period", "Enter a whole number of business days from 1 to 250. Regulatory "
                         "value: 20.")),
     "FXHaircut": ("Currency-mismatch haircut", "Haircut Hfx for a currency mismatch at 10 business days. "
                   "Regulatory value 8% (CRE22.52; CRR Art. 224 Table 4).", SHARE,
@@ -639,16 +641,16 @@ validate(ns, rng(8), "SCRA grade", "Unrated institutions only: A, A_ENH (grade A
          {"validate": "list", "source": ["A", "A_ENH", "B", "C"]},
          ("Invalid grade", "Choose A, A_ENH, B or C, or leave blank."))
 validate(ns, rng(9), "Remargin frequency N_R", "Business days between remargining; blank = 1, daily. Scales "
-         "the haircuts (CRE22.59; CRR Art. 226).", {"validate": "decimal", "criteria": ">=", "value": 1},
-         ("Invalid frequency", "Enter a number of business days of 1 or more, or leave blank."))
+         "the haircuts (CRE22.59; CRR Art. 226).", {"validate": "integer", "criteria": ">=", "value": 1},
+         ("Invalid frequency", "Enter a whole number of business days of 1 or more, or leave blank."))
 validate(ns, rng(10), "Large or illiquid", "Y if the netting set had more than 5,000 transactions in the "
          "previous quarter or holds illiquid collateral: holding period 20 days (CRE22.58; CRR Art. 285(3)). "
          "Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
 validate(ns, rng(11), "Margin disputes", "Y if margin disputes double the holding period (CRE22.58; CRR Art. "
          "285(4)). Blank = N.", YN, ("Invalid choice", "Choose Y or N, or leave blank."))
 validate(ns, rng(12), "Holding period override", "Optional holding period in business days. It can only "
-         "lengthen the regulatory one. Blank = none.", {"validate": "decimal", "criteria": ">=", "value": 0},
-         ("Invalid override", "Enter a number of business days of 0 or more, or leave blank."))
+         "lengthen the regulatory one. Blank = none.", {"validate": "integer", "criteria": ">=", "value": 0},
+         ("Invalid override", "Enter a whole number of business days of 0 or more, or leave blank."))
 validate(ns, rng(13), "0% haircut conditions", "Y declares that the conditions of CRE22.60 / CRR Art. 227 are "
          "met; the engine checks the ones it can see. Blank = N.", YN,
          ("Invalid choice", "Choose Y or N, or leave blank."))
@@ -786,7 +788,7 @@ def output_sheet(title: str, tab_title: str, header_row: int, columns: Sequence[
     return ws
 
 
-RS_COLS = [("NettingSetID", 16), ("Counterparty", 40), ("Regime", 8), ("MNA", 6), ("Transactions used", 11),
+RS_COLS = [("NettingSetID", 16), ("Counterparty", 64), ("Regime", 8), ("MNA", 6), ("Transactions used", 11),
            ("Legs used", 8), ("Holding period T_M (BD)", 9), ("Remargin N_R (BD)", 9), ("Haircut scale", 9),
            ("Sum E (lent)", 15), ("Sum C (received)", 15), ("Net exposure", 13), ("Gross exposure", 13),
            ("N (issues)", 7), ("0.4 x net", 13), ("0.6 x gross / sqrt(N)", 13), ("FX term", 13), ("E* (EAD)", 15),
@@ -881,24 +883,31 @@ for nsid, res_ in EXPECTED.items():
             rows.append((nsid, res_["regime"], m, res_[MEASURES[m][1]]))
 r = 6
 num = fmt(font_size=10, num_format="#,##0.00", align="center")
+# Tolerances down to 1E-12: General shows them as written, not as 0.00.
+tol_fmt = fmt(font_size=10, num_format="General", align="center")
+# A long expected text, such as an INCOMPLETE status, wraps on two lines.
+txt_wrap = fmt(font_size=10, num_format="@", align="center", text_wrap=True)
 for k, (nsid, regime, measure, expected) in enumerate(rows, 1):
     header, _, tol = MEASURES[measure]
     tc.write(r, 2, f"SFT-{k:03d}", F["out_txt"])
     tc.write(r, 3, nsid, F["out_txt"])
     tc.write(r, 4, regime, F["out_txt_c"])
     tc.write(r, 5, measure, F["out_txt"])
-    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else F["out_txt_c"])
+    long_text = isinstance(expected, str) and len(expected) > 20
+    if long_text:
+        tc.set_row(r, 26.1)
+    tc.write(r, 6, expected, num if isinstance(expected, (int, float)) else txt_wrap if long_text else F["out_txt_c"])
     # Row by netting-set ID in the first column, column by header text, both
     # from Results_Header; "~" keeps * and ? of a header literal for MATCH.
     pattern = header.replace("~", "~~").replace("*", "~*").replace("?", "~?")
     calc = (f'=IFERROR(INDEX(Results!$A:$XFD,MATCH($D{r + 1},INDEX(Results!$A:$XFD,0,COLUMN(Results_Header)),0),'
             f'MATCH("{pattern}",INDEX(Results!$A:$XFD,ROW(Results_Header),0),0)),"")')
-    tc.write_formula(r, 7, calc, num if tol is not None else F["out_txt_c"], "")
+    tc.write_formula(r, 7, calc, num if tol is not None else txt_wrap if long_text else F["out_txt_c"], "")
     if tol is None:
         tc.write(r, 8, "exact", F["out_txt_c"])
         res_f = f'=IF(H{r + 1}="","NOT RUN",IF(H{r + 1}=G{r + 1},"PASS","FAIL"))'
     else:
-        tc.write(r, 8, tol, num)
+        tc.write(r, 8, tol, tol_fmt)
         res_f = (f'=IF(H{r + 1}="","NOT RUN",IF(ISNUMBER(H{r + 1}),IF(ABS(H{r + 1}-G{r + 1})<=I{r + 1},'
                  f'"PASS","FAIL"),"FAIL"))')
     tc.write_formula(r, 9, res_f, F["out_txt"], "NOT RUN")

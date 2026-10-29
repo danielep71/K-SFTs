@@ -13,22 +13,20 @@ if not exist "%SCRIPT%" (
     exit /b 1
 )
 
+rem Without a dropped workbook, a fresh development workbook is built from
+rem the template in the ignored test-results folder, replaced on every run.
+rem A dropped workbook is synchronized as it is and never rebuilt.
 set "WORKBOOK=%~1"
-
+set "BUILD="
 if not defined WORKBOOK (
-    echo K-SFT Excel run
-    echo.
-    echo No workbook given. Drag the development .xlsm workbook onto this file, or run:
-    echo   %~nx0 ^<path to workbook^>
-    echo.
-    pause
-    exit /b 1
+    set "WORKBOOK=%CD%\test-results\K-SFT_Development.xlsm"
+    set "BUILD=-FromTemplate"
 )
 
 echo K-SFT Excel run
 echo.
 
-if not exist "%WORKBOOK%" (
+if not defined BUILD if not exist "%WORKBOOK%" (
     echo.
     echo ERROR: Workbook not found:
     echo   %WORKBOOK%
@@ -43,15 +41,22 @@ echo   %CD%
 echo Workbook:
 echo   %WORKBOOK%
 echo.
-echo Synchronizing in Development mode, running the tests and checking the run...
+if defined BUILD (
+    echo Building the workbook from src\workbook\SFT_Template.xlsx,
+) else (
+    echo Using the dropped workbook as it is: its sheets are not rebuilt.
+)
+echo synchronizing in Development mode, running the tests and checking the run...
 echo.
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -WorkbookPath "%WORKBOOK%" -RepoRoot "%REPO_ROOT%" -RecordRun
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -WorkbookPath "%WORKBOOK%" -RepoRoot "%REPO_ROOT%" -RecordRun %BUILD%
 set "RC=%ERRORLEVEL%"
 
 echo.
 if "%RC%"=="0" (
     echo SUCCESS: the Excel run is recorded; copy the report above.
+    echo For the checks by hand, open:
+    echo   %WORKBOOK%
 ) else if "%RC%"=="2" (
     echo NOT CHANGED: nothing was imported; the workbook was not changed.
 ) else if "%RC%"=="3" (

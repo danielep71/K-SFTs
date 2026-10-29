@@ -188,7 +188,8 @@ also prepares an Excel run's evidence folder: it removes an earlier run's
 files and exports the workbook's modules. With `-RecordRun`, or
 `Record-KSFT-ExcelRun.cmd`, it also runs `SaveExampleEvidence` in the saved
 workbook and `check_excel_run.py` against `HEAD`, so one command records the
-run. It is optional and needs *Trust
+run. With `-FromTemplate`, or the launcher started without a workbook, it
+first builds the workbook from the template. It is optional and needs *Trust
 access to the VBA project object model*; the procedure and its safeguards
 are in [INSTALLATION.md](../INSTALLATION.md#synchronizing-vba).
 
