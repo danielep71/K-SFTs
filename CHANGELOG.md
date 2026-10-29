@@ -144,7 +144,9 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
   not fixed rows and columns (#171). A missing output sheet or header name
   is listed on Checks instead of raised, a netting set that is not VALID has
   no Positions rows, and the worksheet functions return an error value for a
-  Boolean, an overflow or an empty array (#141). It is not the methodology of
+  Boolean, an overflow or an empty array (#141). Every sheet is protected
+  without a password, with only the input cells editable, and the text of
+  every sheet was checked (#197). It is not the methodology of
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 
