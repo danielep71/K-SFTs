@@ -2,14 +2,13 @@
 
 The static K-SFTs landing page lives in `docs/index.html`, with its styles in
 `docs/assets/site.css`. It reuses the existing project illustration and CCR
-framework diagram. Content is authored for this repository; the sister project
-pages supplied the visual direction, not copied source.
+framework diagram. Its content is authored for this repository.
 
 ## Publishing
 
-The intended public URL is <https://danielep71.github.io/K-SFTs/>.
-GitHub Pages must be configured to **Deploy from a branch**, branch `main`,
-folder `/docs`. `docs/.nojekyll` makes this a plain static site. No package
+The page is published at <https://danielep71.github.io/K-SFTs/>, by GitHub
+Pages set to **Deploy from a branch**, branch `main`, folder `/docs`; each
+push to `main` redeploys it. `docs/.nojekyll` makes this a plain static site. No package
 installation, JavaScript, build step, analytics or third-party fonts are needed.
 
 Changes follow the repository task/release/main PR process. The live site

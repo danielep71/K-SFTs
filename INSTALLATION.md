@@ -6,17 +6,18 @@ written is in [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md); where each
 component lives in [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
 
 > [!IMPORTANT]
-> **Status on 2026-10-25: working prototype.** The production components
+> **Status on 2026-10-29: working prototype.** The production components
 > are the five prototype modules in `src/`, listed in
 > `tools/vba-projects.json`, and the workbook template holds the prototype's
-> 11 sheets with a demo portfolio
+> 11 protected sheets with a demo portfolio
 > ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)); the prototype is not the
 > methodology of record. The import, compile and harness steps below were
 > first run on a host on 2026-10-24
-> ([#9](https://github.com/danielep71/K-SFTs/issues/9)), and with the
+> ([#9](https://github.com/danielep71/K-SFTs/issues/9)), with the
 > prototype on 2026-10-25
-> ([#135](https://github.com/danielep71/K-SFTs/pull/135)), both recorded in
-> [tested environments](#tested-environments). The
+> ([#135](https://github.com/danielep71/K-SFTs/pull/135)), and last on
+> 2026-10-29 ([#138](https://github.com/danielep71/K-SFTs/issues/138)), all
+> recorded in [tested environments](#tested-environments). The
 > [developer setup](#developer-setup) has been run from a fresh clone on
 > Linux. How changes are proposed is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -50,6 +51,7 @@ below, each with its evidence.
 | --- | --- | --- | --- | --- | --- |
 | Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `1a6f0f7` | [#9](https://github.com/danielep71/K-SFTs/issues/9): import, compile and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
 | Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `fbaee34` | [#135](https://github.com/danielep71/K-SFTs/pull/135): the prototype built with `Sync-KSFT-VBA.ps1` (Development), compiled and run on the demo portfolio (TestCatalogue 107 of 107, FormulaTest 25 of 25), and the three example runs; `check_excel_run.py` PASS, run on that Windows host |
+| Microsoft Excel 16.0, Windows 64-bit | 20430 (`Application.Build`) | Windows 11 Enterprise 25H2, OS build 26200.9711 | 64-bit Office, VBA7 | `134656f` | [#138](https://github.com/danielep71/K-SFTs/issues/138): the protected workbook built from the template and recorded with `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS); TestCatalogue 107 of 107, FormulaTest 28 of 28, and all 11 sheets checked after a run and a rerun |
 
 <a id="get-the-source"></a>
 

@@ -15,8 +15,8 @@ This is an independent personal project.
 K-SFTs covers counterparty credit risk for securities financing
 transactions. *v0.1.0 - Repo setup* prepared the repository infrastructure;
 the current milestone, **v0.2.0 - Prototype setup**, adds the SFT prototype
-as it is. Further development, numerical certification and workbook
-packaging belong to later milestones; the project
+with the robustness fixes of its audit (#141). Further development, numerical
+certification and workbook packaging belong to later milestones; the project
 boundary and architecture are defined in
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/K-SFTs/issues/2)), and the
 VBA conventions, supported hosts and import steps in
@@ -155,8 +155,10 @@ required checks, or unrelated pull requests cannot merge.
 
 The dated settings, evidence, historical snapshots and unverified controls are
 maintained in [REPOSITORY_SETTINGS_EVIDENCE.md](REPOSITORY_SETTINGS_EVIDENCE.md).
-The portable non-default settings reference is [REPOSITORY_SETTINGS.md](REPOSITORY_SETTINGS.md). GitHub's live settings remain authoritative. Intended
-working rules remain above; demonstrated enforcement remains below.
+The portable non-default settings reference is
+[REPOSITORY_SETTINGS.md](REPOSITORY_SETTINGS.md). GitHub's live settings
+remain authoritative. Intended working rules remain above; demonstrated
+enforcement remains below.
 
 <a id="demonstrated-enforcement"></a>
 
@@ -211,6 +213,8 @@ check but was not exercised with a failing one.
 
 Update [the evidence snapshot](REPOSITORY_SETTINGS_EVIDENCE.md), with its date and
 evidence, whenever a control is configured, verified or changed.
+
+<a id="issues"></a>
 
 ## 🗂️ Issues
 

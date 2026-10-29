@@ -76,9 +76,9 @@ The four `vba-*` gates apply the mechanical rules of
 rules of [REPOSITORY_STRUCTURE.md](../docs/REPOSITORY_STRUCTURE.md) to the
 `.bas`, `.cls` and `.frm` files that Git tracks, staged ones included; a new
 file is checked once it is added. They share the reading and lexing in
-`vba_lexer.py`, and each prints how many components it examined. Today the
-only components are the test modules in `tests/modules/`; a PASS says only
-that nothing tracked breaks a rule.
+`vba_lexer.py`, and each prints how many components it examined: the five
+prototype modules in `src/` and the test modules in `tests/modules/`. A PASS
+says only that nothing tracked breaks a rule.
 
 **Three different checks.** A static PASS is not a compilation and not a
 validation:
@@ -312,5 +312,8 @@ Cooldown applies to version updates, not Dependabot security updates. See the
 Dependabot proposals do not replace hash and platform review. If a proposal
 cannot preserve the lock contract, regenerate the affected lock entries by
 hand and verify the CPython 3.13 / Linux x86_64 wheel hashes against PyPI.
+Dependabot's pip updater lists the hash of every published wheel: keep only
+the CPython 3.13 / Linux x86_64 one for each package, as in
+[#196](https://github.com/danielep71/K-SFTs/pull/196).
 The actionlint checksum still requires manual updates: choose a release at
 least two weeks old and compare the archive with its release checksums file.

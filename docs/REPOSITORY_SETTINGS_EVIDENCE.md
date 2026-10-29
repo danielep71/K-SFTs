@@ -83,7 +83,7 @@ of 2026-10-25; the exact intervening activation time was not established.
 | Malware alerts | No change proposed | Verified disabled, UI | Optional control to evaluate separately. |
 | Secret Protection | Enabled | Verified enabled, UI | No secret-injection test performed. |
 | Push protection | Enabled | Verified enabled, UI | No blocked-push demonstration performed. |
-| CodeQL | Configured; validate coverage | [Successful CodeQL Setup run](https://github.com/danielep71/K-SFTs/actions/runs/40837774975), 2026-10-29 | Run evidence only: language, trigger, branch coverage and merge blocking need confirmation. No claim of VBA analysis. |
+| CodeQL | Configured; validate coverage | [Successful CodeQL Setup run](https://github.com/danielep71/K-SFTs/actions/runs/40837774975), 2026-10-29. Observed the same day: `Analyze (python)` and `Analyze (actions)` ran on the pull requests into `main` and their syncs (for example [#202](https://github.com/danielep71/K-SFTs/pull/202)), not on task pull requests into `release/0.2.0` | Not a required check (the rulesets require only Repository integrity). Python and Actions only; no claim of VBA analysis. |
 | Code scanning thresholds | Retain current choice | Verified UI: security high or higher; standard errors only | A failure threshold alone does not make the scan a required merge gate. |
 | Dependabot auto-triage | Review before standardizing | UI reports one enabled rule | Rule identity and dismissal behavior unverified; do not assume low-impact alerts stay visible. |
 | AI scans / agentic autofix | No change proposed | Verified disabled, UI | Preview AI repository, PR and AI-application scans off; agentic autofix off. |
@@ -103,9 +103,10 @@ the repository-wide defaults. Do not copy historical settings as fresh facts.
 | Allowed Actions and reusable workflows | Explicit reviewed policy | Unverified | Record allowed publishers/patterns before declaring a standard. |
 | External-contributor workflow approval | Explicit reviewed policy | Unverified | Record the selected contributor category. |
 | Repository log/artifact retention | Explicit documented period | Unverified | Workflow artifacts use 30 days per tools/README.md; repository retention needs read-back. |
-| Version updates | Weekly grouped GitHub Actions updates | File inspected 2026-10-29: Monday 05:00 Europe/Rome; target release/0.2.0; limit 5; ci/P3; assignee danielep71 | [.github/dependabot.yml](../.github/dependabot.yml); main's definition controls activation. |
+| Version updates | Weekly grouped GitHub Actions and Python updates | File inspected 2026-10-29: Monday 05:00 Europe/Rome; target release/0.2.0; limit 5; ci/P3; assignee danielep71; Python after a 14-day cooldown. The Python entry reached `main` with #194 and was active the same day: Dependabot opened [#196](https://github.com/danielep71/K-SFTs/pull/196) | [.github/dependabot.yml](../.github/dependabot.yml); main's definition controls activation. Its pip updater lists every wheel's hash, which review reduces to the locked platform. |
 | Integrity / labels / issue triage | Preserve installed gates and read-only audits | Historical configuration below; implementation described in tools/README.md | [Tooling](../tools/README.md); this documentation change does not audit all workflow executions. |
 | Traffic analytics environment | main-only access with least-privilege credential | Historical maintainer read-back below | Reverify environment restrictions and credential scope without recording secret values. |
+| Traffic history schedule | Daily collection from `main` | Scheduled runs succeeded every day from 2026-10-25 to 2026-10-29, the first being [40189571417](https://github.com/danielep71/K-SFTs/actions/runs/40189571417), after the manual first collection of 2026-10-24 | [docs/TRAFFIC.md](TRAFFIC.md); this closes the historical record's pending first scheduled run. |
 
 ## Open verification and maintenance
 
