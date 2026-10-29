@@ -220,6 +220,9 @@ README = [
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
      "OTHER. Every non-cash leg names its Issue ID: legs of one issue are netted under a master netting "
      "agreement."),
+    ("Dates", "Date cells take Excel dates: typing 2026-09-30 enters one. The engine also reads text in the "
+     "form yyyy-mm-dd, for example pasted or imported. Cell rules check typed entries only; the engine checks "
+     "every value on Run."),
     ("Eligibility", "A leg whose haircut key is not in the haircut table is not eligible: lent, it takes "
      "NonEligibleHaircut (30%) [CRE22.54; Art. 224(4)]; received, it is not recognised as collateral. "
      "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
@@ -448,7 +451,8 @@ validate(prm, f"H{first + 1}:H{r}", "Haircut H10", "Supervisory haircut at 10 bu
          ("Invalid haircut", "Enter a percentage from 0% to 100%."))
 validate(prm, f"I{first + 1}:I{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
          "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
-prm.write(r, 3, "Keys not in this table are not eligible. Add rows directly below the last one (no blank rows).",
+prm.write(r, 3, "Keys not in this table are not eligible. To add a key, right-click a row of the table and "
+          "Insert: the new row keeps the table's rules. Leave no blank row.",
           F["ref"])
 
 r += 2
@@ -480,7 +484,8 @@ validate(prm, f"F{first + 1}:F{r}", "Risk weight", "Risk weight of the counterpa
 validate(prm, f"G{first + 1}:G{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
          "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
 prm.write(r, 3, "ST_ = every transaction of the netting set has an original maturity of 3 months or less. "
-          "A_ENH = SCRA grade A with CET1 >= 14% and leverage ratio >= 5%.", F["ref"])
+          "A_ENH = SCRA grade A with CET1 >= 14% and leverage ratio >= 5%. To add a key, right-click a row of "
+          "the table and Insert: the new row keeps the table's rules.", F["ref"])
 
 r += 2
 prm.set_row(r, 26)
@@ -499,8 +504,8 @@ for ccy, rate in FIXTURE["fx"].items():
     prm.write(r, 4, rate, F["in_rate"])
     r += 1
 keys = f"C{first + 1}:C{r}"
-validate(prm, keys, "Currency", "Three-letter code, e.g. USD, listed once. Add currencies directly below the "
-         "last row.", {"validate": "custom", "value": f"=AND({ccy3(f'C{first + 1}')['value'][1:]},"
+validate(prm, keys, "Currency", "Three-letter code, e.g. USD, listed once. To add a currency, insert a row "
+         "inside the table.", {"validate": "custom", "value": f"=AND({ccy3(f'C{first + 1}')['value'][1:]},"
                                                       f"{unique(keys)['value'][1:]})"},
          ("Invalid or duplicate currency", "Enter a three-letter code that is not already in the table."))
 validate(prm, f"E{first + 1}:E{r}", "FX rate", "Units of the reporting currency per 1 unit of this currency. "
@@ -508,7 +513,8 @@ validate(prm, f"E{first + 1}:E{r}", "FX rate", "Units of the reporting currency 
          {"validate": "custom", "value": f"=AND(ISNUMBER(E{first + 1}),E{first + 1}>0,OR(UPPER(TRIM(C{first + 1}))"
                                          f"<>UPPER(TRIM(ReportingCcy)),E{first + 1}=1))"},
          ("Invalid FX rate", "Enter a number above 0; the reporting currency has the rate 1."))
-prm.write(r, 3, "Add currencies directly below the last row (no blank rows in column C).", F["ref"])
+prm.write(r, 3, "To add a currency, right-click a row of the table and Insert: the new row keeps the "
+          "table's rules. Leave no blank row in column C.", F["ref"])
 prm.freeze_panes(5, 0)
 
 # ----------------------------------------------------------------------------

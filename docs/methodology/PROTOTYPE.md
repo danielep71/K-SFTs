@@ -65,6 +65,18 @@ consolidated text of 26.06.2026, i.e. with CRR3) and **BCBS** (CRE22 effective
 | Transaction | Legs sharing a TransactionID | Needs one leg of each side; legs agree on netting set, type and dates; rejected as a whole, and counted as rejected in every netting set its legs name |
 | Netting set | One row of NettingSets | With an eligible master netting agreement (MNA = Y) all transactions are netted; otherwise each is calculated alone and E\* is summed |
 
+**Input checks.** The template's data-validation rules check typed entries
+only ([#145](https://github.com/danielep71/K-SFTs/issues/145)); the engine checks
+every value on Run.
+- A pasted value bypasses them.
+- Date cells take Excel dates, so a typed `2026-09-30` becomes one. The engine
+  also reads text in the form `yyyy-mm-dd` (`CORE_Util.ToSerial`), for example
+  pasted or imported; the rules do not accept it typed as text.
+- Rows of a Params table keep its rules when they are inserted inside the
+  table (right-click a row, Insert), not when appended below it.
+- The demo's rejection case, Transactions row 48 (asset type `BOND`), fails
+  its rule on purpose: it shows the rejection path.
+
 ### Haircuts
 
 ```text
