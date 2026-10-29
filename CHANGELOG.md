@@ -58,9 +58,9 @@ Use only the categories an entry needs.
 
 ### Added
 
-- Dedicated repository settings register with desired policy, dated observations,
-  evidence and verification gaps; governance and security policy link to it
-  instead of duplicating settings snapshots ([#162](https://github.com/danielep71/K-SFTs/issues/162)).
+- Portable non-default settings register with glyphs, badges and documented
+  GitHub default comparisons. Custom rulesets are recorded as additions;
+  repository-specific observations remain in a separate evidence snapshot (#162).
 
 No version is planned yet. This holds *v0.1.0 - Repo setup*, the repository
 infrastructure, closed without a release (#13), and *v0.2.0 - Prototype

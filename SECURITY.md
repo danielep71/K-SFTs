@@ -79,7 +79,7 @@ for that command only. No workflow approves, merges or dismisses alerts.
 ## 🛡️ Security features
 
 Current security-feature observations, verification dates, evidence and
-limitations are maintained in the [repository settings register](docs/REPOSITORY_SETTINGS.md#security-settings).
+limitations are maintained in the [repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings).
 Its 2026-10-29 observations supersede the disabled-feature snapshot recorded
 on 2026-10-25. This policy remains authoritative for reporting and handling
 vulnerabilities; a settings record does not establish scan coverage or enforcement.

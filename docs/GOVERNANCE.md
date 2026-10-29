@@ -154,8 +154,8 @@ required checks, or unrelated pull requests cannot merge.
 ### Configured controls
 
 The dated settings, evidence, historical snapshots and unverified controls are
-maintained in [REPOSITORY_SETTINGS.md](REPOSITORY_SETTINGS.md), the single
-settings register. GitHub's live settings remain authoritative. Intended
+maintained in [REPOSITORY_SETTINGS_EVIDENCE.md](REPOSITORY_SETTINGS_EVIDENCE.md).
+The portable non-default settings reference is [REPOSITORY_SETTINGS.md](REPOSITORY_SETTINGS.md). GitHub's live settings remain authoritative. Intended
 working rules remain above; demonstrated enforcement remains below.
 
 <a id="demonstrated-enforcement"></a>
@@ -209,7 +209,7 @@ check but was not exercised with a failing one.
   not been triggered on a real pull request is recorded as verified, not as
   enforced.
 
-Update [the settings register](REPOSITORY_SETTINGS.md), with its date and
+Update [the evidence snapshot](REPOSITORY_SETTINGS_EVIDENCE.md), with its date and
 evidence, whenever a control is configured, verified or changed.
 
 ## 🗂️ Issues
