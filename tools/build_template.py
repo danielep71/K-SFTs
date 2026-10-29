@@ -26,6 +26,9 @@ from xlsxwriter.utility import (  # type: ignore[import-untyped,import-not-found
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "src/workbook/SFT_Template.xlsx"
+# The calculation reference of docs/assets, 1,800 pixels wide in 256 colours:
+# SFT_calculation_reference.png halved, so that the template stays small.
+CARD = ROOT / "docs/assets/SFT_calculation_reference_workbook.png"
 
 FIXTURE = json.loads((ROOT / "tests/derivations/prototype/demo-portfolio.json").read_text())
 TABLES = json.loads((ROOT / "tests/derivations/prototype/regulatory-tables.json").read_text())
@@ -99,6 +102,9 @@ F: dict[str, Any] = {
     "rm_v_last": fmt(font_size=9, text_wrap=True, valign="vcenter", right=1, right_color=NAVY, bottom=1,
                      bottom_color=NAVY),
     "rd_link": fmt(font_size=9, text_wrap=True, bottom=3, bottom_color=GREY, font_color="#0563C1", underline=1),
+    "rm_link": fmt(font_size=9, font_color="#0563C1", underline=1, align="right", bottom=2, bottom_color=NAVY),
+    "brand_l": fmt(font_size=14, font_color=GOLD, bg_color="#000000", align="left", indent=1),
+    "title_l": fmt(font_size=18, bold=True, font_color="#FFFFFF", bg_color=BAND, align="left", indent=1),
     "cf_bad": wb.add_format({"bg_color": "#F8CBAD"}),
     "cf_warn": wb.add_format({"bg_color": "#FFE699"}),
     "cf_pass": wb.add_format({"bg_color": "#C6EFCE", "font_color": "#006100"}),
@@ -174,10 +180,13 @@ def ccy3(cell: str) -> dict[str, Any]:
 readme = wb.add_worksheet("README")
 readme.set_tab_color(TAB_DOC)
 banner(readme, "ReadMe", 5)
+readme.write(0, 1, "K-SFTs", F["brand_l"])
+readme.write(1, 1, "ReadMe", F["title_l"])
 readme.set_column(2, 2, 55.43)
 readme.set_column(3, 3, 162.72)
 readme.set_column(4, 4, 14)
 readme.set_column(5, 5, 5)
+readme.set_column(6, 16383, None, None, {"hidden": True})
 readme.write(2, 2, "Exposure value E*, risk-weighted exposure amount and own funds requirement of securities "
              "financing transactions under the financial collateral comprehensive method with supervisory "
              "haircuts: EU CRR (Art. 220-227), the default, and Basel CRE22, chosen per netting set.", F["note"])
@@ -288,23 +297,37 @@ README = [
      "references: no Scripting.Dictionary, no WorksheetFunction."),
 ]
 # Each section: a spacer row, its heading, then its items grouped under the
-# heading (collapsible, with the button on the heading row).
+# heading (collapsible, with the button on the heading row). Every row is 30
+# points high, the spacer rows 10; no item runs over two lines.
 readme.outline_settings(True, False, True, False)
 r = 3
+heads: dict[str, int] = {}
 for i, (key, value) in enumerate(README):
     if value is None:
         readme.set_row(r, 9.95)
         r += 1
-        readme.set_row(r, 50.1)
+        readme.set_row(r, 30)
         readme.write(r, 2, key, F["rm_h"])
         readme.write_blank(r, 3, None, F["rm_h"])
+        heads[key] = r
     else:
         last = i + 1 == len(README) or README[i + 1][1] is None
-        lines = -(-len(value) // 190)
-        readme.set_row(r, max(30, 12 * lines + 6), None, {"level": 1})
+        readme.set_row(r, 30, None, {"level": 1})
         readme.write(r, 2, key, F["rm_k_last" if last else "rm_k"])
         readme.write(r, 3, value, F["rm_v_last" if last else "rm_v"])
     r += 1
+# The calculation reference closes the sheet, below its own heading; the
+# methodology heading links to it.
+readme.set_row(r, 9.95)
+readme.set_row(r + 1, 30)
+readme.write(r + 1, 2, "Calculation reference", F["rm_h"])
+readme.write_blank(r + 1, 3, None, F["rm_h"])
+readme.write_url(heads["Methodology (per netting set)"], 3, f"internal:'README'!C{r + 2}", F["rm_link"],
+                 "One-page calculation reference: formulas, haircuts and capital (below, on this sheet)")
+readme.insert_image(r + 2, 2, str(CARD), {
+    "x_scale": 0.85, "y_scale": 0.85, "y_offset": 10, "object_position": 2,
+    "description": "K-SFTs calculation reference: SFT exposure formulas, supervisory haircuts, holding periods, "
+                   "capital and prototype limits under the EU CRR and Basel CRE22"})
 readme.freeze_panes(3, 0)
 
 # ----------------------------------------------------------------------------
