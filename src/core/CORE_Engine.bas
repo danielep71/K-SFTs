@@ -3947,16 +3947,16 @@ Private Sub WriteRunInfo( _
 '                                 WriteRunInfo
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Write a one-line run summary to cell C4 (RUNINFO_CELL) of Results: a
+'   Write a one-line run summary to the Results cell named NM_RUNINFO: a
 '   failure, a validation-only run, a completed run with its counts, run
 '   class and duration, or a run stopped by input errors.
 '
 ' ERROR POLICY
 '   Never raises: the summary is informative. A protected or missing
-'   Results sheet keeps its earlier summary.
+'   Results sheet, or a missing name, keeps its earlier summary.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-29
 '==============================================================================
 '
 
@@ -3991,7 +3991,7 @@ Private Sub WriteRunInfo( _
 ' WRITE
 '------------------------------------------------------------------------------
         On Error Resume Next
-        GetSheet(SH_RESULTS).Range(RUNINFO_CELL).Value = Summary
+        NamedCell(NM_RUNINFO).Value = Summary
         On Error GoTo 0
 
 End Sub
