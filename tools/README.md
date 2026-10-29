@@ -185,7 +185,10 @@ log format, not a recorded run.
 and with the components that `vba-projects.json` lists. The `.cmd` files
 run it for a workbook dragged onto them. A development synchronization
 also prepares an Excel run's evidence folder: it removes an earlier run's
-files and exports the workbook's modules. It is optional and needs *Trust
+files and exports the workbook's modules. With `-RecordRun`, or
+`Record-KSFT-ExcelRun.cmd`, it also runs `SaveExampleEvidence` in the saved
+workbook and `check_excel_run.py` against `HEAD`, so one command records the
+run. It is optional and needs *Trust
 access to the VBA project object model*; the procedure and its safeguards
 are in [INSTALLATION.md](../INSTALLATION.md#synchronizing-vba).
 

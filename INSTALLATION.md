@@ -214,6 +214,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps
 | Replaces document-module code, if you agree | It asks, unless `-IncludeSheets` or `-SkipSheets` answers; the workbook's sheet objects are kept. |
 | Imports from a folder | `-SourceDir` (or `tools/Sync-KSFT-VBA-Downloads.cmd`, which asks for one and defaults to `Downloads`) takes only the `.bas` and `.cls` files found there, by their `Attribute VB_Name`, after listing them for confirmation. |
 | Prepares an Excel run's evidence | A `-Mode Development` synchronization, after saving, removes the files an earlier run left in `test-results\excel-run` (or `-EvidenceDir`): the three logs, `host.txt` and the modules in `exported\`. It then exports every standard, class and form module of the workbook into `exported\`. Production and `-SourceDir` synchronizations leave the folder alone. |
+| Records the run | `-RecordRun` (or `tools/Record-KSFT-ExcelRun.cmd`) adds the run to a Development synchronization: it reopens the saved workbook with macros enabled in its own Excel instance, runs `SaveExampleEvidence` on the evidence folder, closes the workbook unsaved and runs `check_excel_run.py` against `HEAD` ([recording an Excel run](#recording-an-excel-run)). Exit code 3: synchronized, but the run did not pass the check. |
 | Protects the workbook | A backup copy first, removed after a successful save. It writes no cells, formulas, names or formatting, and before saving it checks that no sheet was added, removed, renamed or reordered. The workbook is closed unsaved on any error. |
 
 It never writes to the repository. After it, compile as in step 6.
@@ -294,6 +295,24 @@ self-hosted runner and no change to the macro-security level. Built by
 hand, it needs no *Trust access to the VBA project object model*; built with
 [the synchronization script](#synchronizing-vba), it needs that setting and
 takes fewer steps.
+
+**In one step, with the script.** After step 1 below, drag the development
+`.xlsm`, closed, onto `tools/Record-KSFT-ExcelRun.cmd`, or run:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -RecordRun
+```
+
+It does steps 2 to 5: a Development synchronization, the run of
+`SaveExampleEvidence` on `test-results\excel-run` (or `-EvidenceDir`), and
+the check against `HEAD`, which writes `host.txt`. It needs Python 3.12 or
+later and Git on `PATH`, and ends with `RECORDED` and the check's report,
+or `RUN NOT RECORDED` and the reason. Macros are enabled only in the Excel
+instance the script starts; the workbook is closed without saving after the
+run. Then record as in step 6. Checks that need a person, such as how a
+sheet looks, are done by opening the workbook afterwards.
+
+**Step by step:**
 
 1. **Fix the candidate.** In a clone with no local changes
    (`git status --short` prints nothing), type `git switch --detach <commit>`,

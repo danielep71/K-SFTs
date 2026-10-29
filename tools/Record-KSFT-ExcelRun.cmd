@@ -1,0 +1,64 @@
+@echo off
+setlocal EnableExtensions
+set "REPO_ROOT=%~dp0.."
+cd /d "%REPO_ROOT%"
+
+set "SCRIPT=%~dp0Sync-KSFT-VBA.ps1"
+
+if not exist "%SCRIPT%" (
+    echo ERROR: PowerShell script not found:
+    echo   %SCRIPT%
+    echo.
+    pause
+    exit /b 1
+)
+
+set "WORKBOOK=%~1"
+
+if not defined WORKBOOK (
+    echo K-SFT Excel run
+    echo.
+    echo No workbook given. Drag the development .xlsm workbook onto this file, or run:
+    echo   %~nx0 ^<path to workbook^>
+    echo.
+    pause
+    exit /b 1
+)
+
+echo K-SFT Excel run
+echo.
+
+if not exist "%WORKBOOK%" (
+    echo.
+    echo ERROR: Workbook not found:
+    echo   %WORKBOOK%
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
+echo Repository:
+echo   %CD%
+echo Workbook:
+echo   %WORKBOOK%
+echo.
+echo Synchronizing in Development mode, running the tests and checking the run...
+echo.
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -WorkbookPath "%WORKBOOK%" -RepoRoot "%REPO_ROOT%" -RecordRun
+set "RC=%ERRORLEVEL%"
+
+echo.
+if "%RC%"=="0" (
+    echo SUCCESS: the Excel run is recorded; copy the report above.
+) else if "%RC%"=="2" (
+    echo NOT CHANGED: nothing was imported; the workbook was not changed.
+) else if "%RC%"=="3" (
+    echo NOT RECORDED: the workbook is synchronized, but the run did not pass the check.
+) else (
+    echo FAILED: the synchronization or the run returned exit code %RC%.
+)
+echo.
+pause
+exit /b %RC%

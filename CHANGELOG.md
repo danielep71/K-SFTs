@@ -110,9 +110,11 @@ setup*, the SFT prototype as it is (#131). Later milestones lead to v1.0.0.
 - A VBA regression harness with a neutral example suite in `tests/modules/`,
   and a procedure and checker for recording an Excel run against its commit.
   On Windows the checker writes the host record itself, and a development
-  synchronization exports the modules into the evidence folder
+  synchronization exports the modules into the evidence folder. With
+  `-RecordRun`, or `tools/Record-KSFT-ExcelRun.cmd`, one command synchronizes,
+  runs the suite and checks the run against `HEAD`
   ([INSTALLATION.md](INSTALLATION.md#recording-an-excel-run); #7, #9, #147,
-  #149).
+  #149, #168).
 - The macro-free workbook template `src/workbook/SFT_Template.xlsx` (a Readme
   sheet only), and an optional script that imports the repository's VBA into
   a workbook built from it, with its component manifest and the
