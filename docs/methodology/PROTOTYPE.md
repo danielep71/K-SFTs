@@ -74,6 +74,11 @@ every value on Run.
   pasted or imported; the rules do not accept it typed as text.
 - Rows of a Params table keep its rules when they are inserted inside the
   table (right-click a row, Insert), not when appended below it.
+- Business-day inputs are whole numbers, in the rules and in the engine
+  ([#138](https://github.com/danielep71/K-SFTs/issues/138)): `HaircutBaseBD`,
+  the three holding periods on Params, and the remargining frequency and
+  holding-period override on NettingSets. `DaysPerYear` takes decimals, for
+  example 365.25.
 - The demo's rejection case, Transactions row 48 (asset type `BOND`), fails
   its rule on purpose: it shows the rejection path.
 
