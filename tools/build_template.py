@@ -197,13 +197,14 @@ README = [
      "(.xlsm), import the modules of src/core, src/modules and src/workbook (INSTALLATION.md), then open "
      "it and click \"Enable Content\". The SFT_* cells on FormulaTest show #NAME? until the modules are "
      "imported; press Ctrl+Alt+F9 afterwards."),
-    ("2. Parameters", "Params: reporting date, reporting currency, default Regime (CRR or BCBS), holding "
-     "periods, haircut weights, the supervisory haircut table (H10, 10 business days, daily remargining), "
-     "the risk-weight table and FX rates (units of reporting currency per 1 unit). Yellow cells are inputs."),
-    ("3. Netting sets", "NettingSets: one row per netting set - whether an eligible master netting agreement "
-     "covers it, its settlement currency, the counterparty's exposure class, CQS or SCRA grade, the "
-     "remargining frequency, the 20-day and dispute drivers of the holding period, the 0% haircut "
-     "declaration and optional risk-weight and regime overrides."),
+    ("2. Parameters", "Params: reporting date, reporting currency, default Regime (CRR or BCBS), days per "
+     "year, holding periods, the FX and non-eligible haircuts, the netting weights and N threshold, the "
+     "capital ratio, the supervisory haircut table (H10, 10 business days, daily remargining), the "
+     "risk-weight table and FX rates (units of reporting currency per 1 unit). Yellow cells are inputs."),
+    ("3. Netting sets", "NettingSets: one row per netting set - its counterparty, whether an eligible master "
+     "netting agreement covers it, its settlement currency, the counterparty's exposure class, CQS or SCRA "
+     "grade, the remargining frequency, the 20-day and dispute drivers of the holding period, an optional "
+     "holding-period override, the 0% haircut declaration and optional risk-weight and regime overrides."),
     ("4. Transactions", "Transactions: one row per leg. A leg is cash or one security issue the bank lent, "
      "sold or posted (LENT, E) or borrowed, bought or received (RECEIVED, C). Legs sharing a TransactionID "
      "form one transaction and repeat its netting set, type, start and maturity dates. Amounts can be in "
@@ -216,14 +217,15 @@ README = [
      "(WHAT-IF). TestCatalogue compares Results with independently derived values; FormulaTest unit-tests "
      "the SFT_* functions."),
     ("7. Regime", "Basel_vs_CRR lists the differences between CRE22 / CRE20 and the CRR and how the "
-     "workbook treats them. Regime-dependent rows of the Params tables are switched per netting set."),
+     "workbook treats them. Each netting set uses the Params table rows marked BOTH or its regime (every "
+     "shipped row is BOTH); Results totals each regime apart."),
     ("Sign and input conventions", None),
     ("Side", "LENT: cash or securities lent, sold under repo or posted as collateral (E). RECEIVED: cash or "
      "securities borrowed, bought under reverse repo or received as collateral (C). A reverse repo is "
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
      "5 business days. MARGINLEND: other capital-market-driven transaction, 10 business days. A netting set "
-     "holding both uses 10 [CRE22.57-22.58; CRR Art. 224(2) sets the periods by type only]."),
+     "holding both uses 10, in both regimes [CRE22.56-22.58]; CRR Art. 224(2) sets the periods by type only."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
      "FUND with its look-through haircut H10 (or the highest haircut of any asset the fund may invest in); "
@@ -232,24 +234,26 @@ README = [
     ("Dates", "Date cells take Excel dates: typing 2026-09-30 enters one. The engine also reads text in the "
      "form yyyy-mm-dd, for example pasted or imported. Cell rules check typed entries only; the engine checks "
      "every value on Run."),
-    ("Eligibility", "A leg whose haircut key is not in the haircut table is not eligible: lent, it takes "
-     "NonEligibleHaircut (30%) [CRE22.54; Art. 224(4)]; received, it is not recognised as collateral. "
+    ("Eligibility", "A leg other than a fund whose haircut key is not in the haircut table for its regime is "
+     "not eligible: lent, it takes NonEligibleHaircut (30%) [CRE22.54; CRR Art. 224(4)]; received, it is not "
+     "recognised as collateral. A fund takes the H10 entered on its leg. "
      "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
     ("Methodology (per netting set)", None),
     ("Netting (eligible MNA)", "E* = max(0, sum E - sum C + 0.4 x net + 0.6 x gross / sqrt(N) + sum |E_fx| x "
      "Hfx); net = |sum E_s H_s|, gross = sum |E_s| H_s over security issues s, N = issues with |E_s| at "
-     "least one tenth of the largest [CRE22.64-22.65; CRR Art. 220(3)]"),
+     "least one tenth of the largest, E_fx = net position in each currency other than the settlement currency "
+     "[CRE22.64-22.65; CRR Art. 220(3)]."),
     ("Single transaction (no MNA)", "E* = max(0, E x (1 + He) - C x (1 - Hc - Hfx)) per transaction, summed "
-     "over the netting set; baskets use value-weighted haircuts [CRE22.46, 22.55; CRR Art. 223]"),
+     "over the netting set; baskets use value-weighted haircuts [CRE22.46, 22.55; CRR Art. 223]."),
     ("Haircuts", "H = H10 x sqrt((N_R + T_M - 1) / 10); T_M = holding period, N_R = business days between "
      "remargining [CRE22.59; CRR Art. 226]. Currency mismatch Hfx = 8% scaled the same way [CRE22.52; "
      "Art. 224 Table 4]."),
     ("Holding period", "5 BD repo-style, 10 BD margin lending; 20 BD for a netting set with more than 5,000 "
-     "transactions in the previous quarter or illiquid collateral; doubled after margin disputes; an "
-     "override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
+     "transactions in the previous quarter or illiquid collateral; doubled after more than two margin-call "
+     "disputes; an override can only lengthen it [CRE22.57-22.58; CRR Art. 224(2), 285(3)-(4)]."),
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
-     "cash and central government securities, one currency, daily remargining) and takes the rest, "
-     "including the 0% risk weight of the securities, as declared [CRE22.60, 22.36; CRR Art. 227]."),
+     "cash and eligible central government or central bank debt, one currency, daily remargining) and takes the "
+     "rest, including the 0% risk weight of the securities, as declared [CRE22.60, 22.36-22.37; CRR Art. 227]."),
     ("Capital", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA [CRE22.48, RBC20.1; CRR "
      "Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when unrated, short-term "
      "weights when every transaction has an original maturity of 3 months or less [CRE20.18-20.21; Art. "
@@ -282,12 +286,12 @@ README = [
     ("Scope and limitations", None),
     ("Not covered", "SA-CCR and derivatives; internal models (IMM, VaR, own-estimate haircuts); "
      "the simple approach; secured lending and commodity repos; haircut floors for non-centrally cleared "
-     "SFTs (CRE56, not in the CRR); maturity mismatch; credit risk mitigation on the exposure side other "
-     "than collateral; cross-product netting with derivatives; CVA; the SCRA sovereign floor; capital "
-     "buffers and Pillar 2."),
+     "SFTs (CRE56, not in the CRR); maturity mismatch; short-term issue ratings; unfunded credit protection "
+     "(guarantees, credit derivatives); cross-product netting with derivatives; CVA; the SCRA sovereign floor; "
+     "capital buffers and Pillar 2."),
     ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
-     "(effective 1 January 2023) and the consolidated CRR of 26.06.2026; its formulas and tables are not "
-     "yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
+     "(effective 1 January 2023), CRE20, CRE54 and the consolidated CRR of 26.06.2026; its formulas and tables are "
+     "not yet checked against the registered copies (docs/methodology/PROTOTYPE.md). Expected values are "
      "reproduced by an independent Python derivation, not by published worked examples."),
     ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
      "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
