@@ -95,8 +95,8 @@ vulnerabilities; a settings record does not establish scan coverage or enforceme
   workbook before sharing it.
 - If a secret is exposed, revoke or rotate it at once, before reporting it.
 - Renew `TRAFFIC_TOKEN` before it expires and at least every 90 days, and
-  revoke it at once if the traffic workflow is changed by anyone but the
-  maintainer ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
+  revoke it at once if the traffic workflow is changed by anyone but
+  me ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 
 ## 🤝 Safe harbor
 
