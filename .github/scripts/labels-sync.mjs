@@ -4,11 +4,9 @@ import assert from "node:assert/strict";
 import { appendFile, readFile } from "node:fs/promises";
 import process from "node:process";
 
-const EXPECTED_SCHEMA_VERSION = 1;
+const EXPECTED_SCHEMA_VERSION = 2;
 const DEFAULT_MANIFEST = ".github/labels.json";
-const DEFAULT_POLICY = ".github/label-policy.json";
 const API_VERSION = "2022-11-28";
-const PROFILE_NAMES = ["application", "library", "ui-component"];
 const LABELS_PER_PAGE = 100;
 const MAX_LABEL_PAGES = 100;
 const MAX_RATE_LIMIT_RETRIES = 2;
@@ -93,107 +91,25 @@ export function validateManifest(document) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     throw new Error("Manifest must be a JSON object.");
   }
-  if (!sameKeys(document, ["schema_version", "prune", "core", "overlays"])) {
-    errors.push("root must contain exactly schema_version, prune, core, and overlays");
+  if (!sameKeys(document, ["schema_version", "prune", "labels"])) {
+    errors.push("root must contain exactly schema_version, prune, and labels");
   }
   if (document.schema_version !== EXPECTED_SCHEMA_VERSION) {
     errors.push(`schema_version must be ${EXPECTED_SCHEMA_VERSION}`);
   }
   if (typeof document.prune !== "boolean") errors.push("prune must be a boolean");
 
-  const seen = new Map();
-  errors.push(...validateLabelArray(document.core, "core", seen));
-  if (Array.isArray(document.core) && document.core.length === 0) errors.push("core must not be empty");
-
-  const overlays = document.overlays;
-  if (!overlays || typeof overlays !== "object" || Array.isArray(overlays)) {
-    errors.push("overlays must be an object");
-  } else if (!sameKeys(overlays, ["profile", "domain"])) {
-    errors.push("overlays must contain exactly profile and domain");
-  }
-
-  const profiles = overlays?.profile;
-  if (!profiles || typeof profiles !== "object" || Array.isArray(profiles)) {
-    errors.push("overlays.profile must be an object");
-  } else {
-    if (!sameKeys(profiles, PROFILE_NAMES)) {
-      errors.push(`overlays.profile must contain exactly ${PROFILE_NAMES.join(", ")}`);
-    }
-    for (const profile of PROFILE_NAMES) {
-      errors.push(...validateLabelArray(profiles[profile], `overlays.profile.${profile}`, seen));
-    }
-  }
-
-  const domains = overlays?.domain;
-  if (!domains || typeof domains !== "object" || Array.isArray(domains)) {
-    errors.push("overlays.domain must be an object");
-  } else {
-    for (const name of Object.keys(domains).sort()) {
-      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) {
-        errors.push(`overlays.domain key is not kebab-case: ${name}`);
-      }
-      errors.push(...validateLabelArray(domains[name], `overlays.domain.${name}`, seen));
-    }
-  }
+  errors.push(...validateLabelArray(document.labels, "labels", new Map()));
+  if (Array.isArray(document.labels) && document.labels.length === 0) errors.push("labels must not be empty");
 
   if (errors.length > 0) throw new Error(`Invalid label manifest:\n- ${errors.join("\n- ")}`);
   return structuredClone(document);
 }
 
-export function resolveDesired(document, { profile = null, domains = [] } = {}) {
-  const manifest = validateManifest(document);
-  const labels = [...manifest.core];
-  if (profile !== null) {
-    if (!PROFILE_NAMES.includes(profile)) throw new Error(`Unknown profile overlay: ${profile}`);
-    labels.push(...manifest.overlays.profile[profile]);
-  }
-  for (const domain of domains) {
-    const overlay = manifest.overlays.domain[domain];
-    if (!overlay) throw new Error(`Unknown domain overlay: ${domain}`);
-    labels.push(...overlay);
-  }
+export function resolveDesired(document) {
+  const labels = [...validateManifest(document).labels];
   labels.sort((left, right) => compareNames(left.name, right.name));
   return labels;
-}
-
-export function resolvePolicySelection(policy, manifest) {
-  if (!policy || typeof policy !== "object" || Array.isArray(policy)) {
-    throw new Error("Repository policy must be a JSON object");
-  }
-  if (!["template", "generated"].includes(policy.mode)) {
-    throw new Error("Repository policy mode must be template or generated");
-  }
-  if (
-    !Array.isArray(policy.label_domains)
-    || policy.label_domains.some(domain => typeof domain !== "string")
-  ) {
-    throw new Error("Repository policy label_domains must be an array of strings");
-  }
-  const domains = [...policy.label_domains];
-  if (new Set(domains).size !== domains.length) {
-    throw new Error("Repository policy label_domains must not contain duplicates");
-  }
-  if (JSON.stringify(domains) !== JSON.stringify([...domains].sort(compareNames))) {
-    throw new Error("Repository policy label_domains must be sorted case-insensitively");
-  }
-  for (const domain of domains) {
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(domain)) {
-      throw new Error(`Repository policy label domain is not kebab-case: ${domain}`);
-    }
-    if (!manifest.overlays.domain[domain]) {
-      throw new Error(`Repository policy selects unknown domain overlay: ${domain}`);
-    }
-  }
-  if (policy.mode === "template") {
-    if (policy.profile !== null || domains.length > 0) {
-      throw new Error("Template policy must select no profile or domain overlays");
-    }
-    return { profile: null, domains: [] };
-  }
-  if (!PROFILE_NAMES.includes(policy.profile)) {
-    throw new Error("Generated policy must select one supported profile overlay");
-  }
-  return { profile: policy.profile, domains };
 }
 
 export function planChanges(desiredLabels, liveLabels, { prune = true } = {}) {
@@ -233,7 +149,6 @@ export function planChanges(desiredLabels, liveLabels, { prune = true } = {}) {
 function parseArguments(argv) {
   const parsed = {
     manifest: DEFAULT_MANIFEST,
-    policy: DEFAULT_POLICY,
     mode: null,
     live: null,
     repository: process.env.GITHUB_REPOSITORY || null,
@@ -246,7 +161,7 @@ function parseArguments(argv) {
       parsed.dryRun = true;
     } else if (argument === "--self-test") {
       parsed.selfTest = true;
-    } else if (["--manifest", "--policy", "--mode", "--live", "--repository"].includes(argument)) {
+    } else if (["--manifest", "--mode", "--live", "--repository"].includes(argument)) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) throw new Error(`${argument} requires a value`);
       parsed[argument.slice(2)] = value;
@@ -380,19 +295,13 @@ function renderSummary({
   mode,
   manifest,
   manifestPath,
-  policyPath,
   desiredLabels,
-  profile,
-  domains,
   changes = [],
   verified = null,
   dryRun = false,
   error = null,
   partial = false
 }) {
-  const coreLabels = manifest?.core ?? [];
-  const profileLabels = profile === null ? [] : manifest?.overlays?.profile?.[profile] ?? [];
-  const domainLabels = domains.flatMap(domain => manifest?.overlays?.domain?.[domain] ?? []);
   const resolvedLabels = desiredLabels ?? [];
   const planned = changes !== null;
   const counts = Object.fromEntries(["create", "update", "delete"].map(action => [
@@ -403,12 +312,9 @@ function renderSummary({
     "# Repository label synchronization",
     "",
     `- Mode: \`${mode}\`${dryRun ? " (dry run)" : ""}`,
-    `- Policy source: \`${policyPath ?? "unavailable"}\``,
     `- Label manifest: \`${manifestPath ?? "unavailable"}\``,
     `- Schema: **${manifest?.schema_version ?? "unavailable"}**`,
-    `- Core / selected labels: **${coreLabels.length} / ${resolvedLabels.length}**`,
-    `- Profile overlay: **${profile ?? "none"}**`,
-    `- Domain overlays: **${domains.length > 0 ? domains.join(", ") : "none"}**`,
+    `- Labels: **${resolvedLabels.length}**`,
     `- Prune: **${manifest ? (manifest.prune ? "enabled" : "disabled") : "unavailable"}**`,
     `- Planned changes: **${planned ? changes.length : "not computed (live labels not read)"}**`,
     `- Create / update / delete: **${counts.create} / ${counts.update} / ${counts.delete}**`
@@ -416,12 +322,9 @@ function renderSummary({
   if (verified !== null) lines.push(`- Post-run exact match: **${verified ? "yes" : "no"}**`);
   lines.push(
     "",
-    "## Resolved label catalogue",
+    "## Label catalogue",
     "",
-    `- Core labels (${coreLabels.length}): ${renderLabelNames(coreLabels)}`,
-    `- Profile labels (${profile ?? "none"}; ${profileLabels.length}): ${renderLabelNames(profileLabels)}`,
-    `- Domain labels (${domains.length > 0 ? domains.join(", ") : "none"}; ${domainLabels.length}): ${renderLabelNames(domainLabels)}`,
-    `- Complete resolved set (${resolvedLabels.length}): ${renderLabelNames(resolvedLabels)}`
+    `- Labels (${resolvedLabels.length}): ${renderLabelNames(resolvedLabels)}`
   );
   if (error) {
     lines.push("", "## Failure", "", `\`${markdownEscape(error)}\``);
@@ -435,7 +338,7 @@ function renderSummary({
   } else {
     lines.push("", "| Action | Label | Detail |", "|---|---|---|");
     for (const change of changes) {
-      const detail = change.action === "update" ? change.fields.join(", ") : change.action === "delete" ? "outside selected manifest" : "missing live label";
+      const detail = change.action === "update" ? change.fields.join(", ") : change.action === "delete" ? "outside the manifest" : "missing live label";
       lines.push(`| ${change.action} | \`${markdownEscape(change.name)}\` | ${markdownEscape(detail)} |`);
     }
   }
@@ -451,7 +354,7 @@ function expectFailure(operation, pattern) {
   assert.throws(operation, pattern);
 }
 
-async function runSelfTest(manifestPath, policyPath) {
+async function runSelfTest(manifestPath) {
   for (const [header, attempt, expected] of [
     [null, 0, 1000], [null, 2, 4000], ["", 1, 2000],
     ["invalid", 1, 2000], ["-1", 1, 2000], ["0", 2, 0],
@@ -464,81 +367,48 @@ async function runSelfTest(manifestPath, policyPath) {
 
   const baseline = await loadJson(manifestPath);
   const manifest = validateManifest(baseline);
-  const policy = await loadJson(policyPath);
   const desired = resolveDesired(manifest);
-
-  const currentSelection = resolvePolicySelection(policy, manifest);
-  assert.deepEqual(
-    currentSelection,
-    policy.mode === "template"
-      ? { profile: null, domains: [] }
-      : { profile: policy.profile, domains: policy.label_domains }
-  );
-  const templatePolicy = structuredClone(policy);
-  templatePolicy.mode = "template";
-  templatePolicy.profile = null;
-  templatePolicy.label_domains = [];
-  assert.deepEqual(resolvePolicySelection(templatePolicy, manifest), { profile: null, domains: [] });
-
-  const generatedPolicy = structuredClone(templatePolicy);
-  generatedPolicy.mode = "generated";
-  generatedPolicy.profile = "library";
-  assert.deepEqual(resolvePolicySelection(generatedPolicy, manifest), { profile: "library", domains: [] });
-
-  const wrongPolicyMode = structuredClone(policy);
-  wrongPolicyMode.mode = "unknown";
-  expectFailure(() => resolvePolicySelection(wrongPolicyMode, manifest), /mode/);
-
-  const selectedTemplateProfile = structuredClone(templatePolicy);
-  selectedTemplateProfile.profile = "library";
-  expectFailure(() => resolvePolicySelection(selectedTemplateProfile, manifest), /Template policy/);
-
-  const missingGeneratedProfile = structuredClone(generatedPolicy);
-  missingGeneratedProfile.profile = null;
-  expectFailure(() => resolvePolicySelection(missingGeneratedProfile, manifest), /supported profile/);
-
-  const invalidPolicyDomains = structuredClone(generatedPolicy);
-  invalidPolicyDomains.label_domains = ["Unknown Domain"];
-  expectFailure(() => resolvePolicySelection(invalidPolicyDomains, manifest), /kebab-case/);
 
   const missingRoot = structuredClone(baseline);
   delete missingRoot.prune;
   expectFailure(() => validateManifest(missingRoot), /root must contain exactly/);
 
+  const extraRoot = structuredClone(baseline);
+  extraRoot.overlays = {};
+  expectFailure(() => validateManifest(extraRoot), /root must contain exactly/);
+
   const wrongSchema = structuredClone(baseline);
-  wrongSchema.schema_version = 2;
+  wrongSchema.schema_version = 1;
   expectFailure(() => validateManifest(wrongSchema), /schema_version/);
 
   const invalidPrune = structuredClone(baseline);
   invalidPrune.prune = "true";
   expectFailure(() => validateManifest(invalidPrune), /prune must be a boolean/);
 
+  const emptyLabels = structuredClone(baseline);
+  emptyLabels.labels = [];
+  expectFailure(() => validateManifest(emptyLabels), /must not be empty/);
+
   const missingField = structuredClone(baseline);
-  delete missingField.core[0].description;
+  delete missingField.labels[0].description;
   expectFailure(() => validateManifest(missingField), /name, color, and description/);
 
   const invalidColor = structuredClone(baseline);
-  invalidColor.core[0].color = "#c24e00";
+  invalidColor.labels[0].color = "#c24e00";
   expectFailure(() => validateManifest(invalidColor), /uppercase hexadecimal/);
 
   const duplicateName = structuredClone(baseline);
-  duplicateName.core[1].name = baseline.core[0].name.toUpperCase();
+  duplicateName.labels[1].name = baseline.labels[0].name.toUpperCase();
   expectFailure(() => validateManifest(duplicateName), /duplicates/);
 
-  const overlayDuplicate = structuredClone(baseline);
-  overlayDuplicate.overlays.profile.library.push(structuredClone(baseline.core[0]));
-  expectFailure(() => validateManifest(overlayDuplicate), /duplicates/);
-
   const longDescription = structuredClone(baseline);
-  longDescription.core[0].description = "x".repeat(101);
+  longDescription.labels[0].description = "x".repeat(101);
   expectFailure(() => validateManifest(longDescription), /100-character/);
 
   const unsorted = structuredClone(baseline);
-  [unsorted.core[0], unsorted.core[1]] = [unsorted.core[1], unsorted.core[0]];
+  [unsorted.labels[0], unsorted.labels[1]] = [unsorted.labels[1], unsorted.labels[0]];
   expectFailure(() => validateManifest(unsorted), /sorted/);
 
-  expectFailure(() => resolveDesired(manifest, { profile: "unknown" }), /Unknown profile/);
-  expectFailure(() => resolveDesired(manifest, { domains: ["unknown"] }), /Unknown domain/);
   assert.equal(planChanges(desired, desired, { prune: manifest.prune }).length, 0, "idempotent plan must be empty");
 
   assert.deepEqual(planChanges(desired, desired.slice(1)).map(change => change.action), ["create"]);
@@ -558,51 +428,20 @@ async function runSelfTest(manifestPath, policyPath) {
   caseDrift[0].name = desired[0].name.toUpperCase();
   assert.deepEqual(planChanges(desired, caseDrift)[0].fields, ["name"]);
 
-  const overlay = structuredClone(baseline);
-  overlay.overlays.profile.library = [{ name: "library", color: "654321", description: "Library profile label" }];
-  overlay.overlays.domain.alpha = [{ name: "alpha", color: "123ABC", description: "Alpha domain label" }];
-  overlay.overlays.domain.example = [{ name: "example", color: "ABCDEF", description: "Example domain label" }];
-  const selectedOverlay = validateManifest(overlay);
-  const selectedLabels = resolveDesired(selectedOverlay, { profile: "library", domains: ["example"] });
-  assert.equal(selectedLabels.length, desired.length + 2);
-
-  const domainPolicy = structuredClone(generatedPolicy);
-  domainPolicy.label_domains = ["example"];
-  assert.deepEqual(resolvePolicySelection(domainPolicy, overlay), { profile: "library", domains: ["example"] });
-
-  const unknownDomainPolicy = structuredClone(generatedPolicy);
-  unknownDomainPolicy.label_domains = ["unknown"];
-  expectFailure(() => resolvePolicySelection(unknownDomainPolicy, manifest), /unknown domain/);
-
-  const duplicateDomainPolicy = structuredClone(generatedPolicy);
-  duplicateDomainPolicy.label_domains = ["example", "example"];
-  expectFailure(() => resolvePolicySelection(duplicateDomainPolicy, overlay), /duplicates/);
-
-  const unsortedDomainPolicy = structuredClone(generatedPolicy);
-  unsortedDomainPolicy.label_domains = ["example", "alpha"];
-  expectFailure(() => resolvePolicySelection(unsortedDomainPolicy, overlay), /sorted/);
-
   const summary = renderSummary({
     mode: "plan",
-    manifest: selectedOverlay,
+    manifest,
     manifestPath: "fixture-labels.json",
-    policyPath: "fixture-policy.json",
-    desiredLabels: selectedLabels,
-    profile: "library",
-    domains: ["example"],
+    desiredLabels: desired,
     dryRun: true
   });
-  assert.match(summary, /Policy source: `fixture-policy\.json`/);
   assert.match(summary, /Label manifest: `fixture-labels\.json`/);
-  assert.match(summary, /Profile labels \(library; 1\): "library"/);
+  assert.match(summary, new RegExp(`Labels: \\*\\*${desired.length}\\*\\*`));
   const validateSummary = renderSummary({
     mode: "validate",
-    manifest: selectedOverlay,
+    manifest,
     manifestPath: "fixture-labels.json",
-    policyPath: "fixture-policy.json",
-    desiredLabels: selectedLabels,
-    profile: "library",
-    domains: ["example"],
+    desiredLabels: desired,
     changes: null
   });
   assert.match(validateSummary, /Planned changes: \*\*not computed \(live labels not read\)\*\*/);
@@ -612,10 +451,7 @@ async function runSelfTest(manifestPath, policyPath) {
     mode: "failed",
     manifest: null,
     manifestPath: null,
-    policyPath: null,
     desiredLabels: [],
-    profile: null,
-    domains: [],
     changes: [{ action: "create", name: "new" }],
     partial: true,
     error: "write failed"
@@ -623,11 +459,10 @@ async function runSelfTest(manifestPath, policyPath) {
   assert.match(failureSummary, /Prune: \*\*unavailable\*\*/);
   assert.match(failureSummary, /Planned changes: \*\*1\*\*/);
   assert.match(failureSummary, /some changes may already be applied/);
-  assert.match(summary, /Domain labels \(example; 1\): "example"/);
-  assert.match(summary, new RegExp(`Complete resolved set \\(${selectedLabels.length}\\):`));
-  for (const label of selectedLabels) assert.match(summary, new RegExp(`"${label.name}"`));
+  assert.match(summary, new RegExp(`Labels \\(${desired.length}\\):`));
+  for (const label of desired) assert.match(summary, new RegExp(`"${label.name}"`));
 
-  process.stdout.write("SELF-TEST PASS: retry delays, validation, policy, overlay, and reconciliation fixtures\n");
+  process.stdout.write("SELF-TEST PASS: retry delays, validation and reconciliation fixtures\n");
 }
 
 // What the run knew before a failure, so that the failure summary reports it.
@@ -636,20 +471,16 @@ const runState = { summaryBase: null, changes: null, applying: false };
 async function main() {
   const options = parseArguments(process.argv.slice(2));
   if (options.selfTest) {
-    await runSelfTest(options.manifest, options.policy);
+    await runSelfTest(options.manifest);
     return;
   }
 
   const manifest = validateManifest(await loadJson(options.manifest));
-  const selection = resolvePolicySelection(await loadJson(options.policy), manifest);
-  const desired = resolveDesired(manifest, selection);
+  const desired = resolveDesired(manifest);
   const summaryBase = {
     manifest,
     manifestPath: options.manifest,
-    policyPath: options.policy,
-    desiredLabels: desired,
-    profile: selection.profile,
-    domains: selection.domains
+    desiredLabels: desired
   };
   runState.summaryBase = summaryBase;
 
@@ -696,10 +527,7 @@ main().catch(async error => {
       ...(runState.summaryBase ?? {
         manifest: null,
         manifestPath: null,
-        policyPath: null,
-        desiredLabels: [],
-        profile: null,
-        domains: []
+        desiredLabels: []
       }),
       changes: runState.changes,
       partial: runState.applying,

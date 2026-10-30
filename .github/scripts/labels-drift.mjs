@@ -12,7 +12,6 @@ const execFileAsync = promisify(execFile);
 const TOOL_NAME = "Repository label drift";
 const API_VERSION = "2022-11-28";
 const DEFAULT_MANIFEST = ".github/labels.json";
-const DEFAULT_POLICY = ".github/label-policy.json";
 const RECONCILER = ".github/scripts/labels-sync.mjs";
 const LABELS_PER_PAGE = 100;
 const MAX_LABEL_PAGES = 100;
@@ -38,7 +37,6 @@ function normalizedLiveLabel(label) {
 function parseArguments(argv) {
   const parsed = {
     manifest: DEFAULT_MANIFEST,
-    policy: DEFAULT_POLICY,
     live: null,
     repository: process.env.GITHUB_REPOSITORY || null,
     output: null,
@@ -51,7 +49,7 @@ function parseArguments(argv) {
       parsed.selfTest = true;
       continue;
     }
-    if (["--manifest", "--policy", "--live", "--repository", "--output", "--summary"].includes(argument)) {
+    if (["--manifest", "--live", "--repository", "--output", "--summary"].includes(argument)) {
       const value = argv[index + 1];
       if (!value || value.startsWith("--")) throw new Error(`${argument} requires a value`);
       parsed[argument.slice(2)] = value;
@@ -166,25 +164,15 @@ async function runReconciler(arguments_) {
   }
 }
 
-async function validateCanonicalContract(manifestPath, policyPath) {
+async function validateCanonicalContract(manifestPath) {
   await runReconciler([
     "--manifest", manifestPath,
-    "--policy", policyPath,
     "--mode", "validate"
   ]);
 }
 
-function selectionFromValidatedPolicy(policy) {
-  return policy.mode === "template"
-    ? { profile: null, domains: [] }
-    : { profile: policy.profile, domains: [...policy.label_domains] };
-}
-
-function desiredFromValidatedContract(manifest, selection) {
-  const labels = [...manifest.core];
-  if (selection.profile !== null) labels.push(...manifest.overlays.profile[selection.profile]);
-  for (const domain of selection.domains) labels.push(...manifest.overlays.domain[domain]);
-  return labels.sort((left, right) => compareNames(left.name, right.name));
+function desiredFromValidatedContract(manifest) {
+  return [...manifest.labels].sort((left, right) => compareNames(left.name, right.name));
 }
 
 function localPlan(desiredLabels, liveLabels, { prune = true } = {}) {
@@ -244,19 +232,18 @@ function localRows(changes) {
     detail: change.action === "update"
       ? change.fields.join(", ")
       : change.action === "delete"
-        ? "outside selected manifest"
+        ? "outside the manifest"
         : "missing live label"
   }));
 }
 
-async function verifyAgainstCanonicalPlan(manifestPath, policyPath, liveLabels, changes) {
+async function verifyAgainstCanonicalPlan(manifestPath, liveLabels, changes) {
   const directory = await mkdtemp(join(tmpdir(), "label-drift-"));
   const livePath = join(directory, "live.json");
   try {
     await writeFile(livePath, `${JSON.stringify(liveLabels, null, 2)}\n`, "utf8");
     const stdout = await runReconciler([
       "--manifest", manifestPath,
-      "--policy", policyPath,
       "--mode", "plan",
       "--live", livePath
     ]);
@@ -279,7 +266,7 @@ function changeEvidence(change, observedByName) {
   };
 }
 
-function buildReport({ repository, manifestPath, policyPath, manifest, selection, desiredLabels, liveLabels }) {
+function buildReport({ repository, manifestPath, manifest, desiredLabels, liveLabels }) {
   const observed = liveLabels
     .map(normalizedLiveLabel)
     .sort((left, right) => compareNames(left.name, right.name));
@@ -293,13 +280,11 @@ function buildReport({ repository, manifestPath, policyPath, manifest, selection
     differences.filter(item => item.action === action).length
   ]));
   return {
-    schema_version: 1,
+    schema_version: 2,
     tool: TOOL_NAME,
     status: differences.length === 0 ? "pass" : "drift",
     repository,
     manifest: manifestPath,
-    policy: policyPath,
-    selection: { profile: selection.profile, domains: selection.domains },
     prune: manifest.prune,
     counts: {
       desired: desired.length,
@@ -332,9 +317,6 @@ function markdownReport(report) {
     `- Status: **${String(report.status).toUpperCase()}**`,
     `- Repository: \`${report.repository ?? "fixture"}\``,
     `- Manifest: \`${report.manifest}\``,
-    `- Policy: \`${report.policy}\``,
-    `- Profile overlay: **${report.selection.profile ?? "none"}**`,
-    `- Domain overlays: **${report.selection.domains.length > 0 ? report.selection.domains.join(", ") : "none"}**`,
     `- Desired / observed: **${report.counts.desired} / ${report.counts.observed}**`,
     `- Differences: **${report.counts.differences}**`,
     `- Create / update / delete: **${report.counts.create} / ${report.counts.update} / ${report.counts.delete}**`,
@@ -373,23 +355,21 @@ async function publishSummary(summary) {
   }
 }
 
-async function prepareContract(manifestPath, policyPath) {
-  await validateCanonicalContract(manifestPath, policyPath);
+async function prepareContract(manifestPath) {
+  await validateCanonicalContract(manifestPath);
   const manifest = await loadJson(manifestPath);
-  const policy = await loadJson(policyPath);
-  const selection = selectionFromValidatedPolicy(policy);
-  const desiredLabels = desiredFromValidatedContract(manifest, selection);
-  return { manifest, selection, desiredLabels };
+  const desiredLabels = desiredFromValidatedContract(manifest);
+  return { manifest, desiredLabels };
 }
 
 async function checkedReport(parameters) {
   const report = buildReport(parameters);
   const changes = localPlan(report.desired, report.observed, { prune: report.prune });
-  await verifyAgainstCanonicalPlan(report.manifest, report.policy, report.observed, changes);
+  await verifyAgainstCanonicalPlan(report.manifest, report.observed, changes);
   return report;
 }
 
-async function runSelfTest(manifestPath, policyPath) {
+async function runSelfTest(manifestPath) {
   for (const [header, attempt, expected] of [
     [null, 0, 1000], [null, 2, 4000], ["", 1, 2000],
     ["invalid", 1, 2000], ["-1", 1, 2000], ["0", 2, 0],
@@ -400,25 +380,21 @@ async function runSelfTest(manifestPath, policyPath) {
     assert.equal(retryDelayMs({ headers }, attempt), expected, `Retry-After: ${header}`);
   }
 
-  const { manifest, selection, desiredLabels } = await prepareContract(manifestPath, policyPath);
+  const { manifest, desiredLabels } = await prepareContract(manifestPath);
 
   const baseline = structuredClone(desiredLabels);
   const baselineBefore = JSON.stringify(baseline);
   const cleanFirst = await checkedReport({
     repository: "fixture/clean",
     manifestPath,
-    policyPath,
     manifest,
-    selection,
     desiredLabels,
     liveLabels: baseline
   });
   const cleanSecond = await checkedReport({
     repository: "fixture/clean",
     manifestPath,
-    policyPath,
     manifest,
-    selection,
     desiredLabels,
     liveLabels: baseline
   });
@@ -438,18 +414,14 @@ async function runSelfTest(manifestPath, policyPath) {
   const driftFirst = await checkedReport({
     repository: "fixture/drift",
     manifestPath,
-    policyPath,
     manifest,
-    selection,
     desiredLabels,
     liveLabels: drifted
   });
   const driftSecond = await checkedReport({
     repository: "fixture/drift",
     manifestPath,
-    policyPath,
     manifest,
-    selection,
     desiredLabels,
     liveLabels: drifted
   });
@@ -469,11 +441,11 @@ async function runSelfTest(manifestPath, policyPath) {
 async function main() {
   const options = parseArguments(process.argv.slice(2));
   if (options.selfTest) {
-    await runSelfTest(options.manifest, options.policy);
+    await runSelfTest(options.manifest);
     return;
   }
 
-  const { manifest, selection, desiredLabels } = await prepareContract(options.manifest, options.policy);
+  const { manifest, desiredLabels } = await prepareContract(options.manifest);
 
   let liveLabels;
   if (options.live) {
@@ -491,9 +463,7 @@ async function main() {
   const report = await checkedReport({
     repository: options.repository,
     manifestPath: options.manifest,
-    policyPath: options.policy,
     manifest,
-    selection,
     desiredLabels,
     liveLabels
   });

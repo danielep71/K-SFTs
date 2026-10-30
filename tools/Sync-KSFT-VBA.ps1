@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-Synchronize repository VBA source into an existing .xlsm workbook built from
-src\workbook\SFT_Template.xlsx.
+Synchronize repository VBA source into an .xlsm workbook built from
+src\workbook\SFT_Template.xlsx, which -FromTemplate builds first.
 
 .DESCRIPTION
-Updates VBA code only. A full synchronization imports the components that
+Writes VBA code only. A full synchronization imports the components that
 tools\vba-projects.json lists for one of two workbooks, and asks which one
 unless -Mode gives the answer:
 
@@ -15,7 +15,7 @@ unless -Mode gives the answer:
   on synthetic data only.
 
 With -SourceDir only the standard and class modules found in that folder are
-imported (see the third example). Standard and class modules are replaced from
+imported (see the -SourceDir example). Standard and class modules are replaced from
 source. ThisWorkbook and worksheet document modules keep their workbook
 objects and only their code text is replaced. The script
 does not write cells, formulas, names, formatting, tables, worksheets, or
@@ -53,7 +53,7 @@ it is. -IncludeSheets or -SkipSheets gives the answer in advance.
 .NOTES
 Requirements:
 - Windows desktop Excel.
-- Excel > Options > Trust Center > Macro Settings >
+- File > Options > Trust Center > Trust Center Settings > Macro Settings >
   "Trust access to the VBA project object model" enabled.
 - VBA project not password-locked.
 
@@ -86,13 +86,6 @@ with it.
 .EXAMPLE
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SourceDir "$env:USERPROFILE\Downloads"
 
-.EXAMPLE
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SkipSheets
-
-Asks for production or development, then imports every component except the
-worksheet and ThisWorkbook modules, whose code it leaves as it is, without
-asking about it.
-
 With -SourceDir, only the modules found in that folder are imported, for
 example modules downloaded for a test, without copying them into the
 repository. A file is identified only by the Attribute VB_Name it declares,
@@ -107,6 +100,13 @@ files in the folder are ignored. When several files carry the same VB_Name
 lists the files and asks for confirmation unless -Force is given, converts
 their line endings to CRLF and imports them. Every other
 module in the workbook is left as it is.
+
+.EXAMPLE
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tools\Sync-KSFT-VBA.ps1 -WorkbookPath "C:\path\K-SFT.xlsm" -SkipSheets
+
+Asks for production or development, then imports every component except the
+worksheet and ThisWorkbook modules, whose code it leaves as it is, without
+asking about it.
 #>
 
 [CmdletBinding()]
@@ -908,7 +908,7 @@ try {
     }
     catch {
         throw (
-            "Cannot access the VBA project. Enable Excel Trust Center > Macro Settings > " +
+            "Cannot access the VBA project. Enable File > Options > Trust Center > Trust Center Settings > Macro Settings > " +
             "'Trust access to the VBA project object model' and ensure the VBA project " +
             "is not password-locked."
         )

@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "prune": true,
-  "core": [
+  "labels": [
     {
       "name": "behavior-change",
       "color": "C24E00",
@@ -65,7 +65,7 @@
     {
       "name": "P3",
       "color": "FBCA04",
-      "description": "Non-blocking quality, testing, documentation, or technical-debt improvement"
+      "description": "Non-blocking quality, testing, documentation, setup or technical-debt work"
     },
     {
       "name": "question",
@@ -102,13 +102,5 @@
       "color": "6E7781",
       "description": "The maintainer has decided not to implement or continue this work"
     }
-  ],
-  "overlays": {
-    "profile": {
-      "application": [],
-      "library": [],
-      "ui-component": []
-    },
-    "domain": {}
-  }
+  ]
 }

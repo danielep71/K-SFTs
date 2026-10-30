@@ -37,8 +37,8 @@ versions; each gate also writes `<gate>.log`.
 | Gate | Checks |
 | --- | --- |
 | `tool-tests` | Unit tests of the tooling (`tools/test_*.py`), including this runner's status, report and missing-tool rules. |
-| `labels-sync-self-test` | The label synchronizer's validation, overlay and reconciliation fixtures. |
-| `labels-manifest` | `.github/labels.json` is valid under `.github/label-policy.json`. |
+| `labels-sync-self-test` | The label synchronizer's validation and reconciliation fixtures. |
+| `labels-manifest` | `.github/labels.json` is valid. |
 | `labels-drift-self-test` | The read-only drift detector's fixtures. |
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |

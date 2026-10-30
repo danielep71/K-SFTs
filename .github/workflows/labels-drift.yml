@@ -13,7 +13,6 @@ on:
       - "release/**"
     paths:
       - .github/labels.json
-      - .github/label-policy.json
       - .github/scripts/labels-drift.mjs
       - .github/scripts/labels-sync.mjs
       - .github/workflows/labels-drift.yml
@@ -49,7 +48,7 @@ jobs:
           persist-credentials: false
 
       - name: Exercise deterministic read-only drift fixtures
-        run: node .github/scripts/labels-drift.mjs --policy .github/label-policy.json --self-test
+        run: node .github/scripts/labels-drift.mjs --self-test
 
   detect:
     name: Live label drift
@@ -69,15 +68,15 @@ jobs:
       - name: Exercise deterministic read-only drift fixtures
         id: fixtures
         continue-on-error: true
-        run: node .github/scripts/labels-drift.mjs --policy .github/label-policy.json --self-test
+        run: node .github/scripts/labels-drift.mjs --self-test
 
-      - name: Compare live labels with versioned policy
+      - name: Compare live labels with the versioned manifest
         id: drift
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
-          node .github/scripts/labels-drift.mjs --policy .github/label-policy.json
+          node .github/scripts/labels-drift.mjs
           --repository "${GITHUB_REPOSITORY}"
           --output test-results/labels-drift.json
           --summary test-results/labels-drift.md
