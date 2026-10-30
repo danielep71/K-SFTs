@@ -36,8 +36,8 @@ RW, RWA and own funds labelled illustrative
 closed; the source checks in #173 and the fixtures in #174; the core
 separation under a waiver until v1.0.0
 ([#249](https://github.com/danielep71/K-SFTs/issues/249)). The table stays as
-the record of 0.2.0; this document describes the prototype until #248 changes
-it.
+the record of 0.2.0. Since #248, this document describes the prototype as it
+follows the support matrix.
 
 ## Contents
 
@@ -64,9 +64,14 @@ K-SFTs calculates, per netting set of securities financing transactions
 
 SA-CCR does not apply to SFTs (CRR Art. 271(1), 273; Basel CRE51.8): the
 derivatives of the same counterparty are out of scope.
-Both regimes are supported per netting set: **CRR** (Regulation (EU) No 575/2013,
-consolidated text of 26.06.2026, i.e. with CRR3) and **BCBS** (CRE22 effective
-1 January 2023, CRE20, CRE54).
+The only regime is **CRR** (Regulation (EU) No 575/2013, consolidated text of
+26.06.2026, i.e. with CRR3), with the Basel Framework (CRE22 effective 1 January
+2023, CRE20) as reference. Since #248 the workbook refuses what the
+[support matrix](SUPPORT_MATRIX.md) rejects: a `BCBS` regime on Params or a
+table row, and a reporting date before 2025-01-01, stop the run; a `BCBS`
+netting set and the `QCCP` counterparty class make the netting set INVALID.
+Only E\* and its intermediate amounts are supported; the risk weight, RWA and
+own funds requirement are **illustrative**, and labelled so on Results.
 
 <a id="calculation"></a>
 
@@ -170,13 +175,16 @@ and `SFT_ExposureNetted(100,102,2.04,2.04,1)` check this.
 RWA = E* × RW          own funds requirement = 8% × RWA        [CRE22.48, RBC20.1; Art. 92(1)(c)]
 ```
 
+Illustrative outputs (D7): the risk-weight table is not checked against a
+registered source.
+
 | Counterparty class | Key | Rule |
 | --- | --- | --- |
 | SOV | `SOV_CQSn`, `SOV_UNRATED` | 0/20/50/100/100/150, unrated 100 [CRE20.7; Art. 114(2)] |
 | INST rated | `INST_CQSn`, `INST_ST_CQSn` | ECRA 20/30/50/100/100/150; short-term 20/20/20/50/50/150 [CRE20.18-20.19; Art. 120] |
 | INST unrated | `INST_SCRA_g`, `INST_ST_SCRA_g` | SCRA A 40, A_ENH 30, B 75, C 150; short-term 20/20/50/150 [CRE20.21; Art. 121(3)] |
 | CORP | `CORP_CQSn`, `CORP_UNRATED` | 20/50/75/100/150/150, unrated 100 [CRE20 corporates; Art. 122] |
-| QCCP | `QCCP` | 2% on trade exposures [CRE54.7; Art. 306(1)(a)] |
+| QCCP | — | Refused since #248: exposures to CCPs are out of scope |
 
 `ST_` applies when **every** transaction of the netting set has an original
 maturity of three months or less (start date + 3 months ≥ maturity date; an open
@@ -201,7 +209,8 @@ Results and no rows on Positions.
 
 ## 📌 Regulatory parameter set
 
-`CRE22-CRR-2026-10-24` (constants `REF_*` in `src/core/CORE_Config.bas`). A run
+`CRE22-CRR-2026-10-30` (constants `REF_*` in `src/core/CORE_Config.bas`); it
+was `CRE22-CRR-2026-10-24` until #248 removed the QCCP risk weight. A run
 whose parameters, haircut table, risk-weight table and overrides equal it is
 **REGULATORY**; otherwise **WHAT-IF**, with each difference listed on Checks.
 `DaysPerYear` is a convention and does not change the class.
@@ -218,12 +227,12 @@ whose parameters, haircut table, risk-weight table and overrides equal it is
 | `IssueCountThreshold` | 0.1 | CRE22.65; Art. 220(3) |
 | `CapitalRatio` | 8% | RBC20.1; Art. 92(1)(c) |
 | Haircut table | 35 rows | CRE22.49; Art. 224 Tables 1, 3 (10-day column) |
-| Risk-weight table | 35 rows | CRE20; Art. 114, 120-122, 306(1)(a) |
+| Risk-weight table | 34 rows, illustrative | CRE20; Art. 114, 120-122 |
 
 The 10-day haircuts of the consolidated CRR (Table 1: 0.5/2/2/4/4 for CQS 1
 sovereign debt, …, 15 for CQS 4 sovereign debt; Table 3: 20/30/0/20) equal
-CRE22.49, so one table serves both regimes; the `Regimes` column lets a row be
-limited to one of them.
+CRE22.49. The `Regimes` column takes `BOTH` or `CRR`; a row limited to `BCBS`
+is refused (#248).
 
 <a id="support-matrix"></a>
 
@@ -236,7 +245,7 @@ limited to one of them.
 | Cash, debt (SOV / INST / CORP / SEC), equities (main index / listed), gold, funds | Fund haircut (look-through or highest) | Short-term issue ratings (A-1 …) |
 | Holding period: type, >5,000 / illiquid, disputes, override; remargining frequency | The 0% haircut conditions not visible in the inputs | Own-estimate haircuts, VaR, IMM, the simple approach |
 | Non-eligible securities lent (30%), non-eligible collateral not recognised | SCRA grade of an unrated institution | Haircut floors for non-centrally cleared SFTs (CRE56) |
-| Risk weights SOV / INST (ECRA, SCRA, short-term) / CORP / QCCP; override | CQS of counterparties and issues | Maturity mismatch, SCRA sovereign floor, CVA, buffers, Pillar 2 |
+| Illustrative risk weights SOV / INST (ECRA, SCRA, short-term) / CORP; override | CQS of counterparties and issues | Maturity mismatch, SCRA sovereign floor, CVA, buffers, Pillar 2 |
 
 <a id="traceability"></a>
 
@@ -251,7 +260,7 @@ limited to one of them.
 | Holding period | `SFT_HoldingPeriod`, `CORE_Engine.HoldingFor` | Art. 224(2), 285(3)-(4) | CRE22.57-22.58 |
 | Haircut key and eligibility | `CORE_Engine.FindHaircut` | Art. 197, 224(1), (4)-(6) | CRE22.49, 22.54 |
 | 0% haircut | `CORE_Engine.CheckZeroHaircut` | Art. 227 | CRE22.60, 22.36-22.37 |
-| Risk weight | `CORE_Engine.FindRiskWeight` | Art. 114, 120-122, 306(1)(a) | CRE20.7, 20.18-20.21, CRE54.7 |
+| Risk weight (illustrative) | `CORE_Engine.FindRiskWeight` | Art. 114, 120-122 | CRE20.7, 20.18-20.21 |
 | Own funds requirement | `SFT_CapitalRequirement` | Art. 92(1)(c) | CRE22.48, RBC20.1 |
 | Run class | `CORE_Engine.ClassifyRun` | — | — |
 
@@ -261,7 +270,7 @@ limited to one of them.
 
 1. **Mixed netting sets.** CRE22.58 sets 10 BD for a netting set mixing
    repo-style and other capital market transactions; the CRR text does not say
-   so explicitly. The workbook uses the longer minimum (10) in both regimes.
+   so explicitly. The workbook uses the longer minimum (10).
 2. **One haircut per issue.** Legs of one issue in a netting set must describe it
    identically (type, issuer, CQS, maturity, listing, fund haircut, currency);
    otherwise the netting set is INVALID.

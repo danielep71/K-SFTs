@@ -14,7 +14,11 @@ specification in docs/methodology/PROTOTYPE.md:
                   + sum_k |E_k^fx| Hfx)       [CRE22.65; CRR Art. 220(3)]
   haircut scaling   H = H10 sqrt((N_R + T_M - 1) / 10)
                                             [CRE22.59; CRR Art. 226]
-  RWA = E* x RW;  own funds requirement = 8% x RWA
+  RWA = E* x RW;  own funds requirement = 8% x RWA (both illustrative)
+
+The support matrix (docs/methodology/SUPPORT_MATRIX.md) refuses, as the engine
+does: a reporting date before 2025-01-01 or a Params regime other than CRR
+stops the run; a netting set in the BCBS regime or of class QCCP is INVALID.
 
 The VBA engine and this module are written from the same specification but
 share no code; tests/derivations/prototype/demo-portfolio.expected.json is generated from this module and the
@@ -38,7 +42,9 @@ REPO_STYLE = {"REPO", "REVREPO", "SECLEND", "SECBORROW"}
 CAPITAL_MARKET = {"MARGINLEND"}
 TYPES = REPO_STYLE | CAPITAL_MARKET
 ASSETS = {"CASH", "DEBT", "EQUITY", "GOLD", "FUND", "OTHER"}
-CLASSES = {"SOV", "INST", "CORP", "QCCP"}
+CLASSES = {"SOV", "INST", "CORP"}
+REGIME = "CRR"                      # the only supported regime (D1)
+FIRST_AS_OF = dt.date(2025, 1, 1)   # earliest supported reporting date (D2)
 
 
 def date(text):
@@ -126,8 +132,6 @@ def holding_period(types, ns, p):
 def risk_weight_key(ns, short_term):
     cls = ns["class"]
     cqs = ns["cqs"]
-    if cls == "QCCP":
-        return "QCCP"
     if cls == "SOV":
         return f"SOV_CQS{int(cqs)}" if cqs not in ("", None) else "SOV_UNRATED"
     if cls == "CORP":
@@ -141,6 +145,8 @@ def risk_weight_key(ns, short_term):
 def calculate(fixture, tables):
     p = fixture["params"]
     as_of = date(p["AsOfDate"])
+    if as_of < FIRST_AS_OF or p["Regime"] != REGIME:
+        raise ValueError("the run stops: reporting date before 2025-01-01 or a regime other than CRR")
     dpy = p["DaysPerYear"]
     fx = fixture["fx"]
     results = {}
@@ -149,6 +155,12 @@ def calculate(fixture, tables):
         legs_by_ns.setdefault(leg["ns"], []).append(leg)
     for ns in fixture["netting_sets"]:
         regime = ns["regime"] or p["Regime"]
+        # refusals of the support matrix; as the engine, a refused regime
+        # override falls back to the Params regime, and INVALID comes first
+        errors = (regime != REGIME) + (ns["class"] not in CLASSES)
+        if errors:
+            results[ns["id"]] = {"regime": p["Regime"], "status": f"INVALID: {errors} input error(s)"}
+            continue
         # a table row applies when its Regimes column is BOTH or this regime
         hc = {r[0]: r[5] for r in tables["haircuts"] if r[6] in ("BOTH", regime)}
         rw = {r[0]: r[3] for r in tables["risk_weights"] if r[4] in ("BOTH", regime)}
