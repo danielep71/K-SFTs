@@ -61,6 +61,13 @@ infrastructure, closed without a release (#13), and *v0.2.0 - Prototype
 setup*, the SFT prototype with the robustness fixes of its audit (#131,
 #141). Later milestones lead to v1.0.0.
 
+### Fixed
+
+- Issue triage now uses the configured assignee, requires an explicit repository
+  for offline exports, and rejects unsupported label-manifest fields instead of
+  ignoring them. Label workflows validate every pull-request target and limit
+  live reconciliation to the repository's default branch (#212).
+
 ### Added
 
 - Three SFT visual references in editable SVG and high-resolution PNG:
