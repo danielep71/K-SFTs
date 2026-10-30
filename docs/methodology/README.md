@@ -19,7 +19,7 @@ applies here.
 
 ## ⚖️ Regulatory basis
 
-Decided by the maintainer on 2026-10-24 in
+Decided by me on 2026-10-24 in
 [#8](https://github.com/danielep71/K-SFTs/issues/8) (D1).
 
 | Role | Source | Use |
@@ -61,7 +61,7 @@ Article 225 (own-estimate volatility adjustments) is deleted by Regulation
 
 ## 🎯 First scope
 
-Decided by the maintainer on 2026-10-24 in #8:
+Decided by me on 2026-10-24 in #8:
 
 - **Approach (D3):** the Financial Collateral Comprehensive Method (CRR
   Article 223) with supervisory volatility adjustments (Articles 224, 226,

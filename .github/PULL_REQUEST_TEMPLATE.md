@@ -1,6 +1,6 @@
 <!--
   Base: the active release branch named in docs/GOVERNANCE.md for task PRs.
-  main only for a release integration approved by the maintainer; main into
+  main only for a release integration approved by me; main into
   the release branch only for a sync PR. State which route applies below.
   Write NOT RUN or NOT APPLICABLE with a reason; never claim evidence that
   was not produced. Synthetic data only; no secrets or vulnerability details.
@@ -33,12 +33,12 @@ Resolves #
 with the current head (docs/GOVERNANCE.md, Review). Write the reviewed SHA
 and the result here as text: the Codex summary comment is edited in place, so
 its link later shows another commit. For a bot-authored PR,
-record the maintainer's review of the final head and that Codex was skipped.
+record my review of the final head and that Codex was skipped.
 A sync PR whose diff is empty needs CI only: record the empty diff instead of a
 review. -->
 
 - Final PR head SHA:
-- Review type (Codex / maintainer review of a bot-authored PR / not required: empty-diff sync PR):
+- Review type (Codex / my review of a bot-authored PR / not required: empty-diff sync PR):
 - Reviewed commit SHA, result (as text) and review link:
 - `Repository integrity` result and run link:
 

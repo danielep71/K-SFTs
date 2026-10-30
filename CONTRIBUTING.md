@@ -1,7 +1,7 @@
 # 🤝 Contributing to K-SFTs
 
-K-SFTs is an independent personal project with one maintainer, who
-decides scope, priorities and what is integrated
+K-SFTs is my independent personal project. I decide scope, priorities
+and what is integrated
 ([docs/GOVERNANCE.md](docs/GOVERNANCE.md)). The repository is public.
 Every change starts from an issue and arrives through a pull request.
 
@@ -32,7 +32,7 @@ counterparty, collateral or client data, and never credentials, tokens or
 internal paths. Reproduce the problem with invented values; a minimal
 example is better than a real file. A workbook can hold data outside its
 visible cells, so attach none: describe the steps or the exported source
-instead. If confidential data has been posted, say so to the maintainer at
+instead. If confidential data has been posted, say so to me at
 once rather than editing it out quietly; the [data rules](SECURITY.md#-data-and-secrets)
 apply.
 
@@ -62,7 +62,7 @@ Each issue gets an assignee, exactly one priority and a milestone at triage
    final head commit ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-review)).
 7. **Merge.** The pull request is squash-merged once `Repository integrity`
    passes on its current head and the branch is up to date. Integration into
-   `main` is a separate step, taken by the maintainer.
+   `main` is a separate step, taken by me.
 
 Never rebase, amend or force-push a commit that has been pushed; correct it
 with a new commit.
