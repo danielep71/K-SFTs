@@ -65,7 +65,7 @@ records.
 
 ## Artwork
 
-`docs/assets/K-SFTs-social-preview.jpg` was generated with OpenAI image generation
+`docs/assets/SFT_social_preview.png` was generated with OpenAI image generation
 on 2026-10-24 at my request. My own
 social-preview images supplied the visual references (navy background,
 mint accents and dashboard composition). The title and footer were corrected to `K-SFTs`
@@ -75,7 +75,8 @@ The generated image was exported as a 1280 x 640 JPEG for README and
 social-preview use (#113). On 2026-10-30, after the v0.2.0 release, I had
 its pill changed from *Research & Development* to *Release 0.2.0*: only the
 pill and the `K-SFTs` label beside it were repainted, the text set in Barlow
-Condensed Bold (SIL Open Font License), which is not stored here (#235).
+Condensed Bold (SIL Open Font License), which is not stored here, and the
+image was saved losslessly as a PNG under its present name (#235).
 
 `docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
 authored for K-SFTs on 2026-10-26 at my request (#142). The SVG

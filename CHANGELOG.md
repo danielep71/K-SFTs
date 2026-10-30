@@ -68,7 +68,8 @@ to v1.0.0.
 - The README header follows my other engine's: a *Release 0.2.0* badge
   replaces *Status: Prototype*, a *Regression* badge replaces *Static
   gates*, a second row shows the last commit, downloads, open P1 to P3
-  issues and stars, and the hero image's pill reads *Release 0.2.0*
+  issues and stars, and the hero image's pill reads *Release 0.2.0*.
+  The hero image is now a PNG, `docs/assets/SFT_social_preview.png`
   (#235).
 
 <a id="020"></a>

@@ -52,7 +52,7 @@
 <p align="center">
   <img width="100%"
        alt="K-SFTs - securities financing counterparty credit risk; release 0.2.0"
-       src="docs/assets/K-SFTs-social-preview.jpg">
+       src="docs/assets/SFT_social_preview.png">
 </p>
 
 ---
