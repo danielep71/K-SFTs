@@ -11,16 +11,25 @@
 [![Excel VBA](https://img.shields.io/badge/Excel_VBA-64--bit-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white)](#requirements)
 [![Windows](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](#requirements)
 [![Basis](https://img.shields.io/badge/Basis-EU_CRR_%C2%B7_Basel_reference-1f3a5f?style=for-the-badge)](docs/methodology/README.md#regulatory-basis)
-[![Status](https://img.shields.io/badge/Status-Prototype-BF8700?style=for-the-badge)](#status)
+[![Release](https://img.shields.io/badge/Release-0.2.0-2ea44f?style=for-the-badge)](#status)
 [![Harness](https://img.shields.io/badge/Excel_harness-9_cases_%C2%B7_18_assertions_PASS-2ea44f?style=for-the-badge)](#validation)
-[![Static gates](https://img.shields.io/badge/Static_gates-17-2ea44f?style=for-the-badge)](tools/README.md)
+[![Regression](https://img.shields.io/badge/Regression-146_figures_%C2%B7_28_formulas_PASS-2ea44f?style=for-the-badge)](tools/README.md#-prototype-scripts)
 [![License](https://img.shields.io/badge/License-MPL_2.0-2ea44f?style=for-the-badge)](LICENSE)
+
+<br>
+
+[![Last commit](https://img.shields.io/github/last-commit/danielep71/K-SFTs/main?style=flat-square&label=last%20commit&color=217346)](https://github.com/danielep71/K-SFTs/commits/main)
+[![Downloads](https://img.shields.io/github/downloads/danielep71/K-SFTs/total?style=flat-square&label=downloads&color=217346)](https://github.com/danielep71/K-SFTs/releases/latest)
+[![P1 issues](https://img.shields.io/github/issues/danielep71/K-SFTs/P1?style=flat-square&label=P1&color=B60205)](https://github.com/danielep71/K-SFTs/issues?q=is%3Aissue%20is%3Aopen%20label%3AP1)
+[![P2 issues](https://img.shields.io/github/issues/danielep71/K-SFTs/P2?style=flat-square&label=P2&color=D93F0B)](https://github.com/danielep71/K-SFTs/issues?q=is%3Aissue%20is%3Aopen%20label%3AP2)
+[![P3 issues](https://img.shields.io/github/issues/danielep71/K-SFTs/P3?style=flat-square&label=P3&color=FBCA04)](https://github.com/danielep71/K-SFTs/issues?q=is%3Aissue%20is%3Aopen%20label%3AP3)
+[![Stars](https://img.shields.io/github/stars/danielep71/K-SFTs?style=flat-square&color=bf8700)](https://github.com/danielep71/K-SFTs/stargazers)
 
 <br>
 
 **Plain exported VBA · Macro-free workbook template · Four default VBA references · Each implemented rule cites its CRR article**
 
-[Website](https://danielep71.github.io/K-SFTs/)
+[Project website](https://danielep71.github.io/K-SFTs/)
 &nbsp;·&nbsp;
 [Wiki](https://github.com/danielep71/K-SFTs/wiki)
 &nbsp;·&nbsp;
@@ -42,7 +51,7 @@
 
 <p align="center">
   <img width="100%"
-       alt="K-SFTs - securities financing counterparty credit risk; research and development"
+       alt="K-SFTs - securities financing counterparty credit risk; release 0.2.0"
        src="docs/assets/K-SFTs-social-preview.jpg">
 </p>
 
