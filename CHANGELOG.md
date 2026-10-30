@@ -176,6 +176,24 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS): TestCatalogue
   107 of 107, FormulaTest 28 of 28, and every sheet checked after a run and a
   rerun (#138).
+- The closeout candidate at `f3346fb`, recorded on the same host with
+  `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS):
+  - the demo portfolio gives CRR E\* 21,382,760, RWA 11,371,435 and own funds
+    909,715, with 9 of 10 netting sets VALID;
+  - BCBS gives E\* 2,097,603, RWA 419,521 and own funds 33,562, with 1 of 1
+    VALID;
+  - the run reports 1 error and 1 warning, and is REGULATORY. These are the
+    LibreOffice figures;
+  - TestCatalogue 107 of 107 and FormulaTest 28 of 28 PASS.
+
+  Further checks by hand:
+  - `=NA()` pasted into a NettingSets input withholds that netting set, and
+    `=NA()` in a Params table key stops the run with an ERROR;
+  - the input messages of #145 show, and a row inserted inside a Params table
+    keeps its rules;
+  - every sheet is protected, with only the input cells editable (#134).
+
+  The template then changed only in the width of Params column D (#219).
 
 ### Known limitations
 
