@@ -85,10 +85,11 @@ were not checked in a commit message.
 ## 🧪 Source and validation
 
 - **Exported VBA is the source.** The `.bas`, `.cls` and `.frm` files are the
-  reviewable record; a workbook never is, and none is committed. Import and
-  export as in [INSTALLATION.md](INSTALLATION.md#importing-vba-into-excel);
-  write as in [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md); place
-  components as in [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
+  reviewable record; a workbook never is, and no macro-enabled workbook is
+  committed. Import and export as in
+  [INSTALLATION.md](INSTALLATION.md#importing-vba-into-excel); write as in
+  [docs/VBA_HOUSE_STYLE.md](docs/VBA_HOUSE_STYLE.md); place components as in
+  [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
 - **A static PASS is not Excel evidence.** `tools/check.py` and CI read files;
   they do not compile VBA or run Excel
   ([three different checks](tools/README.md#vba-static-checks)). A pull

@@ -29,7 +29,7 @@ Attribute VB_Name = "CORE_Config"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-29
 '
 ' AUTHOR
 '   Daniele Penza
@@ -110,13 +110,13 @@ Attribute VB_Name = "CORE_Config"
 '------------------------------------------------------------------------------
     'The values a regulatory run uses, as listed in the methodology: CRE22
     '(effective 1 January 2023) and the consolidated CRR of 26.06.2026,
-    'transcribed on 2026-10-24 and not yet checked against the registered
-    'copies (PROTOTYPE.md). A run whose parameters, haircut table, risk-
-    'weight table and risk-weight overrides all agree with this set is
-    'REGULATORY and names REF_SET_ID; any difference makes it WHAT-IF
-    '(CORE_Engine.ClassifyRun). DaysPerYear is a convention and does not
-    'change the class. REF_HAIRCUTS and REF_RISKWEIGHTS list each table row
-    'as KEY=value, separated by ";".
+    'transcribed on 2026-10-24. Only the haircut table is checked against
+    'the registered copies (#197; PROTOTYPE.md). A run whose parameters,
+    'haircut table, risk-weight table and risk-weight overrides all agree
+    'with this set is REGULATORY and names REF_SET_ID; any difference makes
+    'it WHAT-IF (CORE_Engine.ClassifyRun). DaysPerYear is a convention and
+    'does not change the class. REF_HAIRCUTS and REF_RISKWEIGHTS list each
+    'table row as KEY=value, separated by ";".
         Public Const REF_SET_ID       As String = "CRE22-CRR-2026-10-24"    'Identity of the set
         Public Const RUN_REGULATORY   As String = "REGULATORY"              'Every parameter as the set
         Public Const RUN_WHATIF       As String = "WHAT-IF"                 'Some parameter differs
@@ -223,19 +223,14 @@ Attribute VB_Name = "CORE_Config"
 '------------------------------------------------------------------------------
 ' PARAMS TABLE HEADERS
 '------------------------------------------------------------------------------
-    'Header text of the first column of each lookup table, at the top-left
-    'cell of its workbook name, and the headers of the columns read.
-        Public Const HDR_HC   As String = "HC_Key"    'Haircut table
-        Public Const HDR_RW   As String = "RW_Key"    'Risk-weight table
-        Public Const HDR_FX   As String = "FX_Ccy"    'FX-rate table
+    'Column positions and header texts of each lookup table, from the
+    'top-left cell of its workbook name.
         Public Const HC_KEY        As Long = 1    'Haircut key
         Public Const HC_H10        As Long = 6    'Haircut H10, decimal
         Public Const HC_REGIMES    As Long = 7    'BOTH, CRR or BCBS
-        Public Const HC_NCOLS      As Long = 7    'Columns read
         Public Const RW_KEY        As Long = 1    'Risk-weight key
         Public Const RW_WEIGHT     As Long = 4    'Risk weight, decimal
         Public Const RW_REGIMES    As Long = 5    'BOTH, CRR or BCBS
-        Public Const RW_NCOLS      As Long = 5    'Columns read
         Public Const HC_HEADERS As String = "HC_Key|Asset type|Issuer category|Credit quality|" & _
             "Residual maturity|Haircut H10|Regimes"
         Public Const RW_HEADERS As String = "RW_Key|Exposure class|Grade|Risk weight|Regimes"

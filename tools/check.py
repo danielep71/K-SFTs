@@ -19,7 +19,6 @@ SCOPE = (
     "static VBA source and workflow checks only; these checks compile and run no VBA in Excel and "
     "check no SFT calculation."
 )
-LABEL_POLICY = ".github/label-policy.json"
 
 
 @dataclass(frozen=True)
@@ -92,12 +91,11 @@ def default_gates() -> list[Gate]:
         Gate("tool-tests", "python",
              (python, "-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py")),
         Gate("labels-sync-self-test", "node",
-             ("node", ".github/scripts/labels-sync.mjs", "--policy", LABEL_POLICY, "--self-test")),
+             ("node", ".github/scripts/labels-sync.mjs", "--self-test")),
         Gate("labels-manifest", "node",
-             ("node", ".github/scripts/labels-sync.mjs", "--policy", LABEL_POLICY,
-              "--mode", "validate")),
+             ("node", ".github/scripts/labels-sync.mjs", "--mode", "validate")),
         Gate("labels-drift-self-test", "node",
-             ("node", ".github/scripts/labels-drift.mjs", "--policy", LABEL_POLICY, "--self-test")),
+             ("node", ".github/scripts/labels-drift.mjs", "--self-test")),
         Gate("issue-config", "python",
              (python, "tools/check_issues.py", "--check-config")),
         Gate("test-cases", "python", (python, "tools/check_test_cases.py")),

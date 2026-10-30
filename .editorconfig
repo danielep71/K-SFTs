@@ -7,7 +7,7 @@
 # POLICY
 #   - Exported VBA source uses CRLF and 4-space indentation.
 #   - Documentation, GitHub configuration, and cross-platform tooling use LF.
-#   - YAML, JSON, XML, and JavaScript use 2-space indentation.
+#   - YAML, JSON, XML, HTML, CSS and JavaScript use 2-space indentation.
 #   - Python and shell scripts use 4-space indentation.
 #   - Trailing whitespace is removed except in Markdown, where two trailing
 #     spaces can represent an explicit line break.
@@ -104,6 +104,19 @@ trim_trailing_whitespace = true
 
 
 #------------------------------------------------------------------------------
+# PROJECT PAGE (docs/index.html, docs/assets/site.css)
+#------------------------------------------------------------------------------
+[*.{html,css}]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+tab_width = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+
+#------------------------------------------------------------------------------
 # OTHER CROSS-PLATFORM TEXT
 #------------------------------------------------------------------------------
 [*.{toml,cfg,csv,tsv,svg}]
@@ -162,7 +175,7 @@ trim_trailing_whitespace = true
 #------------------------------------------------------------------------------
 # REPOSITORY CONTROL FILES
 #------------------------------------------------------------------------------
-[{.editorconfig,.gitattributes,.gitignore,.gitkeep}]
+[{.editorconfig,.gitattributes,.gitignore}]
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
@@ -178,4 +191,11 @@ trim_trailing_whitespace = true
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
+trim_trailing_whitespace = false
+
+# The README beside them is ordinary documentation.
+[docs/methodology/sources/README.md]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
 trim_trailing_whitespace = false

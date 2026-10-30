@@ -146,7 +146,7 @@ def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
 
 def catalogue_labels(root: Path) -> set[str]:
     data = json.loads((root / ".github" / "labels.json").read_text(encoding="utf-8"))
-    return {str(label["name"]) for label in data["core"]}
+    return {str(label["name"]) for label in data["labels"]}
 
 
 def config_findings(root: Path) -> list[str]:

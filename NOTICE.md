@@ -76,21 +76,25 @@ social-preview use (#113).
 
 `docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
 authored for K-SFTs on 2026-10-26 at the maintainer's request (#142). The SVG
-contains editable text and vector shapes; the PNG is its rendered export.
-The diagram is a simplified methodological illustration, not a screenshot
-or evidence of validated calculations.
+contains editable text and vector shapes; the PNG is its rendered export,
+re-rendered on 2026-10-30 with Arial's metrics so that no title overruns its
+box (#208). The diagram is a simplified methodological illustration, not a
+screenshot or evidence of validated calculations.
 
 The companion pairs `docs/assets/SFT_CRR_uses.svg` / `.png` and
 `docs/assets/SFT_calculation_reference.svg` / `.png` were authored on
 2026-10-26 for the same request (#142). Both are editable vector diagrams
 with PNG exports. Regulatory-use labels distinguish separate frameworks;
 calculation details identify prototype conventions and limitations.
+`docs/assets/SFT_calculation_reference_workbook.png` is a half-size,
+256-colour copy of the calculation reference PNG, made for the workbook's
+README sheet (#167).
 
 `docs/assets/CCR_framework.svg` and `docs/assets/CCR_framework.png` were
 authored on 2026-10-26 at the maintainer's request (#151), and the same
 pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
 vector shapes; the PNG is its rendered export, at twice the SVG's size and
-reduced to 256 colours. The diagram names the sister calculators K-SACCR,
+reduced to 256 colours. The diagram names the sister calculators K-SA-CCR,
 K-CCP and K-CVA by the maintainer's decision of 2026-10-26: an explicit
 exception, for this diagram, to the rule of #137 that no file names
 K-SACCR. It is an architecture illustration, not evidence of an implemented
