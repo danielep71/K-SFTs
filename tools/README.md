@@ -66,6 +66,22 @@ Not gates of `tools/check.py`:
 | --- | --- |
 | `build_template.py` | Writes `src/workbook/SFT_Template.xlsx` from `tests/derivations/prototype/`; needs `xlsxwriter` |
 | `lo_regression.py` | Runs the exported VBA headless in LibreOffice (VBA compatibility mode), compares Results with the derivation and runs the `SFT_*` unit tests. Not Excel evidence; its harness-only shims are listed in its docstring |
+| `render_social_preview.mjs` | Renders `docs/assets/SFT_social_preview.html` to `docs/assets/SFT_social_preview.png` at 1280 × 640, and stops if a web font did not load; see below |
+
+### Hero image
+
+The README hero, the website image and the GitHub social preview are one PNG,
+rendered from its HTML source. After changing the HTML, for example its
+`RELEASE x.y.z` pill at a release, render it again and commit both files:
+
+```sh
+npm install --no-save playwright && npx playwright install chromium   # once
+node tools/render_social_preview.mjs
+```
+
+The page loads its fonts from Google Fonts, so rendering needs the network;
+the same HTML renders to the same PNG. A changed PNG is uploaded again as the
+social preview in **Settings → General**, by hand.
 
 <a id="vba-static-checks"></a>
 

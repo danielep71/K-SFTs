@@ -54,7 +54,7 @@
 
 <p align="center">
   <img width="100%"
-       alt="K-SFTs - securities financing counterparty credit risk; release 0.2.0"
+       alt="K-SFTs, release 0.2.0: E* of the demo netting set CRR-MNA with its terms, haircut scaling, the EU CRR or Basel regime, and five demo netting sets equal to the independent reference"
        src="docs/assets/SFT_social_preview.png">
 </p>
 
