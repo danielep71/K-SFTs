@@ -4,8 +4,8 @@ All notable changes to K-SFTs are recorded here, from the user's point of
 view. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-It is not a commit log or a substitute for release evidence. **No version has
-been released**: everything below is under `[Unreleased]`.
+It is not a commit log or a substitute for release evidence. The first
+release is **0.2.0**.
 
 ## 🧭 Maintenance policy
 
@@ -56,10 +56,16 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
-No version is planned yet. This holds *v0.1.0 - Repo setup*, the repository
-infrastructure, closed without a release (#13), and *v0.2.0 - Prototype
+Nothing yet. Later milestones lead to v1.0.0.
+
+<a id="020"></a>
+
+## [0.2.0] - 2026-10-30
+
+The first release. It holds *v0.1.0 - Repo setup*, the repository
+infrastructure, which closed without a release (#13), and *v0.2.0 - Prototype
 setup*, the SFT prototype with the robustness fixes of its audit (#131,
-#141). Later milestones lead to v1.0.0.
+#141).
 
 ### Added
 
@@ -70,18 +76,14 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   reference also closes the workbook's README sheet, linked from its
   methodology heading. The README sheet is read-only, and its sections
   still expand and collapse (#138).
-
 - A responsive K-SFTs project web page with prototype scope, calculation
   flow, framework artwork, setup resources and validation boundaries;
   Website followed by Wiki in the root README navigation (#155).
-
 - A counterparty credit risk framework diagram in the root README, showing
   the calculator K-SFTs belongs beside, in editable SVG and PNG, shared with
   K-SACCR and K-Risk Engines (#151).
-
 - A K-SFTs banner in the root README, with a reusable 1280 x 640 image
   in `docs/assets/` (#113, #117).
-
 - Governance: the branch model, integration and sync pull requests, review
   of the final head, rulesets on `main`, `release/**` and `v*` tags, and the
   issue rules ([docs/GOVERNANCE.md](docs/GOVERNANCE.md); #1, #12).
@@ -129,7 +131,10 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   registered copies of the texts relied on, and the test-case file format
   ([docs/methodology/](docs/methodology/README.md); #8).
 - Onboarding: README, developer setup and contributing guide (#10, #120).
-- Issue and pull request forms and an issue-triage check (#11).
+- Issue and pull request forms and an issue-triage check (#11). The check
+  reads the required assignee from the issue forms, validates the label
+  catalogue with the label synchronizer, and needs an explicit `--repo-name`
+  for offline exports (#212).
 - Repository traffic history kept beyond GitHub's 14 days
   ([docs/TRAFFIC.md](docs/TRAFFIC.md); #36).
 - This changelog and the release procedure ([RELEASING.md](RELEASING.md); #13).
@@ -148,12 +153,6 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   every sheet was checked (#197). It is not the methodology of
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
-
-### Fixed
-
-- Issue triage reads the required assignee from the issue forms, needs an
-  explicit `--repo-name` for offline exports, and rejects unsupported
-  label-manifest fields instead of ignoring them (#212).
 
 ### Validation
 
@@ -207,4 +206,5 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)).
 - There is no production workbook.
 
-[Unreleased]: https://github.com/danielep71/K-SFTs/commits/main
+[Unreleased]: https://github.com/danielep71/K-SFTs/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/danielep71/K-SFTs/releases/tag/v0.2.0

@@ -16,9 +16,9 @@ version and changelog rules are in
 
 | Item | State |
 | --- | --- |
-| Released versions | None |
-| `VERSION` | Does not exist yet: it is created when the first release is prepared |
-| Planned first version | Not decided. *v0.1.0 - Repo setup* closed without a release ([#13](https://github.com/danielep71/K-SFTs/issues/13)); *v0.2.0 - Prototype setup* is in progress, and later milestones lead to v1.0.0 |
+| Released versions | [0.2.0](CHANGELOG.md#020) (2026-10-30), the first. *v0.1.0 - Repo setup* closed without a release ([#13](https://github.com/danielep71/K-SFTs/issues/13)) and is included in it |
+| `VERSION` | `0.2.0` |
+| Next version | Not decided. Later milestones lead to v1.0.0 |
 | Active branch | `release/0.2.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
 
 <a id="versioning"></a>

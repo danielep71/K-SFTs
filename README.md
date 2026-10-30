@@ -375,9 +375,9 @@ Collateral Simple Method, and other prudential measures
 
 ## 📌 Status
 
-**Unreleased.** Work is in the milestone
-[*v0.2.0 - Prototype setup*](https://github.com/danielep71/K-SFTs/milestone/2);
-changes are recorded under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
+**0.2.0**, the first release (2026-10-30): the SFT prototype as it is, not
+the methodology of record ([CHANGELOG.md](CHANGELOG.md#020)). Later changes
+are recorded under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 Development happens on the
 [active release branch](docs/GOVERNANCE.md#-branches) through task branches
 and pull requests; `main` receives it through an approved integration, and

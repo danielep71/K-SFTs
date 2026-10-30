@@ -122,7 +122,7 @@ were not checked in a commit message.
 | Branches, review, protection, issues | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 | Pull request checklist | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 | Vulnerabilities and data | [SECURITY.md](SECURITY.md) |
-| Versions, changelog and releases | [CHANGELOG.md](CHANGELOG.md), [RELEASING.md](RELEASING.md); nothing is published yet. |
+| Versions, changelog and releases | [CHANGELOG.md](CHANGELOG.md), [RELEASING.md](RELEASING.md); the first release is 0.2.0. |
 
 ## 📄 Licensing
 
