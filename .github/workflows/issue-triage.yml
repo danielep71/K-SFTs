@@ -5,7 +5,7 @@ run-name: "Issue triage — ${{ github.event_name }} by ${{ github.actor }}"
 # assignee, exactly one priority, P1 only on bugs, a milestone, catalogue
 # labels, and `blocked` exactly while a named prerequisite is unresolved.
 # Read-only: it never changes an issue. A failed run is the triage signal;
-# the maintainer resolves each finding by hand (docs/GOVERNANCE.md, Issues).
+# I resolve each finding by hand (docs/GOVERNANCE.md, Issues).
 # Issue events run the workflow from the default branch only.
 
 on:
