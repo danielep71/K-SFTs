@@ -71,6 +71,11 @@ to v1.0.0.
   issues and stars, and the hero image's pill reads *Release 0.2.0*.
   The hero image is now a PNG, `docs/assets/SFT_social_preview.png`
   (#235).
+- The traffic history keeps what my other engine's keeps: each snapshot
+  also records stars, forks, watchers and open issues; the workflow writes
+  clones, visitors (14 days) and visits badge files, shown in the README;
+  and a traffic alert issue is opened when views or clones spike, stars or
+  forks increase, or a new referrer brings 5 or more views (#236).
 
 <a id="020"></a>
 
