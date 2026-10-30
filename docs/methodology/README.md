@@ -4,7 +4,8 @@ This directory records **what K-SFTs will implement and on what
 authority**: the controlling and reference texts with their dates, the
 primary-source provenance of every rule, the scope decisions, assumptions,
 and the trace from each rule to its formula, code and tests. The numerical
-test-case contract is in [TEST_CASES.md](TEST_CASES.md); copies of the texts
+test-case contract is in [TEST_CASES.md](TEST_CASES.md), the supported scope
+of v1.0.0 in [SUPPORT_MATRIX.md](SUPPORT_MATRIX.md); copies of the texts
 relied on are in [sources/](sources/README.md). No derivative SA-CCR content
 applies here.
 
@@ -13,7 +14,9 @@ applies here.
 > sources, their roles and the first scope are decided; no rule has entered
 > the [traceability](#traceability) table. The prototype implements
 > formulas, haircuts and parameters outside this methodology
-> ([PROTOTYPE.md](PROTOTYPE.md)); they are not validated.
+> ([PROTOTYPE.md](PROTOTYPE.md)); they are not validated. On 2026-10-30 I
+> decided the supported scope of v1.0.0 and closed D4, D6 and D7
+> ([SUPPORT_MATRIX.md](SUPPORT_MATRIX.md), #172).
 
 <a id="regulatory-basis"></a>
 
@@ -76,8 +79,11 @@ SFTs (CRE54), the CRE56 haircut floors, the Financial Collateral Simple
 Method (Article 222), and other prudential measures such as large exposures,
 leverage or reporting.
 
-Products (D4), collateral eligibility (D6) and outputs (D7) stay open; see
-[open decisions](#open-decisions).
+Products (D4), collateral (D6) and outputs (D7) were decided by me on
+2026-10-30 in #172: all five products, the prototype's collateral rules, and
+E\* with its intermediate amounts as the supported output, the risk weight,
+RWA and own funds requirement being illustrative. CCP exposures are out of
+scope. The [support matrix](SUPPORT_MATRIX.md) gives every combination.
 
 <a id="version-applicability"></a>
 
@@ -159,14 +165,16 @@ are non-binding.
 The decisions are listed in
 [REPOSITORY_STRUCTURE.md](../REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions).
 D1, D2, D3, D5 and D8 are closed by this document and
-[TEST_CASES.md](TEST_CASES.md). D4, D6 and D7 stay open, each to be closed
-by a reviewed change that records it here with its controlling source.
+[TEST_CASES.md](TEST_CASES.md); D4, D6 and D7 by
+[SUPPORT_MATRIX.md](SUPPORT_MATRIX.md) on 2026-10-30 (#172). Each rule they
+admit enters the [traceability](#traceability) table through #173.
 
 <a id="regime-differences"></a>
 
 ## 🔀 CRR and Basel
 
-There is one calculation regime, `CRR`. Where the Basel reference differs
+There is one calculation regime, `CRR`; the prototype's `BCBS` regime is
+rejected from v1.0.0 ([SUPPORT_MATRIX.md](SUPPORT_MATRIX.md), #248). Where the Basel reference differs
 from the CRR, the CRR applies and the difference is recorded here before any
 code depends on it, so that the method stays explainable. None is recorded
 yet. Both texts define the exposure of SFTs under a master netting agreement
