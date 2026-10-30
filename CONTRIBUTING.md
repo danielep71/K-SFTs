@@ -8,7 +8,8 @@ Every change starts from an issue and arrives through a pull request.
 The repository holds a **prototype**, not a validated method
 ([README.md](README.md)), released as 0.2.0. The current milestone,
 *v0.3.0 - Methodology and numerical assurance*, defines its supported scope
-and verifies it ([#172](https://github.com/danielep71/K-SFTs/issues/172)–[#176](https://github.com/danielep71/K-SFTs/issues/176)).
+([support matrix](docs/methodology/SUPPORT_MATRIX.md)) and verifies it
+([#172](https://github.com/danielep71/K-SFTs/issues/172)–[#176](https://github.com/danielep71/K-SFTs/issues/176), [#248](https://github.com/danielep71/K-SFTs/issues/248)).
 Contributions today are to that work: scope, traceability, numerical
 fixtures, regression tests and workbook integrity, with tooling and
 documentation around them.

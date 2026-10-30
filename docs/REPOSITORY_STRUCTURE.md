@@ -15,12 +15,13 @@ basis is the EU CRR as the controlling source, with the Basel Framework as
 the methodological reference ([methodology](methodology/README.md#regulatory-basis)).
 The first scope is bilateral SFTs under the Financial Collateral
 Comprehensive Method with supervisory volatility adjustments; products,
-collateral and outputs are still
-[open decisions](#-open-product-and-methodology-decisions).
+collateral and outputs were decided on 2026-10-30
+([support matrix](methodology/SUPPORT_MATRIX.md)).
 
 **Out of scope:** derivatives exposure under SA-CCR;
 valuation adjustments such as CVA; and capital or risk-weighted assets beyond
-the exposure measure, unless a later decision adds them.
+the exposure measure, unless a later decision adds them. The prototype's
+risk weight, RWA and own funds requirement are illustrative outputs (D7).
 
 **Status on 2026-10-29: working prototype.** *v0.1.0 - Repo setup* built
 tooling, governance and conventions; *v0.2.0 - Prototype setup* adds a
@@ -28,7 +29,9 @@ prototype, with the robustness fixes of its audit
 ([PROTOTYPE.md](methodology/PROTOTYPE.md)). The prototype
 is not the methodology of record and departs from this document where
 [PROTOTYPE.md](methodology/PROTOTYPE.md) lists it, among them `src/core`
-modules that read and write sheets; nothing in this repository should be
+modules that read and write sheets, which a waiver allows until v1.0.0
+([support matrix](methodology/SUPPORT_MATRIX.md#architecture-waiver), #249);
+nothing in this repository should be
 used to compute regulatory exposure. Resolving the departures, production
 calculations, numerical certification and workbook packaging belong to
 later milestones.
@@ -77,7 +80,7 @@ second implementation to be kept in step.
 .github/            workflows, issue and pull-request templates, label catalogue
                     and its scripts, Dependabot
 docs/               project website, governance, architecture, contracts, methodology
-  methodology/      regulatory basis, decisions, provenance, fixture contract,
+  methodology/      regulatory basis, decisions, provenance, fixture contract, support matrix
     sources/        copies of the regulatory texts relied on
 src/                production VBA source and the workbook template: the only inputs to the workbook
 tests/              verification source, synthetic fixtures, expected values
@@ -220,10 +223,10 @@ apply to SFTs** and are never imported as defaults.
 | D1 | Regulatory framework and jurisdiction. **Decided 2026-10-24 ([#8](https://github.com/danielep71/K-SFTs/issues/8)):** the EU CRR (Regulation (EU) No 575/2013 with Regulation (EU) 2024/1623) is the controlling source and the only calculation regime; the Basel Framework is the methodological reference and EBA Q&As are used for interpretation ([regulatory basis](methodology/README.md#regulatory-basis)) | Fixes every formula, parameter and term, and the citation format | #8 |
 | D2 | Rule version and effective date. **Decided 2026-10-24 (#8):** the version that applies on the calculation date; registered: the CRR consolidated text of 26.06.2026 for calculation dates from 1 January 2025, and CRE22 as in force from 1 January 2023 ([version applicability](methodology/README.md#version-applicability)) | Results must be reproducible against one dated text | #8 |
 | D3 | Approach. **Decided 2026-10-24 (#8):** the Financial Collateral Comprehensive Method (CRR Article 223) with supervisory volatility adjustments (Articles 224, 226, 227); internal models, the Simple Method, CCP treatment and the CRE56 floors are separate scope decisions ([first scope](methodology/README.md#scope)) | Determines inputs, parameters and validation | #8 |
-| D4 | Products in scope: repo and reverse repo, securities lending and borrowing, margin lending | Fixes the transaction record and its validation | Later methodology issue |
+| D4 | Products in scope. **Decided 2026-10-30 ([#172](https://github.com/danielep71/K-SFTs/issues/172)):** repo and reverse repo, securities lending and borrowing, margin lending ([support matrix](methodology/SUPPORT_MATRIX.md#matrix)) | Fixes the transaction record and its validation | #172 |
 | D5 | Netting. **Decided 2026-10-24 (#8):** bilateral SFTs, as single transactions or under an eligible master netting agreement (CRR Articles 206 and 220) | Fixes the netting-set record and aggregation | #8 |
-| D6 | Collateral: eligibility, haircut source, currency mismatch, holding period and remargining frequency | Fixes the collateral record and the haircut arithmetic | Later methodology issue |
-| D7 | Output measures: exposure only, or exposure with intermediate amounts for audit | Fixes the result sheets and the output contract | Later methodology issue |
+| D6 | Collateral: eligibility, haircut source, currency mismatch, holding period and remargining frequency. **Decided 2026-10-30 (#172):** as the prototype specifies them, under the supervisory haircut table of CRR Article 224 ([support matrix](methodology/SUPPORT_MATRIX.md#matrix)) | Fixes the collateral record and the haircut arithmetic | #172 |
+| D7 | Output measures. **Decided 2026-10-30 (#172):** E\* with its intermediate amounts for audit is supported; the risk weight, RWA and own funds requirement are illustrative and labelled so ([support matrix](methodology/SUPPORT_MATRIX.md#matrix)) | Fixes the result sheets and the output contract | #172 |
 | D8 | Numeric conventions: precision, rounding and tolerances. **Decided 2026-10-24 (#8):** `Double` arithmetic without intermediate rounding, and explicit absolute and relative tolerances on every expected value ([tolerance](methodology/TEST_CASES.md#tolerance)) | Fixes test tolerances and comparison rules | #8 |
 
 A decision is closed only by a reviewed change that records it, with its

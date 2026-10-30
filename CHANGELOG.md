@@ -81,6 +81,14 @@ to v1.0.0.
   `tools/render_social_preview.mjs`, as for my other engine. It shows
   demo figures of the prototype and its independent reference instead of
   the generated illustration (#239).
+- The supported scope of v1.0.0 is decided, in
+  `docs/methodology/SUPPORT_MATRIX.md` (#172): CRR is the only regime;
+  all five products and the prototype's collateral rules are supported
+  (D4, D6); E* and its intermediate amounts are the supported output, and
+  the risk weight, RWA and own funds requirement are illustrative (D7);
+  CCP exposures, the BCBS regime and reporting dates before 2025-01-01
+  are out of the supported scope, and #248 makes the workbook reject them.
+  The core/worksheet separation is waived until v1.0.0 (#249).
 
 <a id="020"></a>
 
