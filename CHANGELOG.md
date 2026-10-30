@@ -76,6 +76,11 @@ to v1.0.0.
   clones, visitors (14 days) and visits badge files, shown in the README;
   and a traffic alert issue is opened when views or clones spike, stars or
   forks increase, or a new referrer brings 5 or more views (#236).
+- The hero image is rendered from an HTML source,
+  `docs/assets/SFT_social_preview.html`, by
+  `tools/render_social_preview.mjs`, as for my other engine. It shows
+  demo figures of the prototype and its independent reference instead of
+  the generated illustration (#239).
 
 <a id="020"></a>
 

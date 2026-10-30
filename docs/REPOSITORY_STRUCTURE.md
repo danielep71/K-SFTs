@@ -81,7 +81,7 @@ docs/               project website, governance, architecture, contracts, method
     sources/        copies of the regulatory texts relied on
 src/                production VBA source and the workbook template: the only inputs to the workbook
 tests/              verification source, synthetic fixtures, expected values
-tools/              repository checks and automation (Python; the VBA sync script in PowerShell)
+tools/              repository checks and automation (Python; the VBA sync script in PowerShell; the hero render in Node)
 ```
 
 The root holds the project documents (`README.md`, `INSTALLATION.md`,
