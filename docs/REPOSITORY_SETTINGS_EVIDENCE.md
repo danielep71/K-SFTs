@@ -30,7 +30,7 @@ All rows below were verified on that date.
 
 | Setting | Desired baseline | Observed setting | Exceptions / interpretation |
 | --- | --- | --- | --- |
-| Visibility / default branch | Public / main | Public / main | Development targets release/0.2.0, not main. |
+| Visibility / default branch | Public / main | Public / main | Development targets release/0.3.0, not main. |
 | Issues / Wiki | Enabled | Enabled / enabled | Wiki editing access was not reverified. |
 | Projects / Discussions | Retain current choice | Disabled / disabled | Repository feature flags; not an inventory of user-level projects. |
 | Merge methods | Subject to branch rules | Merge, squash, rebase enabled | Protected branches restrict the methods below. |

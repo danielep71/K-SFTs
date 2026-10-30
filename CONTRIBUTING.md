@@ -6,11 +6,12 @@ and what is integrated
 Every change starts from an issue and arrives through a pull request.
 
 The repository holds a **prototype**, not a validated method
-([README.md](README.md)): milestone *v0.2.0 - Prototype setup* takes it in,
-with the robustness fixes of its audit
-([#141](https://github.com/danielep71/K-SFTs/issues/141)). Contributions today
-are to that setup: tooling, tests, documentation and governance; other
-changes to the calculation belong to later milestones.
+([README.md](README.md)), released as 0.2.0. The current milestone,
+*v0.3.0 - Methodology and numerical assurance*, defines its supported scope
+and verifies it ([#172](https://github.com/danielep71/K-SFTs/issues/172)–[#176](https://github.com/danielep71/K-SFTs/issues/176)).
+Contributions today are to that work: scope, traceability, numerical
+fixtures, regression tests and workbook integrity, with tooling and
+documentation around them.
 
 Never disclose a suspected vulnerability in an issue or pull request; follow
 [SECURITY.md](SECURITY.md).

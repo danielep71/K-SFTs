@@ -13,10 +13,11 @@ automation work within the scope authorized by me.
 This is an independent personal project.
 
 K-SFTs covers counterparty credit risk for securities financing
-transactions. *v0.1.0 - Repo setup* prepared the repository infrastructure;
-the current milestone, **v0.2.0 - Prototype setup**, adds the SFT prototype
-with the robustness fixes of its audit (#141). Further development, numerical
-certification and workbook packaging belong to later milestones; the project
+transactions. *v0.1.0 - Repo setup* prepared the repository infrastructure,
+and *v0.2.0 - Prototype setup* added the SFT prototype with the robustness
+fixes of its audit (#141), published as the first release, 0.2.0. The current
+milestone, **v0.3.0 - Methodology and numerical assurance**, defines and
+verifies the method; workbook packaging belongs to v1.0.0. The project
 boundary and architecture are defined in
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) ([#2](https://github.com/danielep71/K-SFTs/issues/2)), and the
 VBA conventions, supported hosts and import steps in
@@ -35,7 +36,8 @@ bypass branch rules.
 | Branch | Role |
 | --- | --- |
 | `main` | Integrated source. Receives the active release branch through a merge commit after my approval. No task branches or task pull requests target it. |
-| `release/0.2.0` | **Active integration branch** for v0.2.0 - Prototype setup. Base for task branches and target of task and sync pull requests. Created from `main` at `3fc2c97` on 2026-10-25 by my decision. |
+| `release/0.3.0` | **Active integration branch** for v0.3.0 - Methodology and numerical assurance. Base for task branches and target of task and sync pull requests. Created from `main` at `40e15d3`, the commit tagged `v0.2.0`, on 2026-10-30 by my decision ([#228](https://github.com/danielep71/K-SFTs/issues/228)). |
+| `release/0.2.0` | Integration branch of v0.2.0 - Prototype setup, released as `v0.2.0` on 2026-10-30 and closed the same day ([#134](https://github.com/danielep71/K-SFTs/issues/134), [#224](https://github.com/danielep71/K-SFTs/issues/224)). No longer active: no task branch is created from it and no pull request targets it. Created from `main` at `3fc2c97` on 2026-10-25. |
 | `release/0.1.0` | Integration branch of v0.1.0 - Repo setup, whose milestone was certified at `576bb58` and closed on 2026-10-25 ([#13](https://github.com/danielep71/K-SFTs/issues/13)). No longer active: no task branch is created from it and no pull request targets it. Created from `main` at `85b2b3b` on 2026-10-23. |
 | Other `release/X.Y.Z` | Opened only by my decision, without a `v` prefix. Do not infer a new target from a version number or from this document. |
 | `fix/<issue>-<slug>`, `docs/<slug>`, `test/<slug>` | Short-lived task branches, created from the active release branch and deleted after merge. |

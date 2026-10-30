@@ -19,7 +19,7 @@ version and changelog rules are in
 | Released versions | [0.2.0](CHANGELOG.md#020) (2026-10-30), the first. *v0.1.0 - Repo setup* closed without a release ([#13](https://github.com/danielep71/K-SFTs/issues/13)) and is included in it |
 | `VERSION` | `0.2.0` |
 | Next version | Not decided. Later milestones lead to v1.0.0 |
-| Active branch | `release/0.2.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
+| Active branch | `release/0.3.0` ([docs/GOVERNANCE.md](docs/GOVERNANCE.md#-branches)) |
 
 <a id="versioning"></a>
 

@@ -145,7 +145,7 @@ should be relied on.
 ```sh
 git clone https://github.com/danielep71/K-SFTs.git
 cd K-SFTs
-git switch release/0.2.0
+git switch release/0.3.0
 python tools/check.py
 ```
 
@@ -339,9 +339,10 @@ The full layout, the dependency direction and the public API boundary are in
 | Step | Scope |
 | --- | --- |
 | v0.1.0 - Repo setup | Tooling, governance, conventions, the harness and its Excel evidence; closed by a certification from a fresh checkout, without a release (#13) |
-| v0.2.0 - Prototype setup | The prototype, working in Excel and integrated into `main`, with the robustness fixes of its audit (#141), the workbook checks (#138, #197) and a closeout from a fresh checkout (#134); no change to E\* for valid inputs |
-| Open decisions | Products in scope (D4), collateral (D6), output measures (D7) ([open decisions](docs/REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)) |
-| Later milestones, up to v1.0.0 | The prototype's departures resolved, the first-scope calculation, its numerical certification, and the production workbook |
+| v0.2.0 - Prototype setup | The prototype, working in Excel and integrated into `main`, with the robustness fixes of its audit (#141), the workbook checks (#138, #197) and a closeout from a fresh checkout (#134); no change to E\* for valid inputs. Released as `v0.2.0` on 2026-10-30 (#224) |
+| v0.3.0 - Methodology and numerical assurance (current) | The supported scope and support matrix, regulatory traceability and parameters, numerical fixtures, regression suites and workbook integrity (#172–#176) |
+| Open decisions | Products in scope (D4), collateral (D6), output measures (D7) ([open decisions](docs/REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)), decided in #172 |
+| v1.0.0 - First supported release | The frozen contract, the production workbook, the user manual, certification in Excel and the packaged release (#177–#181) |
 
 Separate scope decisions, each needing its own issue: the internal models
 approach, CCP-cleared SFTs, the CRE56 haircut floors, the Financial
