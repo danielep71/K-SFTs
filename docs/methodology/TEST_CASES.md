@@ -171,7 +171,7 @@ numerical-validation references.
 - `script`, when not `null`, names a file under `tests/derivations/` that
   computed the value; it must exist.
 - `reviewed_by` may be `null`: the code under test and its expected values
-  come from the same maintainer, and no independent reviewer is required.
+  both come from me, and no independent reviewer is required.
 - **Examples are never benchmarks.** Derivative SA-CCR examples or thresholds
   are not SFT references; the register holds no such source, so no case can
   cite one.
