@@ -19,7 +19,7 @@ is added as a new file next to the old one, with its own row.
 
 On 2026-10-24 the first copies of the CRR and CRE22, an XHTML extract and an
 HTML page with its formula images, were replaced by the PDFs below, which
-hold the same versions, by maintainer decision: a PDF can be cited by page
+hold the same versions, by my decision: a PDF can be cited by page
 and shows each formula in place. They are in the Git history.
 
 ## 📄 Files
@@ -70,7 +70,7 @@ extract.
 - **Cross-check of the six chapters added later.** The text of CRE32, CRE50,
   CRE51, CRE53, CRE54 and CRE56 equals, apart from the cover page and page
   footers, the same chapters in an independent extract from the full Basel
-  Framework PDF that the maintainer prepared on 2026-10-24 (commit
+  Framework PDF that I prepared on 2026-10-24 (commit
   `380df17` on a branch deleted unmerged the same day; the extract is not
   in the repository).
 - **EBA Q&As.** Text copied from each page's HTML; only the layout and white
@@ -92,7 +92,7 @@ under its publisher's terms.
 | --- | --- | --- |
 | Bank for International Settlements | <https://www.bis.org/terms_conditions.htm>: BIS material may be downloaded, displayed, printed, photocopied or redistributed for non-commercial purposes without written permission | Read 2026-10-24; re-read 2026-10-25 |
 | European Banking Authority | <https://www.eba.europa.eu/legal-notice>: reproduction of EBA material is authorised, provided the source is acknowledged, save where otherwise stated | Read 2026-10-24; re-read 2026-10-25 |
-| European Union (EUR-Lex) | <https://eur-lex.europa.eu/content/legal-notice/legal-notice.html>, *Copyright notice*: under Commission Decision 2011/833/EU the legal documents published in EUR-Lex may be re-used for commercial or non-commercial purposes, unless otherwise specified; the consolidated texts are licensed under the Creative Commons Attribution 4.0 International licence (CC BY 4.0), which requires the source to be acknowledged and any changes to be indicated | Read 2026-10-25 by the maintainer, who supplied the notice's text; this environment cannot retrieve the page |
+| European Union (EUR-Lex) | <https://eur-lex.europa.eu/content/legal-notice/legal-notice.html>, *Copyright notice*: under Commission Decision 2011/833/EU the legal documents published in EUR-Lex may be re-used for commercial or non-commercial purposes, unless otherwise specified; the consolidated texts are licensed under the Creative Commons Attribution 4.0 International licence (CC BY 4.0), which requires the source to be acknowledged and any changes to be indicated | Read 2026-10-25 by me; I supplied the notice's text; this environment cannot retrieve the page |
 
 **CRR extract, CC BY 4.0 attribution.** `CRR_575-2013_consolidated_2026-06-26_extract.pdf`:
 © European Union, <https://eur-lex.europa.eu>, 1998-2026; Regulation (EU) No

@@ -25,7 +25,7 @@ component lives in [docs/REPOSITORY_STRUCTURE.md](docs/REPOSITORY_STRUCTURE.md).
 
 ## 🖥️ Supported hosts
 
-Decided by the maintainer on 2026-10-24 in
+Decided by me on 2026-10-24 in
 [#4](https://github.com/danielep71/K-SFTs/issues/4).
 
 | Host | Support level |

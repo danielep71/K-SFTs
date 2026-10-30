@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check issue metadata and dependency status that issue forms cannot enforce.
 
-Read-only: the check never changes an issue. It reports findings for the
-maintainer to resolve by hand (docs/GOVERNANCE.md, Issues).
+Read-only: the check never changes an issue. It reports findings for
+me to resolve by hand (docs/GOVERNANCE.md, Issues).
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -19,7 +20,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-OWNER = "danielep71"
 PRIORITIES = ("P1", "P2", "P3")
 BLOCKED = "blocked"
 FORM_PRIORITIES = {"bug.yml": "P2", "enhancement.yml": "P3", "documentation.yml": "P3"}
@@ -83,10 +83,10 @@ def references(lines: Iterable[str], repository: str, own: int) -> set[int]:
     return found
 
 
-def metadata_findings(issue: Issue) -> list[Finding]:
+def metadata_findings(issue: Issue, assignee: str) -> list[Finding]:
     findings = []
-    if OWNER not in issue.assignees:
-        findings.append(Finding(issue.number, "assignee", f"is not assigned to {OWNER}"))
+    if assignee not in issue.assignees:
+        findings.append(Finding(issue.number, "assignee", f"is not assigned to {assignee}"))
     priorities = [label for label in issue.labels if label in PRIORITIES]
     if len(priorities) != 1:
         found = ", ".join(priorities) or "none"
@@ -128,14 +128,15 @@ def dependency_findings(issue: Issue, states: Mapping[int, str], repository: str
 
 
 def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
-          catalogue: set[str] | None = None, pulls: Collection[int] = ()) -> list[Finding]:
+          catalogue: set[str] | None = None, pulls: Collection[int] = (),
+          *, assignee: str) -> list[Finding]:
     """Audit every open issue; ``states`` maps every known issue number to its state
     and ``pulls`` holds the numbers of the repository's pull requests."""
     findings = []
     for issue in sorted(issues, key=lambda item: item.number):
         if issue.state != "open":
             continue
-        findings += metadata_findings(issue)
+        findings += metadata_findings(issue, assignee)
         findings += dependency_findings(issue, states, repository, pulls)
         if catalogue is not None:
             findings += [Finding(issue.number, "catalogue", f"has label {label!r}, "
@@ -145,14 +146,32 @@ def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
 
 
 def catalogue_labels(root: Path) -> set[str]:
+    # Use the same schema validator as synchronization; never silently ignore overlays.
+    result = subprocess.run(
+        ["node", str(root / ".github/scripts/labels-sync.mjs"), "--mode", "validate",
+         "--manifest", str(root / ".github/labels.json")],
+        capture_output=True, text=True, check=False,
+    )
+    if result.returncode:
+        raise ValueError(result.stderr.strip() or result.stdout.strip())
     data = json.loads((root / ".github" / "labels.json").read_text(encoding="utf-8"))
     return {str(label["name"]) for label in data["labels"]}
+
+
+def configured_assignee(root: Path) -> str:
+    """Read the required person from the issue form, not the repository owner."""
+    text = (root / ".github/ISSUE_TEMPLATE/bug.yml").read_text(encoding="utf-8")
+    assignees = flow_list(text, "assignees")
+    if len(assignees) != 1:
+        raise ValueError("bug.yml must configure exactly one assignee")
+    return assignees[0]
 
 
 def config_findings(root: Path) -> list[str]:
     """Check the label catalogue and the issue forms against the issue rules."""
     problems = []
     labels = catalogue_labels(root)
+    assignee = configured_assignee(root)
     status_labels = sorted(n for n in labels if DEPENDENCY_STATUS_WORDS.search(n))
     if status_labels != [BLOCKED]:
         problems.append(f"the dependency status labels must be exactly ['blocked'], "
@@ -169,8 +188,8 @@ def config_findings(root: Path) -> list[str]:
             problems.append(f"{name} must set exactly the priority {priority}")
         problems += [f"{name} sets unknown label {label!r}"
                      for label in form_labels if label not in labels]
-        if flow_list(text, "assignees") != [OWNER]:
-            problems.append(f"{name} must assign {OWNER}")
+        if flow_list(text, "assignees") != [assignee]:
+            problems.append(f"{name} must assign {assignee}")
         if not re.search(r"^\s*id:\s*dependencies\s*$", text, re.M):
             problems.append(f"{name} has no dependencies field")
     config = forms / "config.yml"
@@ -251,11 +270,17 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     source.add_argument("--input", type=Path, help="issues exported as GitHub REST JSON")
     source.add_argument("--check-config", action="store_true",
                         help="check the issue forms and label catalogue only (offline)")
-    parser.add_argument("--repo-name", default="danielep71/K-SFTs",
+    parser.add_argument("--repo-name",
                         help="repository used to resolve issue URLs with --input")
     parser.add_argument("--output", type=Path, help="write the findings as JSON")
     parser.add_argument("--summary", type=Path, help="append the Markdown report to this file")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.input and not args.repo_name:
+        parser.error("--input requires --repo-name owner/name")
+    repository = args.repository or args.repo_name
+    if repository and not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        parser.error("repository must have the form owner/name")
+    return args
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -277,7 +302,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             issues, states, pulls = load_file(args.input)
             repository = args.repo_name
-        findings = audit(issues, states, repository, catalogue_labels(root), pulls)
+        findings = audit(issues, states, repository, catalogue_labels(root), pulls,
+                         assignee=configured_assignee(root))
     except (OSError, RuntimeError, ValueError, KeyError, urllib.error.URLError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 2

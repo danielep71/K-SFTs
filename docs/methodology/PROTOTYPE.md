@@ -7,17 +7,17 @@ decisions of [#8](https://github.com/danielep71/K-SFTs/issues/8) govern, and
 every rule below enters README.md's traceability table only through a
 reviewed change.
 
-**Where the prototype departs from the recorded decisions.** By maintainer
+**Where the prototype departs from the recorded decisions.** By my
 decision of 2026-10-25, milestone v0.2.0 integrates the prototype as it is,
 with these departures; each is resolved in a later milestone
-([#131](https://github.com/danielep71/K-SFTs/issues/131)). On 2026-10-29 the
-maintainer moved the robustness fixes of its audit into v0.2.0
+([#131](https://github.com/danielep71/K-SFTs/issues/131)). On 2026-10-29 I
+moved the robustness fixes of its audit into v0.2.0
 ([#141](https://github.com/danielep71/K-SFTs/issues/141)); they change no E\*
 for valid inputs:
 
 | Prototype | Recorded position | Needed |
 | --- | --- | --- |
-| Two calculation regimes, `CRR` and `BCBS`, per netting set | One regime, `CRR`; Basel is a reference only (D1) | Drop the BCBS regime, or a maintainer decision |
+| Two calculation regimes, `CRR` and `BCBS`, per netting set | One regime, `CRR`; Basel is a reference only (D1) | Drop the BCBS regime, or my decision |
 | QCCP counterparty class (2%, CRE54.7 / Art. 306(1)(a)) | CCP-cleared SFTs out of scope | Remove, or a scope issue |
 | Outputs E\*, RW, RWA, own funds | Outputs open (D7) | Decision D7 |
 | Products REPO, REVREPO, SECLEND, SECBORROW, MARGINLEND | Products open (D4) | Decision D4 |
@@ -124,7 +124,7 @@ Hfx = 8%  × sqrt((N_R + T_M − 1) / 10)                         [CRE22.52; Art
   The 0% risk weight under Chapter 2 [Art. 227(2)(a)] is not derived from the
   CQS: debt of a Member State's central government denominated and funded in
   its domestic currency takes 0% at any CQS [Art. 114(4)], and the inputs do
-  not show that (maintainer decision, #141).
+  not show that (my decision, #141).
 
 ### Exposure value
 

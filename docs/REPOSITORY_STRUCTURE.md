@@ -37,7 +37,7 @@ later milestones.
 
 ## 🧭 Profile decision
 
-**K-SFTs uses the `application` profile.** Decided by the maintainer on
+**K-SFTs uses the `application` profile.** Decided by me on
 2026-10-24 in [#2](https://github.com/danielep71/K-SFTs/issues/2).
 
 | Question | Answer |

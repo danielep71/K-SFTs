@@ -35,7 +35,7 @@ fine-grained personal access token is used.
 **Renewal:** before the token expires, and at least every 90 days, generate a
 new token with the same settings, replace the secret, and repeat step 4.
 Revoke the token at once if it may have been exposed, or if the workflow is
-changed by anyone but the maintainer. Collections missed while the token is
+changed by anyone but me. Collections missed while the token is
 invalid are lost once they fall outside the 14-day window.
 
 Only the fetch step receives `TRAFFIC_TOKEN`, and it runs `curl` only. The
@@ -102,11 +102,11 @@ stored day that have no row.
 ### Visibility
 
 The repository is public since 2026-10-25, and so is the branch: anyone can
-read its CSV files. By the maintainer's decision
+read its CSV files. By my decision
 ([#123](https://github.com/danielep71/K-SFTs/issues/123)) it stays public. The
 data is aggregate (counts, referrers and paths) and identifies no visitor. It
 is not published through
-GitHub Pages or badges. The counts include the maintainer's own visits and
+GitHub Pages or badges. The counts include my own visits and
 every clone made by CI checkouts.
 
 ## 🛡️ Branch protection

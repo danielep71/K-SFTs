@@ -149,6 +149,12 @@ setup*, the SFT prototype with the robustness fixes of its audit (#131,
   record, and departs from recorded decisions where
   [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) lists it (#131, #135, #145).
 
+### Fixed
+
+- Issue triage reads the required assignee from the issue forms, needs an
+  explicit `--repo-name` for offline exports, and rejects unsupported
+  label-manifest fields instead of ignoring them (#212).
+
 ### Validation
 
 - The harness and the example suite at `1a6f0f7` were imported, compiled
