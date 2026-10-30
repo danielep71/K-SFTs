@@ -2,10 +2,14 @@ name: Traffic history
 run-name: "Traffic history — ${{ github.event_name }}"
 
 # Keeps this repository's GitHub traffic beyond the API's 14-day window:
-# collects views, clones, top referrers and popular paths once a day and
-# merges them into CSV files on the data-only `traffic-history` branch with
-# tools/traffic_history.py. Analytics only: it is not CI and must never run
-# builds or tests. Operation, credentials and recovery: docs/TRAFFIC.md.
+# collects views, clones, top referrers, popular paths and the repository's
+# stars, forks, watchers and open issues once a day, and merges them into CSV
+# files on the data-only `traffic-history` branch with
+# tools/traffic_history.py, which also writes the README badge files there.
+# When traffic spikes, stars or forks increase, or a new referrer appears, the
+# alert job opens one issue for that day. Analytics only: it is not CI and
+# must never run builds or tests. Operation, credentials and recovery:
+# docs/TRAFFIC.md.
 #
 # Credentials
 #   TRAFFIC_TOKEN, a fine-grained personal access token limited to this
@@ -13,7 +17,8 @@ run-name: "Traffic history — ${{ github.event_name }}"
 #   workflow token cannot read traffic), stored in the `analytics`
 #   environment, whose deployment branches are limited to the default branch.
 #   Only the fetch step receives it; that step runs curl and no repository
-#   code. The workflow token pushes the history, with contents: write.
+#   code. The workflow token pushes the history, with contents: write; the
+#   alert job, which never sees TRAFFIC_TOKEN, opens issues with issues: write.
 
 on:
   schedule:
@@ -71,7 +76,7 @@ jobs:
         id: fetch
         env:
           TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
-          API: ${{ github.api_url }}/repos/${{ github.repository }}/traffic
+          API: ${{ github.api_url }}/repos/${{ github.repository }}
         run: |
           set -euo pipefail
           if [ -z "${TRAFFIC_TOKEN:-}" ]; then
@@ -84,16 +89,18 @@ jobs:
           mkdir -p "$RAW"
           # curl retries timeouts and HTTP 408, 429, 500, 502, 503 and 504,
           # honouring Retry-After; any other failure stops the run before a merge.
-          for resource in views clones popular/referrers popular/paths; do
-            name="${resource#popular/}"
+          for resource in traffic/views traffic/clones traffic/popular/referrers \
+                          traffic/popular/paths ""; do
+            name="${resource##*/}"
+            name="${name:-repository}"
             curl --silent --show-error --location --fail-with-body \
               --retry 5 --retry-max-time 300 --max-time 60 \
               --header "Authorization: Bearer $TRAFFIC_TOKEN" \
               --header "Accept: application/vnd.github+json" \
               --header "X-GitHub-Api-Version: 2026-03-10" \
               --output "$RAW/$name.json" \
-              "$API/$resource" \
-              || { echo "::error::Traffic API request for $resource failed"; exit 1; }
+              "$API${resource:+/$resource}" \
+              || { echo "::error::API request for ${resource:-the repository} failed"; exit 1; }
           done
 
       - name: Merge into the history
@@ -144,3 +151,65 @@ jobs:
           done
           echo "::error::Could not push the history after 3 attempts"
           exit 1
+
+  alert:
+    name: Traffic alert
+    needs: collect
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    # No environment: this job never receives TRAFFIC_TOKEN.
+    permissions:
+      contents: read
+      issues: write
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source
+          persist-credentials: false
+
+      - name: Check out traffic-history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: traffic-history
+          path: history
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Open the alert issue, if one is due
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          ASSIGNEE: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          # The active milestone: the open one with the earliest due date.
+          milestone="$(gh api "repos/$GH_REPO/milestones?state=open&sort=due_on&direction=asc" \
+            --jq '[.[] | select(.due_on != null)][0] | [.title, .due_on[0:10]] | @tsv')"
+          if [ -z "$milestone" ]; then
+            echo "::error::No open milestone with a due date to file the alert under"
+            exit 1
+          fi
+          IFS=$'\t' read -r title due <<< "$milestone"
+          alert="$RUNNER_TEMP/alert.json"
+          python source/tools/traffic_history.py alert \
+            --data history/data --milestone-due "$due" --output "$alert"
+          [ -f "$alert" ] || exit 0
+          issue_title="$(jq -r .title "$alert")"
+          jq -j .body "$alert" > "$RUNNER_TEMP/alert.md"
+          existing="$(gh issue list --state all --search "\"$issue_title\" in:title" \
+            --json title --jq "map(select(.title == \"$issue_title\")) | length")"
+          if [ "$existing" != "0" ]; then
+            echo "An issue titled \"$issue_title\" already exists."
+            exit 0
+          fi
+          gh issue create --title "$issue_title" --body-file "$RUNNER_TEMP/alert.md" \
+            --assignee "$ASSIGNEE" --label P3 --label repository --milestone "$title"

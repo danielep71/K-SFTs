@@ -226,20 +226,25 @@ field the manifest schema does not define is an error. Its rules are tested by
 
 ## 📈 Traffic history
 
-`traffic_history.py` merges one collection of GitHub traffic API responses
-(`views.json`, `clones.json`, `referrers.json`, `paths.json`) into the CSV
-history of the `traffic-history` branch. It needs only the standard library
-and no token: the `Traffic history` workflow fetches the responses first.
+`traffic_history.py` merges one collection of GitHub API responses
+(`views.json`, `clones.json`, `referrers.json`, `paths.json` and
+`repository.json`) into the CSV history of the `traffic-history` branch, and
+rewrites the README badge files there. Its `alert` command writes the issue
+for a traffic alert when one is due. It needs only the standard library and
+no token: the `Traffic history` workflow fetches the responses first and
+opens the issue.
 
 ```sh
 python tools/traffic_history.py merge --raw <responses> --data <history>/data
 python tools/traffic_history.py init --data <history>/data   # empty files with headers
+python tools/traffic_history.py alert --data <history>/data \
+  --milestone-due 2026-12-20 --output alert.json            # written only when due
 ```
 
 Every response and every existing file is validated before anything is
-written, so exit code 2 means the history was left unchanged. The merge and
-data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md); `test_traffic_history.py`
-covers them in `tool-tests`.
+written, so exit code 2 means the history was left unchanged. The merge,
+badge, alert and data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md);
+`test_traffic_history.py` covers them in `tool-tests`.
 
 ## 🔧 Tool versions
 

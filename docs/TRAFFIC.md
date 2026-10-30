@@ -2,9 +2,12 @@
 
 GitHub keeps repository traffic for 14 days. The **Traffic history** workflow
 ([.github/workflows/traffic-history.yml](../.github/workflows/traffic-history.yml))
-collects it once a day and merges it into CSV files on the data-only
-`traffic-history` branch, so the history outlives that window. It is
-repository analytics, not CI: it builds and tests nothing.
+collects it once a day, with the repository's stars, forks, watchers and open
+issues, and merges it into CSV files on the data-only `traffic-history`
+branch, so the history outlives that window. It also writes the README's
+traffic badges there, and opens an issue when traffic stands out
+(*Traffic alert* below). It is repository analytics, not CI: it builds and
+tests nothing.
 
 ## ⏱️ Schedule
 
@@ -53,12 +56,33 @@ not rewritten.
 | File | Key | Contents |
 | --- | --- | --- |
 | `daily.csv` | `date` | Views and unique views, clones and unique clones per UTC day. `views_collected_at` and `clones_collected_at` give the collection that last changed each pair. |
-| `snapshots.csv` | `snapshot_date` | One row per collection day: the first and last day the API reported, the 14-day totals, and `collected_at`, the collection that last changed that day's snapshot, referrers or paths. |
+| `snapshots.csv` | `snapshot_date` | One row per collection day: the first and last day the API reported, the 14-day totals, the repository's `stars`, `forks`, `watchers` and `open_issues` at collection time, and `collected_at`, the collection that last changed that day's snapshot, referrers or paths. |
 | `referrers.csv` | `snapshot_date`, `rank` | The top 10 referrers over the 14 days before each collection. |
 | `paths.csv` | `snapshot_date`, `rank` | The top 10 repository paths over the same window. |
+| `badges/*.json` | — | The README badges, rewritten from the stored data after each merge (*Badges* below). |
 
 Referrers and paths are retained per collection day, because the API gives
 them only as 14-day totals, never per day.
+
+The repository counts come from the repository API (`stargazers_count`,
+`forks_count`, `subscribers_count`, `open_issues_count`), as in my other
+engine's traffic history. `open_issues` is GitHub's count, which includes
+open pull requests. Snapshots collected before this change reached `main`
+(#236) have them blank: a blank count was not recorded, not zero.
+
+### Badges
+
+The README shows three badges read by shields.io from `data/badges/`, in its
+*endpoint* format:
+
+| Badge | Counts |
+| --- | --- |
+| `clones` | Every clone in `daily.csv`, summed since tracking began. |
+| `visitors (14d)` | Unique visitors over the API's 14-day window, from the latest snapshot. Daily unique counts cannot be summed into a unique count. |
+| `visits` | Daily unique visitors summed since tracking began: a visitor counts once per day they visit. |
+
+Large numbers are shortened (`1.2k`, `11k`). A badge file changes only when
+its value does, so a rerun with the same data still changes nothing.
 
 ### Merge rules
 
@@ -106,8 +130,31 @@ read its CSV files. By my decision
 ([#123](https://github.com/danielep71/K-SFTs/issues/123)) it stays public. The
 data is aggregate (counts, referrers and paths) and identifies no visitor. It
 is not published through
-GitHub Pages or badges. The counts include my own visits and
-every clone made by CI checkouts.
+GitHub Pages; the three badges show the totals above. The counts include my
+own visits and every clone made by CI checkouts.
+
+## 🚨 Traffic alert
+
+After each collection the **Traffic alert** job compares the latest snapshot
+with the one before (`traffic_history.py alert`) and opens one issue, titled
+`Traffic alert: <snapshot date>`, when any of these holds:
+
+- **Views or clones spike:** the 14-day total at least doubles and grows by
+  at least 100 views or 10 clones;
+- **Stars or forks increase;**
+- **New referrer:** a referrer never stored before brings at least 5 views.
+
+A count blank in the older snapshot raises nothing. At most one issue is
+opened per snapshot date: the job skips a date whose issue exists, open or
+closed. Like every issue it is assigned to me, labelled `P3` and
+`repository`, and filed under the open milestone with the earliest due date,
+so it passes *Issue triage*. Its *Schedule* starts on the snapshot date and
+targets a week later. The thresholds are those of my other engine's traffic
+workflow.
+
+The job uses the workflow token with `issues: write` and `contents: read`. It
+has no environment, so it never receives `TRAFFIC_TOKEN`, and it runs only
+after a successful collection.
 
 ## 🛡️ Branch protection
 
@@ -134,8 +181,11 @@ invalid, and leaves the history unchanged. Read the failing step:
 | *Fetch*: HTTP 403 or 404 | Token lacks *Administration: read* on this repository. | Regenerate it with the settings above. |
 | *Fetch*: HTTP 429 or 5xx after retries | Rate limit or GitHub outage. | Run it again later; the next run collects the same 14 days. |
 | *Merge*: `ERROR: ...; the history was not changed` | The API returned an unexpected shape, or a history file no longer has the expected layout. | Inspect the response or the named file; a file edited by hand must keep its header and columns. |
+| *Fetch*: `API request for the repository failed` | Same causes as the traffic requests. | As above. |
 | *Commit and push*: `Could not push the history` | `traffic-history` kept moving, or a rule rejected the push. | Check the branch's rules and recent commits, then run again. |
 | *Check out traffic-history* fails | The branch was deleted. | Restore it from the last known commit; never recreate it empty over existing history. |
+| *Traffic alert*: `No open milestone with a due date` | Every milestone is closed, or none has a due date. | Open the next milestone with a due date, then run the workflow again. |
+| *Traffic alert*: `gh issue create` fails | A label, the assignee or the milestone no longer exists. | Restore it, then run the workflow again; the history is already saved. |
 
 A failed run can always be repeated: the merge is idempotent, and each
 collection covers the last 14 days.

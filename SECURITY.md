@@ -70,7 +70,7 @@ step runs no repository code ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 | `Issue triage` | `contents: read`, `issues: read`, `pull-requests: read` | Issue events and manual dispatch, from `main` |
 | `Detect issue-label drift` | `contents: read`, `issues: read` | Label-file pull requests, daily schedule, manual dispatch |
 | `Sync issue labels` | `contents: read`; `issues: write` only to reconcile labels | Label-file pull requests (validation only); label-file pushes to `main` and manual dispatch on `main` (reconciliation) |
-| `Traffic history` | `contents: write`, to push `traffic-history`; plus `TRAFFIC_TOKEN` for the traffic API | Daily schedule and manual dispatch, from `main` only |
+| `Traffic history` | Collection job: `contents: write`, to push `traffic-history`, plus `TRAFFIC_TOKEN` for the traffic and repository API. Alert job: `contents: read`, `issues: write`, to open a traffic-alert issue; no `TRAFFIC_TOKEN` | Daily schedule and manual dispatch, from `main` only |
 
 Every checkout sets `persist-credentials: false`, and every action is pinned
 to a full commit SHA; the traffic workflow passes its push credential to `git`
