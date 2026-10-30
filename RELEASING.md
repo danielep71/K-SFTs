@@ -1,13 +1,13 @@
 # 🚀 Releasing
 
-The maintainer's procedure for preparing and publishing a version. The branch
+My procedure for preparing and publishing a version. The branch
 model and integration are in [docs/GOVERNANCE.md](docs/GOVERNANCE.md); the
 version and changelog rules are in
 [CHANGELOG.md](CHANGELOG.md#date-and-version-rules).
 
 > [!IMPORTANT]
-> Nothing is versioned, tagged or published unless the maintainer explicitly
-> decides it. Closing a milestone, or integrating a release branch into
+> Nothing is versioned, tagged or published unless I explicitly
+> decide it. Closing a milestone, or integrating a release branch into
 > `main`, publishes nothing. Unreleased work stays under `## [Unreleased]`.
 
 <a id="current-status"></a>
@@ -28,7 +28,7 @@ version and changelog rules are in
 | Item | Convention |
 | --- | --- |
 | Version | Semantic Versioning, `MAJOR.MINOR.PATCH`; `0.y.z` while in initial development ([rules](CHANGELOG.md#date-and-version-rules)) |
-| Release branch | `release/X.Y.Z`, without `v`, opened only by maintainer decision |
+| Release branch | `release/X.Y.Z`, without `v`, opened only by my decision |
 | Milestone | `vX.Y.Z - <title>`, on issues only |
 | `VERSION` | One `X.Y.Z` line at the root. Created in the release-preparation pull request, never before; afterwards it always names the newest released version |
 | Changelog | Work stays under `## [Unreleased]`; preparation moves it to `## [X.Y.Z] - YYYY-MM-DD` |
@@ -43,7 +43,7 @@ equal to the newest one ([tools/README.md](tools/README.md#-gates)).
 
 ## 🧩 Preparation and publication
 
-A release has two parts, each decided by the maintainer separately:
+A release has two parts, each decided by me separately:
 
 | Part | Steps | Effect |
 | --- | --- | --- |
@@ -119,7 +119,7 @@ start again at step 2.
 
 ### 5. Create the annotated tag
 
-Only on the maintainer's decision to publish, from the command line so that
+Only on my decision to publish, from the command line so that
 the tag is annotated:
 
 ```sh
@@ -174,12 +174,12 @@ expire, so copy the decisive lines
 
 | # | Gate | Done |
 | ---: | --- | :---: |
-| 1 | The maintainer decided to prepare the version | ☐ |
+| 1 | I decided to prepare the version | ☐ |
 | 2 | Changelog section dated and `VERSION` created or updated | ☐ |
 | 3 | Release branch integrated into `main`, and synced back | ☐ |
 | 4 | Candidate frozen: the integration merge commit's full SHA | ☐ |
 | 5 | `check.py --ci` and `Repository integrity` pass on the candidate | ☐ |
 | 6 | `check_excel_run.py` passes on the candidate's Excel run | ☐ |
-| 7 | The maintainer decided to publish | ☐ |
+| 7 | I decided to publish | ☐ |
 | 8 | Annotated tag on the candidate | ☐ |
 | 9 | GitHub Release published from the tag and verified | ☐ |
