@@ -13,7 +13,6 @@ on:
       - "release/**"
     paths:
       - .github/labels.json
-      - .github/label-policy.json
       - .github/scripts/labels-sync.mjs
       - .github/workflows/labels-sync.yml
   push:
@@ -21,7 +20,6 @@ on:
       - main
     paths:
       - .github/labels.json
-      - .github/label-policy.json
       - .github/scripts/labels-sync.mjs
       - .github/workflows/labels-sync.yml
   workflow_dispatch:
@@ -38,6 +36,7 @@ jobs:
     name: Validate label manifest
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       contents: read
 
@@ -47,11 +46,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Exercise validation, overlays, and reconciliation paths
-        run: node .github/scripts/labels-sync.mjs --policy .github/label-policy.json --self-test
+      - name: Exercise validation and reconciliation paths
+        run: node .github/scripts/labels-sync.mjs --self-test
 
       - name: Validate the canonical manifest
-        run: node .github/scripts/labels-sync.mjs --policy .github/label-policy.json --mode validate
+        run: node .github/scripts/labels-sync.mjs --mode validate
 
   reconcile:
     name: Reconcile live labels
@@ -59,6 +58,7 @@ jobs:
       github.event_name != 'pull_request' &&
       github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       contents: read
       issues: write
@@ -69,10 +69,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Exercise validation, overlays, and reconciliation paths
-        run: node .github/scripts/labels-sync.mjs --policy .github/label-policy.json --self-test
+      - name: Exercise validation and reconciliation paths
+        run: node .github/scripts/labels-sync.mjs --self-test
 
-      - name: Reconcile and verify the versioned label selection
+      - name: Reconcile and verify the versioned label catalogue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/labels-sync.mjs --policy .github/label-policy.json --mode reconcile --repository "${GITHUB_REPOSITORY}"
+        run: node .github/scripts/labels-sync.mjs --mode reconcile --repository "${GITHUB_REPOSITORY}"

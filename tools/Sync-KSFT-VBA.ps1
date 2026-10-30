@@ -908,7 +908,7 @@ try {
     }
     catch {
         throw (
-            "Cannot access the VBA project. Enable Excel Trust Center > Macro Settings > " +
+            "Cannot access the VBA project. Enable File > Options > Trust Center > Trust Center Settings > Macro Settings > " +
             "'Trust access to the VBA project object model' and ensure the VBA project " +
             "is not password-locked."
         )

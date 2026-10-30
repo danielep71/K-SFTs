@@ -39,8 +39,6 @@ later milestones.
 
 **K-SFTs uses the `application` profile.** Decided by the maintainer on
 2026-10-24 in [#2](https://github.com/danielep71/K-SFTs/issues/2).
-`.github/label-policy.json` already selects the same profile for the label
-catalogue.
 
 | Question | Answer |
 | --- | --- |

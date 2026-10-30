@@ -76,9 +76,10 @@ social-preview use (#113).
 
 `docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
 authored for K-SFTs on 2026-10-26 at the maintainer's request (#142). The SVG
-contains editable text and vector shapes; the PNG is its rendered export.
-The diagram is a simplified methodological illustration, not a screenshot
-or evidence of validated calculations.
+contains editable text and vector shapes; the PNG is its rendered export,
+re-rendered on 2026-10-30 with Arial's metrics so that no title overruns its
+box (#208). The diagram is a simplified methodological illustration, not a
+screenshot or evidence of validated calculations.
 
 The companion pairs `docs/assets/SFT_CRR_uses.svg` / `.png` and
 `docs/assets/SFT_calculation_reference.svg` / `.png` were authored on
