@@ -116,7 +116,9 @@ This is an architecture diagram, not evidence of an implemented or validated
 calculation. Today the [prototype](docs/methodology/PROTOTYPE.md) covers the
 K-SFT box and the standardised risk weight, RWA and own funds of each
 netting set, a QCCP taking the 2% trade-exposure weight. Default-fund
-capital and CVA are not implemented here.
+capital and CVA are not implemented here. For v1.0.0 only E\* is supported:
+the risk weight, RWA and own funds become illustrative, and the QCCP class is
+rejected ([support matrix](docs/methodology/SUPPORT_MATRIX.md)).
 
 ---
 
@@ -222,11 +224,11 @@ flowchart LR
 
 | Step | Source | Status |
 | --- | --- | --- |
-| Transaction and collateral records | Products (D4) and collateral (D6) | Open decisions; the prototype takes five types and six asset types |
+| Transaction and collateral records | Products (D4) and collateral (D6) | Decided on 2026-10-30 (#172): the prototype's five types and six asset types are supported ([support matrix](docs/methodology/SUPPORT_MATRIX.md)) |
 | Supervisory volatility adjustments | CRR Articles 224, 226, 227; Basel CRE22 | In the prototype; its haircut table matches CRE22.49 and Article 224 Tables 1, 3 and 4 (#197) |
 | Single transaction: fully adjusted exposure value E* | CRR Article 223 | In the prototype; not yet checked against the text |
 | Master netting agreement: exposure of the netting set | CRR Articles 206 and 220(2)–(3); Basel CRE22.64–22.65 | In the prototype; not yet checked against the text |
-| Output measures | D7 | Open decision; the prototype gives E\*, RWA and own funds |
+| Output measures | D7 | Decided on 2026-10-30 (#172): E\* and its intermediate amounts supported; the prototype's risk weight, RWA and own funds illustrative |
 
 ### Netting-set aggregation at a glance
 
@@ -323,7 +325,9 @@ The full layout, the dependency direction and the public API boundary are in
 
 - **Prototype only.** The calculation is a prototype, not the methodology of
   record: it departs from recorded decisions (a BCBS regime, a QCCP class,
-  the open decisions D4, D6 and D7), its expected values are illustrative,
+  risk weight, RWA and own funds not yet labelled illustrative; #248 aligns
+  it with the [support matrix](docs/methodology/SUPPORT_MATRIX.md)), its
+  expected values are illustrative,
   and there is no numerical test case in the format of
   [TEST_CASES.md](docs/methodology/TEST_CASES.md) and no production
   workbook ([departures](docs/methodology/PROTOTYPE.md)).
@@ -352,9 +356,8 @@ The full layout, the dependency direction and the public API boundary are in
 | --- | --- |
 | v0.1.0 - Repo setup | Tooling, governance, conventions, the harness and its Excel evidence; closed by a certification from a fresh checkout, without a release (#13) |
 | v0.2.0 - Prototype setup | The prototype, working in Excel and integrated into `main`, with the robustness fixes of its audit (#141), the workbook checks (#138, #197) and a closeout from a fresh checkout (#134); no change to E\* for valid inputs. Released as `v0.2.0` on 2026-10-30 (#224) |
-| v0.3.0 - Methodology and numerical assurance (current) | The supported scope and support matrix, regulatory traceability and parameters, numerical fixtures, regression suites and workbook integrity (#172–#176) |
-| Open decisions | Products in scope (D4), collateral (D6), output measures (D7) ([open decisions](docs/REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)), decided in #172 |
-| v1.0.0 - First supported release | The frozen contract, the production workbook, the user manual, certification in Excel and the packaged release (#177–#181) |
+| v0.3.0 - Methodology and numerical assurance (current) | The supported scope and [support matrix](docs/methodology/SUPPORT_MATRIX.md) (#172), the workbook aligned with it (#248), regulatory traceability and parameters, numerical fixtures, regression suites and workbook integrity (#173–#176, #220) |
+| v1.0.0 - First supported release | The core separated from the worksheet code (#249), the frozen contract, the production workbook, the user manual, certification in Excel and the packaged release (#177–#181) |
 
 Separate scope decisions, each needing its own issue: the internal models
 approach, CCP-cleared SFTs, the CRE56 haircut floors, the Financial

@@ -27,6 +27,18 @@ for valid inputs:
 | `CORE_Engine` and `CORE_Util` read and write sheets | `src/core/` never touches Excel | Split into core and host glue |
 | `CORE_Engine` calls `SFT_Formulas` in `src/modules/`, which holds the formulas, keeps module-level run state, and `M_Main` calls it directly | The dependency direction of [REPOSITORY_STRUCTURE.md](../REPOSITORY_STRUCTURE.md#-dependency-direction) | Move the formulas to the core and route the workbook through the facade |
 
+**Resolved on 2026-10-30.** By my decisions in
+[#172](https://github.com/danielep71/K-SFTs/issues/172),
+[SUPPORT_MATRIX.md](SUPPORT_MATRIX.md#prototype-departures) assigns each row
+above, and each assumption below, a resolution: BCBS and QCCP rejected and
+RW, RWA and own funds labelled illustrative
+([#248](https://github.com/danielep71/K-SFTs/issues/248)); D4, D6 and D7
+closed; the source checks in #173 and the fixtures in #174; the core
+separation under a waiver until v1.0.0
+([#249](https://github.com/danielep71/K-SFTs/issues/249)). The table stays as
+the record of 0.2.0; this document describes the prototype until #248 changes
+it.
+
 ## Contents
 
 - [Scope](#scope)
