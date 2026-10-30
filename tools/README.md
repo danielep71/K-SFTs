@@ -213,12 +213,15 @@ without it the issues API omits pull requests.
 
 ```sh
 GITHUB_TOKEN=<token with issues:read and pull-requests:read> python tools/check_issues.py --repository danielep71/K-SFTs
-python tools/check_issues.py --input issues.json   # issues exported as GitHub REST JSON
+python tools/check_issues.py --input issues.json --repo-name danielep71/K-SFTs   # issues exported as GitHub REST JSON
 python tools/check_issues.py --check-config        # forms and label catalogue only
 ```
 
 Exit code 0 means no findings, 1 means findings, 2 means the audit could not
-run. Its rules are tested by `test_check_issues.py` in `tool-tests`.
+run. Offline exports require `--repo-name owner/name`; the required assignee
+is read from the bug form and checked for consistency across all forms.
+Node.js validates the manifest using the synchronization script, including
+rejecting unsupported overlay fields. Its rules are tested by `test_check_issues.py` in `tool-tests`.
 
 ## 📈 Traffic history
 
