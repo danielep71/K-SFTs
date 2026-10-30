@@ -35,6 +35,12 @@ def series(key: str, days: Sequence[Day]) -> dict[str, Any]:
     }
 
 
+def stats(stars: int = 1, forks: int = 0, watchers: int = 1, open_issues: int = 4) -> dict[str, Any]:
+    """The fields of a repository API response that a collection keeps."""
+    return {"stargazers_count": stars, "forks_count": forks,
+            "subscribers_count": watchers, "open_issues_count": open_issues, "name": "r"}
+
+
 def at(stamp: str) -> datetime:
     return datetime.fromisoformat(stamp).replace(tzinfo=UTC)
 
@@ -48,7 +54,7 @@ class Workspace:
         self.raw.mkdir()
 
     def collect(self, views: Sequence[Day], clones: Sequence[Day] | None = None,
-                referrers: Any = None, paths: Any = None) -> None:
+                referrers: Any = None, paths: Any = None, repository: Any = None) -> None:
         responses: dict[str, Any] = {
             "views.json": series("views", views),
             "clones.json": series("clones", views if clones is None else clones),
@@ -56,6 +62,7 @@ class Workspace:
             if referrers is None else referrers,
             "paths.json": [{"path": "/o/r", "title": "r", "count": 3, "uniques": 1}]
             if paths is None else paths,
+            "repository.json": stats() if repository is None else repository,
         }
         for name, body in responses.items():
             (self.raw / name).write_text(json.dumps(body), encoding="utf-8")
@@ -73,8 +80,13 @@ class Workspace:
                 for row in self.rows(DAILY)}
 
     def snapshot(self) -> dict[str, str]:
-        return {name: (self.data / name).read_text(encoding="utf-8")
-                for name in traffic_history.HEADERS if (self.data / name).exists()}
+        return {str(path.relative_to(self.data)): path.read_text(encoding="utf-8")
+                for path in sorted(self.data.rglob("*")) if path.is_file()}
+
+    def badge(self, name: str) -> dict[str, Any]:
+        result: dict[str, Any] = json.loads(
+            (self.data / "badges" / f"{name}.json").read_text(encoding="utf-8"))
+        return result
 
 
 @contextlib.contextmanager
@@ -88,7 +100,9 @@ class MergeTests(unittest.TestCase):
         with workspace() as ws:
             ws.collect(window("2026-10-14", [(1, 1)] * 14))
             report = ws.merge("2026-10-14T06:17:00")
-            self.assertEqual(sorted(report.changed), sorted(traffic_history.HEADERS))
+            self.assertEqual(sorted(report.changed),
+                             sorted([*traffic_history.HEADERS, "badges/clones.json",
+                                     "badges/visitors.json", "badges/visits.json"]))
             self.assertEqual(len(ws.rows(DAILY)), 14)
             snapshot = ws.rows(SNAPSHOTS)[0]
             self.assertEqual((snapshot["first_date"], snapshot["last_date"]),
@@ -214,6 +228,162 @@ class MergeTests(unittest.TestCase):
                        clones=window("2026-10-13", [(1, 1)] * 13))
             ws.merge("2026-10-14T06:00:00")
             self.assertEqual(ws.daily()["2026-10-14"][:2], ("1", ""))
+
+
+class RepositoryCountTests(unittest.TestCase):
+    def test_counts_are_stored_in_the_snapshot(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(1, 1)] * 14),
+                       repository=stats(stars=3, forks=1, watchers=2, open_issues=7))
+            ws.merge("2026-10-14T06:00:00")
+            row = ws.rows(SNAPSHOTS)[0]
+            self.assertEqual([row[key] for key in ("stars", "forks", "watchers", "open_issues")],
+                             ["3", "1", "2", "7"])
+
+    def test_a_count_change_alone_replaces_that_day(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(1, 1)] * 14))
+            ws.merge("2026-10-14T06:00:00")
+            ws.collect(window("2026-10-14", [(1, 1)] * 14), repository=stats(stars=2))
+            ws.merge("2026-10-14T18:00:00")
+            row = ws.rows(SNAPSHOTS)[0]
+            self.assertEqual((row["stars"], row["collected_at"]), ("2", "2026-10-14T18:00:00Z"))
+
+    def test_legacy_snapshots_are_kept_with_blank_counts(self) -> None:
+        legacy = ("snapshot_date,collected_at,first_date,last_date,"
+                  "views_14d,unique_views_14d,clones_14d,unique_clones_14d\n"
+                  "2026-10-13,2026-10-13T06:00:00Z,2026-09-30,2026-10-13,7,1,10,3\n")
+        with workspace() as ws:
+            ws.data.mkdir()
+            (ws.data / SNAPSHOTS).write_text(legacy, encoding="utf-8")
+            ws.collect(window("2026-10-14", [(1, 1)] * 14))
+            ws.merge("2026-10-14T06:00:00")
+            old, new = ws.rows(SNAPSHOTS)
+            self.assertEqual((old["views_14d"], old["stars"], old["open_issues"]), ("7", "", ""))
+            self.assertEqual(new["stars"], "1")
+            self.assertEqual((ws.data / SNAPSHOTS).read_text(encoding="utf-8").splitlines()[0],
+                             ",".join(traffic_history.HEADERS[SNAPSHOTS]))
+
+    def test_invalid_repository_response_is_refused(self) -> None:
+        for body, message in [([], "repository: expected an object"),
+                              (stats() | {"forks_count": None}, "repository.forks_count"),
+                              (stats() | {"stargazers_count": -1}, "non-negative")]:
+            with self.subTest(message=message), workspace() as ws:
+                ws.collect(window("2026-10-14", [(1, 1)] * 14), repository=body)
+                with self.assertRaisesRegex(TrafficError, message):
+                    ws.merge("2026-10-14T06:00:00")
+                self.assertFalse(ws.data.exists())
+
+
+class BadgeTests(unittest.TestCase):
+    def test_badges_count_clones_visitors_and_visits(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(2, 1)] * 14),
+                       clones=window("2026-10-14", [(100, 3)] * 14))
+            ws.merge("2026-10-14T06:00:00")
+            self.assertEqual(ws.badge("clones"), {"schemaVersion": 1, "label": "clones",
+                                                  "message": "1.4k", "color": "217346"})
+            # The latest snapshot's 14-day unique count, not a sum of daily uniques.
+            self.assertEqual(ws.badge("visitors")["message"], "1")
+            self.assertEqual(ws.badge("visitors")["label"], "visitors (14d)")
+            self.assertEqual(ws.badge("visits")["message"], "14")
+            # A week later the visits badge keeps the older days and adds the new ones.
+            ws.collect(window("2026-10-21", [(2, 1)] * 14),
+                       clones=window("2026-10-21", [(100, 3)] * 14))
+            ws.merge("2026-10-21T06:00:00")
+            self.assertEqual(ws.badge("visits")["message"], "21")
+            self.assertEqual(ws.badge("clones")["message"], "2.1k")
+
+    def test_badges_are_rewritten_only_when_they_change(self) -> None:
+        with workspace() as ws:
+            ws.collect(window("2026-10-14", [(2, 1)] * 14))
+            ws.merge("2026-10-14T06:00:00")
+            (ws.data / "badges" / "visits.json").unlink()
+            report = ws.merge("2026-10-14T09:00:00")
+            self.assertEqual(report.changed, {"badges/visits.json": 1})
+            self.assertEqual(ws.merge("2026-10-14T12:00:00").changed, {})
+
+    def test_compact_numbers(self) -> None:
+        self.assertEqual([traffic_history.compact(value)
+                          for value in (0, 999, 1000, 1250, 11_000, 2_500_000)],
+                         ["0", "999", "1k", "1.2k", "11k", "2.5M"])
+
+
+class AlertTests(unittest.TestCase):
+    def history(self, ws: Workspace, before: tuple[int, int, int], after: tuple[int, int, int],
+                referrers: Any = None) -> dict[str, str] | None:
+        """Two daily snapshots of (views, clones, stars); the second may add referrers."""
+        for day, (views, clones, stars), extra in (("2026-10-13", before, None),
+                                                  ("2026-10-14", after, referrers)):
+            ws.collect([(day, views, 1)], clones=[(day, clones, 1)],
+                       repository=stats(stars=stars), referrers=extra)
+            ws.merge(f"{day}T06:00:00")
+        return traffic_history.alert(ws.data, "2026-12-20")
+
+    def test_no_alert_when_nothing_stands_out(self) -> None:
+        with workspace() as ws:
+            ws.collect([("2026-10-13", 5, 1)])
+            ws.merge("2026-10-13T06:00:00")
+            self.assertIsNone(traffic_history.alert(ws.data, "2026-12-20"))
+            self.assertIsNone(self.history(ws, (50, 20, 1), (99, 29, 1)))
+
+    def test_spikes_and_more_stars_raise_an_alert(self) -> None:
+        with workspace() as ws:
+            issue = self.history(ws, (50, 20, 1), (150, 40, 2))
+            assert issue is not None
+            self.assertEqual(issue["title"], "Traffic alert: 2026-10-14")
+            self.assertIn("views spike, clones spike, stars increased.", issue["body"])
+            self.assertIn("| Stars | 2 | 1 |", issue["body"])
+            for line in ("- Planned start: **2026-10-14**.", "- Target completion: **2026-10-21**.",
+                         "- Milestone target: **2026-12-20**.",
+                         "## Dependencies and blocking status\n\nNone."):
+                self.assertIn(line, issue["body"])
+
+    def test_a_spike_needs_double_and_the_minimum_growth(self) -> None:
+        with workspace() as ws:
+            # Clones double (4 to 8) but grow by less than 10: no spike.
+            self.assertIsNone(self.history(ws, (1, 4, 1), (1, 8, 1)))
+
+    def test_new_referrer_needs_enough_views(self) -> None:
+        few = [{"referrer": "github.com", "count": 3, "uniques": 1},
+               {"referrer": "example.org", "count": 4, "uniques": 2}]
+        with workspace() as ws:
+            self.assertIsNone(self.history(ws, (10, 1, 1), (10, 1, 1), few))
+        many = [{"referrer": "github.com", "count": 30, "uniques": 1},
+                {"referrer": "example.org", "count": 5, "uniques": 2}]
+        with workspace() as ws:
+            issue = self.history(ws, (10, 1, 1), (10, 1, 1), many)
+            assert issue is not None
+            self.assertIn("- example.org: 5 views, 2 unique", issue["body"])
+            self.assertNotIn("New referrers** (at least 5 views):\n\n- github.com", issue["body"])
+
+    def test_counts_missing_from_the_older_snapshot_raise_nothing(self) -> None:
+        legacy = ("snapshot_date,collected_at,first_date,last_date,"
+                  "views_14d,unique_views_14d,clones_14d,unique_clones_14d\n"
+                  "2026-10-13,2026-10-13T06:00:00Z,2026-10-13,2026-10-13,10,1,1,1\n")
+        with workspace() as ws:
+            ws.data.mkdir()
+            (ws.data / SNAPSHOTS).write_text(legacy, encoding="utf-8")
+            ws.collect([("2026-10-14", 10, 1)], clones=[("2026-10-14", 1, 1)],
+                       repository=stats(stars=5))
+            ws.merge("2026-10-14T06:00:00")
+            self.assertIsNone(traffic_history.alert(ws.data, "2026-12-20"))
+
+    def test_alert_command_writes_the_issue_only_when_due(self) -> None:
+        with workspace() as ws:
+            self.history(ws, (50, 20, 1), (50, 20, 1))
+            output = ws.raw.parent / "alert.json"
+            arguments = ["alert", "--data", str(ws.data), "--milestone-due", "2026-12-20",
+                         "--output", str(output)]
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(traffic_history.main(arguments), 0)
+            self.assertFalse(output.exists())
+            ws.collect([("2026-10-15", 500, 1)], clones=[("2026-10-15", 20, 1)])
+            ws.merge("2026-10-15T06:00:00")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(traffic_history.main(arguments), 0)
+            self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["title"],
+                             "Traffic alert: 2026-10-15")
 
 
 class FailureTests(unittest.TestCase):

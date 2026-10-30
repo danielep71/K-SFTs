@@ -19,6 +19,9 @@
 <br>
 
 [![Last commit](https://img.shields.io/github/last-commit/danielep71/K-SFTs/main?style=flat-square&label=last%20commit&color=217346)](https://github.com/danielep71/K-SFTs/commits/main)
+[![Clones](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdanielep71%2FK-SFTs%2Ftraffic-history%2Fdata%2Fbadges%2Fclones.json&style=flat-square&label=clones)](docs/TRAFFIC.md#badges)
+[![Visitors](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdanielep71%2FK-SFTs%2Ftraffic-history%2Fdata%2Fbadges%2Fvisitors.json&style=flat-square&label=visitors%20(14d))](docs/TRAFFIC.md#badges)
+[![Visits](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdanielep71%2FK-SFTs%2Ftraffic-history%2Fdata%2Fbadges%2Fvisits.json&style=flat-square&label=visits)](docs/TRAFFIC.md#badges)
 [![Downloads](https://img.shields.io/github/downloads/danielep71/K-SFTs/total?style=flat-square&label=downloads&color=217346)](https://github.com/danielep71/K-SFTs/releases/latest)
 [![P1 issues](https://img.shields.io/github/issues/danielep71/K-SFTs/P1?style=flat-square&label=P1&color=B60205)](https://github.com/danielep71/K-SFTs/issues?q=is%3Aissue%20is%3Aopen%20label%3AP1)
 [![P2 issues](https://img.shields.io/github/issues/danielep71/K-SFTs/P2?style=flat-square&label=P2&color=D93F0B)](https://github.com/danielep71/K-SFTs/issues?q=is%3Aissue%20is%3Aopen%20label%3AP2)
