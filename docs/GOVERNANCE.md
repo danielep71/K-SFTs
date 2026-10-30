@@ -319,8 +319,8 @@ pull request or commit description.
 
 Versions follow Semantic Versioning; the changelog and its rules are in
 [CHANGELOG.md](../CHANGELOG.md) and the procedure for preparing and
-publishing a version is in [RELEASING.md](../RELEASING.md). No version has
-been released and no tag exists. Closing a milestone or integrating a
+publishing a version is in [RELEASING.md](../RELEASING.md). The first
+release is 0.2.0, tagged `v0.2.0`. Closing a milestone or integrating a
 release branch into `main` does not publish a release: preparation and
 publication each happen only on my explicit decision.
 
