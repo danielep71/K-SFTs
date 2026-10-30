@@ -8,9 +8,6 @@ run-name: Label drift — ${{ github.ref_name }} @ ${{ github.sha }}
 
 on:
   pull_request:
-    branches:
-      - main
-      - "release/**"
     paths:
       - .github/labels.json
       - .github/scripts/labels-drift.mjs
