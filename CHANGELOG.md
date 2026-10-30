@@ -56,7 +56,13 @@ Use only the categories an entry needs.
 
 ## [Unreleased]
 
-Nothing yet. Later milestones lead to v1.0.0.
+Work of *v0.3.0 - Methodology and numerical assurance*. Later milestones lead
+to v1.0.0.
+
+### Changed
+
+- The active release branch is `release/0.3.0`, created from the `v0.2.0`
+  commit; task branches start from it, and Dependabot targets it (#228).
 
 <a id="020"></a>
 
