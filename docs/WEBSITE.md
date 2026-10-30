@@ -10,6 +10,9 @@ The page is published at <https://danielep71.github.io/K-SFTs/>, by GitHub
 Pages set to **Deploy from a branch**, branch `main`, folder `/docs`; each
 push to `main` redeploys it. `docs/.nojekyll` makes this a plain static site. No package
 installation, JavaScript, build step, analytics or third-party fonts are needed.
+`docs/assets/SFT_social_preview.html`, the source of the hero image, is
+published with the folder but not linked; only it loads Google Fonts, when
+opened ([tools/README.md](../tools/README.md#hero-image)).
 
 Changes follow the repository task/release/main PR process. The live site
 updates only when the page changes reach `main` and the Pages deployment

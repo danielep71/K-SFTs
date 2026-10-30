@@ -30,6 +30,7 @@ same licence, MPL-2.0.
 | --- | --- | --- | --- |
 | `.github/workflows/traffic-history.yml`, `tools/traffic_history.py`, `docs/TRAFFIC.md` | [K-Risk-Engines](https://github.com/danielep71/K-Risk-Engines) `docs/TRAFFIC.md` (design) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository ([#36](https://github.com/danielep71/K-SFTs/issues/36)): merge logic moved into a tested script with validation and all-or-nothing writes; data branch created with a fixed layout; zero and unavailable days distinguished; token limited to the fetch step. Badges, alert issues and repository counts came later (next row). |
 | `.github/workflows/traffic-history.yml`, `tools/traffic_history.py`, `docs/TRAFFIC.md`, `README.md` (traffic badges) | [K-SACCR](https://github.com/danielep71/K-SACCR) `.github/workflows/daily-traffic.yml` (badges, alert, repository counts) | `957f30b7010e43cfd927ba264b76945a8fab481e` | Adapted ([#236](https://github.com/danielep71/K-SFTs/issues/236)): the badge definitions, alert triggers and thresholds are kept; the logic moved into the tested script; the counts are snapshot columns, blank in older rows; the alert issue carries the assignee, `P3` and `repository`, the earliest-due open milestone and a schedule, and is opened by a separate job that never receives `TRAFFIC_TOKEN`. |
+| `docs/assets/SFT_social_preview.html` | [K-SACCR](https://github.com/danielep71/K-SACCR) `docs/assets/SACCR_social_preview.html` (layout) | `e44d1b138f810393e8511ee80534765c4434a23e` | Adapted ([#239](https://github.com/danielep71/K-SFTs/issues/239)): the layout, colours and fonts are kept; the title, text and every figure are K-SFTs' own, from its demo portfolio and independent reference; a header comment names the source of the figures and the render command. |
 | `.github/PULL_REQUEST_TEMPLATE.md`; parts of `docs/GOVERNANCE.md` (Branches, Integration, Review) | K-Risk-Engines (structure) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository's branches, sync procedure and checks ([#1](https://github.com/danielep71/K-SFTs/issues/1), [#11](https://github.com/danielep71/K-SFTs/issues/11)). |
 
 The other files were written for, or adapted by me into, this
@@ -48,6 +49,7 @@ copied into the repository; each keeps its own licence.
 | Ruff | 0.17.1 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
 | mypy | 2.4.0 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
 | actionlint | 1.7.12 | MIT | Workflow check, downloaded and verified by SHA-256 |
+| Playwright | Not pinned; optional | Apache-2.0 | Renders the hero image (`tools/render_social_preview.mjs`); not a gate |
 
 The licences were checked on 2026-10-24 against the upstream licence files and
 package metadata, and again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
@@ -66,7 +68,16 @@ records.
 
 ## Artwork
 
-`docs/assets/SFT_social_preview.png` was generated with OpenAI image generation
+`docs/assets/SFT_social_preview.png` is rendered from
+`docs/assets/SFT_social_preview.html`, authored for K-SFTs on 2026-10-30 at my
+request (#239) after the hero of my other engine: the same layout, colours and
+fonts, with K-SFTs' own text and figures. Its figures come from the demo
+portfolio and its independent reference (`tests/derivations/`); they are
+prototype outputs, not evidence of validated calculations. The page loads
+Barlow, Barlow Condensed and JetBrains Mono (SIL Open Font License) from
+Google Fonts when it is rendered; no font file is stored here.
+
+It replaces an image generated with OpenAI image generation
 on 2026-10-24 at my request. My own
 social-preview images supplied the visual references (navy background,
 mint accents and dashboard composition). The title and footer were corrected to `K-SFTs`
@@ -77,7 +88,8 @@ social-preview use (#113). On 2026-10-30, after the v0.2.0 release, I had
 its pill changed from *Research & Development* to *Release 0.2.0*: only the
 pill and the `K-SFTs` label beside it were repainted, the text set in Barlow
 Condensed Bold (SIL Open Font License), which is not stored here, and the
-image was saved losslessly as a PNG under its present name (#235).
+image was saved losslessly as a PNG under its present name (#235). The
+generated image stays in the repository history.
 
 `docs/assets/SFT_aggregation.svg` and `docs/assets/SFT_aggregation.png` were
 authored for K-SFTs on 2026-10-26 at my request (#142). The SVG
