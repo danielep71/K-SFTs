@@ -1,23 +1,19 @@
 name: Sync issue labels
 
-# Pull requests validate without write permission. Only a trusted push to main
-# or an explicit manual dispatch on main can reconcile the live repository
+# Pull requests validate without write permission. Only a trusted push to the default branch
+# or an explicit manual dispatch on the default branch can reconcile the live repository
 # taxonomy; a dispatch on any other branch skips reconciliation.
 # The job runs the script's self-test, then reconciles; the script validates
 # before the first API mutation and verifies an exact post-run match.
 
 on:
   pull_request:
-    branches:
-      - main
-      - "release/**"
     paths:
       - .github/labels.json
       - .github/scripts/labels-sync.mjs
       - .github/workflows/labels-sync.yml
   push:
-    branches:
-      - main
+    branches: ["**"]
     paths:
       - .github/labels.json
       - .github/scripts/labels-sync.mjs
