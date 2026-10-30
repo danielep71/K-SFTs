@@ -1,5 +1,5 @@
 # Proposes updates to SHA-pinned GitHub Actions and hash-locked Python tools.
-# Every update arrives as a pull request for maintainer review; nothing merges
+# Every update arrives as a pull request for my review; nothing merges
 # automatically. See tools/README.md, "Dependency updates".
 # target-branch must name the active release branch in docs/GOVERNANCE.md.
 # Milestones belong to issues only; link each PR to a tracking issue in triage.

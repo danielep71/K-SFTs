@@ -91,7 +91,7 @@ here.
 K-SFTs is one calculator of a counterparty credit risk framework: it
 produces the exposure value E\* of securities financing transactions, the
 **K-SFT** box of step 1. The derivatives exposure belongs to
-[K-SACCR](https://github.com/danielep71/VBA-SACCR-Toolkit); the capital
+[K-SACCR](https://github.com/danielep71/K-SACCR); the capital
 steps, ordinary and CCP, and the CVA memo item belong to the wider framework
 of [K-Risk Engines](https://github.com/danielep71/K-Risk-Engines).
 
