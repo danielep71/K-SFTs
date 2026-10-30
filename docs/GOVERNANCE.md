@@ -6,9 +6,9 @@ as configured**; a rule written here is not evidence that GitHub enforces it.
 
 ## 👤 Ownership and scope
 
-**Daniele Penza (@danielep71)** maintains K-SFTs and decides scope,
+I, **Daniele Penza (@danielep71)**, maintain K-SFTs and decide scope,
 priorities, branch strategy, integration and publication. Contributors and
-automation work within the scope authorized by the maintainer.
+automation work within the scope authorized by me.
 
 This is an independent personal project.
 
@@ -23,21 +23,21 @@ VBA conventions, supported hosts and import steps in
 [VBA_HOUSE_STYLE.md](VBA_HOUSE_STYLE.md) and
 [INSTALLATION.md](../INSTALLATION.md) ([#4](https://github.com/danielep71/K-SFTs/issues/4)).
 
-Commits may be authored by the maintainer or by bots acting within authorized
+Commits may be authored by me or by bots acting within authorized
 repository workflows. Keep author attribution truthful: a bot-authored change
-is not recreated under the maintainer's name only to change its authorship.
+is not recreated under my name only to change its authorship.
 Bot-authored pull requests remain subject to the applicable checks and
-maintainer review; bot authorship does not authorize automatic merging or
+my review; bot authorship does not authorize automatic merging or
 bypass branch rules.
 
 ## 🌿 Branches
 
 | Branch | Role |
 | --- | --- |
-| `main` | Integrated source. Receives the active release branch through a merge commit after maintainer approval. No task branches or task pull requests target it. |
-| `release/0.2.0` | **Active integration branch** for v0.2.0 - Prototype setup. Base for task branches and target of task and sync pull requests. Created from `main` at `3fc2c97` on 2026-10-25 by maintainer decision. |
+| `main` | Integrated source. Receives the active release branch through a merge commit after my approval. No task branches or task pull requests target it. |
+| `release/0.2.0` | **Active integration branch** for v0.2.0 - Prototype setup. Base for task branches and target of task and sync pull requests. Created from `main` at `3fc2c97` on 2026-10-25 by my decision. |
 | `release/0.1.0` | Integration branch of v0.1.0 - Repo setup, whose milestone was certified at `576bb58` and closed on 2026-10-25 ([#13](https://github.com/danielep71/K-SFTs/issues/13)). No longer active: no task branch is created from it and no pull request targets it. Created from `main` at `85b2b3b` on 2026-10-23. |
-| Other `release/X.Y.Z` | Opened only by maintainer decision, without a `v` prefix. Do not infer a new target from a version number or from this document. |
+| Other `release/X.Y.Z` | Opened only by my decision, without a `v` prefix. Do not infer a new target from a version number or from this document. |
 | `fix/<issue>-<slug>`, `docs/<slug>`, `test/<slug>` | Short-lived task branches, created from the active release branch and deleted after merge. |
 | `traffic-history` | Data-only branch written by the Traffic history workflow ([docs/TRAFFIC.md](TRAFFIC.md)). Unrelated to `main`; never merged, never a task base, never deleted. |
 
@@ -56,7 +56,7 @@ release will be published (see [Releases](#-releases)).
    `docs: define repository governance (#<PR>)`, and its body ends with the
    issue reference.
 4. Integrate the release branch into `main` through a pull request merged with
-   a merge commit, only after maintainer approval.
+   a merge commit, only after my approval.
 5. After the integration commit passes its checks on `main`, bring the
    release branch level with `main` through a sync pull request from `main`
    into the release branch, merged with a merge commit once its checks pass.
@@ -73,7 +73,7 @@ release will be published (see [Releases](#-releases)).
 6. `main` receives commits only through these integration pull requests. If
    it receives any other commit while the release branch has commits of its
    own, the sync pull request cannot meet the up-to-date rule; stop and
-   record a maintainer decision before integrating further.
+   record my decision before integrating further.
 
 `main` and the release branches change only through pull requests, as the
 [protection policy](#-protection-policy) requires. The release branch is
@@ -88,11 +88,11 @@ branch. History is corrected with new commits.
 
 ## 🔎 Review
 
-The maintainer is the sole owner and reviewer. GitHub does not allow an author
+I am the sole owner and reviewer. GitHub does not allow an author
 to approve their own pull request, so the policy requires a pull request but
 no approving review. Review evidence consists of:
 
-- **Maintainer review** of the final diff and head commit;
+- **My review** of the final diff and head commit;
 - **Codex code review**, which runs on pull requests opened by people;
 - **CI**, the required checks on the current pull request revision.
 
@@ -113,7 +113,7 @@ later pushes. Before merging a pull request whose head changed after review:
    link is only a pointer: the Codex summary is one comment edited in
    place, so it later describes another commit or review.
 
-Codex does not review bot-authored pull requests; for those, the maintainer's
+Codex does not review bot-authored pull requests; for those, my
 review of the final diff and head SHA is the only review. Do not claim Codex
 coverage when it was skipped. If review fails or is unavailable, leave the
 pull request open and record the blocker.
@@ -196,12 +196,13 @@ check but was not exercised with a failing one.
 ### Accepted limitations
 
 - The sole owner cannot approve their own pull requests, so no approving
-  review is required. The maintainer review, Codex review and CI above take
+  review is required. My review, Codex review and CI above take
   its place.
-- Live label reconciliation runs only from `main`: on pushes to `main` that
-  change label files, and on manual dispatch on `main` (a dispatch on any
-  other branch skips it). Label changes merged into a release branch take
-  effect after integration into `main`.
+- Live label reconciliation runs only from the repository's default branch:
+  on pushes that change label files and on manual dispatch there. A dispatch
+  on another branch skips reconciliation. Label pull requests are validated
+  regardless of the target branch. The current default branch is `main`;
+  label changes on a release branch take effect after integration into it.
 - Run logs and report artifacts expire: the artifacts after 30 days, the logs
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into
@@ -264,7 +265,7 @@ status label.
   section, as an issue link (`#12`) or on a line starting
   `External condition:`. Write `None` when nothing blocks the work.
 - Add `blocked` when a named prerequisite is unresolved, and remove it when
-  all of them are resolved or the maintainer explicitly resolves the
+  all of them are resolved or I explicitly resolve the
   dependency. When an issue closes, review the issues that name it.
 
 ### Triage
@@ -274,7 +275,7 @@ read-only **Issue triage** workflow
 ([.github/workflows/issue-triage.yml](../.github/workflows/issue-triage.yml))
 audits every open issue whenever an issue is opened, edited, closed,
 reopened, labelled, assigned or given a milestone, and on manual dispatch.
-It fails, and GitHub notifies the maintainer, when an open issue:
+It fails, and GitHub notifies me, when an open issue:
 
 - is not assigned to danielep71, has no milestone, or does not have exactly
   one priority;
@@ -287,12 +288,12 @@ It fails, and GitHub notifies the maintainer, when an open issue:
   an open prerequisite or external condition without being `blocked`.
 
 The workflow never changes an issue: it does not assign, label or set a
-milestone. On each new issue, and whenever the audit fails, the maintainer:
+milestone. On each new issue, and whenever the audit fails, I:
 
-1. sets the milestone of the work the issue belongs to;
-2. confirms or changes the priority;
-3. adds or removes `blocked` as the dependency section requires;
-4. re-runs the workflow, or makes the next issue change, and checks that it
+1. set the milestone of the work the issue belongs to;
+2. confirm or change the priority;
+3. add or remove `blocked` as the dependency section requires;
+4. re-run the workflow, or make the next issue change, and check that it
    passes.
 
 The same rules run locally with
@@ -322,7 +323,7 @@ Versions follow Semantic Versioning; the changelog and its rules are in
 publishing a version is in [RELEASING.md](../RELEASING.md). No version has
 been released and no tag exists. Closing a milestone or integrating a
 release branch into `main` does not publish a release: preparation and
-publication each happen only on an explicit maintainer decision.
+publication each happen only on my explicit decision.
 
 ## 🔐 Security and licensing
 
