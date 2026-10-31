@@ -16,34 +16,66 @@ The workflow is scheduled daily at **06:17 UTC** and can be started from
 scheduled runs late; each collection records the time it was actually taken.
 A manual run on any other branch is skipped.
 
-## 🔑 Credential setup and renewal
+## 🔑 GitHub App setup
 
-The traffic API needs a token with **Administration: read** on the
-repository. The workflow token cannot be given that permission, so a
-fine-grained personal access token is used.
+The traffic API needs **Administration: read** on this repository. The
+workflow token cannot have that permission, so collection uses a short-lived
+GitHub App installation token.
 
-1. **Settings → Environments → New environment** `analytics`. Under
-   *Deployment branches and tags*, select *Selected branches and tags* and
-   allow `main` only. Do this before adding the secret: a run that names a
+1. In **Settings → Environments → analytics**, restrict deployment branches
+   to the default branch, `main`, before adding credentials. A run naming a
    missing environment creates it without that restriction.
-2. **Settings → Developer settings → Fine-grained tokens → Generate new
-   token**: resource owner `danielep71`, *Only select repositories*:
-   `K-SFTs`, repository permission **Administration: Read-only**, nothing
-   else. Set an expiry of at most 90 days.
-3. In the `analytics` environment, add the secret **TRAFFIC_TOKEN** with that
-   token. Never put the token in a file, issue, comment or chat.
-4. Run the workflow manually on `main` and check that it passes and that
-   `traffic-history` gains a commit.
+2. Under **Settings → Developer settings → GitHub Apps** for `danielep71`,
+   create the traffic App, or use the existing dedicated traffic App. Disable
+   its webhook and grant only **Administration: Read-only** as a repository
+   permission (GitHub adds **Metadata: Read-only**). Limit installation to
+   this account.
+3. Install the App on `K-SFTs` using **Only select repositories**. If the App
+   already serves other repositories, add this repository without expanding
+   its permissions. The workflow requests a token for this repository only.
+4. In the `analytics` environment, set the variable **TRAFFIC_APP_CLIENT_ID**
+   to the App's **Client ID**. Generate a dedicated private key and put the
+   whole `.pem` content in the environment secret **TRAFFIC_APP_PRIVATE_KEY**.
+   Delete the downloaded key file after saving it. Never commit the key or
+   put it in an issue, comment or chat.
+5. After configuration is confirmed and the workflow is integrated into the
+   default branch, run **Actions → Traffic history → Run workflow** there.
+   Check that collection succeeds and `traffic-history` gains a commit.
 
-**Renewal:** before the token expires, and at least every 90 days, generate a
-new token with the same settings, replace the secret, and repeat step 4.
-Revoke the token at once if it may have been exposed, or if the workflow is
-changed by anyone but me. Collections missed while the token is
-invalid are lost once they fall outside the 14-day window.
+### Migration from the personal token
 
-Only the fetch step receives `TRAFFIC_TOKEN`, and it runs `curl` only. The
-merge script runs without it, and the push uses the workflow token with
-`contents: write`.
+I install the App, generate its key and configure the environment variable
+and secret. The migration pull request waits for my configuration confirmation
+before merge. Only after the first successful App-based run and verified
+history commit do I delete the old `TRAFFIC_TOKEN` secret from `analytics`
+and revoke the personal token in my account settings. The workflow has no
+fallback to that secret; its step-local `TRAFFIC_TOKEN` variable now holds
+only the App installation token.
+
+### Credential isolation and key rotation
+
+Only **Create the traffic App token** receives the private key; the preceding
+configuration check sees only whether it is set. The action requests an
+installation token limited to this repository and **Administration: read**,
+which expires after an hour and is revoked by the action when the job ends.
+Only the fetch step receives it, and that step runs `curl`, not repository
+code. The merge script receives neither credential; the push uses the
+workflow token with `contents: write`.
+
+Rotate the key if it may have been exposed or if anyone but me changes the
+workflow. For a routine rotation:
+
+1. Generate a new private key in the App's settings.
+2. Replace **TRAFFIC_APP_PRIVATE_KEY** in **Settings → Environments →
+   analytics**. The environment secret takes precedence over any repository
+   secret with the same name.
+3. Run the workflow on the default branch and verify successful API collection
+   and a new `traffic-history` commit.
+4. Delete the old key in the App's settings, checking its fingerprint first.
+   If compromise is suspected, revoke the exposed key immediately instead
+   of waiting for this verification.
+
+Missed collections are lost once they fall outside the API's 14-day window.
 
 ## 🗄️ Stored data
 
@@ -165,7 +197,8 @@ targets a week later. The thresholds are those of my other engine's traffic
 workflow.
 
 The job uses the workflow token with `issues: write` and `contents: read`. It
-has no environment, so it never receives `TRAFFIC_TOKEN`, and it runs only
+has no environment, so it receives neither the App's private key nor its
+installation token, and it runs only
 after a successful collection.
 
 ## 🛡️ Branch protection
@@ -188,9 +221,10 @@ invalid, and leaves the history unchanged. Read the failing step:
 
 | Step and message | Cause | Action |
 | --- | --- | --- |
-| *Fetch*: `TRAFFIC_TOKEN is not set` | Secret missing, or the run is not in the `analytics` environment. | Follow the credential setup. |
-| *Fetch*: HTTP 401 | Token expired or revoked. | Renew the token. |
-| *Fetch*: HTTP 403 or 404 | Token lacks *Administration: read* on this repository. | Regenerate it with the settings above. |
+| *Check the traffic App configuration*: `TRAFFIC_APP_CLIENT_ID or TRAFFIC_APP_PRIVATE_KEY is not set` | Missing environment variable or secret, or the wrong environment. | Follow the App setup above. The check sees only a Boolean for the key. |
+| *Create the traffic App token* fails | Wrong Client ID or key, deleted key, or App not installed on this repository. | Check installation and Client ID; replace or rotate the key as above. |
+| *Fetch*: HTTP 401 | Installation token rejected, for example after App removal during a run. | Check installation and rerun. |
+| *Fetch*: HTTP 403 or 404 | App lacks *Administration: read* or access to this repository. | Check the selected repository and permission; accept any approved permission change, then rerun. |
 | *Fetch*: HTTP 429 or 5xx after retries | Rate limit or GitHub outage. | Run it again later; the next run collects the same 14 days. |
 | *Merge*: `ERROR: ...; the history was not changed` | The API returned an unexpected shape, or a history file no longer has the expected layout. | Inspect the response or the named file; a file edited by hand must keep its header and columns. |
 | *Fetch*: `API request for the repository failed` | Same causes as the traffic requests. | As above. |
