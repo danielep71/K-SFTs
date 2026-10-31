@@ -177,6 +177,10 @@ class ConfigTests(unittest.TestCase):
             config.write_text(text.replace("      - danielep71\n", "      - someone-else\n", 1), encoding="utf-8")
             self.assertIn(".github/dependabot.yml assigns 'someone-else', not 'danielep71'",
                           check_issues.config_findings(root))
+            config.write_text(text.replace("    labels:\n      - ci\n      - P3\n",
+                                           "    labels: [no-such-label] # custom labels\n", 1), encoding="utf-8")
+            self.assertIn(".github/dependabot.yml sets unknown label 'no-such-label'",
+                          check_issues.config_findings(root))
 
     def test_block_lists(self) -> None:
         text = ("updates:\n  - x: 1\n    labels:\n      - ci   # a comment\n\n      - \"P3\"\n"
@@ -184,6 +188,9 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(check_issues.block_lists(text, "labels"), [["ci", "P3"], ["tests"]])
         self.assertEqual(check_issues.block_lists(text, "assignees"), [["triage-person"]])
         self.assertEqual(check_issues.block_lists(text, "missing"), [])
+        commented = "labels: [no-such-label, P3]  # custom labels\nassignees: [someone-else] # owner\n"
+        self.assertEqual(check_issues.block_lists(commented, "labels"), [["no-such-label", "P3"]])
+        self.assertEqual(check_issues.block_lists(commented, "assignees"), [["someone-else"]])
 
     def test_flow_list(self) -> None:
         text = 'name: x\nlabels: ["bug", "P2"]\nassignees: [triage-person]\n'
