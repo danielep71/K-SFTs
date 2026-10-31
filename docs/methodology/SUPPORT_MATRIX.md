@@ -10,10 +10,10 @@ open decisions D4, D6 and D7
 
 > [!IMPORTANT]
 > A **supported** item is the scope that v0.3.0 traces to the CRR, tests and
-> certifies; it is not validated yet. Where the 0.2.0 prototype still behaves
-> differently, the *Prototype today* column says so, and
-> [#248](https://github.com/danielep71/K-SFTs/issues/248) makes the workbook
-> match before the numerical fixtures of
+> certifies; it is not validated yet. The *0.2.0 prototype* column records
+> where the released prototype behaved differently;
+> [#248](https://github.com/danielep71/K-SFTs/issues/248) made the workbook
+> follow this matrix before the numerical fixtures of
 > [#174](https://github.com/danielep71/K-SFTs/issues/174) are written.
 
 ## Contents
@@ -59,7 +59,7 @@ Taken by me on 2026-10-30 in #172.
 
 ### Transactions and netting
 
-| Item | Status | Behaviour | Prototype today | Reason |
+| Item | Status | Behaviour | 0.2.0 prototype | Reason |
 | --- | --- | --- | --- | --- |
 | `REPO`, `REVREPO`, `SECLEND`, `SECBORROW` | Supported | 5 BD holding period | Same | D4; CRR Art. 224(2) |
 | `MARGINLEND` | Supported | 10 BD holding period | Same | D4; CRR Art. 224(2) |
@@ -75,7 +75,7 @@ Taken by me on 2026-10-30 in #172.
 
 ### Collateral and haircuts
 
-| Item | Status | Behaviour | Prototype today | Reason |
+| Item | Status | Behaviour | 0.2.0 prototype | Reason |
 | --- | --- | --- | --- | --- |
 | Cash | Supported | Haircut 0 | Same | CRR Art. 224 Table 1 |
 | Debt of sovereigns, institutions, corporates, securitisations, by CQS and residual maturity | Supported | 10-day haircut from the table, scaled | Same | D6; CRR Art. 224 Table 1 |
@@ -94,19 +94,19 @@ Taken by me on 2026-10-30 in #172.
 
 ### Counterparties, regime and dates
 
-| Item | Status | Behaviour | Prototype today | Reason |
+| Item | Status | Behaviour | 0.2.0 prototype | Reason |
 | --- | --- | --- | --- | --- |
 | Counterparty classes `SOV`, `INST`, `CORP` | Supported for E\* | E\* does not depend on the class; it selects the illustrative risk weight | Same | D5 |
 | `QCCP` counterparty class | Rejected | The netting set is INVALID | Computed with a 2% risk weight | D3, D5: exposures to CCPs are out of scope |
 | Regime `CRR` | Supported | The only regime | One of two | D1 |
-| Regime `BCBS` | Rejected | A netting set set to `BCBS` is INVALID; a default regime of `BCBS` on Params stops the run | Computed as a second regime | D1 |
+| Regime `BCBS` | Rejected | A netting set set to `BCBS` is INVALID; a default regime of `BCBS` on Params, or a table row limited to `BCBS`, stops the run | Computed as a second regime | D1 |
 | Reporting date from 2025-01-01 | Supported | The CRR consolidated text of 26.06.2026 applies | Same | D2 |
 | Reporting date before 2025-01-01 | Rejected | The run stops | Computed | D2: the pre-CRR3 text is not registered |
 | Reporting currency, settlement currency of the agreement | Entered | Any 3-letter code with an FX rate | Same | Inputs |
 
 ### Outputs
 
-| Item | Status | Behaviour | Prototype today | Reason |
+| Item | Status | Behaviour | 0.2.0 prototype | Reason |
 | --- | --- | --- | --- | --- |
 | E\* per netting set | Supported | On Results, with the status | Same | D7 |
 | Intermediate amounts: positions, scaled haircuts, holding period, ΣE, ΣC, net, gross, N, FX term | Supported | On Results and Positions | Same | D7: exposure with its intermediate amounts for audit |

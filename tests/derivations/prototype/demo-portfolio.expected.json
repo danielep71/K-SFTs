@@ -38,22 +38,8 @@
    "own_funds": 33561.64448289111
   },
   "BCBS-MNA": {
-   "regime": "BCBS",
-   "status": "VALID",
-   "holding_bd": 5,
-   "sum_e": 140000000.0,
-   "sum_c": 141600000.0,
-   "net": 393151.3703397198,
-   "gross": 7747061.8946798155,
-   "n": 4,
-   "systematic": 157260.54813588792,
-   "idiosyncratic": 2324118.5684039444,
-   "fx_term": 1216223.6636408619,
-   "e_star": 2097602.780180694,
-   "rw_key": "INST_CQS1",
-   "rw": 0.2,
-   "rwa": 419520.55603613885,
-   "own_funds": 33561.64448289111
+   "regime": "CRR",
+   "status": "INVALID: 1 input error(s)"
   },
   "CRR-NO-MNA": {
    "regime": "CRR",
@@ -124,21 +110,7 @@
   },
   "CRR-QCCP": {
    "regime": "CRR",
-   "status": "VALID",
-   "holding_bd": 5,
-   "sum_e": 70000000.0,
-   "sum_c": 69000000.0,
-   "net": 989949.4936611666,
-   "gross": 989949.4936611666,
-   "n": 1,
-   "systematic": 395979.79746446665,
-   "idiosyncratic": 593969.6961967,
-   "fx_term": 0,
-   "e_star": 1989949.4936611666,
-   "rw_key": "QCCP",
-   "rw": 0.02,
-   "rwa": 39798.989873223334,
-   "own_funds": 3183.919189857867
+   "status": "INVALID: 1 input error(s)"
   },
   "CRR-USD-SOV": {
    "regime": "CRR",

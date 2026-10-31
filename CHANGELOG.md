@@ -98,6 +98,18 @@ to v1.0.0.
   `reconcile` summary followed by a `failed` one.
   `docs/REPOSITORY_SETTINGS.md` names the ruleset *Protect main* and lists
   private vulnerability reporting.
+- The workbook follows the support matrix (#248): a `BCBS` regime on
+  Params or in a table row, and a reporting date before 2025-01-01, stop
+  the run; a `BCBS` netting set and the `QCCP` counterparty class make the
+  netting set INVALID. The risk weight, RWA and own funds requirement are
+  labelled illustrative on Results, in the run's closing message and in the
+  template text. The QCCP row leaves the risk-weight table, so the
+  reference parameter set is now `CRE22-CRR-2026-10-30`; Results writes no
+  `TOTAL BCBS` row. The demo's BCBS-MNA and CRR-QCCP netting sets stay as
+  refusal examples; E\* of every supported netting set is unchanged. The
+  NettingSets class header no longer lists QCCP, so a workbook built from
+  the 0.2.0 template fails the layout check: build it again from the new
+  template.
 
 <a id="020"></a>
 

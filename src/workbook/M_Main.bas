@@ -51,7 +51,7 @@ Attribute VB_Name = "M_Main"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-29
+'   2026-10-30
 '
 ' AUTHOR
 '   Daniele Penza
@@ -639,7 +639,8 @@ Private Function ReportOutcome( _
 '------------------------------------------------------------------------------
 ' PURPOSE
 '   Tell the user how the operation ended, and build the result line of
-'   RunSFT_Silent.
+'   RunSFT_Silent. A completed run's message says that the risk weight,
+'   RWA and own funds are illustrative (D7; the support matrix, #248).
 '
 ' RETURNS
 '   "OK" or "STOPPED", the run class, the error and warning counts and the
@@ -650,7 +651,7 @@ Private Function ReportOutcome( _
 '   shown with the outcome otherwise.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-30
 '==============================================================================
 '
 
@@ -672,7 +673,8 @@ Private Function ReportOutcome( _
                 If Completed Then
                     ReportOutcome = "OK"
                     If Operation = OP_RUN Then
-                        Message = "SFT run completed." & vbLf & vbLf & Replace(Totals, "; ", vbLf)
+                        Message = "SFT run completed." & vbLf & vbLf & Replace(Totals, "; ", vbLf) & vbLf & _
+                                  "The risk weight, RWA and own funds are illustrative: only E* is supported."
                     Else
                         Message = "Validation completed: outputs cleared."
                     End If
