@@ -125,6 +125,16 @@ to v1.0.0.
 
 ### Fixed
 
+- The traffic history no longer lets an older collection, merged after a
+  newer one, overwrite the newer one's data when the newer one left the
+  values unchanged (#265). `daily.csv` gains `views_observed_at` and
+  `clones_observed_at`, and `snapshots.csv` gains `observed_at`: the newest
+  collection that reported the values. A collection older than that never
+  replaces them; a newer one with identical data records only its
+  observation time, so every successful run now adds a commit to
+  `traffic-history`. Files in the earlier layouts are read with the
+  observation time equal to the collection time and rewritten on the next
+  merge, with no stored value changed.
 - A run that stops before its parameters are checked no longer ends its
   closing message with an empty "Run class: ." (#220); the run class is
   shown when it is set, and the result line of `RunSFT_Silent` is
