@@ -98,6 +98,18 @@ to v1.0.0.
   `reconcile` summary followed by a `failed` one.
   `docs/REPOSITORY_SETTINGS.md` names the ruleset *Protect main* and lists
   private vulnerability reporting.
+- Governance checks (#261): the workflow *Keep milestones issue-only*,
+  `.github/workflows/pr-milestones.yml`, removes a milestone set on a pull
+  request, on each pull request event and in a daily scan; a push or a
+  manual run executes only the default branch's copy. A new gate,
+  `workflow-invariants` (`tools/check_workflows.py`), reads the workflows and
+  `.github/dependabot.yml` with PyYAML and fails on an action not pinned to a
+  full SHA, a checkout that persists credentials, a missing permissions block
+  or timeout, a write permission outside the allowed list, a filter or
+  condition on the required `Repository integrity` job, a reconciliation that
+  no longer checks the default branch, a change to the milestone workflow's
+  shape, or a Dependabot update that is duplicated, sets a milestone or is
+  not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
   the run; a `BCBS` netting set and the `QCCP` counterparty class make the

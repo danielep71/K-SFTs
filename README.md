@@ -138,7 +138,7 @@ fixes of its audit:
 | Regression harness | `TEST_Harness` with a neutral example suite: assertions, tolerances, error values, completeness and an Excel-state cleanup verdict ([running the harness](INSTALLATION.md#running-the-harness)) |
 | Excel evidence | A procedure and a checker that bind an Excel run to its exact commit, record by record ([recording an Excel run](INSTALLATION.md#recording-an-excel-run)) |
 | Workbook build | A macro-free template and an optional script that imports the repository's VBA into a workbook built from it ([synchronizing VBA](INSTALLATION.md#synchronizing-vba)) |
-| Repository checks | `python tools/check.py` with 17 gates, run by CI on every pull request and on pushes to `main` and `release/**` ([tools/README.md](tools/README.md)) |
+| Repository checks | `python tools/check.py` with 18 gates, run by CI on every pull request and on pushes to `main` and `release/**` ([tools/README.md](tools/README.md)) |
 | Governance | Branch model, integration and sync, rulesets on `main`, `release/**` and `v*` tags, review records, issue rules and a 20-label catalogue ([GOVERNANCE.md](docs/GOVERNANCE.md)) |
 | Prototype | E\* under the FCCM with supervisory haircuts (CRR Articles 220, 223, 224, 226, 227), risk weight, RWA and own funds per netting set; eight `SFT_*` worksheet functions; an 11-sheet template with a demo portfolio, a test catalogue and formula tests; an independent Python reference and a LibreOffice regression ([PROTOTYPE.md](docs/methodology/PROTOTYPE.md)) |
 | Releases | SemVer, a changelog with its own gate, and a release procedure that separates preparation from publication ([RELEASING.md](RELEASING.md)) |
@@ -280,7 +280,7 @@ implementation reference.
 
 | Evidence | Result | Record |
 | --- | --- | --- |
-| Static gates | 17 gates, required to PASS on every pull request and run on pushes to `main` and `release/**`: tooling tests, labels, issue forms, test cases, changelog, VBA source rules, workflows, Ruff and strict mypy | [tools/README.md](tools/README.md) |
+| Static gates | 18 gates, required to PASS on every pull request and run on pushes to `main` and `release/**`: tooling tests, labels, issue forms, test cases, changelog, VBA source rules, workflows and their security invariants, Ruff and strict mypy | [tools/README.md](tools/README.md) |
 | Excel host run | Harness and example suite at `1a6f0f7` imported, compiled and run in Excel 16.0 (build 20430, 64-bit, VBA7) on Windows 11 Enterprise 25H2: the normal run passed, both failure paths ended as documented, `check_excel_run.py` PASS | [tested environments](INSTALLATION.md#tested-environments), #9 |
 | Workbook synchronization | The sync script imported the test modules into a workbook built from the template, and the suite passed in it | #102 |
 | Prototype in Excel | At `134656f`, on the same host: built and recorded with `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS); TestCatalogue 107 of 107 against the independent reference, FormulaTest 28 of 28, and all 11 sheets checked after a run and a rerun | [tested environments](INSTALLATION.md#tested-environments), #138 |
