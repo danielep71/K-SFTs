@@ -7,6 +7,7 @@ import copy
 import io
 import os
 import re
+import subprocess
 import unittest
 from collections.abc import Callable
 from pathlib import Path
@@ -182,6 +183,68 @@ class WorkflowInvariantTests(unittest.TestCase):
         step = self.repo.job("pr-milestones.yml", "reconcile")["steps"][0]
         step["run"] = step["run"].replace("import json", "import json  # ${{ github.head_ref }}")
         self.assertFinding("the inline code contains `${{`")
+
+    def test_traffic_app_credentials_stay_in_their_steps(self) -> None:
+        workflow = self.repo.workflows["traffic-history.yml"]
+        jobs = workflow["jobs"]
+        collect = jobs["collect"]
+        steps = collect["steps"]
+        key = "${{ secrets.TRAFFIC_APP_PRIVATE_KEY }}"
+        token = "${{ steps.app-token.outputs.token }}"
+        with_key = [step for step in steps if "TRAFFIC_APP_PRIVATE_KEY" in str(step)]
+        self.assertEqual([step["name"] for step in with_key],
+                         ["Check the traffic App configuration", "Create the traffic App token"])
+        config, mint = with_key
+        self.assertEqual(config["env"], {
+            "CLIENT_ID": "${{ vars.TRAFFIC_APP_CLIENT_ID }}",
+            "HAS_KEY": "${{ secrets.TRAFFIC_APP_PRIVATE_KEY != '' }}",
+        })
+        self.assertNotIn(key, str(config))
+        self.assertEqual(mint["id"], "app-token")
+        self.assertTrue(mint["uses"].startswith("actions/create-github-app-token@"))
+        self.assertEqual(mint["with"], {
+            "client-id": "${{ vars.TRAFFIC_APP_CLIENT_ID }}",
+            "private-key": key,
+            "permission-administration": "read",
+        })
+        with_token = [step for step in steps if token in str(step)]
+        self.assertEqual([step["name"] for step in with_token],
+                         ["Fetch traffic from the GitHub API"])
+        fetch = with_token[0]
+        self.assertEqual(fetch["env"]["TRAFFIC_TOKEN"], token)
+        self.assertNotRegex(fetch["run"], r"\bpython|\.py\b|source/")
+        self.assertNotRegex(fetch["run"], r"TRAFFIC_TOKEN.*GITHUB_(ENV|OUTPUT)")
+        self.assertLess(steps.index(config), steps.index(mint))
+        self.assertLess(steps.index(mint), steps.index(fetch))
+        self.assertEqual(collect["environment"], "analytics")
+        self.assertNotIn("secrets.TRAFFIC_TOKEN", str(workflow))
+        # Removing the three authorized steps also checks workflow/job-level
+        # env, outputs and any other job for accidental credential exposure.
+        outside = copy.deepcopy(workflow)
+        outside["jobs"]["collect"]["steps"] = [
+            step for step in steps if step not in (config, mint, fetch)]
+        self.assertNotIn("TRAFFIC_APP_PRIVATE_KEY", str(outside))
+        self.assertNotIn("app-token.outputs", str(outside))
+        self.assertNotIn("environment", jobs["alert"])
+        self.assertNotIn("secrets.", str(jobs["alert"]))
+
+    def test_traffic_app_configuration_missing_values_fail_clearly(self) -> None:
+        steps = self.repo.job("traffic-history.yml", "collect")["steps"]
+        config = next(step for step in steps
+                      if step["name"] == "Check the traffic App configuration")
+        for client_id, has_key in (("", "false"), ("", "true"),
+                                   ("test-client", "false"), ("test-client", "true")):
+            with self.subTest(client_id=client_id, has_key=has_key):
+                result = subprocess.run(
+                    ["bash", "-e", "-c", config["run"]], capture_output=True, text=True,
+                    env={"CLIENT_ID": client_id, "HAS_KEY": has_key}, check=False)
+                if client_id and has_key == "true":
+                    self.assertEqual(result.returncode, 0)
+                    self.assertEqual(result.stdout, "")
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("::error::TRAFFIC_APP_CLIENT_ID or TRAFFIC_APP_PRIVATE_KEY "
+                                  "is not set in the analytics environment", result.stdout)
 
     # Dependabot
     def test_dependabot_duplicate_ecosystem(self) -> None:
