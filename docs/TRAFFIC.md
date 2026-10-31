@@ -50,13 +50,15 @@ merge script runs without it, and the push uses the workflow token with
 The `traffic-history` branch holds `README.md` and these files under `data/`.
 It was created on 2026-10-24 as the orphan commit `8560b31`, with the files
 below empty apart from their headers, so it has no history in common with
-`main`; `8915601` then set the current `daily.csv` header, before any data. It is never merged into `main` or a release branch, and its history is
-not rewritten.
+`main`; `8915601` then set the 7-column `daily.csv` header, before any data.
+The merge script rewrites a file still in an earlier layout with the current
+header the next time it merges a collection. The branch is never merged into
+`main` or a release branch, and its history is not rewritten.
 
 | File | Key | Contents |
 | --- | --- | --- |
-| `daily.csv` | `date` | Views and unique views, clones and unique clones per UTC day. `views_collected_at` and `clones_collected_at` give the collection that last changed each pair. |
-| `snapshots.csv` | `snapshot_date` | One row per collection day: the first and last day the API reported, the 14-day totals, the repository's `stars`, `forks`, `watchers` and `open_issues` at collection time, and `collected_at`, the collection that last changed that day's snapshot, referrers or paths. |
+| `daily.csv` | `date` | Views and unique views, clones and unique clones per UTC day. `views_collected_at` and `clones_collected_at` give the collection that last changed each pair; `views_observed_at` and `clones_observed_at`, the newest collection that reported it, whether or not it changed the values. |
+| `snapshots.csv` | `snapshot_date` | One row per collection day: the first and last day the API reported, the 14-day totals, the repository's `stars`, `forks`, `watchers` and `open_issues` at collection time, `collected_at`, the collection that last changed that day's snapshot, referrers or paths, and `observed_at`, the newest collection of that day. |
 | `referrers.csv` | `snapshot_date`, `rank` | The top 10 referrers over the 14 days before each collection. |
 | `paths.csv` | `snapshot_date`, `rank` | The top 10 repository paths over the same window. |
 | `badges/*.json` | — | The README badges, rewritten from the stored data after each merge (*Badges* below). |
@@ -82,33 +84,43 @@ The README shows three badges read by shields.io from `data/badges/`, in its
 | `visits` | Daily unique visitors summed since tracking began: a visitor counts once per day they visit. |
 
 Large numbers are shortened (`1.2k`, `11k`). A badge file changes only when
-its value does, so a rerun with the same data still changes nothing.
+its value does, so a new collection with the same data leaves the badges
+unchanged.
 
 ### Merge rules
 
-`tools/traffic_history.py` merges each collection idempotently:
+`tools/traffic_history.py` merges each collection by date and metric:
 
-- **Overlapping windows:** for every date the collection reports, its values
-  replace the stored ones. The newest collection wins, so a day that was
-  incomplete when first collected is corrected later. Views and clones are
-  merged separately, each with its own collection time, which stays unchanged
-  when its values do not change.
+- **Idempotent:** merging the same collection again, with the same collection
+  time, changes nothing.
+- **Newest wins:** for every date and metric, the values of the newest
+  collection that reported them win, even when its counts are lower than the
+  stored ones, so a day that was incomplete when first collected is corrected
+  later. "Newest" means the latest collection time. Views and clones are
+  merged separately, each with two times: `*_collected_at`, the collection
+  that last changed the values, and `*_observed_at`, the newest collection
+  that reported them, which also counts when it left them unchanged.
+- **Order:** a collection older than the stored observation never replaces
+  anything, whether it is a saved collection merged again by hand or a run
+  rebuilt on a newer branch tip. It can only fill a date or a metric that no
+  newer collection reported.
 - **Older history:** dates the collection does not report keep their values.
   Nothing is deleted.
 - **No double counting:** values are replaced, never added. Unique counts are
   never summed across days or windows; a 14-day unique count is only in
   `snapshots.csv`.
 - **Same-day runs:** a collection day's snapshot, referrers and paths are one
-  unit. A second collection on the same UTC day replaces the unit only if any
-  of the three changed. Running the workflow twice with the same data changes
-  nothing.
-- **Order:** "newest" means the latest collection time. Merging an older
-  collection after a newer one, when a saved collection is replayed or a run
-  is rebuilt on a newer branch tip, never replaces what the newer one stored;
-  it can only fill a date or metric that nothing newer reported. A stored
-  time is that of the collection that last *changed* the values; a day's
-  counts only grow until the day ends, so an older collection replayed later
-  cannot hold different values.
+  unit. A newer collection on the same UTC day replaces the unit only if any
+  of the three changed; otherwise it updates the snapshot's `observed_at`
+  alone. An older one never changes it.
+- **New identical data:** a newer collection whose values match the stored
+  ones still records its observation time in `daily.csv` and `snapshots.csv`,
+  so every successful run adds a commit to `traffic-history`; the badges and
+  the other files stay unchanged.
+- **Earlier layouts:** a `daily.csv` without the `*_observed_at` columns, or a
+  `snapshots.csv` without `observed_at`, is read with each observation time
+  equal to its collection time, and rewritten in the current layout on the
+  next merge, with every stored value and collection time unchanged.
 
 ### Zero or unavailable
 
@@ -187,8 +199,8 @@ invalid, and leaves the history unchanged. Read the failing step:
 | *Traffic alert*: `No open milestone with a due date` | Every milestone is closed, or none has a due date. | Open the next milestone with a due date, then run the workflow again. |
 | *Traffic alert*: `gh issue create` fails | A label, the assignee or the milestone no longer exists. | Restore it, then run the workflow again; the history is already saved. |
 
-A failed run can always be repeated: the merge is idempotent, and each
-collection covers the last 14 days.
+A failed run can always be repeated: an older collection never replaces a
+newer one, and each collection covers the last 14 days.
 
 If the branch must be repaired, change it with a new commit made with
 `python tools/traffic_history.py merge` or by hand, keeping every header.
