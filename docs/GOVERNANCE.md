@@ -280,7 +280,7 @@ An issue or pull request carries every type that describes its work.
 | `behavior-change` | Work that changes externally observable behavior, such as calculated results or the layout of inputs and outputs. |
 | `refactor` | Internal restructuring that preserves supported behavior; if supported behavior changes, use `behavior-change` instead. |
 | `tests` | Regression coverage, test harnesses, fixtures or manual validation. |
-| `ci` | Automated quality checks and workflow maintenance, including Dependabot pull requests. |
+| `ci` | Workflows, automated checks, and dependency updates, including every Dependabot pull request. Release certification belongs to `release`. |
 | `repository` | Repository structure, governance, metadata, tooling or maintenance. |
 | `release` | Release preparation, certification, evidence, packaging or publication, including integration and sync pull requests. |
 | `security` | Security boundaries, supply chain or hardening. Never for an undisclosed vulnerability: report it privately, as [SECURITY.md](../SECURITY.md) says. |
