@@ -231,7 +231,8 @@ Every issue has:
 
 - the assignee **danielep71**;
 - exactly one priority, `P1`, `P2` or `P3`, and the appropriate type labels
-  from [.github/labels.json](../.github/labels.json);
+  from [.github/labels.json](../.github/labels.json), as the tables below
+  explain;
 - the milestone of the work it belongs to.
 
 Milestones belong only to issues, so milestone progress counts tasks rather
@@ -256,11 +257,46 @@ A form sets its default priority; triage confirms or changes it. Raise a bug
 to `P1` only once the calculation defect is confirmed, and only with the `bug`
 label.
 
+### Types
+
+An issue or pull request carries every type that describes its work.
+
+| Label | Use |
+| --- | --- |
+| `bug` | A confirmed defect in behavior, correctness, error handling or a documented contract. The Bug report form sets it. |
+| `enhancement` | A new capability or a meaningful improvement to supported behavior. The Enhancement form sets it. |
+| `documentation` | Documentation for users or for repository maintenance. The Documentation form sets it. |
+| `behavior-change` | Work that changes externally observable behavior, such as calculated results or the layout of inputs and outputs. |
+| `refactor` | Internal restructuring that preserves supported behavior; if supported behavior changes, use `behavior-change` instead. |
+| `tests` | Regression coverage, test harnesses, fixtures or manual validation. |
+| `ci` | Automated quality checks and workflow maintenance, including Dependabot pull requests. |
+| `repository` | Repository structure, governance, metadata, tooling or maintenance. |
+| `release` | Release preparation, certification, evidence, packaging or publication, including integration and sync pull requests. |
+| `security` | Security boundaries, supply chain or hardening. Never for an undisclosed vulnerability: report it privately, as [SECURITY.md](../SECURITY.md) says. |
+
+### Status and triage
+
+| Label | Use |
+| --- | --- |
+| `question` | I need information, or need to make a decision, before the work can go on. |
+| `help wanted` | I welcome external investigation, implementation, validation or review. |
+| `good first issue` | A well-scoped task suitable for a first contribution. |
+| `duplicate` | Another issue or pull request already covers the work: close this one and link the one that covers it. |
+| `invalid` | Close it: the report is incomplete, unsupported or not actionable as submitted. |
+| `wontfix` | Close it: I have decided not to implement or continue the work. |
+
+`python tools/check.py` fails when a label of the catalogue is not explained
+exactly once in these tables, the priority table and the dependency status
+table below.
+
 ### Dependency status
 
-`blocked` is the only dependency status label. It means that a named,
-unresolved prerequisite prevents work from starting. Ready issues carry no
-status label.
+`blocked` is the only dependency status label. Ready issues carry no status
+label.
+
+| Label | Use |
+| --- | --- |
+| `blocked` | A named, unresolved prerequisite prevents the work from starting. |
 
 - Name every blocker in the issue's *Dependencies and blocking status*
   section, as an issue link (`#12`) or on a line starting
