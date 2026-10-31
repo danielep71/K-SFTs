@@ -111,6 +111,13 @@ to v1.0.0.
   the 0.2.0 template fails the layout check: build it again from the new
   template.
 
+### Fixed
+
+- A run that stops before its parameters are checked no longer ends its
+  closing message with an empty "Run class: ." (#220); the run class is
+  shown when it is set, and the result line of `RunSFT_Silent` is
+  unchanged.
+
 <a id="020"></a>
 
 ## [0.2.0] - 2026-10-30

@@ -641,6 +641,8 @@ Private Function ReportOutcome( _
 '   Tell the user how the operation ended, and build the result line of
 '   RunSFT_Silent. A completed run's message says that the risk weight,
 '   RWA and own funds are illustrative (D7; the support matrix, #248).
+'   A run stopped before its parameters were checked has no run class,
+'   and the message leaves it out (#220).
 '
 ' RETURNS
 '   "OK" or "STOPPED", the run class, the error and warning counts and the
@@ -651,7 +653,7 @@ Private Function ReportOutcome( _
 '   shown with the outcome otherwise.
 '
 ' UPDATED
-'   2026-10-30
+'   2026-10-31
 '==============================================================================
 '
 
@@ -688,7 +690,10 @@ Private Function ReportOutcome( _
                     ReportOutcome = ReportOutcome & " | " & Totals
                 End If
                 Message = Message & vbLf & vbLf & "Errors " & CORE_Engine.ErrorCount & ", warnings " & _
-                          CORE_Engine.WarningCount & " (see Checks). Run class: " & CORE_Engine.RunClass & "."
+                          CORE_Engine.WarningCount & " (see Checks)."
+                If Len(CORE_Engine.RunClass) > 0 Then
+                    Message = Message & " Run class: " & CORE_Engine.RunClass & "."
+                End If
         End Select
 
 '------------------------------------------------------------------------------
