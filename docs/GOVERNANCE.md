@@ -260,7 +260,7 @@ fails if its events, permissions or code change shape.
 
 | Priority | Use |
 | --- | --- |
-| `P1` | Reserved for a **confirmed calculation bug**: wrong results for valid inputs. Never for setup, documentation or tooling work. |
+| `P1` | **Confirmed calculation bug**: wrong results for valid inputs (reserved for this case), always with `bug`. Never for setup, documentation or tooling work. |
 | `P2` | Material correctness, robustness or maintainability defect. Default of the Bug report form. |
 | `P3` | Non-blocking quality, testing, documentation or setup work. Default of the Enhancement and Documentation forms. |
 

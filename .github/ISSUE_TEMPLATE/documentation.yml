@@ -11,7 +11,7 @@ body:
 
         **Accurate · Current · Traceable to its source**
 
-        Documentation must match the code, the recorded decisions and the cited regulatory texts. Triage sets the milestone and confirms the priority (`P3` by default).
+        Documentation must match the code, the recorded decisions and the cited regulatory texts. Triage sets the milestone and confirms the priority (`P3` by default; `P1` only for a confirmed calculation bug, reported as a bug).
 
   - type: input
     id: location
