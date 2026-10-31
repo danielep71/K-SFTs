@@ -127,7 +127,7 @@ class DefaultGatesTests(unittest.TestCase):
         gates = check.default_gates()
         self.assertEqual(len({g.name for g in gates}), len(gates))
         self.assertEqual({g.tool for g in gates},
-                         {"python", "node", "ruff", "mypy", "actionlint"})
+                         {"python", "node", "ruff", "mypy", "actionlint", "pyyaml"})
         for g in gates:
             self.assertTrue(bool(g.command) != (g.probe is not None), g.name)
 

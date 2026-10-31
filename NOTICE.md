@@ -23,13 +23,15 @@ and any other distribution of its content, is decided by me.
 Files adapted from another repository keep a record of where they came from,
 so that their notices and later changes can be traced. Each entry names the
 source repository, an immutable revision and the local adaptations. The
-source repositories are owned by me and published under the
-same licence, MPL-2.0.
+source repositories are owned by me. They are published under the same
+licence, MPL-2.0, except where a row says otherwise; as the copyright
+holder, I publish every adapted file here under MPL-2.0.
 
 | Files | Source | Revision | Local adaptations |
 | --- | --- | --- | --- |
 | `.github/workflows/traffic-history.yml`, `tools/traffic_history.py`, `docs/TRAFFIC.md` | [K-Risk-Engines](https://github.com/danielep71/K-Risk-Engines) `docs/TRAFFIC.md` (design) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository ([#36](https://github.com/danielep71/K-SFTs/issues/36)): merge logic moved into a tested script with validation and all-or-nothing writes; data branch created with a fixed layout; zero and unavailable days distinguished; token limited to the fetch step. |
 | `.github/PULL_REQUEST_TEMPLATE.md`; parts of `docs/GOVERNANCE.md` (Branches, Integration, Review) | K-Risk-Engines (structure) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository's branches, sync procedure and checks ([#1](https://github.com/danielep71/K-SFTs/issues/1), [#11](https://github.com/danielep71/K-SFTs/issues/11)). |
+| `.github/workflows/pr-milestones.yml` | [K-FRTB-SA](https://github.com/danielep71/K-FRTB-SA) `.github/workflows/pr-milestones.yml`, published there under the MIT License; relicensed here under MPL-2.0 by me, its copyright holder | `faa5799af271b32aff8f2034125e2f3915180f5d` | A header comment, and a condition on the `reconcile` job so that a push or a manual run executes only the default branch's copy ([#261](https://github.com/danielep71/K-SFTs/issues/261)); the inline script, the permissions and the triggers are unchanged. |
 
 The other files were written for, or adapted by me into, this
 repository. Revisions are full commit SHAs on the source repository's `main`
@@ -47,11 +49,13 @@ copied into the repository; each keeps its own licence.
 | Ruff | 0.17.1 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
 | mypy | 2.4.0 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
 | actionlint | 1.7.12 | MIT | Workflow check, downloaded and verified by SHA-256 |
+| PyYAML | 6.0.3 | MIT | Workflow invariant check (`tools/requirements-quality-ci.txt`) |
 | Playwright | Not pinned; optional | Apache-2.0 | Renders the hero image (`tools/render_social_preview.mjs`); not a gate |
 
 The licences were checked on 2026-10-24 against the upstream licence files and
-package metadata, and again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
-against their package metadata.
+package metadata, again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
+against their package metadata, and for PyYAML 6.0.3 on 2026-10-31 against
+its package metadata.
 
 ## 🚫 Data
 

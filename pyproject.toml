@@ -1,7 +1,8 @@
 # Quality settings for the repository's Python tooling (tools/). check.py and
-# its gates need only the standard library; build_template.py needs xlsxwriter
-# and lo_regression.py openpyxl. Ruff and mypy are CI and development tools,
-# installed from tools/requirements-quality-ci.txt.
+# its gates need only the standard library, except check_workflows.py, which
+# needs PyYAML; build_template.py needs xlsxwriter and lo_regression.py
+# openpyxl. Ruff, mypy and PyYAML are CI and development tools, installed from
+# tools/requirements-quality-ci.txt.
 
 [tool.ruff]
 target-version = "py312"
