@@ -18,13 +18,12 @@ Attribute VB_Name = "CORE_Engine"
 '     RWA = E* x RW;  own funds requirement = 8% x RWA
 '
 ' REGIME LAYER
-'   The regime is set on Params (CRR by default) and can be overridden per
-'   netting set. With the CRR consolidated text of 26.06.2026 the haircuts,
-'   holding periods, netting formula and risk weights used here are the
-'   same in both regimes; the regime selects the rows of the haircut and
-'   risk-weight tables whose Regimes column is BOTH or that regime, and
-'   keeps the totals apart. The differences that remain are documented on
-'   the Basel_vs_CRR sheet.
+'   CRR is the only supported regime (D1; the support matrix, #248). The
+'   regime is set on Params and can be set per netting set, and a table row
+'   applies to BOTH or CRR; a BCBS value anywhere is refused. The
+'   two-regime totals stay in the code until the core is separated from
+'   the worksheets (#249); they only ever hold CRR. The differences between
+'   CRE22 and the CRR are documented on the Basel_vs_CRR sheet.
 '
 ' FLOW
 '   Calculate runs, in order:
@@ -83,7 +82,7 @@ Attribute VB_Name = "CORE_Engine"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-29
+'   2026-10-30
 '
 ' AUTHOR
 '   Daniele Penza
@@ -107,7 +106,7 @@ Attribute VB_Name = "CORE_Engine"
         Counterparty      As String     'Counterparty name
         MNA               As Boolean    'Covered by an eligible master netting agreement
         SettleCcy         As String     'Settlement currency of the agreement
-        CptyClass         As String     'SOV, INST, CORP or QCCP
+        CptyClass         As String     'SOV, INST or CORP; QCCP is refused
         CQS               As Long       'Credit quality step 1-6; 0 unrated
         SCRA              As String     'SCRA grade of an unrated institution
         RemarginBD        As Double     'Remargining frequency N_R, business days
@@ -117,7 +116,7 @@ Attribute VB_Name = "CORE_Engine"
         ZeroHaircut       As Boolean    'Conditions of the 0% haircut declared met
         HasRWOverride     As Boolean    'A risk weight override is given
         RWOverride        As Double     'Risk weight override, decimal
-        Regime            As String     'BCBS or CRR
+        Regime            As String     'CRR; BCBS is refused
         InputErrors       As Long       'Errors that make the netting set INVALID
         TxCount           As Long       'Transactions read for this netting set
         TxRejected        As Long       'Transactions rejected
@@ -242,12 +241,12 @@ Attribute VB_Name = "CORE_Engine"
     'Lookup tables of Params.
         Private mHcKeys()      As String     'Haircut keys
         Private mHcValues()    As Double     'H10
-        Private mHcRegimes()   As String     'BOTH, CRR or BCBS
+        Private mHcRegimes()   As String     'BOTH or CRR
         Private mHcCount       As Long       'Rows
         Private mHcIndex       As Collection 'Key to row
         Private mRwKeys()      As String     'Risk-weight keys
         Private mRwValues()    As Double     'Risk weights
-        Private mRwRegimes()   As String     'BOTH, CRR or BCBS
+        Private mRwRegimes()   As String     'BOTH or CRR
         Private mRwCount       As Long       'Rows
         Private mRwIndex       As Collection 'Key to row
         Private mFxCcy()       As String     'Currencies
@@ -1026,7 +1025,7 @@ Private Function LoadParams() As Boolean
 '   logged, and the run stops.
 '
 ' UPDATED
-'   2026-10-24
+'   2026-10-30
 '==============================================================================
 '
 
@@ -1042,6 +1041,10 @@ Private Function LoadParams() As Boolean
         If pAsOf <= 0# Then
             LogMsg SEV_ERROR, SH_PARAMS, PRM_ASOF, "Reporting date missing or not a date."
             Problems = Problems + 1
+        ElseIf pAsOf < FIRST_ASOF Then
+            LogMsg SEV_ERROR, SH_PARAMS, PRM_ASOF, "Reporting date before 2025-01-01 is not supported: " & _
+                   "the CRR as amended by Regulation (EU) 2024/1623 applies from that date."
+            Problems = Problems + 1
         End If
         pRepCcy = UTxt(GetParam(PRM_REPCCY))
         If Len(pRepCcy) <> 3 Then
@@ -1049,8 +1052,11 @@ Private Function LoadParams() As Boolean
             Problems = Problems + 1
         End If
         pRegime = UTxt(GetParam(PRM_REGIME))
-        If pRegime <> RG_CRR And pRegime <> RG_BCBS Then
-            LogMsg SEV_ERROR, SH_PARAMS, PRM_REGIME, "Regime must be CRR or BCBS."
+        If pRegime = RG_BCBS Then
+            LogMsg SEV_ERROR, SH_PARAMS, PRM_REGIME, "Regime BCBS is not supported: CRR is the only regime."
+            Problems = Problems + 1
+        ElseIf pRegime <> RG_CRR Then
+            LogMsg SEV_ERROR, SH_PARAMS, PRM_REGIME, "Regime must be CRR."
             Problems = Problems + 1
         End If
 
@@ -1223,7 +1229,7 @@ Private Function LoadHaircutTable() As Boolean
 '   CRE22.49; CRR Art. 224 Tables 1 and 3.
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-30
 '==============================================================================
 '
 
@@ -1261,8 +1267,9 @@ Private Function LoadHaircutTable() As Boolean
             ElseIf CDbl(Value) < 0# Or CDbl(Value) > 1# Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Haircut must be between 0 and 1.", Header.Row + r
                 Problems = Problems + 1
-            ElseIf Regimes <> RG_BOTH And Regimes <> RG_CRR And Regimes <> RG_BCBS Then
-                LogMsg SEV_ERROR, SH_PARAMS, Key, "Regimes must be BOTH, CRR or BCBS.", Header.Row + r
+            ElseIf Regimes <> RG_BOTH And Regimes <> RG_CRR Then
+                LogMsg SEV_ERROR, SH_PARAMS, Key, "Regimes must be BOTH or CRR: CRR is the only regime.", _
+                       Header.Row + r
                 Problems = Problems + 1
             Else
                 mHcCount = mHcCount + 1
@@ -1304,7 +1311,7 @@ Private Function LoadRiskWeightTable() As Boolean
 '   CRE20.7, 20.18-20.21, CRE54.7; CRR Art. 114, 120-122, 306(1)(a).
 '
 ' UPDATED
-'   2026-10-26
+'   2026-10-30
 '==============================================================================
 '
 
@@ -1342,8 +1349,9 @@ Private Function LoadRiskWeightTable() As Boolean
             ElseIf CDbl(Value) < 0# Or CDbl(Value) > 12.5 Then
                 LogMsg SEV_ERROR, SH_PARAMS, Key, "Risk weight must be between 0 and 12.5.", Header.Row + r
                 Problems = Problems + 1
-            ElseIf Regimes <> RG_BOTH And Regimes <> RG_CRR And Regimes <> RG_BCBS Then
-                LogMsg SEV_ERROR, SH_PARAMS, Key, "Regimes must be BOTH, CRR or BCBS.", Header.Row + r
+            ElseIf Regimes <> RG_BOTH And Regimes <> RG_CRR Then
+                LogMsg SEV_ERROR, SH_PARAMS, Key, "Regimes must be BOTH or CRR: CRR is the only regime.", _
+                       Header.Row + r
                 Problems = Problems + 1
             Else
                 mRwCount = mRwCount + 1
@@ -1641,7 +1649,7 @@ Private Function LoadNettingSets() As Boolean
 '   run stops.
 '
 ' UPDATED
-'   2026-10-29
+'   2026-10-30
 '==============================================================================
 '
 
@@ -1745,8 +1753,11 @@ Private Sub ReadNettingSet( _
             .Regime = UTxt(Block(r, NS_REGIME))
             If Len(.Regime) = 0 Then
                 .Regime = pRegime
-            ElseIf .Regime <> RG_CRR And .Regime <> RG_BCBS Then
-                NsError NsIndex, "Regime override must be blank, CRR or BCBS"
+            ElseIf .Regime = RG_BCBS Then
+                NsError NsIndex, "Regime BCBS is not supported: CRR is the only regime"
+                .Regime = pRegime
+            ElseIf .Regime <> RG_CRR Then
+                NsError NsIndex, "Regime override must be blank or CRR"
                 .Regime = pRegime
             End If
 
@@ -1755,9 +1766,11 @@ Private Sub ReadNettingSet( _
 '------------------------------------------------------------------------------
             .CptyClass = UTxt(Block(r, NS_CLASS))
             Select Case .CptyClass
-                Case CC_SOV, CC_INST, CC_CORP, CC_QCCP
+                Case CC_SOV, CC_INST, CC_CORP
+                Case CC_QCCP
+                    NsError NsIndex, "Counterparty class QCCP is not supported: exposures to CCPs are out of scope"
                 Case Else
-                    NsError NsIndex, "Counterparty class must be SOV, INST, CORP or QCCP"
+                    NsError NsIndex, "Counterparty class must be SOV, INST or CORP"
             End Select
             If Not IsBlankCell(Block(r, NS_CQS)) Then
                 If IsNum(Block(r, NS_CQS)) Then
@@ -2844,7 +2857,7 @@ Private Sub FindRiskWeight( _
 '   CRE20.7, 20.18-20.21, CRE54.7; CRR Art. 114, 120-122, 306(1)(a).
 '
 ' UPDATED
-'   2026-10-25
+'   2026-10-30
 '==============================================================================
 '
 
@@ -2862,8 +2875,6 @@ Private Sub FindRiskWeight( _
                 ShortPart = "ST_"
             End If
             Select Case .CptyClass
-                Case CC_QCCP
-                    .RWKey = "QCCP"
                 Case CC_SOV, CC_CORP
                     If .CQS > 0 Then
                         .RWKey = .CptyClass & "_CQS" & .CQS
@@ -3633,12 +3644,14 @@ Private Sub WriteResults()
 '                                 WriteResults
 '------------------------------------------------------------------------------
 ' PURPOSE
-'   Write one Results row per netting set, then the TOTAL CRR and TOTAL
-'   BCBS rows over the VALID netting sets of each regime. A netting set
-'   that is not VALID shows its identity and status only.
+'   Write one Results row per netting set, then the TOTAL CRR row over
+'   the VALID netting sets. A TOTAL BCBS row is written only when a
+'   netting set is in that regime, which the refusal of BCBS (#248) rules
+'   out. A netting set that is not VALID shows its identity and status
+'   only.
 '
 ' UPDATED
-'   2026-10-25
+'   2026-10-30
 '==============================================================================
 '
 
@@ -3651,6 +3664,7 @@ Private Sub WriteResults()
     Dim RowCount   As Long         'Rows written
     Dim Ns         As Long         'Netting set
     Dim r          As Long         'Regime index
+    Dim TotalRows  As Long         'TOTAL rows written
 
 '------------------------------------------------------------------------------
 ' NETTING SETS
@@ -3696,14 +3710,17 @@ Private Sub WriteResults()
 ' TOTALS
 '------------------------------------------------------------------------------
         For r = 1 To 2
-            RowCount = RowCount + 1
-            Block(RowCount, 1) = "TOTAL " & Choose(r, RG_CRR, RG_BCBS)
-            Block(RowCount, 3) = Choose(r, RG_CRR, RG_BCBS)
-            Block(RowCount, 18) = mRegEStar(r)
-            Block(RowCount, 22) = mRegRWA(r)
-            Block(RowCount, 23) = mRegOwnFunds(r)
-            Block(RowCount, 24) = mRegValid(r) & " of " & mRegSets(r) & " netting set(s) VALID; " & _
-                              (mRegSets(r) - mRegValid(r)) & " withheld"
+            If r = 1 Or mRegSets(r) > 0 Then
+                RowCount = RowCount + 1
+                TotalRows = TotalRows + 1
+                Block(RowCount, 1) = "TOTAL " & Choose(r, RG_CRR, RG_BCBS)
+                Block(RowCount, 3) = Choose(r, RG_CRR, RG_BCBS)
+                Block(RowCount, 18) = mRegEStar(r)
+                Block(RowCount, 22) = mRegRWA(r)
+                Block(RowCount, 23) = mRegOwnFunds(r)
+                Block(RowCount, 24) = mRegValid(r) & " of " & mRegSets(r) & " netting set(s) VALID; " & _
+                                  (mRegSets(r) - mRegValid(r)) & " withheld"
+            End If
         Next r
 
 '------------------------------------------------------------------------------
@@ -3712,7 +3729,7 @@ Private Sub WriteResults()
         WriteBlock Sheet, TopRow, Block, RowCount, RS_NCOLS
         FormatColumns Sheet, TopRow, RowCount, "@|@|@|@|0|0|0|0|0.0000|#,##0|#,##0|#,##0|#,##0|0|#,##0|#,##0|" & _
                       "#,##0|#,##0|@|@|0.00%|#,##0|#,##0|@"
-        TableRange(Sheet, TopRow + RowCount - 2, 1, TopRow + RowCount - 1, RS_NCOLS).Font.Bold = True
+        TableRange(Sheet, TopRow + RowCount - TotalRows, 1, TopRow + RowCount - 1, RS_NCOLS).Font.Bold = True
 
 End Sub
 

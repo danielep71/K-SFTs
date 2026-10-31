@@ -180,8 +180,8 @@ def validate(ws: Any, cells: str, title: str, prompt: str, rule: dict[str, Any] 
 
 YN = {"validate": "list", "source": ["Y", "N"]}
 CQS = {"validate": "list", "source": ["1", "2", "3", "4", "5", "6"]}
-REGIME = {"validate": "list", "source": ["CRR", "BCBS"]}
-REGIMES = {"validate": "list", "source": ["BOTH", "CRR", "BCBS"]}
+REGIME = {"validate": "list", "source": ["CRR"]}
+REGIMES = {"validate": "list", "source": ["BOTH", "CRR"]}
 SHARE = {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 1}
 DAYS = {"validate": "integer", "criteria": "between", "minimum": 1, "maximum": 250}
 ANY_DATE = {"validate": "date", "criteria": ">", "value": 0}
@@ -210,9 +210,9 @@ readme.set_column(3, 3, 162.72)
 readme.set_column(4, 4, 14)
 readme.set_column(5, 5, 5)
 readme.set_column(6, 6, None, None, {"hidden": True})
-readme.write(2, 2, "Exposure value E*, risk-weighted exposure amount and own funds requirement of securities "
-             "financing transactions under the financial collateral comprehensive method with supervisory "
-             "haircuts: EU CRR (Art. 220-227), the default, and Basel CRE22, chosen per netting set.", F["note"])
+readme.write(2, 2, "Exposure value E* of securities financing transactions under the financial collateral "
+             "comprehensive method with supervisory haircuts of the EU CRR (Art. 220-227). The risk weight, "
+             "risk-weighted exposure amount and own funds requirement are illustrative.", F["note"])
 readme.set_row(2, 30)
 README = [
     ("How to use", None),
@@ -220,7 +220,7 @@ README = [
      "(.xlsm), import the modules of src/core, src/modules and src/workbook (INSTALLATION.md), then open "
      "it and click \"Enable Content\". The SFT_* cells on FormulaTest show #NAME? until the modules are "
      "imported; press Ctrl+Alt+F9 afterwards."),
-    ("2. Parameters", "Params: reporting date, reporting currency, default Regime (CRR or BCBS), days per "
+    ("2. Parameters", "Params: reporting date, reporting currency, Regime (CRR, the only one), days per "
      "year, holding periods, the FX and non-eligible haircuts, the netting weights and N threshold, the "
      "capital ratio, the supervisory haircut table (H10, 10 business days, daily remargining), the "
      "risk-weight table and FX rates (units of reporting currency per 1 unit). Yellow cells are inputs."),
@@ -239,16 +239,16 @@ README = [
      "warning and information message, including each difference from the regulatory parameter set "
      "(WHAT-IF). TestCatalogue compares Results with independently derived values; FormulaTest unit-tests "
      "the SFT_* functions."),
-    ("7. Regime", "Basel_vs_CRR lists the differences between CRE22 / CRE20 and the CRR and how the "
-     "workbook treats them. Each netting set uses the Params table rows marked BOTH or its regime (every "
-     "shipped row is BOTH); Results totals each regime apart."),
+    ("7. Regime", "CRR is the only supported regime: a BCBS value on Params, on a netting set or in a table "
+     "row is refused. Basel_vs_CRR lists the differences between CRE22 / CRE20 and the CRR and how the "
+     "workbook treats them."),
     ("Sign and input conventions", None),
     ("Side", "LENT: cash or securities lent, sold under repo or posted as collateral (E). RECEIVED: cash or "
      "securities borrowed, bought under reverse repo or received as collateral (C). A reverse repo is "
      "cash LENT and securities RECEIVED; a repo is securities LENT and cash RECEIVED."),
     ("Transaction type", "REPO, REVREPO, SECLEND, SECBORROW: repo-style transactions, minimum holding period "
      "5 business days; MARGINLEND: other capital-market-driven transaction, 10 [CRE22.56-22.57; CRR Art. "
-     "224(2)]. A netting set with an eligible MNA holding both uses 10, in both regimes [CRE22.58]; without "
+     "224(2)]. A netting set with an eligible MNA holding both uses 10 [CRE22.58]; without "
      "one, each transaction takes its own."),
     ("Asset type", "CASH; DEBT with issuer SOV / INST / CORP / SEC, issue CQS (blank = unrated) and security "
      "maturity date; EQUITY with listing MAIN (main index), LISTED (recognised exchange) or OTHER; GOLD; "
@@ -258,7 +258,7 @@ README = [
     ("Dates", "Date cells take Excel dates: typing 2026-09-30 enters one. The engine also reads text in the "
      "form yyyy-mm-dd, for example pasted or imported. Cell rules check typed entries only; the engine checks "
      "every value on Run."),
-    ("Eligibility", "A leg other than a fund whose haircut key is not in the haircut table for its regime is "
+    ("Eligibility", "A leg other than a fund whose haircut key is not in the haircut table is "
      "not eligible: lent, it takes NonEligibleHaircut (30%) [CRE22.54; CRR Art. 224(4)]; received, it is not "
      "recognised as collateral. A fund takes the H10 entered on its leg. "
      "Unrated debt of an institution is treated as CQS 2-3 [CRE22.34(3)(b), 22.49; Art. 197(4), 224(6)]."),
@@ -282,16 +282,16 @@ README = [
     ("0% haircut", "Declared per netting set; the engine checks the conditions it can see (repo-style only, "
      "cash and eligible central government or central bank debt, one currency, daily remargining) and takes the "
      "rest, including the 0% risk weight of the securities, as declared [CRE22.60, 22.36-22.37; CRR Art. 227]."),
-    ("Capital", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA [CRE22.48, RBC20.1; CRR "
-     "Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when unrated, short-term "
-     "weights when every transaction has an original maturity of 3 months or less [CRE20.18-20.21; Art. "
-     "120-121]. QCCP trade exposures 2% [CRE54.7; Art. 306(1)(a)]."),
+    ("Capital (illustrative)", "RWA = E* x RW of the counterparty; own funds requirement = 8% x RWA "
+     "[CRE22.48, RBC20.1; CRR Art. 92(1)(c)]. Institutions: ECRA by CQS, SCRA grade A / A_ENH / B / C when "
+     "unrated, short-term weights when every transaction has an original maturity of 3 months or less "
+     "[CRE20.18-20.21; Art. 120-121]. Illustrative only: the risk-weight table is not checked."),
     ("Sheets", None),
     ("Params", "Inputs - parameters, haircut table, risk-weight table, FX rates"),
     ("NettingSets", "Inputs - netting sets, counterparties and holding-period drivers"),
     ("Transactions", "Inputs - transaction legs"),
-    ("Results", "Output - E*, RWA and own funds per netting set, and TOTAL CRR / TOTAL BCBS over the VALID "
-     "netting sets of each regime"),
+    ("Results", "Output - E* per netting set, with the illustrative risk weight, RWA and own funds, and "
+     "TOTAL CRR over the VALID netting sets"),
     ("Positions", "Output - per VALID netting set: with netting, each security issue (E_s, H_s, counted in N) "
      "and each currency (FX term); without netting, each transaction"),
     ("LegCalc", "Output - every leg: haircut key, eligibility, residual maturity, H10, holding period, scale, "
@@ -317,12 +317,15 @@ README = [
      "SFTs (CRE56, not in the CRR); maturity mismatch; short-term issue ratings; unfunded credit protection "
      "(guarantees, credit derivatives); cross-product netting with derivatives; CVA; the SCRA sovereign floor; "
      "capital buffers and Pillar 2."),
-    ("Status", "Prototype. Implements the parameter set CRE22-CRR-2026-10-24, transcribed from CRE22 "
-     "(effective 1 January 2023), CRE20, CRE54 and the consolidated CRR of 26.06.2026; only its haircut table is "
-     "checked against the registered copies (#197; docs/methodology/PROTOTYPE.md). Expected values are "
-     "reproduced by an independent Python derivation, not by published worked examples."),
-    ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA repeats CRR-MNA under "
-     "Basel; DEMO-REJECTED shows how a rejected transaction withholds a netting set's E*."),
+    ("Refused", "Exposures to CCPs (class QCCP) and the Basel regime (BCBS) make a netting set INVALID; a BCBS "
+     "regime on Params or a table row, or a reporting date before 2025-01-01, stops the run."),
+    ("Status", "Prototype. Parameter set CRE22-CRR-2026-10-30, from CRE22 (effective 1 January 2023), CRE20 "
+     "and the consolidated CRR of 26.06.2026; only its haircut table is checked (#197). Only E* is supported "
+     "(docs/methodology/SUPPORT_MATRIX.md). Expected values come from an independent Python derivation, not "
+     "from published worked examples."),
+    ("Sample data", "Illustrative counterparties, securities and FX rates. BCBS-MNA and CRR-QCCP show the "
+     "refusal of the Basel regime and of a CCP counterparty; DEMO-REJECTED shows how a rejected transaction "
+     "withholds a netting set's E*."),
     ("Code", None),
     ("Modules", "M_Main (macros), CORE_Engine (calculation), SFT_Formulas (public SFT_* functions), "
      "CORE_Config (layout constants and the regulatory parameter set), CORE_Util (helpers). No external "
@@ -372,7 +375,7 @@ P = FIXTURE["params"]
 PARAMS = [
     ("AsOfDate", "Reporting (calculation) date", date(P["AsOfDate"]), "in_date", ""),
     ("ReportingCcy", "Reporting currency (all amounts converted into it)", P["ReportingCcy"], "in_ctr", ""),
-    ("Regime", "Default regime: CRR (EU) or BCBS (Basel CRE22); override per netting set", P["Regime"], "in_ctr",
+    ("Regime", "Regime: CRR (EU), the only supported one; BCBS is refused", P["Regime"], "in_ctr",
      "see Basel_vs_CRR sheet"),
     ("DaysPerYear", "Calendar days per year for the residual maturity of debt securities", P["DaysPerYear"],
      "in_gen", "Year convention"),
@@ -404,8 +407,8 @@ PARAM_RULES: dict[str, tuple[str, str, dict[str, Any], tuple[str, str]]] = {
     "ReportingCcy": ("Reporting currency", "Three-letter code, e.g. EUR. Every amount is converted into it; "
                      "the FX table below lists it with the rate 1.", {},
                      ("Invalid currency", "Enter a three-letter currency code, e.g. EUR.")),
-    "Regime": ("Default regime", "CRR = EU rules (Art. 220-227); BCBS = Basel CRE22. Used for every netting "
-               "set without a regime override.", REGIME, ("Invalid regime", "Choose CRR or BCBS.")),
+    "Regime": ("Regime", "CRR = EU rules (Art. 220-227), the only supported regime; BCBS is refused. Used "
+               "for every netting set without a regime override.", REGIME, ("Invalid regime", "Choose CRR.")),
     "DaysPerYear": ("Days per year", "Calendar days per year for the residual maturity of debt securities. "
                     "Normally 365.", {"validate": "decimal", "criteria": "between", "minimum": 360, "maximum": 366},
                     ("Invalid day count", "Enter a number from 360 to 366. Normally 365.")),
@@ -508,15 +511,15 @@ validate(prm, keys, "Haircut key", "Key the engine builds from the asset type, i
 validate(prm, f"H{first + 1}:H{r}", "Haircut H10", "Supervisory haircut at 10 business days with daily "
          "remargining (CRE22.49; CRR Art. 224 Tables 1 and 3).", SHARE,
          ("Invalid haircut", "Enter a percentage from 0% to 100%."))
-validate(prm, f"I{first + 1}:I{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
-         "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
+validate(prm, f"I{first + 1}:I{r}", "Regimes", "Regimes in which the row applies: BOTH or CRR. A row limited "
+         "to BCBS is refused.", REGIMES, ("Invalid regime", "Choose BOTH or CRR."))
 prm.write(r, 3, "Keys not in this table are not eligible. To add a key, right-click a row of the table and "
           "Insert: the new row keeps the table's rules. Leave no blank row.",
           F["ref"])
 
 r += 2
 prm.set_row(r, 26.1)
-prm.write(r, 2, "Risk weights - CRE20 / CRR Art. 114, 120-122; QCCP CRE54.7 / Art. 306(1)(a)", F["section"])
+prm.write(r, 2, "Risk weights (illustrative) - CRE20 / CRR Art. 114, 120-122", F["section"])
 r += 1
 prm.set_row(r, 30)
 for c, h in enumerate(["RW_Key", "Exposure class", "Grade", "Risk weight", "Regimes", "Reference"]):
@@ -536,12 +539,12 @@ keys = f"C{first + 1}:C{r}"
 validate(prm, keys, "Risk-weight key", "Key the engine builds from the counterparty class and its CQS, SCRA "
          "grade or short-term status, e.g. INST_CQS2. Listed once.", unique(keys),
          ("Duplicate key", "This key is already in the table. Enter it once."))
-validate(prm, f"F{first + 1}:F{r}", "Risk weight", "Risk weight of the counterparty, from 0% to 1250% "
-         "(CRE20; CRR Art. 114, 120-122; QCCP CRE54.7, Art. 306(1)(a)).",
+validate(prm, f"F{first + 1}:F{r}", "Risk weight", "Illustrative risk weight of the counterparty, from 0% to "
+         "1250% (CRE20; CRR Art. 114, 120-122).",
          {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 12.5},
          ("Invalid risk weight", "Enter a percentage from 0% to 1250%."))
-validate(prm, f"G{first + 1}:G{r}", "Regimes", "Regimes in which the row applies: BOTH, CRR only or BCBS "
-         "only.", REGIMES, ("Invalid regime", "Choose BOTH, CRR or BCBS."))
+validate(prm, f"G{first + 1}:G{r}", "Regimes", "Regimes in which the row applies: BOTH or CRR. A row limited "
+         "to BCBS is refused.", REGIMES, ("Invalid regime", "Choose BOTH or CRR."))
 prm.write(r, 3, "ST_ = every transaction of the netting set has an original maturity of 3 months or less. "
           "A_ENH = SCRA grade A with CET1 >= 14% and leverage ratio >= 5%. To add a key, right-click a row of "
           "the table and Insert: the new row keeps the table's rules.", F["ref"])
@@ -584,7 +587,7 @@ NS_COLS = [
     ("Counterparty", 58.29, "in_txt", "counterparty"),
     ("Eligible master netting agreement (Y/N)", 12, "in_bool", "mna"),
     ("Settlement ccy (blank = reporting)", 11, "in_ctr", "settlement_ccy"),
-    ("Counterparty class (SOV / INST / CORP / QCCP)", 13, "in_ctr", "class"),
+    ("Counterparty class (SOV / INST / CORP)", 13, "in_ctr", "class"),
     ("Counterparty CQS (1-6, blank = unrated)", 11, "in_ctr", "cqs"),
     ("SCRA grade (A / A_ENH / B / C)", 11, "in_ctr", "scra"),
     ("Remargin frequency N_R (BD)", 11, "in_int", "remargin_bd"),
@@ -643,10 +646,10 @@ validate(ns, rng(5), "Settlement currency", "Currency the netting set settles in
          "other currencies take the currency-mismatch haircut. Blank = the reporting currency. It must be in "
          "the Params FX table.", ccy3(f"F{top}"),
          ("Invalid currency", "Enter a three-letter code from the FX table, or leave blank."))
-validate(ns, rng(6), "Counterparty class", "SOV = sovereign, INST = institution, CORP = corporate, QCCP = "
-         "qualifying central counterparty. Selects the risk weight (CRE20; CRR Art. 114, 120-122, 306).",
-         {"validate": "list", "source": ["SOV", "INST", "CORP", "QCCP"]},
-         ("Invalid class", "Choose SOV, INST, CORP or QCCP."))
+validate(ns, rng(6), "Counterparty class", "SOV = sovereign, INST = institution, CORP = corporate. Selects "
+         "the illustrative risk weight (CRE20; CRR Art. 114, 120-122). QCCP is refused: CCPs are out of scope.",
+         {"validate": "list", "source": ["SOV", "INST", "CORP"]},
+         ("Invalid class", "Choose SOV, INST or CORP."))
 validate(ns, rng(7), "Counterparty CQS", "Credit quality step 1 to 6 of the counterparty; blank = unrated.",
          CQS, ("Invalid CQS", "Choose a whole number from 1 to 6, or leave blank."))
 validate(ns, rng(8), "SCRA grade", "Unrated institutions only: A, A_ENH (grade A with CET1 >= 14% and leverage "
@@ -672,8 +675,8 @@ validate(ns, rng(14), "Risk weight override", "Optional risk weight from 0% to 1
          "risk-weight table. Blank = none.",
          {"validate": "decimal", "criteria": "between", "minimum": 0, "maximum": 12.5},
          ("Invalid risk weight", "Enter a percentage from 0% to 1250%, or leave blank."))
-validate(ns, rng(15), "Regime override", "CRR or BCBS for this netting set; blank = the Params Regime.", REGIME,
-         ("Invalid regime", "Choose CRR or BCBS, or leave blank."))
+validate(ns, rng(15), "Regime override", "CRR for this netting set; blank = the Params Regime. BCBS is "
+         "refused.", REGIME, ("Invalid regime", "Choose CRR, or leave blank."))
 ns.autofilter(HDR_NS, 2, last_ns, 2 + len(NS_COLS) - 1)
 ns.freeze_panes(HDR_NS + 1, 3)
 buttons(ns, 3, 4)
@@ -806,14 +809,14 @@ RS_COLS = [("NettingSetID", 16), ("Counterparty", 64), ("Regime", 8), ("MNA", 6)
            ("Legs used", 8), ("Holding period T_M (BD)", 9), ("Remargin N_R (BD)", 9), ("Haircut scale", 9),
            ("Sum E (lent)", 15), ("Sum C (received)", 15), ("Net exposure", 13), ("Gross exposure", 13),
            ("N (issues)", 7), ("0.4 x net", 13), ("0.6 x gross / sqrt(N)", 13), ("FX term", 13), ("E* (EAD)", 15),
-           ("Exposure class", 9), ("Risk weight key", 16), ("Risk weight", 9), ("RWA", 15),
-           ("Own funds requirement", 14), ("Status", 40)]
+           ("Exposure class", 9), ("Risk weight key", 16), ("Risk weight (illustrative)", 11),
+           ("RWA (illustrative)", 15), ("Own funds requirement (illustrative)", 15), ("Status", 40)]
 HDR_RS = 5
 res = output_sheet("Results", "Results", HDR_RS, RS_COLS, None, "Results_Header", run_buttons=True)
 res.write(3, 2, "No results yet: press Run SFT.", F["runinfo"])
 name("Results_RunInfo", "Results", 3, 2)
-res.write(4, 2, "Withheld netting sets (INVALID, INCOMPLETE) are shaded; totals add VALID netting sets of one "
-          "regime only.", F["runinfo"])
+res.write(4, 2, "Withheld netting sets (INVALID, INCOMPLETE) are shaded; totals add VALID netting sets. "
+          "The risk weight, RWA and own funds are illustrative: only E* is supported.", F["runinfo"])
 
 
 def table_rows(header_row: int, columns: Sequence[tuple[str, float]]) -> str:
@@ -864,11 +867,11 @@ ck.conditional_format(table_rows(HDR_CK, CK_COLS), {"type": "formula", "criteria
 # TEST CATALOGUE
 # ----------------------------------------------------------------------------
 MEASURES: dict[str, tuple[str, str, float | None]] = {  # measure: (Results header, expected key, tolerance)
-    "E*": ("E* (EAD)", "e_star", 0.01), "RWA": ("RWA", "rwa", 0.01),
-    "Own funds": ("Own funds requirement", "own_funds", 0.01), "Status": ("Status", "status", None),
+    "E*": ("E* (EAD)", "e_star", 0.01), "RWA": ("RWA (illustrative)", "rwa", 0.01),
+    "Own funds": ("Own funds requirement (illustrative)", "own_funds", 0.01), "Status": ("Status", "status", None),
     "Holding period": ("Holding period T_M (BD)", "holding_bd", 1e-9), "N": ("N (issues)", "n", 0),
     "Net exposure": ("Net exposure", "net", 0.01), "Gross exposure": ("Gross exposure", "gross", 0.01),
-    "FX term": ("FX term", "fx_term", 0.01), "Risk weight": ("Risk weight", "rw", 1e-12),
+    "FX term": ("FX term", "fx_term", 0.01), "Risk weight": ("Risk weight (illustrative)", "rw", 1e-12),
     "Risk weight key": ("Risk weight key", "rw_key", None),
 }
 assert all(header in [h for h, _ in RS_COLS] for header, _, _ in MEASURES.values())
@@ -1038,7 +1041,7 @@ BVC = [
     ("Holding periods", "5 BD repo-style, 10 BD other capital market, 20 BD secured lending; 10 BD when a "
      "netting set mixes repo-style and other capital market transactions.", "5, 10 and 20 BD; aligned with "
      "the margin period of risk of Art. 285(2)-(4) for large or illiquid netting sets.", "Yes, except the "
-     "mixed rule", "The longer minimum (10) for a mixed netting set with an eligible MNA, in both regimes; "
+     "mixed rule", "The longer minimum (10) for a mixed netting set with an eligible MNA; "
      "without one, each transaction takes its own. Secured lending out of scope.", "CRE22.57-22.58; Art. 224(2)"),
     ("20-day holding period and disputes", "More than 5,000 trades, illiquid collateral; doubled after more "
      "than two disputes.", "Through Art. 285(3)-(4).", "Yes", "Flags on NettingSets.",
@@ -1057,18 +1060,18 @@ BVC = [
      "Art. 227 conditions.", "Yes", "Declared per netting set; observable conditions checked.",
      "CRE22.60, 22.36-22.37; Art. 227"),
     ("Haircut floors", "Minimum haircut floors for non-centrally cleared SFTs with some counterparties.",
-     "Not in the consolidated text.", "No", "Not implemented in either regime.", "CRE56"),
+     "Not in the consolidated text.", "No", "Not implemented.", "CRE56"),
     ("Institution risk weights", "ECRA 20/30/50/100/150; short-term 20/20/20/50/150; SCRA 40 (30) / 75 / "
      "150, short-term 20/50/150; original maturity of 3 months or less.", "Art. 120-121: the same weights "
-     "and original-maturity test.", "Yes", "RW_Table; short-term only when every transaction qualifies; the "
-     "SCRA sovereign floor is not applied.", "CRE20.18-20.21; Art. 120-121"),
+     "and original-maturity test.", "Yes", "Illustrative RW_Table; short-term only when every transaction "
+     "qualifies; the SCRA sovereign floor is not applied.", "CRE20.18-20.21; Art. 120-121"),
     ("Corporate and sovereign risk weights", "Sovereigns 0/20/50/100/150; corporates 20/50/75/100/150, "
-     "unrated 100%.", "Art. 114, 122: the same weights.", "Yes", "RW_Table; transitional and output-floor "
-     "treatments not modelled.", "CRE20.7, CRE20 corporates; Art. 114, 122"),
-    ("QCCP", "2% on trade exposures of a clearing member.", "2% under Art. 306(1)(a).", "Yes", "Class QCCP.",
-     "CRE54.7; Art. 306(1)(a)"),
-    ("Capital requirement", "Total capital at least 8% of RWA.", "Art. 92(1)(c).", "Yes", "CapitalRatio; "
-     "buffers and Pillar 2 not included.", "RBC20.1; Art. 92(1)(c)"),
+     "unrated 100%.", "Art. 114, 122: the same weights.", "Yes", "Illustrative RW_Table; transitional and "
+     "output-floor treatments not modelled.", "CRE20.7, CRE20 corporates; Art. 114, 122"),
+    ("QCCP", "2% on trade exposures of a clearing member.", "2% under Art. 306(1)(a).", "Yes", "Refused: "
+     "exposures to CCPs are out of scope.", "CRE54.7; Art. 306(1)(a)"),
+    ("Capital requirement", "Total capital at least 8% of RWA.", "Art. 92(1)(c).", "Yes", "CapitalRatio, "
+     "illustrative; buffers and Pillar 2 not included.", "RBC20.1; Art. 92(1)(c)"),
 ]
 r = 5
 for row in BVC:

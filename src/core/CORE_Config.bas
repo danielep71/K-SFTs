@@ -29,7 +29,7 @@ Attribute VB_Name = "CORE_Config"
 '   Excel VBA; no references beyond the defaults.
 '
 ' UPDATED
-'   2026-10-29
+'   2026-10-30
 '
 ' AUTHOR
 '   Daniele Penza
@@ -110,14 +110,16 @@ Attribute VB_Name = "CORE_Config"
 '------------------------------------------------------------------------------
     'The values a regulatory run uses, as listed in the methodology: CRE22
     '(effective 1 January 2023) and the consolidated CRR of 26.06.2026,
-    'transcribed on 2026-10-24. Only the haircut table is checked against
-    'the registered copies (#197; PROTOTYPE.md). A run whose parameters,
+    'transcribed on 2026-10-24; the QCCP risk weight left it on 2026-10-30,
+    'when CCP exposures were put out of scope (#248). Only the haircut table
+    'is checked against the registered copies (#197; PROTOTYPE.md). A run
+    'whose parameters,
     'haircut table, risk-weight table and risk-weight overrides all agree
     'with this set is REGULATORY and names REF_SET_ID; any difference makes
     'it WHAT-IF (CORE_Engine.ClassifyRun). DaysPerYear is a convention and
     'does not change the class. REF_HAIRCUTS and REF_RISKWEIGHTS list each
     'table row as KEY=value, separated by ";".
-        Public Const REF_SET_ID       As String = "CRE22-CRR-2026-10-24"    'Identity of the set
+        Public Const REF_SET_ID       As String = "CRE22-CRR-2026-10-30"    'Identity of the set
         Public Const RUN_REGULATORY   As String = "REGULATORY"              'Every parameter as the set
         Public Const RUN_WHATIF       As String = "WHAT-IF"                 'Some parameter differs
         Public Const REF_HCBASE       As Double = 10      'CRE22.49; CRR Art. 224 Table 1 (10-day column)
@@ -152,16 +154,19 @@ Attribute VB_Name = "CORE_Config"
             "INST_SCRA_A=0.4;INST_SCRA_A_ENH=0.3;INST_SCRA_B=0.75;INST_SCRA_C=1.5;" & _
             "INST_ST_SCRA_A=0.2;INST_ST_SCRA_A_ENH=0.2;INST_ST_SCRA_B=0.5;INST_ST_SCRA_C=1.5;" & _
             "CORP_CQS1=0.2;CORP_CQS2=0.5;CORP_CQS3=0.75;CORP_CQS4=1;CORP_CQS5=1.5;CORP_CQS6=1.5;" & _
-            "CORP_UNRATED=1;QCCP=0.02"
+            "CORP_UNRATED=1"
 
 '------------------------------------------------------------------------------
 ' REGIMES
 '------------------------------------------------------------------------------
-    'Regime codes accepted on Params and as a netting-set override; a row
-    'of the haircut or risk-weight table applies to BOTH or to one regime.
-        Public Const RG_BCBS   As String = "BCBS"    'Basel framework, CRE22 and CRE20
+    'Regime codes. CRR is the only supported regime (D1; the support matrix,
+    '#248): a BCBS value on Params, on a netting set or in a table row is
+    'refused, and a table row applies to BOTH or CRR. RG_BCBS stays so that
+    'the refusal can name it.
+        Public Const RG_BCBS   As String = "BCBS"    'Basel framework: refused
         Public Const RG_CRR    As String = "CRR"     'EU Capital Requirements Regulation
-        Public Const RG_BOTH   As String = "BOTH"    'Table row valid in both regimes
+        Public Const RG_BOTH   As String = "BOTH"    'Table row valid in every regime
+        Public Const FIRST_ASOF As Double = 45658#   'Earliest reporting date, 2025-01-01 (D2: CRR3 applies)
 
 '------------------------------------------------------------------------------
 ' TRANSACTION CODES
@@ -205,7 +210,7 @@ Attribute VB_Name = "CORE_Config"
         Public Const CC_SOV         As String = "SOV"           'Central government or central bank
         Public Const CC_INST        As String = "INST"          'Institution
         Public Const CC_CORP        As String = "CORP"          'Corporate
-        Public Const CC_QCCP        As String = "QCCP"          'Qualifying CCP, trade exposure
+        Public Const CC_QCCP        As String = "QCCP"          'Qualifying CCP: refused, CCPs are out of scope
     'SCRA grades of an unrated institution; A_ENH is grade A with a CET1
     'ratio of at least 14% and a leverage ratio of at least 5%.
         Public Const SCRA_GRADES    As String = "A A_ENH B C"
@@ -227,10 +232,10 @@ Attribute VB_Name = "CORE_Config"
     'top-left cell of its workbook name.
         Public Const HC_KEY        As Long = 1    'Haircut key
         Public Const HC_H10        As Long = 6    'Haircut H10, decimal
-        Public Const HC_REGIMES    As Long = 7    'BOTH, CRR or BCBS
+        Public Const HC_REGIMES    As Long = 7    'BOTH or CRR
         Public Const RW_KEY        As Long = 1    'Risk-weight key
         Public Const RW_WEIGHT     As Long = 4    'Risk weight, decimal
-        Public Const RW_REGIMES    As Long = 5    'BOTH, CRR or BCBS
+        Public Const RW_REGIMES    As Long = 5    'BOTH or CRR
         Public Const HC_HEADERS As String = "HC_Key|Asset type|Issuer category|Credit quality|" & _
             "Residual maturity|Haircut H10|Regimes"
         Public Const RW_HEADERS As String = "RW_Key|Exposure class|Grade|Risk weight|Regimes"
@@ -246,7 +251,7 @@ Attribute VB_Name = "CORE_Config"
         Public Const NS_CPTY       As Long = 2     'Counterparty
         Public Const NS_MNA        As Long = 3     'Eligible master netting agreement (Y/N)
         Public Const NS_SETTLE     As Long = 4     'Settlement currency; blank: reporting currency
-        Public Const NS_CLASS      As Long = 5     'Counterparty class: SOV, INST, CORP or QCCP
+        Public Const NS_CLASS      As Long = 5     'Counterparty class: SOV, INST or CORP
         Public Const NS_CQS        As Long = 6     'Counterparty credit quality step 1-6; blank: unrated
         Public Const NS_SCRA       As Long = 7     'SCRA grade of an unrated institution
         Public Const NS_FREQ       As Long = 8     'Remargining frequency N_R, business days
@@ -259,7 +264,7 @@ Attribute VB_Name = "CORE_Config"
         Public Const NS_NCOLS      As Long = 14    'Number of input columns
         Public Const NS_HEADERS As String = "NettingSetID|Counterparty|" & _
             "Eligible master netting agreement (Y/N)|Settlement ccy (blank = reporting)|" & _
-            "Counterparty class (SOV / INST / CORP / QCCP)|Counterparty CQS (1-6, blank = unrated)|" & _
+            "Counterparty class (SOV / INST / CORP)|Counterparty CQS (1-6, blank = unrated)|" & _
             "SCRA grade (A / A_ENH / B / C)|Remargin frequency N_R (BD)|" & _
             ">5,000 trades or illiquid collateral (Y/N)|Margin disputes (Y/N)|" & _
             "Holding period override (BD)|0% haircut conditions met (Y/N)|Risk weight override|" & _
@@ -303,7 +308,7 @@ Attribute VB_Name = "CORE_Config"
     'and the position of the main Results columns (WriteResults writes them
     'by literal index; no procedure reads these constants).
         Public Const RS_NCOLS       As Long = 24    'Results
-        Public Const RS_ID          As Long = 1     'Results: NettingSetID, or TOTAL CRR / TOTAL BCBS
+        Public Const RS_ID          As Long = 1     'Results: NettingSetID, or TOTAL CRR
         Public Const RS_REGIME      As Long = 3     'Results: BCBS or CRR
         Public Const RS_ESTAR       As Long = 18    'Results: E*, the exposure value
         Public Const RS_RWA         As Long = 22    'Results: risk-weighted exposure amount

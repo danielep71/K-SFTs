@@ -13,7 +13,7 @@
 [![Basis](https://img.shields.io/badge/Basis-EU_CRR_%C2%B7_Basel_reference-1f3a5f?style=for-the-badge)](docs/methodology/README.md#regulatory-basis)
 [![Release](https://img.shields.io/badge/Release-0.2.0-2ea44f?style=for-the-badge)](#status)
 [![Harness](https://img.shields.io/badge/Excel_harness-9_cases_%C2%B7_18_assertions_PASS-2ea44f?style=for-the-badge)](#validation)
-[![Regression](https://img.shields.io/badge/Regression-146_figures_%C2%B7_28_formulas_PASS-2ea44f?style=for-the-badge)](tools/README.md#-prototype-scripts)
+[![Regression](https://img.shields.io/badge/Regression-118_figures_%C2%B7_28_formulas_PASS-2ea44f?style=for-the-badge)](tools/README.md#-prototype-scripts)
 [![License](https://img.shields.io/badge/License-MPL_2.0-2ea44f?style=for-the-badge)](LICENSE)
 
 <br>
@@ -114,11 +114,10 @@ of [K-Risk Engines](https://github.com/danielep71/K-Risk-Engines).
 
 This is an architecture diagram, not evidence of an implemented or validated
 calculation. Today the [prototype](docs/methodology/PROTOTYPE.md) covers the
-K-SFT box and the standardised risk weight, RWA and own funds of each
-netting set, a QCCP taking the 2% trade-exposure weight. Default-fund
-capital and CVA are not implemented here. For v1.0.0 only E\* is supported:
-the risk weight, RWA and own funds become illustrative, and the QCCP class is
-rejected ([support matrix](docs/methodology/SUPPORT_MATRIX.md)).
+K-SFT box: E\* is supported, and the standardised risk weight, RWA and own
+funds of each netting set are illustrative. Exposures to CCPs are refused,
+and default-fund capital and CVA are not implemented here
+([support matrix](docs/methodology/SUPPORT_MATRIX.md)).
 
 ---
 
@@ -285,7 +284,7 @@ implementation reference.
 | Excel host run | Harness and example suite at `1a6f0f7` imported, compiled and run in Excel 16.0 (build 20430, 64-bit, VBA7) on Windows 11 Enterprise 25H2: the normal run passed, both failure paths ended as documented, `check_excel_run.py` PASS | [tested environments](INSTALLATION.md#tested-environments), #9 |
 | Workbook synchronization | The sync script imported the test modules into a workbook built from the template, and the suite passed in it | #102 |
 | Prototype in Excel | At `134656f`, on the same host: built and recorded with `tools/Record-KSFT-ExcelRun.cmd` (`check_excel_run.py` PASS); TestCatalogue 107 of 107 against the independent reference, FormulaTest 28 of 28, and all 11 sheets checked after a run and a rerun | [tested environments](INSTALLATION.md#tested-environments), #138 |
-| Prototype in LibreOffice | `tools/lo_regression.py`: the engine and the `SFT_*` tests headless, 146 figures equal to the reference | [tools/README.md](tools/README.md#-prototype-scripts) |
+| Prototype in LibreOffice | `tools/lo_regression.py`: the engine and the `SFT_*` tests headless, 118 figures equal to the reference (146 before #248 refused two demo netting sets) | [tools/README.md](tools/README.md#-prototype-scripts) |
 | SFT calculation | Not validated: the expected values are illustrative, from an independent implementation of the specification, not from published worked examples | [PROTOTYPE.md](docs/methodology/PROTOTYPE.md) |
 
 Static checks never stand in for Excel evidence: since the first host run,
@@ -324,9 +323,8 @@ The full layout, the dependency direction and the public API boundary are in
 ## ⚠️ Known limitations
 
 - **Prototype only.** The calculation is a prototype, not the methodology of
-  record: it departs from recorded decisions (a BCBS regime, a QCCP class,
-  risk weight, RWA and own funds not yet labelled illustrative; #248 aligns
-  it with the [support matrix](docs/methodology/SUPPORT_MATRIX.md)), its
+  record: it follows the [support matrix](docs/methodology/SUPPORT_MATRIX.md)
+  (#248), but its formulas are not yet traced to the CRR (#173), its
   expected values are illustrative,
   and there is no numerical test case in the format of
   [TEST_CASES.md](docs/methodology/TEST_CASES.md) and no production
