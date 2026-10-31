@@ -131,6 +131,60 @@ class ConfigTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 check_issues.configured_assignee(root)
 
+    @staticmethod
+    def copy_configuration(root: Path) -> None:
+        """The files config_findings reads, copied from the repository."""
+        for folder in (".github/scripts", ".github/ISSUE_TEMPLATE"):
+            shutil.copytree(ROOT / folder, root / folder)
+        for name in (".github/labels.json", ".github/dependabot.yml", "docs/GOVERNANCE.md"):
+            (root / name).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(ROOT / name, root / name)
+
+    def test_label_guide_explains_every_catalogue_label_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.copy_configuration(root)
+            guide = root / "docs/GOVERNANCE.md"
+            text = guide.read_text(encoding="utf-8")
+            row = next(line for line in text.splitlines() if line.startswith("| `wontfix` |"))
+            guide.write_text(text.replace(row + "\n", ""), encoding="utf-8")
+            self.assertIn("docs/GOVERNANCE.md must explain label 'wontfix' exactly once in the label tables "
+                          "of Issues, found 0", check_issues.config_findings(root))
+            guide.write_text(text.replace(row, row + "\n" + row), encoding="utf-8")
+            self.assertIn("docs/GOVERNANCE.md must explain label 'wontfix' exactly once in the label tables "
+                          "of Issues, found 2", check_issues.config_findings(root))
+            guide.write_text(text.replace(row, row + "\n| `stale` | Not a label. |"), encoding="utf-8")
+            self.assertIn("docs/GOVERNANCE.md explains label 'stale', which is not in the catalogue",
+                          check_issues.config_findings(root))
+
+    def test_documented_labels_reads_only_the_label_tables_of_issues(self) -> None:
+        text = ("## Branches\n\n| Label | Use |\n| --- | --- |\n| `main` | x |\n\n"
+                "## 🗂️ Issues\n\n| Priority | Use |\n| --- | --- |\n| `P1` | x |\n\nText `bug`.\n\n"
+                "| Other | Use |\n| --- | --- |\n| `ci` | x |\n\n| Label | Use |\n| --- | --- |\n| `bug` | x |\n\n"
+                "## Releases\n\n| Label | Use |\n| --- | --- |\n| `release` | x |\n")
+        self.assertEqual(check_issues.documented_labels(text), ["P1", "bug"])
+
+    def test_dependabot_labels_and_assignees_are_checked(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.copy_configuration(root)
+            self.assertEqual(check_issues.config_findings(root), [])
+            config = root / ".github/dependabot.yml"
+            text = config.read_text(encoding="utf-8")
+            config.write_text(text.replace("      - ci\n", "      - no-such-label\n", 1), encoding="utf-8")
+            self.assertIn(".github/dependabot.yml sets unknown label 'no-such-label'",
+                          check_issues.config_findings(root))
+            config.write_text(text.replace("      - danielep71\n", "      - someone-else\n", 1), encoding="utf-8")
+            self.assertIn(".github/dependabot.yml assigns 'someone-else', not 'danielep71'",
+                          check_issues.config_findings(root))
+
+    def test_block_lists(self) -> None:
+        text = ("updates:\n  - x: 1\n    labels:\n      - ci   # a comment\n\n      - \"P3\"\n"
+                "    assignees: [triage-person]\n    other: y\n  - x: 2\n    labels:\n    - tests\n")
+        self.assertEqual(check_issues.block_lists(text, "labels"), [["ci", "P3"], ["tests"]])
+        self.assertEqual(check_issues.block_lists(text, "assignees"), [["triage-person"]])
+        self.assertEqual(check_issues.block_lists(text, "missing"), [])
+
     def test_flow_list(self) -> None:
         text = 'name: x\nlabels: ["bug", "P2"]\nassignees: [triage-person]\n'
         self.assertEqual(check_issues.flow_list(text, "labels"), ["bug", "P2"])

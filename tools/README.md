@@ -230,15 +230,19 @@ without it the issues API omits pull requests.
 ```sh
 GITHUB_TOKEN=<token with issues:read and pull-requests:read> python tools/check_issues.py --repository danielep71/K-SFTs
 python tools/check_issues.py --input issues.json --repo-name danielep71/K-SFTs   # issues exported as GitHub REST JSON
-python tools/check_issues.py --check-config        # forms and label catalogue only
+python tools/check_issues.py --check-config        # configuration only: forms, catalogue, label guide, Dependabot
 ```
 
 Exit code 0 means no findings, 1 means findings, 2 means the audit could not
 run. Offline exports require `--repo-name owner/name`; the required assignee
 is read from the bug form and checked for consistency across all forms.
 The label catalogue is validated by the synchronization script (Node.js), so a
-field the manifest schema does not define is an error. Its rules are tested by
-`test_check_issues.py` in `tool-tests`.
+field the manifest schema does not define is an error. `--check-config` also
+checks that the label tables of `docs/GOVERNANCE.md` (Issues) explain every
+catalogue label exactly once and no other, and that the labels and assignees
+of `.github/dependabot.yml` are in the catalogue and equal to the forms'
+assignee; it reads that file line by line, without a YAML library. Its rules
+are tested by `test_check_issues.py` in `tool-tests`.
 
 ## 📈 Traffic history
 

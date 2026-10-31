@@ -37,9 +37,11 @@ portable file. Copying this file does not apply settings or verify another repos
 | Always suggest updating PR branches | Off (`allow_update_branch: false`) | **On** | Offers updates even without a freshness requirement; local governance still governs use on shared integration branches. |
 | Repository Projects feature | On (`has_projects: true`) | **Off** | Disables the repository feature; this does not describe account-level project boards. Organization defaults may differ. |
 | Legacy downloads flag | On (`has_downloads: true`) | **Off** | API metadata difference; not a prohibition on release assets or source downloads. |
+| Private vulnerability reporting | Off | **On** | Available for public repositories only. Lets anyone report a vulnerability privately; the reporting procedure itself is in `SECURITY.md`. |
 
-Source: GitHub's [repository REST documentation][repo-api]. These values are
-configuration differences, not blanket recommendations for every project.
+Sources: GitHub's [repository REST documentation][repo-api] and
+[private vulnerability reporting][pvr]. These values are configuration
+differences, not blanket recommendations for every project.
 
 <a id="rulesets"></a>
 
@@ -53,7 +55,7 @@ as separate deviations from GitHub defaults.
 
 | Custom ruleset | Target | Added restrictions |
 | --- | --- | --- |
-| Protect default branch | `~DEFAULT_BRANCH` | Require PR, resolved conversations and strict up-to-date `Repository integrity` from GitHub Actions; allow merge commits only; block deletion and force pushes. |
+| Protect main | `~DEFAULT_BRANCH`, the default branch (`main`) | Require PR, resolved conversations and strict up-to-date `Repository integrity` from GitHub Actions; allow merge commits only; block deletion and force pushes. |
 | Protect release branches | `refs/heads/release/**` | Require PR, resolved conversations and the same strict required check; allow squash or merge commits; block deletion and force pushes. |
 | Prevent release branch deletion | `refs/heads/release/**` | Independent deletion restriction. |
 | Protect release tags | `refs/tags/v*` | Block updates, deletion and force pushes. |
@@ -108,9 +110,11 @@ reports on every relevant PR before adopting these rules.
 | [Repository REST API][repo-api] | Declared option defaults and parameter meanings |
 | [Creating rulesets][ruleset-create] | Custom targets, bypass configuration and activation; the editor initially uses Disabled enforcement |
 | [Available rules][ruleset-rules] | Meaning of selected protection rules, including editor defaults |
+| [Configuring private vulnerability reporting][pvr] | Its default (Off) and the restriction to public repositories |
 | [Security configuration defaults][security-defaults] | Why organization-applied defaults must be distinguished from a standalone baseline |
 
 [repo-api]: https://docs.github.com/en/rest/repos/repos
+[pvr]: https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository
 [ruleset-create]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository
 [ruleset-rules]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets
 [security-defaults]: https://docs.github.com/en/enterprise-cloud@latest/code-security/how-tos/secure-at-scale/configure-enterprise-security/establish-complete-coverage/create-custom-configuration
