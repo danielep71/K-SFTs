@@ -39,7 +39,8 @@ once rather than editing it out quietly; the [data rules](SECURITY.md#-data-and-
 apply.
 
 Each issue gets an assignee, exactly one priority and a milestone at triage
-([docs/GOVERNANCE.md](docs/GOVERNANCE.md#issues)).
+([docs/GOVERNANCE.md](docs/GOVERNANCE.md#issues)). `P1` is only for a
+confirmed calculation bug: wrong results for valid inputs.
 
 <a id="development-workflow"></a>
 
