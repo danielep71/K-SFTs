@@ -459,6 +459,19 @@ async function runSelfTest(manifestPath) {
   assert.match(failureSummary, /Prune: \*\*unavailable\*\*/);
   assert.match(failureSummary, /Planned changes: \*\*1\*\*/);
   assert.match(failureSummary, /some changes may already be applied/);
+  assert.doesNotMatch(failureSummary, /Post-run exact match/);
+  const unverifiedSummary = renderSummary({
+    mode: "failed",
+    manifest,
+    manifestPath: "fixture-labels.json",
+    desiredLabels: desired,
+    changes: [{ action: "create", name: "new" }],
+    verified: false,
+    partial: true,
+    error: "Post-run verification found 1 remaining difference(s)"
+  });
+  assert.match(unverifiedSummary, /Mode: `failed`/);
+  assert.match(unverifiedSummary, /Post-run exact match: \*\*no\*\*/);
   assert.match(summary, new RegExp(`Labels \\(${desired.length}\\):`));
   for (const label of desired) assert.match(summary, new RegExp(`"${label.name}"`));
 
@@ -466,7 +479,7 @@ async function runSelfTest(manifestPath) {
 }
 
 // What the run knew before a failure, so that the failure summary reports it.
-const runState = { summaryBase: null, changes: null, applying: false };
+const runState = { summaryBase: null, changes: null, applying: false, verified: null };
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
@@ -515,8 +528,11 @@ async function main() {
   const after = await listLiveLabels(options.repository, process.env.GITHUB_TOKEN);
   const remaining = planChanges(desired, after, { prune: manifest.prune });
   const verified = remaining.length === 0;
+  if (!verified) {
+    runState.verified = false;
+    throw new Error(`Post-run verification found ${remaining.length} remaining difference(s)`);
+  }
   await publishSummary(renderSummary({ mode: "reconcile", ...summaryBase, changes, verified }));
-  if (!verified) throw new Error(`Post-run verification found ${remaining.length} remaining difference(s)`);
 }
 
 main().catch(async error => {
@@ -530,6 +546,7 @@ main().catch(async error => {
         desiredLabels: []
       }),
       changes: runState.changes,
+      verified: runState.verified,
       partial: runState.applying,
       error: message
     }));

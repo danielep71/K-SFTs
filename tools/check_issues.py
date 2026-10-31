@@ -15,6 +15,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from collections import Counter
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,11 @@ FORM_PRIORITIES = {"bug.yml": "P2", "enhancement.yml": "P3", "documentation.yml"
 DEPENDENCY_STATUS_WORDS = re.compile(r"block|ready|waiting|depend|on[ -]hold|prerequisite", re.I)
 HEADING = re.compile(r"^#{2,3}\s+(.*)$")
 EXTERNAL = re.compile(r"^\s*(?:[-*]\s*)?external condition:\s*\S", re.I)
+GOVERNANCE = Path("docs/GOVERNANCE.md")
+DEPENDABOT = Path(".github/dependabot.yml")
+# The tables of the Issues section of GOVERNANCE.md that explain the labels.
+LABEL_TABLES = {"| Priority | Use |", "| Label | Use |"}
+TABLE_LABEL = re.compile(r"^\|\s*`([^`]+)`\s*\|")
 API = "https://api.github.com"
 
 
@@ -167,8 +173,66 @@ def configured_assignee(root: Path) -> str:
     return assignees[0]
 
 
+def documented_labels(text: str) -> list[str]:
+    """Labels in the first column of the label tables of the Issues section.
+
+    The section is the level-2 heading ending "Issues"; a label table starts
+    with a header row in LABEL_TABLES and ends at the first non-table line.
+    A label is listed once per row, so a label named twice appears twice.
+    """
+    found: list[str] = []
+    in_section = in_table = False
+    for line in text.splitlines():
+        if line.startswith("## "):
+            in_section = line.rstrip().endswith("Issues")
+            in_table = False
+            continue
+        if not in_section:
+            continue
+        stripped = line.strip()
+        if stripped in LABEL_TABLES:
+            in_table = True
+        elif not stripped.startswith("|"):
+            in_table = False
+        elif in_table and (match := TABLE_LABEL.match(stripped)):
+            found.append(match.group(1))
+    return found
+
+
+def block_lists(text: str, key: str) -> list[list[str]]:
+    """Every list under ``key:`` in a simple YAML file, read line by line.
+
+    A list is either written inline (``key: [a, b]``) or as the ``- item``
+    lines that follow ``key:``, indented at least as far as the key. Trailing
+    comments, comment lines and blank lines are skipped; quotes around items
+    are removed.
+    """
+    lists = []
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        inline = re.match(rf"^\s*{re.escape(key)}:\s*\[(.*?)\]\s*(?:#.*)?$", line)
+        if inline:
+            lists.append([item.strip().strip("\"'") for item in inline.group(1).split(",") if item.strip()])
+            continue
+        start = re.match(rf"^(\s*){re.escape(key)}:\s*(?:#.*)?$", line)
+        if not start:
+            continue
+        indent, items = len(start.group(1)), []
+        for following in lines[index + 1:]:
+            if not following.strip() or following.lstrip().startswith("#"):
+                continue
+            item = re.match(r"^(\s*)-\s+(.*?)\s*(?:#.*)?$", following)
+            if not item or len(item.group(1)) < indent:
+                break
+            items.append(item.group(2).strip("\"'"))
+        lists.append(items)
+    return lists
+
+
 def config_findings(root: Path) -> list[str]:
-    """Check the label catalogue and the issue forms against the issue rules."""
+    """Check the label catalogue, the issue forms, the label guide of
+    GOVERNANCE.md and the labels and assignees of Dependabot against the
+    issue rules."""
     problems = []
     labels = catalogue_labels(root)
     assignee = configured_assignee(root)
@@ -196,6 +260,24 @@ def config_findings(root: Path) -> list[str]:
     if not config.is_file() or not re.search(r"^blank_issues_enabled:\s*false\s*$",
                                              config.read_text(encoding="utf-8"), re.M):
         problems.append("ISSUE_TEMPLATE/config.yml must set blank_issues_enabled: false")
+    governance = root / GOVERNANCE
+    if governance.is_file():
+        counts = Counter(documented_labels(governance.read_text(encoding="utf-8")))
+        problems += [f"{GOVERNANCE.as_posix()} must explain label {name!r} exactly once in the label tables "
+                     f"of Issues, found {counts[name]}" for name in sorted(labels) if counts[name] != 1]
+        problems += [f"{GOVERNANCE.as_posix()} explains label {name!r}, which is not in the catalogue"
+                     for name in sorted(set(counts) - labels)]
+    else:
+        problems.append(f"{GOVERNANCE.as_posix()} is missing")
+    dependabot = root / DEPENDABOT
+    if dependabot.is_file():
+        text = dependabot.read_text(encoding="utf-8")
+        problems += [f"{DEPENDABOT.as_posix()} sets unknown label {label!r}"
+                     for found in block_lists(text, "labels") for label in found if label not in labels]
+        problems += [f"{DEPENDABOT.as_posix()} assigns {person!r}, not {assignee!r}"
+                     for found in block_lists(text, "assignees") for person in found if person != assignee]
+    else:
+        problems.append(f"{DEPENDABOT.as_posix()} is missing")
     return problems
 
 

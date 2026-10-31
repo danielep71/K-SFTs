@@ -89,6 +89,15 @@ to v1.0.0.
   CCP exposures, the BCBS regime and reporting dates before 2025-01-01
   are out of the supported scope, and #248 makes the workbook reject them.
   The core/worksheet separation is waived until v1.0.0 (#249).
+- Labels and settings documentation (#254): `docs/GOVERNANCE.md` explains
+  every label in *Label | Use* tables, and `check_issues.py --check-config`
+  fails when a catalogue label is not explained exactly once, or when
+  `.github/dependabot.yml` sets a label outside the catalogue or another
+  assignee. When the verification after a label reconciliation fails,
+  `labels-sync.mjs` now publishes one summary, `failed`, instead of a
+  `reconcile` summary followed by a `failed` one.
+  `docs/REPOSITORY_SETTINGS.md` names the ruleset *Protect main* and lists
+  private vulnerability reporting.
 
 <a id="020"></a>
 
