@@ -245,6 +245,17 @@ requests reference the issues and preceding pull requests they carry. Bot
 pull requests are linked to an existing relevant issue or a new tracking issue
 during triage. Assign the milestone to that issue, never to the pull request.
 
+The workflow *Keep milestones issue-only*
+([.github/workflows/pr-milestones.yml](../.github/workflows/pr-milestones.yml))
+removes a milestone set on a pull request: when a pull request is opened,
+reopened, edited or given a milestone, and on a daily scan of every pull
+request, closed and merged ones included. It runs only its own inline code,
+as committed on the pull request's base branch for pull request events and
+on the default branch for the schedule, a push and a manual run, never a pull
+request's contents. Its only permission is `pull-requests: write`, and it
+refuses to change an issue. `tools/check.py` (gate `workflow-invariants`)
+fails if its events, permissions or code change shape.
+
 ### Priorities
 
 | Priority | Use |

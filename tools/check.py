@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -110,10 +112,14 @@ def default_gates() -> list[Gate]:
         Gate("mypy", "mypy", ("mypy", "--no-incremental")),
         Gate("mypy-strict-probe", "mypy", probe=mypy_strict_probe),
         Gate("actionlint", "actionlint", ("actionlint", "-no-color")),
+        Gate("workflow-invariants", "pyyaml", (python, "tools/check_workflows.py")),
     ]
 
 
 def available(tool: str) -> bool:
+    if tool == "pyyaml":
+        # On GitHub Actions the gate runs anyway, so a missing PyYAML fails it.
+        return importlib.util.find_spec("yaml") is not None or bool(os.environ.get("GITHUB_ACTIONS"))
     return tool == "python" or shutil.which(tool) is not None
 
 
@@ -125,8 +131,12 @@ def tool_versions(gates: Sequence[Gate], root: Path) -> dict[str, str]:
         if not available(tool):
             versions[tool] = "not installed"
             continue
-        executable = sys.executable if tool == "python" else tool
-        code, log = run([executable, flags.get(tool, "--version")], root)
+        if tool == "pyyaml":
+            code, log = run([sys.executable, "-c", "import yaml; print('PyYAML', yaml.__version__)"],
+                            root)
+        else:
+            executable = sys.executable if tool == "python" else tool
+            code, log = run([executable, flags.get(tool, "--version")], root)
         lines = log.strip().splitlines()
         versions[tool] = lines[0] if code == 0 and lines else f"unknown (exit {code})"
     return versions
