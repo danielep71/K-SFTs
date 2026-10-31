@@ -17,7 +17,7 @@ import check
 import check_workflows as cw
 
 ROOT = Path(__file__).resolve().parents[1]
-YAML = cw.load_yaml()
+YAML: Any = cw.load_yaml()
 
 
 def setUpModule() -> None:
@@ -206,6 +206,17 @@ class WorkflowInvariantTests(unittest.TestCase):
 def quiet_main() -> int:
     with contextlib.redirect_stdout(io.StringIO()):
         return cw.main(["--root", str(ROOT)])
+
+
+class StrictLoaderTests(unittest.TestCase):
+    def test_duplicate_key_is_rejected(self) -> None:
+        text = "permissions:\n  issues: write\n  contents: read\n  issues: read\n"
+        with self.assertRaisesRegex(YAML.YAMLError, r"duplicate key\(s\) \['issues'\]"):
+            YAML.load(text, Loader=cw.strict_loader(YAML))
+
+    def test_on_key_is_read(self) -> None:
+        workflow = YAML.load("on:\n  push: {}\n", Loader=cw.strict_loader(YAML))
+        self.assertEqual(cw.triggers(workflow), {"push": {}})
 
 
 class MissingYamlTests(unittest.TestCase):

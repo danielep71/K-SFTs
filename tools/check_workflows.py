@@ -61,6 +61,22 @@ def load_yaml() -> Any | None:
     return importlib.import_module("yaml")
 
 
+def strict_loader(yaml: Any) -> Any:
+    """A SafeLoader that rejects a duplicate key, which PyYAML would silently
+    resolve to its last value (a hidden `issues: write`, for example)."""
+
+    class StrictLoader(yaml.SafeLoader):  # type: ignore[misc]
+        def construct_mapping(self, node: Any, deep: bool = False) -> Any:
+            keys = [self.construct_object(key, deep=deep) for key, _ in node.value]
+            duplicates = sorted({str(key) for key in keys if keys.count(key) > 1})
+            if duplicates:
+                raise yaml.constructor.ConstructorError(
+                    None, None, f"duplicate key(s) {duplicates}", node.start_mark)
+            return super().construct_mapping(node, deep=deep)
+
+    return StrictLoader
+
+
 def triggers(workflow: Workflow) -> Any:
     """The `on:` mapping; YAML 1.1 reads an unquoted `on` key as True."""
     return workflow.get("on", workflow.get(True))
@@ -250,9 +266,10 @@ def findings_for(workflows: Mapping[str, Workflow], dependabot: Any, governance:
 
 
 def load(root: Path, yaml: Any) -> tuple[dict[str, Workflow], Any, str, str]:
-    workflows = {path.name: yaml.safe_load(path.read_text(encoding="utf-8"))
+    loader = strict_loader(yaml)
+    workflows = {path.name: yaml.load(path.read_text(encoding="utf-8"), Loader=loader)
                  for path in sorted((root / WORKFLOWS).glob("*.yml"))}
-    dependabot = yaml.safe_load((root / DEPENDABOT).read_text(encoding="utf-8"))
+    dependabot = yaml.load((root / DEPENDABOT).read_text(encoding="utf-8"), Loader=loader)
     return (workflows, dependabot, (root / GOVERNANCE).read_text(encoding="utf-8"),
             (root / SETTINGS).read_text(encoding="utf-8"))
 
@@ -269,7 +286,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
         print("workflow-invariants: SKIPPED locally: PyYAML is not installed")
         return 2
-    workflows, dependabot, governance, settings = load(args.root, yaml)
+    try:
+        workflows, dependabot, governance, settings = load(args.root, yaml)
+    except yaml.YAMLError as error:
+        print(f"workflow-invariants: FAIL: {error}")
+        return 1
     findings = findings_for(workflows, dependabot, governance, settings)
     for finding in findings:
         print(finding)

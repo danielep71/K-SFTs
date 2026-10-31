@@ -252,7 +252,8 @@ are tested by `test_check_issues.py` in `tool-tests`.
 
 `check_workflows.py` reads `.github/workflows/*.yml` and
 `.github/dependabot.yml` with PyYAML, a real YAML parser, and fails on any of
-these findings:
+these findings. A duplicate key fails the load: PyYAML would otherwise keep
+its last value and could hide, say, a second `issues:` entry.
 
 - **Actions:** a `uses:` not pinned to a 40-character commit SHA, or an
   `actions/checkout` step without `persist-credentials: false`.
