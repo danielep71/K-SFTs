@@ -1,4 +1,5 @@
-# Hash-locked CPython 3.13 / Linux x86_64 CI requirements for Ruff and mypy.
+# Hash-locked CPython 3.13 / Linux x86_64 CI requirements for Ruff, mypy and
+# PyYAML (the workflow-invariants gate).
 # Every hash was checked against PyPI. Regenerate only after reviewing package
 # provenance and wheel hashes; see tools/README.md, "Dependency updates".
 # CI installs with --only-binary=:all: --require-hashes.
@@ -17,3 +18,5 @@ pathspec==1.1.1 \
     --hash=sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189
 typing-extensions==4.16.0 \
     --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+pyyaml==6.0.3 \
+    --hash=sha256:0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6

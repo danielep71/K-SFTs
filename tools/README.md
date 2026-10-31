@@ -10,7 +10,8 @@ validates an SFT calculation ([VBA static checks](#vba-static-checks)).
 ## ▶️ Running the checks
 
 Requirements: Git, Python 3.12 or later and Node.js 22 on `PATH`, plus the
-quality tools below. `check.py` itself needs only the standard library. The
+quality tools below. `check.py` itself needs only the standard library;
+`check_workflows.py` needs PyYAML. The
 step-by-step setup is in
 [INSTALLATION.md](../INSTALLATION.md#developer-setup).
 
@@ -53,6 +54,7 @@ versions; each gate also writes `<gate>.log`.
 | `mypy` | `mypy --strict` over `tools/`, tests included. |
 | `mypy-strict-probe` | Strict mode is active: an annotated function passes and the same function without annotations is rejected. |
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
+| `workflow-invariants` | The security and governance invariants of `.github/workflows/*.yml` and `.github/dependabot.yml`, read with PyYAML (`check_workflows.py`); see [Workflow invariants](#workflow-invariants). |
 
 The label gates run on every pull request here, although the label workflows
 run on a pull request only when it changes label files. Live label
@@ -244,6 +246,53 @@ of `.github/dependabot.yml` are in the catalogue and equal to the forms'
 assignee; it reads that file line by line, without a YAML library. Its rules
 are tested by `test_check_issues.py` in `tool-tests`.
 
+<a id="workflow-invariants"></a>
+
+## 🛡️ Workflow invariants
+
+`check_workflows.py` reads `.github/workflows/*.yml` and
+`.github/dependabot.yml` with PyYAML, a real YAML parser, and fails on any of
+these findings:
+
+- **Actions:** a `uses:` not pinned to a 40-character commit SHA, or an
+  `actions/checkout` step without `persist-credentials: false`.
+- **Permissions and timeouts:** a workflow without workflow-level
+  `permissions`, or with a write permission there; a job without
+  `timeout-minutes`; a job with a write permission outside this list:
+
+  | Workflow / job | Write permission |
+  | --- | --- |
+  | `labels-sync.yml` / `reconcile` | `issues` |
+  | `traffic-history.yml` / `collect` | `contents` |
+  | `traffic-history.yml` / `alert` | `issues` |
+  | `pr-milestones.yml` / `reconcile` | `pull-requests` |
+
+- **Required check:** the job of `repository-integrity.yml` must be named as
+  the required check of [docs/GOVERNANCE.md](../docs/GOVERNANCE.md#-protection-policy)
+  and of the rulesets in
+  [docs/REPOSITORY_SETTINGS.md](../docs/REPOSITORY_SETTINGS.md), have no
+  `if` and no `strategy`, and filter `pull_request` and `push` only by the
+  protected branches, `main` and `release/**`, with no path filter.
+- **Default-branch writes:** the condition of `labels-sync.yml`'s
+  `reconcile` job must check the default branch.
+- **`pr-milestones.yml`:** its events, its `permissions: {}`, its single
+  `reconcile` job with `pull-requests: write` and its default-branch
+  condition are fixed; the job has one inline `run` step and no `${{` in its
+  code.
+- **Dependabot:** `github-actions` (`/`) and `pip` (`/tools`), the pinned
+  ecosystems, are each covered exactly once; no update sets a milestone;
+  each update's only priority label is `P3`.
+
+`test_check_workflows.py`, in `tool-tests`, breaks each rule on a copy of the
+files and expects its finding. It also runs the inline script of
+`pr-milestones.yml` against a fake GitHub API: a pull request with a milestone
+is cleared, a scan over three pages clears every pull request with a
+milestone and no issue, and a number that belongs to an issue is refused.
+
+PyYAML is hash-locked in `tools/requirements-quality-ci.txt`. Without it the
+gate is **NOT RUN** locally; when `GITHUB_ACTIONS` is set it runs and fails,
+and the tests fail instead of being skipped.
+
 ## 📈 Traffic history
 
 `traffic_history.py` merges one collection of GitHub API responses
@@ -272,7 +321,7 @@ badge, alert and data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md);
 | --- | --- | --- |
 | Python | 3.13 in CI; 3.12 or later locally | `actions/setup-python` |
 | Node.js | 22 | `actions/setup-node` |
-| Ruff, mypy | 0.17.1, 2.4.0 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
+| Ruff, mypy, PyYAML | 0.17.1, 2.4.0, 6.0.3 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
 | actionlint | 1.7.12 | Release archive verified by SHA-256 in the workflow |
 
 Install the same quality tools locally, on CPython 3.13 and Linux x86_64:
@@ -282,7 +331,8 @@ python -m pip install --only-binary=:all: --require-hashes -r tools/requirements
 ```
 
 On another platform, install the same versions without the lock
-(`pip install ruff==0.17.1 mypy==2.4.0`); CI remains the reference run.
+(`pip install ruff==0.17.1 mypy==2.4.0 pyyaml==6.0.3`); CI remains the
+reference run.
 actionlint is available from its
 [1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12).
 
