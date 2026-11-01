@@ -260,7 +260,7 @@ fails if its events, permissions or code change shape.
 
 | Priority | Use |
 | --- | --- |
-| `P1` | Reserved for a **confirmed calculation bug**: wrong results for valid inputs. Never for setup, documentation or tooling work. |
+| `P1` | **Confirmed calculation bug**: wrong results for valid inputs (reserved for this case), always with `bug`. Never for setup, documentation or tooling work. |
 | `P2` | Material correctness, robustness or maintainability defect. Default of the Bug report form. |
 | `P3` | Non-blocking quality, testing, documentation or setup work. Default of the Enhancement and Documentation forms. |
 
@@ -280,7 +280,7 @@ An issue or pull request carries every type that describes its work.
 | `behavior-change` | Work that changes externally observable behavior, such as calculated results or the layout of inputs and outputs. |
 | `refactor` | Internal restructuring that preserves supported behavior; if supported behavior changes, use `behavior-change` instead. |
 | `tests` | Regression coverage, test harnesses, fixtures or manual validation. |
-| `ci` | Automated quality checks and workflow maintenance, including Dependabot pull requests. |
+| `ci` | Workflows, automated checks, and dependency updates, including every Dependabot pull request. Release certification belongs to `release`. |
 | `repository` | Repository structure, governance, metadata, tooling or maintenance. |
 | `release` | Release preparation, certification, evidence, packaging or publication, including integration and sync pull requests. |
 | `security` | Security boundaries, supply chain or hardening. Never for an undisclosed vulnerability: report it privately, as [SECURITY.md](../SECURITY.md) says. |

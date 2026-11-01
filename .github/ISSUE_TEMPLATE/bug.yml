@@ -11,7 +11,7 @@ body:
 
         **Reproducible · Exact commit · Sourced expected value · Synthetic data only**
 
-        Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug.
+        Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug: wrong results for valid inputs.
 
         > [!CAUTION]
         > Synthetic data only: never paste real trades, counterparties, collateral, credentials or private workbooks. Report a vulnerability privately as [`SECURITY.md`](https://github.com/danielep71/K-SFTs/blob/main/SECURITY.md) describes, never in an issue.

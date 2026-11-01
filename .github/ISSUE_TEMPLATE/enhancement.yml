@@ -11,7 +11,7 @@ body:
 
         **Outcome first · Cited rule · Checkable acceptance · Explicit boundaries**
 
-        Describe the result you need and how it will be proved before any implementation. A calculation change cites its regulatory source and states units and valid input domains. Triage sets the milestone and confirms the priority (`P3` by default).
+        Describe the result you need and how it will be proved before any implementation. A calculation change cites its regulatory source and states units and valid input domains. Triage sets the milestone and confirms the priority (`P3` by default; `P1` only for a confirmed calculation bug, reported as a bug).
 
         > [!NOTE]
         > Synthetic data only: no real trades, counterparties, collateral, credentials or private links.

@@ -110,6 +110,7 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
+
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
   the run; a `BCBS` netting set and the `QCCP` counterparty class make the
@@ -122,6 +123,19 @@ to v1.0.0.
   NettingSets class header no longer lists QCCP, so a workbook built from
   the 0.2.0 template fails the layout check: build it again from the new
   template.
+
+### Fixed
+
+- The traffic history no longer lets an older collection, merged after a
+  newer one, overwrite the newer one's data when the newer one left the
+  values unchanged (#265). `daily.csv` gains `views_observed_at` and
+  `clones_observed_at`, and `snapshots.csv` gains `observed_at`: the newest
+  collection that reported the values. A collection older than that never
+  replaces them; a newer one with identical data records only its
+  observation time, so every successful run now adds a commit to
+  `traffic-history`. Files in the earlier layouts are read with the
+  observation time equal to the collection time and rewritten on the next
+  merge, with no stored value changed.
 
 <a id="020"></a>
 
