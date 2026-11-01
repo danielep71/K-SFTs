@@ -110,7 +110,6 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
-
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
   the run; a `BCBS` netting set and the `QCCP` counterparty class make the
@@ -136,6 +135,10 @@ to v1.0.0.
   `traffic-history`. Files in the earlier layouts are read with the
   observation time equal to the collection time and rewritten on the next
   merge, with no stored value changed.
+- A run that stops before its parameters are checked no longer ends its
+  closing message with an empty "Run class: ." (#220); the run class is
+  shown when it is set, and the result line of `RunSFT_Silent` is
+  unchanged.
 
 <a id="020"></a>
 
