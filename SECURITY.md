@@ -58,11 +58,14 @@ workbook template and tests.
 
 The calculation prototype in VBA runs only in a workbook a user builds and
 opens; no workflow runs it. The automation runs with the workflow token,
-except the traffic collection, which also reads
-`TRAFFIC_TOKEN`: a fine-grained token limited to this repository with
-*Administration: read*, stored in the `analytics` environment, which only
-`main` may use. Only the step that calls the traffic API receives it, and that
-step runs no repository code ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
+except traffic collection, which creates a repository-scoped GitHub App
+installation token with *Administration: read*. The `analytics` environment,
+restricted to `main`, holds the variable `TRAFFIC_APP_CLIENT_ID` and secret
+`TRAFFIC_APP_PRIVATE_KEY`. Only the token-creation step receives the key;
+the configuration check sees only whether it is set. Only the API fetch step
+receives the installation token, and that step runs no repository code.
+The token expires after an hour and the action revokes it when the job ends
+([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 
 | Workflow | Token permissions | Runs on |
 | --- | --- | --- |
@@ -70,7 +73,7 @@ step runs no repository code ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
 | `Issue triage` | `contents: read`, `issues: read`, `pull-requests: read` | Issue events and manual dispatch, from `main` |
 | `Detect issue-label drift` | `contents: read`, `issues: read` | Label-file pull requests, daily schedule, manual dispatch |
 | `Sync issue labels` | `contents: read`; `issues: write` only to reconcile labels | Label-file pull requests (validation only); label-file pushes to `main` and manual dispatch on `main` (reconciliation) |
-| `Traffic history` | Collection job: `contents: write`, to push `traffic-history`, plus `TRAFFIC_TOKEN` for the traffic and repository API. Alert job: `contents: read`, `issues: write`, to open a traffic-alert issue; no `TRAFFIC_TOKEN` | Daily schedule and manual dispatch, from `main` only |
+| `Traffic history` | Collection job: `contents: write`, to push `traffic-history`, plus an App installation token with `Administration: read` for the traffic and repository API. Alert job: `contents: read`, `issues: write`, to open a traffic-alert issue; no analytics environment, App key or installation token | Daily schedule and manual dispatch, from `main` only |
 
 Every checkout sets `persist-credentials: false`, and every action is pinned
 to a full commit SHA; the traffic workflow passes its push credential to `git`
@@ -94,9 +97,12 @@ vulnerabilities; a settings record does not establish scan coverage or enforceme
 - Excel files can hold sensitive material outside visible cells; inspect any
   workbook before sharing it.
 - If a secret is exposed, revoke or rotate it at once, before reporting it.
-- Renew `TRAFFIC_TOKEN` before it expires and at least every 90 days, and
-  revoke it at once if the traffic workflow is changed by anyone but
-  me ([docs/TRAFFIC.md](docs/TRAFFIC.md)).
+- Rotate `TRAFFIC_APP_PRIVATE_KEY` if it may have been exposed or if the
+  traffic workflow is changed by anyone but me; revoke an exposed key
+  immediately. Follow the rotation and verification procedure in
+  [docs/TRAFFIC.md](docs/TRAFFIC.md).
+- After migration succeeds, I delete the old `TRAFFIC_TOKEN` environment
+  secret and revoke the personal token; it is no longer a workflow credential.
 
 ## 🤝 Safe harbor
 
