@@ -130,6 +130,12 @@ to v1.0.0.
   required *Target end date* form field). The Bug report gains an optional
   *Evidence, workaround or recovery* field and the Enhancement form an
   optional *Alternatives considered* field.
+- Documentation links are checked (#280): a new offline gate, `links`
+  (`tools/check_links.py`), fails on a relative link to a missing, empty,
+  untracked or out-of-repository file, or to a heading or anchor that does
+  not exist; the weekly *External link check* workflow reports every
+  external URL as verified, not verifiable or broken, and is not a required
+  check.
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
