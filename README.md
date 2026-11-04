@@ -336,8 +336,11 @@ The full layout, the dependency direction and the public API boundary are in
   registered copies, page by page.
 - **No code scanning of the VBA.** Secret scanning, push protection,
   Dependabot security updates and CodeQL are enabled. CodeQL analyses the
-  Python tools and the workflows on pull requests into `main`, not the VBA,
-  which the static gates and Excel runs check, and it is not a required check
+  Python tools, the JavaScript scripts and the workflows with the
+  `security-extended` queries, as `.github/workflows/codeql.yml` sets, on
+  pull requests and pushes to `main` and `release/**` and weekly, not the
+  VBA, which the static gates and Excel runs check, and it is not a required
+  check
   ([repository settings evidence](docs/REPOSITORY_SETTINGS_EVIDENCE.md#security-settings)).
   Vulnerabilities are reported privately on GitHub or by email
   ([SECURITY.md](SECURITY.md)).

@@ -136,6 +136,10 @@ to v1.0.0.
   not exist; the weekly *External link check* workflow reports every
   external URL as verified, not verifiable or broken, and is not a required
   check.
+- CodeQL is configured in `.github/workflows/codeql.yml` (#281): Actions,
+  JavaScript/TypeScript and Python, `security-extended` queries, on pull
+  requests and pushes to `main` and `release/**` and weekly. It replaces
+  GitHub's default setup, which is switched off in the settings.
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop

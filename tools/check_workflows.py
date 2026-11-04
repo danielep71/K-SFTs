@@ -34,6 +34,7 @@ ALLOWED_WRITES: dict[tuple[str, str], frozenset[str]] = {
     ("traffic-history.yml", "collect"): frozenset({"contents"}),
     ("traffic-history.yml", "alert"): frozenset({"issues"}),
     ("pr-milestones.yml", "reconcile"): frozenset({"pull-requests"}),
+    ("codeql.yml", "analyze"): frozenset({"security-events"}),
 }
 
 # Inputs that select a runtime version, by action; the required job pins them.
