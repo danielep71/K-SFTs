@@ -167,6 +167,12 @@ class CollectionTests(unittest.TestCase):
                                 "https://c.test/page": ["docs/a.md:1"]})
         self.assertEqual(skipped, 1)
 
+    def test_protocol_relative_urls_are_https(self) -> None:
+        self.write("README.md", "[a](//a.test/x) [self](//github.com/danielep71/K-SFTs)\n")
+        urls, skipped = cel.collect(self.root, ["README.md"])
+        self.assertEqual(urls, {"https://a.test/x": ["README.md:1"]})
+        self.assertEqual(skipped, 1)
+
     def test_report_and_exit_code(self) -> None:
         self.write("README.md", "[ok](https://ok.test/) [warn](https://warn.test/)\n")
         fetch = FakeFetcher({"https://ok.test/": [Reply(200, reason="OK")],

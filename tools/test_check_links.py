@@ -108,6 +108,12 @@ class FragmentTests(Fixture):
                    "[a](#notes) [b](#notes-1) [c](#notes-2) [d](#notes-3)\n")
         self.assertFindings("`#notes-3`")
 
+    def test_headings_inside_blockquotes_and_lists(self) -> None:
+        self.write("README.md", "> ## Note\n\n- ## Item\n\n1. > ### Deep\n\n"
+                   "- plain item\n\n```\n> ## Fenced\n```\n\n"
+                   "[a](#note) [b](#item) [c](#deep) [d](#plain-item) [e](#fenced)\n")
+        self.assertFindings("`#plain-item`", "`#fenced`")
+
     def test_suffix_collisions_take_the_next_free_slug(self) -> None:
         self.write("README.md", "## Foo\n\n## Foo-1\n\n## Foo\n\n## Foo\n\n"
                    "[a](#foo) [b](#foo-1) [c](#foo-2) [d](#foo-3) [e](#foo-1-1)\n")

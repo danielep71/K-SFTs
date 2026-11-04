@@ -168,12 +168,14 @@ def collect(root: Path, tracked: Iterable[str]) -> tuple[dict[str, list[str]], i
             continue
         text = (root / source).read_text(encoding="utf-8")
         for link in check_links.extract_links(text):
-            if urlsplit(link.target).scheme.lower() not in ("http", "https"):
+            # GitHub serves pages over HTTPS, so `//host/path` is HTTPS.
+            target = "https:" + link.target if link.target.startswith("//") else link.target
+            if urlsplit(target).scheme.lower() not in ("http", "https"):
                 continue
-            if is_self(link.target):
+            if is_self(target):
                 skipped += 1
                 continue
-            urls.setdefault(urldefrag(link.target).url, []).append(f"{source}:{link.line}")
+            urls.setdefault(urldefrag(target).url, []).append(f"{source}:{link.line}")
     return urls, skipped
 
 

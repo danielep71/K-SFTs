@@ -42,6 +42,8 @@ COMMENT = re.compile(r"<!--.*?-->", re.S)
 BACKTICKS = re.compile(r"`+")
 PARAGRAPH_BREAK = re.compile(r"\n[ \t>]*\n")
 ATX = re.compile(r"^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$")
+# Blockquote markers and list-item markers before a heading on the same line.
+CONTAINER = re.compile(r"^(?: {0,3}>[ \t]?| {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+)*")
 SETEXT = re.compile(r"^ {0,3}(?:=+|-+)[ \t]*$")
 NOT_PARAGRAPH = re.compile(r"^\s*(?:$|#|>|<|\||[-*+][ \t]|\d+[.)][ \t]|`{3}|~{3})")
 REFERENCE = re.compile(
@@ -277,7 +279,7 @@ def headings(text: str) -> Iterator[str]:
         source = blank(source, comment.start(), comment.end())
     lines = source.splitlines()
     for index, line in enumerate(lines):
-        atx = ATX.match(line)
+        atx = ATX.match(CONTAINER.sub("", line, count=1))
         if atx:
             yield heading_text(atx.group(2) or "")
         elif (index > 0 and SETEXT.match(line) and not NOT_PARAGRAPH.match(lines[index - 1])
