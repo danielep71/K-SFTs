@@ -97,6 +97,7 @@ class MainTests(unittest.TestCase):
                               capture_output=True, text=True, check=True).stdout.strip()
         self.assertEqual(report["candidate_sha"], head)
         self.assertEqual((report["status"], report["mode"], report["dirty"]), ("pass", "ci", False))
+        self.assertEqual(report["dirty_after_gates"], False)
         markdown = (self.root / "test-results" / "repository-integrity.md").read_text("utf-8")
         self.assertIn("Status: **PASS**", markdown)
         self.assertIn(head, markdown)
@@ -116,6 +117,14 @@ class MainTests(unittest.TestCase):
         (self.root / "untracked.txt").write_text("x\n", encoding="utf-8")
         self.assertEqual(self.main("--ci", gates=[gate("ok", 0)]), 1)
         self.assertEqual(self.report()["dirty"], True)
+
+    def test_ci_rejects_a_tree_changed_by_a_gate(self) -> None:
+        writer = check.Gate("writer", "python", (sys.executable, "-c",
+                            "open('left-behind.txt', 'w').write('x')"))
+        self.assertEqual(self.main("--ci", gates=[writer]), 1)
+        report = self.report()
+        self.assertEqual((report["status"], report["dirty"], report["dirty_after_gates"]),
+                         ("fail", True, True))
 
     def test_ci_and_allow_missing_are_exclusive(self) -> None:
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):

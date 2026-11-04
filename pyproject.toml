@@ -23,3 +23,5 @@ show_error_codes = true
 warn_unused_configs = true
 # Every module, tests included, is held to the full strict bundle.
 strict = true
+# Report code that type narrowing makes unreachable; strict does not.
+warn_unreachable = true
