@@ -108,6 +108,13 @@ class FragmentTests(Fixture):
                    "[a](#notes) [b](#notes-1) [c](#notes-2) [d](#notes-3)\n")
         self.assertFindings("`#notes-3`")
 
+    def test_suffix_collisions_take_the_next_free_slug(self) -> None:
+        self.write("README.md", "## Foo\n\n## Foo-1\n\n## Foo\n\n## Foo\n\n"
+                   "[a](#foo) [b](#foo-1) [c](#foo-2) [d](#foo-3) [e](#foo-1-1)\n")
+        self.assertFindings("`#foo-1-1`")
+        self.write("README.md", "## Foo\n\n## Foo\n\n## Foo-1\n\n[a](#foo-1-1)\n")
+        self.assertEqual(self.findings(), [])
+
     def test_emoji_and_punctuation_slug(self) -> None:
         self.write("README.md", "## 🧰 Repository tooling\n\n## ▶️ Running the checks\n\n"
                    "## A.B: c/d (e) — f_g, `check.py` & *em* [link](x.md)\n\n"
@@ -161,6 +168,15 @@ class ReferenceTests(Fixture):
         self.write("docs/guide.md", "# Guide\n\n## Usage\n")
         self.assertFindings("README.md:4: `docs/missing.md`",
                             "README.md:5: `#intro`: no heading or anchor `intro`")
+
+
+class EscapeTests(Fixture):
+    def test_destinations_are_rendered_before_checking(self) -> None:
+        self.write("README.md", "[a](a\\(b\\).md) [b](a&amp;b.md) [c](<a&#40;b).md>)\n\n"
+                   "[d]: a\\&amp;b.md\n[e]: a&amp;b.md\n")
+        self.write("a(b).md")
+        self.write("a&b.md")
+        self.assertFindings("README.md:3: `a&amp;b.md`")
 
 
 class ExtractionTests(unittest.TestCase):

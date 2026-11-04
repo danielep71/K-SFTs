@@ -193,10 +193,10 @@ def extract_links(text: str) -> list[Link]:
             continue
         inline = destination(clean, match.end())
         if inline is not None and inline[1] and opens(clean, match.start()):
-            found[inline[0]] = inline[1]
+            found[inline[0]] = rendered_destination(inline[1])
     for match in REFERENCE.finditer(clean):
         if not match.group(1).startswith("^"):
-            found[match.start(2)] = match.group(2).strip("<>")
+            found[match.start(2)] = rendered_destination(match.group(2).strip("<>"))
     for pattern in (HTML_LINK, AUTOLINK):
         for match in pattern.finditer(clean):
             group = 1 if match.group(1) is not None else 2
@@ -218,6 +218,12 @@ def trim_bare(url: str) -> str:
         else:
             break
     return url
+
+
+def rendered_destination(target: str) -> str:
+    """A link destination as GitHub renders it: backslash escapes and
+    character references decoded, `\\&amp;` kept as the literal `&amp;`."""
+    return unprotect(html.unescape(protect(target)))
 
 
 def protect(text: str) -> str:
@@ -284,9 +290,13 @@ def anchors(text: str) -> set[str]:
     found: set[str] = set()
     counts: dict[str, int] = {}
     for title in headings(text):
-        slug = slugify(title)
-        found.add(f"{slug}-{counts[slug]}" if counts.get(slug) else slug)
-        counts[slug] = counts.get(slug, 0) + 1
+        # GitHub's slugger: a taken slug gets the next free `-<n>` suffix of
+        # its base, so `Foo`, `Foo`, `Foo-1` give `foo`, `foo-1`, `foo-1-1`.
+        base = slug = slugify(title)
+        while slug in found:
+            counts[base] = counts.get(base, 0) + 1
+            slug = f"{base}-{counts[base]}"
+        found.add(slug)
     for match in ANCHOR.finditer(visible(text)):
         found.add(html.unescape(match.group(1) if match.group(1) is not None else match.group(2)))
     return found
