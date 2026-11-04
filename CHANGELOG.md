@@ -110,6 +110,15 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
+- CI hardening (#279): the required check pins Python 3.13.17 and Node.js
+  22.23.4, and a newer run of the same pull request cancels only that pull
+  request's older run, while each push keeps its own run.
+  `tools/check.py --ci` reads the working tree again after the gates and
+  fails if a gate left a change behind; mypy also reports unreachable code
+  (`warn_unreachable`), which `mypy-strict-probe` proves active.
+  *Keep milestones issue-only* queues each pull request's events separately
+  from its scans. `workflow-invariants` checks the exact versions and both
+  concurrency settings.
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
