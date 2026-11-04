@@ -120,11 +120,12 @@ link.
   `https` and `//` ones.
 
 The parser is not a full CommonMark implementation. It supports the
-Markdown this repository writes: ATX and setext headings, also after
-blockquote or list-item markers on the same line; fences, also opened after
-those markers; inline, reference, HTML and bare links. It does not
-recognize indented code blocks, list items continued by indentation alone
-or other container nesting that the repository does not use. Before writing
+Markdown this repository writes: ATX headings, also after blockquote or
+list-item markers on the same line, and single-line setext headings; fences,
+also opened after those markers; inline, reference, HTML and bare links. It
+does not recognize indented code blocks, setext headings spanning several
+lines, list items continued by indentation alone or other container nesting
+that the repository does not use. Before writing
 such a construct, extend the parser and its tests in the same change.
 
 Each finding is printed as `path:line: message`; exit code 0 means no
