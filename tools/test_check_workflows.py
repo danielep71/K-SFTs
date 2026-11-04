@@ -151,6 +151,27 @@ class WorkflowInvariantTests(unittest.TestCase):
             "| Required status context | `Integrity` |")
         self.assertFinding("the rulesets require ['Integrity', 'Repository integrity']")
 
+    def test_required_runtime_not_exact(self) -> None:
+        steps = self.repo.job("repository-integrity.yml", "repository-integrity")["steps"]
+        python = next(step for step in steps
+                      if str(step.get("uses", "")).startswith("actions/setup-python@"))
+        python["with"]["python-version"] = "3.13"
+        self.assertFinding("actions/setup-python `python-version` is '3.13'")
+        node = next(step for step in steps
+                    if str(step.get("uses", "")).startswith("actions/setup-node@"))
+        node["with"]["node-version"] = "22"
+        self.assertFinding("actions/setup-node `node-version` is '22'")
+
+    def test_required_concurrency_per_ref(self) -> None:
+        self.repo.workflows["repository-integrity.yml"]["concurrency"] = {
+            "group": "repository-integrity-${{ github.ref }}", "cancel-in-progress": True}
+        self.assertFinding("repository-integrity.yml: concurrency must group pull requests")
+
+    def test_milestones_single_queue(self) -> None:
+        self.repo.workflows["pr-milestones.yml"]["concurrency"] = {
+            "group": "pr-milestones", "cancel-in-progress": False}
+        self.assertFinding("pr-milestones.yml: concurrency must queue each pull request")
+
     # labels-sync and pr-milestones
     def test_labels_sync_condition(self) -> None:
         self.repo.job("labels-sync.yml", "reconcile")["if"] = "github.event_name != 'pull_request'"
@@ -184,6 +205,25 @@ class WorkflowInvariantTests(unittest.TestCase):
         self.assertFinding("the inline code contains `${{`")
 
     # Dependabot
+    # The external link check
+    def test_link_check_on_pull_request(self) -> None:
+        self.repo.on("link-check.yml")["pull_request"] = {"branches": ["main"]}
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_without_schedule(self) -> None:
+        del self.repo.on("link-check.yml")["schedule"]
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_permissions(self) -> None:
+        self.repo.workflows["link-check.yml"]["permissions"] = {"issues": "read"}
+        self.assertFinding("link-check.yml: workflow-level permissions must be")
+        self.repo.job("link-check.yml", "external-links")["permissions"]["issues"] = "read"
+        self.assertFinding("link-check.yml: job external-links's permissions must be")
+
+    def test_link_check_missing(self) -> None:
+        del self.repo.workflows["link-check.yml"]
+        self.assertFinding("link-check.yml: not found")
+
     def test_dependabot_duplicate_ecosystem(self) -> None:
         self.repo.dependabot["updates"].append(copy.deepcopy(self.repo.dependabot["updates"][1]))
         self.assertFinding("`pip` is covered 2 times")

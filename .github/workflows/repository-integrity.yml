@@ -5,7 +5,8 @@ run-name: Repository integrity — ${{ github.ref_name }} @ ${{ github.sha }}
 # on every pull request and push to the integration branches. No path filter:
 # the job reports on every pull request, so it can be a required check.
 # Static checks only: tooling, labels and issue forms, test-case and changelog
-# format, VBA source and workflows; no VBA compilation or Excel.
+# format, documentation links, VBA source and workflows; no VBA compilation,
+# Excel or request to an external link.
 
 on:
   pull_request:
@@ -21,9 +22,15 @@ on:
 permissions:
   contents: read
 
+# A newer run of the same pull request cancels the older one; a push or a
+# manual run has a group of its own and is never cancelled, so every pushed
+# commit keeps its result.
 concurrency:
-  group: repository-integrity-${{ github.ref }}
-  cancel-in-progress: true
+  group: >-
+    repository-integrity-${{ github.event_name == 'pull_request'
+    && format('pr-{0}', github.event.pull_request.number)
+    || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -58,12 +65,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.13"
+          # Exact versions, changed only by a reviewed pull request
+          # (tools/README.md, Tool versions).
+          python-version: "3.13.17"
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "22"
+          node-version: "22.23.4"
 
       - name: Install hash-locked Python quality tools
         run: |

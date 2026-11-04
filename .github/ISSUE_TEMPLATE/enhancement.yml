@@ -81,6 +81,21 @@ body:
       required: true
 
   - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔀 Alternatives considered"
+      description: Optional. Other approaches, and why the requested behavior is preferred.
+
+  - type: input
+    id: target_end_date
+    attributes:
+      label: "📅 Target end date"
+      description: ISO date YYYY-MM-DD, not after the milestone's due date; triage checks it.
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+
+  - type: textarea
     id: dependencies
     attributes:
       label: "🔗 Dependencies and blocking status"
