@@ -110,6 +110,12 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
+- Issue triage (#278) also runs on milestone events and reports an open
+  issue in a closed milestone, or without a real target completion date on
+  or before its milestone's due date (the *Schedule* line, else the new
+  required *Target end date* form field). The Bug report gains an optional
+  *Evidence, workaround or recovery* field and the Enhancement form an
+  optional *Alternatives considered* field.
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop

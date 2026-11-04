@@ -2,11 +2,14 @@ name: Issue triage
 run-name: "Issue triage — ${{ github.event_name }} by ${{ github.actor }}"
 
 # Audits every open issue against the rules issue forms cannot enforce:
-# assignee, exactly one priority, P1 only on bugs, a milestone, catalogue
+# assignee, exactly one priority, P1 only on bugs, an open milestone, a
+# target completion date not after the milestone's due date, catalogue
 # labels, and `blocked` exactly while a named prerequisite is unresolved.
 # Read-only: it never changes an issue. A failed run is the triage signal;
 # I resolve each finding by hand (docs/GOVERNANCE.md, Issues).
-# Issue events run the workflow from the default branch only.
+# Issue and milestone events run the workflow from the default branch only;
+# a milestone event re-audits the open issues after a due date changes or a
+# milestone closes.
 
 on:
   issues:
@@ -21,6 +24,13 @@ on:
       - unassigned
       - milestoned
       - demilestoned
+  milestone:
+    types:
+      - created
+      - edited
+      - opened
+      - closed
+      - deleted
   workflow_dispatch:
 
 permissions:
@@ -50,7 +60,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
 
     steps:
-      - name: Check out the triggering ref (the default branch on issue events)
+      - name: Check out the triggering ref (the default branch on issue and milestone events)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

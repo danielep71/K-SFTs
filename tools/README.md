@@ -223,7 +223,8 @@ in Windows PowerShell 5.1
 
 `check_issues.py` applies the issue rules of `docs/GOVERNANCE.md` (Triage) to
 every open issue and reports findings; it never changes an issue. The
-`Issue triage` workflow runs it on issue events with a read-only token.
+`Issue triage` workflow runs it on issue and milestone events with a
+read-only token.
 Pull requests are not audited, but their numbers are loaded so that a
 dependency section may name one as a reference; it never counts as a
 prerequisite. The token therefore needs `pull-requests: read` as well:
@@ -235,6 +236,21 @@ python tools/check_issues.py --input issues.json --repo-name danielep71/K-SFTs  
 python tools/check_issues.py --check-config        # configuration only: forms, catalogue, label guide, Dependabot
 ```
 
+Each open issue's milestone must be open (`milestone-closed`), and its target
+completion date present (`target-date-missing`), a real calendar date
+(`target-date-invalid`) and not after the date part of the milestone's
+`due_on` (`target-date-after-due`, skipped when the milestone has no due
+date). The date is the bold value of the line
+`Target completion: **YYYY-MM-DD**` in the body's *Schedule* section (the
+first level-2 or level-3 heading whose first word is *Schedule*, such as
+`## Schedule — baseline 2026-10-29`); without
+it, the first line under the issue form's `### 📅 Target end date` heading,
+where `_No response_` counts as missing. A value is valid only if it matches
+`^\d{4}-\d{2}-\d{2}$` and `date.fromisoformat` accepts it, so `2026-02-30`
+fails. The milestone's state and due date come from the REST issue object, so
+an export read with `--input` must keep the `milestone` objects whole; a
+malformed `due_on` stops the audit (exit code 2).
+
 Exit code 0 means no findings, 1 means findings, 2 means the audit could not
 run. Offline exports require `--repo-name owner/name`; the required assignee
 is read from the bug form and checked for consistency across all forms.
@@ -243,7 +259,10 @@ field the manifest schema does not define is an error. `--check-config` also
 checks that the label tables of `docs/GOVERNANCE.md` (Issues) explain every
 catalogue label exactly once and no other, and that the labels and assignees
 of `.github/dependabot.yml` are in the catalogue and equal to the forms'
-assignee; it reads that file line by line, without a YAML library. Its rules
+assignee; it reads that file line by line, without a YAML library. It also
+requires each of the three forms to have a required `input` with
+`id: target_end_date` and the label *Target end date*, the heading that the
+audit reads, reading the forms line by line as well. Its rules
 are tested by `test_check_issues.py` in `tool-tests`.
 
 <a id="workflow-invariants"></a>
