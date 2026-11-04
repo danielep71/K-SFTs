@@ -439,7 +439,9 @@ def initialize(data: Path) -> list[str]:
 # --- Traffic alert ---------------------------------------------------------------
 
 # A 14-day total that at least doubles and grows by this much is a spike.
-SPIKE_GROWTH = {"views_14d": 100, "clones_14d": 10}
+# Clones are not a cause: they include every CI checkout. They stay in the
+# history, the badge and the alert's table.
+SPIKE_GROWTH = {"views_14d": 100}
 NEW_REFERRER_VIEWS = 5
 ALERT_DAYS = 7
 
@@ -451,9 +453,10 @@ def number(row: Mapping[str, str], key: str) -> int | None:
 def alert(data: Path, milestone_due: str) -> dict[str, str] | None:
     """The alert issue for the latest snapshot, or None when nothing stands out.
 
-    It compares the latest snapshot with the one before: a views or clones
-    spike, more stars or forks, or a referrer never seen before that brings at
-    least NEW_REFERRER_VIEWS views. Counts missing from the older snapshot
+    It compares the latest snapshot with the one before: a views spike, more
+    stars or forks, or a referrer never seen before that brings at least
+    NEW_REFERRER_VIEWS views. A clones spike alone raises nothing: clones
+    include every CI checkout. Counts missing from the older snapshot
     (collected before they were recorded) raise nothing.
     """
     snapshots = sorted(read_history(data / SNAPSHOTS), key=lambda row: row["snapshot_date"])

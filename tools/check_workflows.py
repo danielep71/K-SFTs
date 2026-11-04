@@ -34,7 +34,13 @@ ALLOWED_WRITES: dict[tuple[str, str], frozenset[str]] = {
     ("traffic-history.yml", "collect"): frozenset({"contents"}),
     ("traffic-history.yml", "alert"): frozenset({"issues"}),
     ("pr-milestones.yml", "reconcile"): frozenset({"pull-requests"}),
+    ("codeql.yml", "analyze"): frozenset({"security-events"}),
 }
+
+# Inputs that select a runtime version, by action; the required job pins them.
+RUNTIME_INPUTS = {"actions/setup-python": "python-version", "actions/setup-node": "node-version"}
+EXACT_VERSION = re.compile(r"^\d+\.\d+\.\d+$")
+PR_ONLY_CANCEL = "${{ github.event_name == 'pull_request' }}"
 
 MILESTONES_FILE = "pr-milestones.yml"
 MILESTONES_EVENTS: dict[str, Any] = {
@@ -46,6 +52,11 @@ MILESTONES_EVENTS: dict[str, Any] = {
 MILESTONES_IF = ("github.event_name == 'pull_request_target' || "
                  "github.event_name == 'schedule' || " + DEFAULT_BRANCH_REF)
 SCRIPT = re.compile(r"<<'PY'\n(.*)\nPY\s*$", re.S)
+
+# The external link check depends on other sites: never on pull requests, read-only.
+LINK_CHECK_FILE = "link-check.yml"
+LINK_CHECK_EVENTS = {"schedule", "workflow_dispatch"}
+READ_ONLY: tuple[dict[str, str], ...] = ({}, {"contents": "read"})
 
 # Ecosystems whose versions are pinned here, and where Dependabot must look.
 PINNED_ECOSYSTEMS = {"github-actions": "/", "pip": "/tools"}
@@ -179,7 +190,37 @@ def integrity_findings(workflows: Mapping[str, Workflow], governance: str,
             actual = on.get(event) if isinstance(on, Mapping) else on
             findings.append(f"{file}: `{event}` filters are {actual!r}; {GOVERNANCE} requires "
                             f"{expected!r} and no other filter")
+    return findings + runtime_findings(file, matching) + concurrency_findings(file, workflow)
+
+
+def runtime_findings(file: str, required: Sequence[tuple[str, Mapping[str, Any]]]) -> list[str]:
+    """The required job pins Python and Node.js to exact X.Y.Z versions."""
+    findings = []
+    for job_id, job in required:
+        for step in job.get("steps") or []:
+            if not isinstance(step, Mapping):
+                continue
+            action = str(step.get("uses", "")).split("@")[0]
+            key = RUNTIME_INPUTS.get(action)
+            if key is None:
+                continue
+            version = str((step.get("with") or {}).get(key, ""))
+            if not EXACT_VERSION.match(version):
+                findings.append(f"{file}: job {job_id}: {action} `{key}` is {version!r}; "
+                                "expected an exact X.Y.Z version")
     return findings
+
+
+def concurrency_findings(file: str, workflow: Workflow) -> list[str]:
+    """Only a newer run of the same pull request cancels a required-check run."""
+    concurrency = workflow.get("concurrency")
+    group = squash(concurrency.get("group", "")) if isinstance(concurrency, Mapping) else ""
+    cancel = concurrency.get("cancel-in-progress") if isinstance(concurrency, Mapping) else None
+    if ("github.event.pull_request.number" not in group or "github.run_id" not in group
+            or squash(cancel) != PR_ONLY_CANCEL):
+        return [f"{file}: concurrency must group pull requests by number and other runs by "
+                f"run ID, with cancel-in-progress {PR_ONLY_CANCEL}"]
+    return []
 
 
 def labels_sync_findings(workflows: Mapping[str, Workflow]) -> list[str]:
@@ -226,6 +267,32 @@ def milestone_findings(workflows: Mapping[str, Workflow]) -> list[str]:
         findings.append(f"{MILESTONES_FILE}: the inline code contains `${{{{`")
     elif milestone_script(workflow) is None:
         findings.append(f"{MILESTONES_FILE}: no `<<'PY'` Python script in the step")
+    concurrency = workflow.get("concurrency")
+    group = squash(concurrency.get("group", "")) if isinstance(concurrency, Mapping) else ""
+    if ("github.event.pull_request.number" not in group
+            or not isinstance(concurrency, Mapping)
+            or concurrency.get("cancel-in-progress") is not False):
+        findings.append(f"{MILESTONES_FILE}: concurrency must queue each pull request "
+                        "separately, without cancelling")
+    return findings
+
+
+def link_check_findings(workflows: Mapping[str, Workflow]) -> list[str]:
+    workflow = workflows.get(LINK_CHECK_FILE)
+    if workflow is None:
+        return [f"{LINK_CHECK_FILE}: not found"]
+    findings = []
+    on = triggers(workflow)
+    if not isinstance(on, Mapping) or set(on) != LINK_CHECK_EVENTS:
+        findings.append(f"{LINK_CHECK_FILE}: events must be exactly "
+                        f"{sorted(LINK_CHECK_EVENTS)}, not {on!r}")
+    if workflow.get("permissions") not in READ_ONLY:
+        findings.append(f"{LINK_CHECK_FILE}: workflow-level permissions must be {{}} "
+                        "or contents: read")
+    for job_id, job in jobs(workflow):
+        if job.get("permissions") not in READ_ONLY:
+            findings.append(f"{LINK_CHECK_FILE}: job {job_id}'s permissions must be {{}} "
+                            "or contents: read")
     return findings
 
 
@@ -261,6 +328,7 @@ def findings_for(workflows: Mapping[str, Workflow], dependabot: Any, governance:
         findings += action_findings(name, workflow) + permission_findings(name, workflow)
     findings += integrity_findings(workflows, governance, settings)
     findings += labels_sync_findings(workflows) + milestone_findings(workflows)
+    findings += link_check_findings(workflows)
     findings += dependabot_findings(dependabot)
     return findings
 
