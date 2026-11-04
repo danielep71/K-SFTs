@@ -11,6 +11,8 @@ const LABELS_PER_PAGE = 100;
 const MAX_LABEL_PAGES = 100;
 const MAX_RATE_LIMIT_RETRIES = 2;
 const MAX_RETRY_DELAY_MS = 5000;
+// The issues list filter takes a comma-separated list of label names.
+const LABEL_FILTER_SEPARATOR = ",";
 
 function compareNames(left, right) {
   const leftKey = left.toLowerCase();
@@ -266,6 +268,68 @@ async function listLiveLabels(repository, token) {
   throw new Error(`GitHub label pagination exceeded ${MAX_LABEL_PAGES} pages`);
 }
 
+// A name the issues list filter cannot match as exactly one label, or null.
+function unqueryableReason(name) {
+  if (name.length === 0) return "empty name";
+  if (name.includes(LABEL_FILTER_SEPARATOR)) return "contains a comma, which the issues filter reads as a separator";
+  if (name !== name.trim()) return "has surrounding whitespace";
+  return null;
+}
+
+// Read-only: for every planned deletion, ask whether any issue or pull
+// request, open or closed, carries the label. The issues list includes pull
+// requests, so one result is enough to prove use; no pagination is needed.
+async function findBlockedDeletions(repository, token, changes) {
+  const inUse = [];
+  const refused = [];
+  for (const change of changes.filter(item => item.action === "delete")) {
+    const name = change.currentName;
+    const reason = unqueryableReason(name);
+    if (reason) {
+      refused.push({ name, reason });
+      continue;
+    }
+    const batch = await githubRequest(
+      repository,
+      token,
+      "GET",
+      `/issues?labels=${encodeURIComponent(name)}&state=all&per_page=1`
+    );
+    if (!Array.isArray(batch)) throw new Error("GitHub issues response is not an array");
+    if (batch.length > 0) {
+      const item = batch[0];
+      inUse.push({ name, example: `${item.pull_request ? "pull request" : "issue"} #${item.number}` });
+    }
+  }
+  return { inUse, refused };
+}
+
+// Runs before the first create, update or delete: a label still in use, or
+// one whose use cannot be checked, is never deleted, and nothing is changed.
+async function assertDeletionsAllowed(repository, token, changes) {
+  const { inUse, refused } = await findBlockedDeletions(repository, token, changes);
+  if (inUse.length === 0 && refused.length === 0) return;
+  const parts = [];
+  if (inUse.length > 0) {
+    parts.push(`still in use by an issue or pull request: ${inUse.map(item => `${JSON.stringify(item.name)} (${item.example})`).join(", ")}`);
+  }
+  if (refused.length > 0) {
+    parts.push(`use cannot be queried reliably: ${refused.map(item => `${JSON.stringify(item.name)} (${item.reason})`).join(", ")}`);
+  }
+  throw new Error(
+    `Refusing to delete labels outside the manifest; ${parts.join("; ")}. `
+    + "No label was created, updated or deleted. Add each label to the manifest, "
+    + "or remove it from every issue and pull request (or rename it) first."
+  );
+}
+
+// The guard runs to completion before the state records that applying began.
+async function guardAndApplyChanges(repository, token, changes, state) {
+  await assertDeletionsAllowed(repository, token, changes);
+  state.applying = true;
+  await applyChanges(repository, token, changes);
+}
+
 async function applyChanges(repository, token, changes) {
   for (const change of changes) {
     if (change.action === "update") {
@@ -282,13 +346,21 @@ async function applyChanges(repository, token, changes) {
   }
 }
 
-function markdownEscape(value) {
-  return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+// A Markdown code span for one dynamic value: the fence is longer than any
+// backtick run inside it, a value at a backtick or both-ends space is padded,
+// "|" is escaped for table cells and every line break becomes a space.
+function markdownCode(value) {
+  const text = String(value).replace(/\r\n|\r|\n/g, " ").replaceAll("|", "\\|");
+  if (text.length === 0) return "` `";
+  const longest = Math.max(0, ...Array.from(text.matchAll(/`+/g), match => match[0].length));
+  const fence = "`".repeat(longest + 1);
+  const pad = /^`|`$/.test(text) || (/^ .* $/s.test(text) && text.trim().length > 0) ? " " : "";
+  return `${fence}${pad}${text}${pad}${fence}`;
 }
 
 function renderLabelNames(labels) {
   if (labels.length === 0) return "none";
-  return labels.map(label => markdownEscape(JSON.stringify(label.name))).join(", ");
+  return labels.map(label => markdownCode(label.name)).join(", ");
 }
 
 function renderSummary({
@@ -311,8 +383,8 @@ function renderSummary({
   const lines = [
     "# Repository label synchronization",
     "",
-    `- Mode: \`${mode}\`${dryRun ? " (dry run)" : ""}`,
-    `- Label manifest: \`${manifestPath ?? "unavailable"}\``,
+    `- Mode: ${markdownCode(mode)}${dryRun ? " (dry run)" : ""}`,
+    `- Label manifest: ${markdownCode(manifestPath ?? "unavailable")}`,
     `- Schema: **${manifest?.schema_version ?? "unavailable"}**`,
     `- Labels: **${resolvedLabels.length}**`,
     `- Prune: **${manifest ? (manifest.prune ? "enabled" : "disabled") : "unavailable"}**`,
@@ -327,7 +399,7 @@ function renderSummary({
     `- Labels (${resolvedLabels.length}): ${renderLabelNames(resolvedLabels)}`
   );
   if (error) {
-    lines.push("", "## Failure", "", `\`${markdownEscape(error)}\``);
+    lines.push("", "## Failure", "", markdownCode(error));
     if (partial) {
       lines.push("", "The failure happened during or after reconciliation: some changes may already be applied. Compare the live labels with the manifest.");
     }
@@ -339,7 +411,7 @@ function renderSummary({
     lines.push("", "| Action | Label | Detail |", "|---|---|---|");
     for (const change of changes) {
       const detail = change.action === "update" ? change.fields.join(", ") : change.action === "delete" ? "outside the manifest" : "missing live label";
-      lines.push(`| ${change.action} | \`${markdownEscape(change.name)}\` | ${markdownEscape(detail)} |`);
+      lines.push(`| ${change.action} | ${markdownCode(change.name)} | ${detail} |`);
     }
   }
   return `${lines.join("\n")}\n`;
@@ -352,6 +424,48 @@ async function publishSummary(summary) {
 
 function expectFailure(operation, pattern) {
   assert.throws(operation, pattern);
+}
+
+// Cells of one Markdown table row, split at unescaped pipes.
+function tableCells(row) {
+  return row.replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map(cell => cell.trim());
+}
+
+// Replaces fetch with a fake GitHub that answers the issues list filter (as
+// GitHub does: exact label names, case-insensitive, open only unless state is
+// given) and accepts every mutation; records every request it receives.
+async function withFakeGitHub(issues, operation) {
+  const original = globalThis.fetch;
+  const requests = [];
+  globalThis.fetch = async (url, init = {}) => {
+    const parsed = new URL(url);
+    const method = init.method ?? "GET";
+    requests.push({ method, path: parsed.pathname, query: parsed.searchParams });
+    if (method === "GET" && parsed.pathname.endsWith("/issues")) {
+      const wanted = String(parsed.searchParams.get("labels") ?? "").split(",").map(name => name.toLowerCase());
+      const state = parsed.searchParams.get("state") ?? "open";
+      const perPage = Number(parsed.searchParams.get("per_page") ?? 30);
+      const matching = issues.filter(issue => (
+        (state === "all" || issue.state === state)
+        && wanted.every(name => issue.labels.some(label => label.toLowerCase() === name))
+      ));
+      return new Response(JSON.stringify(matching.slice(0, perPage)), { status: 200 });
+    }
+    if (method === "DELETE") return new Response(null, { status: 204 });
+    if (method === "GET") return new Response("unexpected request", { status: 404 });
+    return new Response(init.body ?? "{}", { status: method === "POST" ? 201 : 200 });
+  };
+  try {
+    let error = null;
+    try {
+      await operation();
+    } catch (caught) {
+      error = caught;
+    }
+    return { error, requests, mutations: requests.filter(request => request.method !== "GET") };
+  } finally {
+    globalThis.fetch = original;
+  }
 }
 
 async function runSelfTest(manifestPath) {
@@ -473,9 +587,93 @@ async function runSelfTest(manifestPath) {
   assert.match(unverifiedSummary, /Mode: `failed`/);
   assert.match(unverifiedSummary, /Post-run exact match: \*\*no\*\*/);
   assert.match(summary, new RegExp(`Labels \\(${desired.length}\\):`));
-  for (const label of desired) assert.match(summary, new RegExp(`"${label.name}"`));
+  for (const label of desired) assert.ok(summary.includes(markdownCode(label.name)), label.name);
 
   process.stdout.write("SELF-TEST PASS: retry delays, validation and reconciliation fixtures\n");
+
+  // Deletion guard, against a fake GitHub. Each plan also updates and creates
+  // a label, so a mutation before the guard would be recorded.
+  const fakeIssues = [
+    { number: 3, state: "open", labels: ["stale"] },
+    { number: 9, state: "closed", pull_request: {}, labels: ["Old-PR"] },
+    { number: 10, state: "closed", labels: ["bug"] }
+  ];
+  const mixedLive = structuredClone(desired).slice(1);
+  mixedLive[0].color = mixedLive[0].color === "000000" ? "FFFFFF" : "000000";
+  const guardPlan = extras => planChanges(desired, [...mixedLive, ...extras.map(name => (
+    { name, color: "ABCDEF", description: "extra" }
+  ))]);
+  const guarded = async extras => {
+    const state = { applying: false };
+    const changes = guardPlan(extras);
+    const outcome = await withFakeGitHub(fakeIssues, () => guardAndApplyChanges("fixture/repo", "token", changes, state));
+    return { ...outcome, changes, state };
+  };
+
+  const openUse = await guarded(["stale"]);
+  assert.ok(openUse.error, "a label on an open issue must not be deleted");
+  assert.match(openUse.error.message, /still in use by an issue or pull request: "stale" \(issue #3\)/);
+  assert.match(openUse.error.message, /No label was created, updated or deleted/);
+  assert.deepEqual(openUse.mutations, [], "no mutation may precede a failed guard");
+  assert.equal(openUse.state.applying, false, "a failed guard is not a partial run");
+  const openQuery = openUse.requests.find(request => request.path.endsWith("/issues"));
+  assert.equal(openQuery.query.get("labels"), "stale");
+  assert.equal(openQuery.query.get("state"), "all");
+  assert.equal(openQuery.query.get("per_page"), "1");
+  process.stdout.write(`SELF-TEST GUARD (in use, open issue): ${openUse.error.message}\n`);
+
+  const closedPull = await guarded(["old-pr"]);
+  assert.ok(closedPull.error, "a label only on a closed pull request must not be deleted");
+  assert.match(closedPull.error.message, /"old-pr" \(pull request #9\)/);
+  assert.deepEqual(closedPull.mutations, []);
+
+  const comma = await guarded(["a,b", "unused"]);
+  assert.ok(comma.error, "a name the issues filter cannot express must be refused");
+  assert.match(comma.error.message, /use cannot be queried reliably: "a,b" \(contains a comma/);
+  assert.doesNotMatch(comma.error.message, /"unused"/);
+  assert.deepEqual(comma.mutations, [], "a refused name blocks every mutation");
+  assert.ok(!comma.requests.some(request => request.query.get("labels") === "a,b"));
+
+  const both = await guarded(["stale", "old-pr", "x,y"]);
+  assert.match(both.error.message, /"old-pr" \(pull request #9\), "stale" \(issue #3\); use cannot be queried reliably: "x,y"/);
+  assert.deepEqual(both.mutations, []);
+
+  const unused = await guarded(["unused: a/b é"]);
+  assert.equal(unused.error, null, "an unused extra label is deleted");
+  assert.equal(unused.state.applying, true);
+  assert.deepEqual(unused.mutations.map(request => request.method), ["PATCH", "POST", "DELETE"]);
+  assert.equal(decodeURIComponent(unused.mutations[2].path.split("/labels/")[1]), "unused: a/b é");
+  const unusedQuery = unused.requests.findIndex(request => request.query.get("labels") === "unused: a/b é");
+  assert.ok(unusedQuery >= 0 && unusedQuery < unused.requests.indexOf(unused.mutations[0]), "the query precedes every mutation");
+
+  const noDeletion = await withFakeGitHub(fakeIssues, () => guardAndApplyChanges("fixture/repo", "token", guardPlan([]), { applying: false }));
+  assert.equal(noDeletion.error, null);
+  assert.equal(noDeletion.requests.filter(request => request.method === "GET").length, 0, "no deletion, no query");
+  process.stdout.write("SELF-TEST PASS: deletion guard refuses labels in use (open issue, closed pull request) and unqueryable names before any mutation; an unused extra label is deleted\n");
+
+  // Summary values: one code span per value, longer than its backtick runs.
+  assert.equal(markdownCode("plain"), "`plain`");
+  assert.equal(markdownCode("a`b"), "``a`b``");
+  assert.equal(markdownCode("``x`"), "``` ``x` ```");
+  assert.equal(markdownCode("a|b"), "`a\\|b`");
+  assert.equal(markdownCode("one\r\ntwo\rthree\nfour"), "`one two three four`");
+  assert.equal(markdownCode(" padded "), "`  padded  `");
+  assert.equal(markdownCode(""), "` `");
+  const hostile = "odd `x` | y\r\nz``";
+  const hostileSummary = renderSummary({
+    mode: "plan",
+    manifest,
+    manifestPath: "dir|`x`.json",
+    desiredLabels: desired,
+    changes: [{ action: "delete", name: hostile, currentName: hostile }]
+  });
+  const hostileRow = hostileSummary.split("\n").find(line => line.startsWith("| delete |"));
+  assert.deepEqual(tableCells(hostileRow), ["delete", "``` odd `x` \\| y z`` ```", "outside the manifest"]);
+  assert.match(hostileSummary, /Label manifest: ``dir\\\|`x`\.json``/);
+  assert.doesNotMatch(hostileSummary, /\r/);
+  const hostileFailure = renderSummary({ mode: "failed", manifest, manifestPath: "m", desiredLabels: desired, error: "HTTP 422: `bad` | line\nbreak" });
+  assert.match(hostileFailure, /\n``HTTP 422: `bad` \\\| line break``\n/);
+  process.stdout.write("SELF-TEST PASS: summary code spans for values with backticks, pipes and line breaks\n");
 }
 
 // What the run knew before a failure, so that the failure summary reports it.
@@ -518,13 +716,15 @@ async function main() {
 
   const changes = planChanges(desired, live, { prune: manifest.prune });
   runState.changes = changes;
+  if (options.mode === "reconcile" && options.dryRun) {
+    await assertDeletionsAllowed(options.repository, process.env.GITHUB_TOKEN, changes);
+  }
   if (options.mode === "plan" || options.dryRun) {
     await publishSummary(renderSummary({ mode: options.mode, ...summaryBase, changes, dryRun: options.dryRun }));
     return;
   }
 
-  runState.applying = true;
-  await applyChanges(options.repository, process.env.GITHUB_TOKEN, changes);
+  await guardAndApplyChanges(options.repository, process.env.GITHUB_TOKEN, changes, runState);
   const after = await listLiveLabels(options.repository, process.env.GITHUB_TOKEN);
   const remaining = planChanges(desired, after, { prune: manifest.prune });
   const verified = remaining.length === 0;

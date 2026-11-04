@@ -110,6 +110,20 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
+- CI hardening (#279): the required check pins Python 3.13.17 and Node.js
+  22.23.4, and a newer run of the same pull request cancels only that pull
+  request's older run, while each push keeps its own run.
+  `tools/check.py --ci` reads the working tree again after the gates and
+  fails if a gate left a change behind; mypy also reports unreachable code
+  (`warn_unreachable`), which `mypy-strict-probe` proves active.
+  *Keep milestones issue-only* queues each pull request's events separately
+  from its scans. `workflow-invariants` checks the exact versions and both
+  concurrency settings.
+- A clones spike no longer raises a traffic alert (#282): clones include
+  every CI checkout. Views spikes, more stars or forks and new referrers
+  still do; clones stay in the history, the badge and the alert's table.
+- `CODE_OF_CONDUCT.md` states the expected behaviour, what is not accepted
+  and how to report a problem privately (#282).
 - Issue triage (#278) also runs on milestone events and reports an open
   issue in a closed milestone, or without a real target completion date on
   or before its milestone's due date (the *Schedule* line, else the new
@@ -132,6 +146,11 @@ to v1.0.0.
 
 ### Fixed
 
+- Label reconciliation never deletes a label still in use (#277): before
+  any change it checks every label planned for deletion against issues and
+  pull requests, open or closed, and fails with nothing changed if one is in
+  use or its name cannot be queried (a comma). The label summaries render
+  names, colours and errors with backticks, pipes or line breaks safely.
 - The traffic history no longer lets an older collection, merged after a
   newer one, overwrite the newer one's data when the newer one left the
   values unchanged (#265). `daily.csv` gains `views_observed_at` and

@@ -432,7 +432,8 @@ class AlertTests(unittest.TestCase):
             issue = self.history(ws, (50, 20, 1), (150, 40, 2))
             assert issue is not None
             self.assertEqual(issue["title"], "Traffic alert: 2026-10-14")
-            self.assertIn("views spike, clones spike, stars increased.", issue["body"])
+            self.assertIn("views spike, stars increased.", issue["body"])
+            self.assertIn("| Clones | 40 | 20 |", issue["body"])
             self.assertIn("| Stars | 2 | 1 |", issue["body"])
             for line in ("- Planned start: **2026-10-14**.", "- Target completion: **2026-10-21**.",
                          "- Milestone target: **2026-12-20**.",
@@ -441,8 +442,15 @@ class AlertTests(unittest.TestCase):
 
     def test_a_spike_needs_double_and_the_minimum_growth(self) -> None:
         with workspace() as ws:
-            # Clones double (4 to 8) but grow by less than 10: no spike.
-            self.assertIsNone(self.history(ws, (1, 4, 1), (1, 8, 1)))
+            # Views double (60 to 120) but grow by less than 100: no spike.
+            self.assertIsNone(self.history(ws, (60, 1, 1), (120, 1, 1)))
+
+    def test_a_clones_spike_alone_raises_no_alert(self) -> None:
+        with workspace() as ws:
+            # Clones grow from 20 to 400: stored, but not a cause, as they
+            # include every CI checkout.
+            self.assertIsNone(self.history(ws, (50, 20, 1), (50, 400, 1)))
+            self.assertEqual(ws.rows(SNAPSHOTS)[-1]["clones_14d"], "400")
 
     def test_new_referrer_needs_enough_views(self) -> None:
         few = [{"referrer": "github.com", "count": 3, "uniques": 1},

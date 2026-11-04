@@ -203,7 +203,13 @@ check but was not exercised with a failing one.
 - Live label reconciliation runs only from `main`: on pushes to `main` that
   change label files, and on manual dispatch on `main` (a dispatch on any
   other branch skips it). Label changes merged into a release branch take
-  effect after integration into `main`.
+  effect after integration into `main`. With `prune` enabled, reconciliation
+  deletes a live label outside the catalogue, but never one still in use:
+  before any change it asks GitHub whether an issue or pull request, open or
+  closed, carries each label planned for deletion. If one does, or its name
+  cannot be queried reliably (a name with a comma), the run fails and changes
+  nothing; add the label to the catalogue or remove it from every issue and
+  pull request first.
 - Run logs and report artifacts expire: the artifacts after 30 days, the logs
   after the repository's Actions retention period. The decisive lines of the
   enforcement evidence are therefore copied into
