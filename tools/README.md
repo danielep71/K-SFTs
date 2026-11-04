@@ -267,6 +267,7 @@ its last value and could hide, say, a second `issues:` entry.
   | `traffic-history.yml` / `collect` | `contents` |
   | `traffic-history.yml` / `alert` | `issues` |
   | `pr-milestones.yml` / `reconcile` | `pull-requests` |
+  | `codeql.yml` / `analyze` | `security-events` |
 
 - **Required check:** the job of `repository-integrity.yml` must be named as
   the required check of [docs/GOVERNANCE.md](../docs/GOVERNANCE.md#-protection-policy)
@@ -355,6 +356,18 @@ reports on every pull request and can be made a required check.
   **retained for 30 days**. Download it from the run page.
 - The workflow uses no other repository at run time; its only downloads are
   the pinned actions, the locked Python wheels and the actionlint archive.
+
+## 🔍 CodeQL
+
+`.github/workflows/codeql.yml` holds the code scanning configuration, so it
+can be read from any commit: the `actions`, `javascript-typescript` and
+`python` languages, `build-mode: none`, the `security-extended` query suite,
+on pull requests into and pushes to `main` and `release/**`, weekly and on
+manual dispatch. Its only write permission is `security-events: write`, to
+upload the results; the VBA is not analysed. It replaces GitHub's default
+setup, which must stay switched off in **Settings → Code security**: both
+together would run every scan twice, and GitHub refuses results from this
+workflow while the default setup is on. It is not a required check.
 
 ## 📦 Dependency updates
 
