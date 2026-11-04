@@ -23,7 +23,7 @@ python tools/check.py
 | --- | --- |
 | *(default)* | Runs every gate. A gate whose tool is missing is **NOT RUN** and fails the run. |
 | `--allow-missing` | Reports missing tools as **NOT RUN** and exits 0 with status **INCOMPLETE**. An incomplete run is never a pass; use it only to iterate locally. |
-| `--ci` | Requires every tool and a clean checkout (no modified or untracked files). Used by the workflow. |
+| `--ci` | Requires every tool and a clean checkout (no modified or untracked files), before the gates and again after them, so a gate that leaves a file behind fails the run. Used by the workflow. |
 
 Exit code 0 means PASS (or INCOMPLETE with `--allow-missing`); 1 means a gate
 failed, a tool was missing, or `--ci` found a dirty tree.
@@ -51,8 +51,8 @@ versions; each gate also writes `<gate>.log`.
 | `vba-public-api` | Every procedure, and every module-level declaration that VBA would otherwise make public (`Enum`, `Type`, `Event`, `Declare`), states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
-| `mypy` | `mypy --strict` over `tools/`, tests included. |
-| `mypy-strict-probe` | Strict mode is active: an annotated function passes and the same function without annotations is rejected. |
+| `mypy` | `mypy --strict` with `warn_unreachable` over `tools/`, tests included. |
+| `mypy-strict-probe` | Strict mode and `warn_unreachable` are active: an annotated function passes, while the same function without annotations, and a statement made unreachable by an `isinstance` check, are rejected. |
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 | `workflow-invariants` | The security and governance invariants of `.github/workflows/*.yml` and `.github/dependabot.yml`, read with PyYAML (`check_workflows.py`); see [Workflow invariants](#workflow-invariants). |
 
@@ -276,13 +276,17 @@ its last value and could hide, say, a second `issues:` entry.
   and of the rulesets in
   [docs/REPOSITORY_SETTINGS.md](../docs/REPOSITORY_SETTINGS.md), have no
   `if` and no `strategy`, and filter `pull_request` and `push` only by the
-  protected branches, `main` and `release/**`, with no path filter.
+  protected branches, `main` and `release/**`, with no path filter. It
+  pins Python and Node.js to exact `X.Y.Z` versions, and its concurrency
+  groups a pull request's runs by number, cancelling only an older run of the
+  same pull request, while every push or manual run has a group of its own.
 - **Default-branch writes:** the condition of `labels-sync.yml`'s
   `reconcile` job must check the default branch.
 - **`pr-milestones.yml`:** its events, its `permissions: {}`, its single
   `reconcile` job with `pull-requests: write` and its default-branch
   condition are fixed; the job has one inline `run` step and no `${{` in its
-  code.
+  code. Its concurrency queues each pull request's events separately from
+  the scans, and never cancels.
 - **Dependabot:** `github-actions` (`/`) and `pip` (`/tools`), the pinned
   ecosystems, are each covered exactly once; no update sets a milestone;
   each update's only priority label is `P3`.
@@ -323,8 +327,8 @@ badge, alert and data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md);
 
 | Tool | Version | Source |
 | --- | --- | --- |
-| Python | 3.13 in CI; 3.12 or later locally | `actions/setup-python` |
-| Node.js | 22 | `actions/setup-node` |
+| Python | 3.13.17 in CI; 3.12 or later locally | `actions/setup-python`, exact version in `repository-integrity.yml` |
+| Node.js | 22.23.4 in CI; 22 locally | `actions/setup-node`, exact version in `repository-integrity.yml` |
 | Ruff, mypy, PyYAML | 0.17.1, 2.4.0, 6.0.3 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
 | actionlint | 1.7.12 | Release archive verified by SHA-256 in the workflow |
 
@@ -340,6 +344,13 @@ reference run.
 actionlint is available from its
 [1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12).
 
+The Python and Node.js versions of the required check are exact, so the
+runtime changes only through a reviewed pull request; Dependabot does not
+update them. To move to a newer patch of the same series, change both
+`python-version` and `node-version` in `repository-integrity.yml` and check
+that the runner's setup step reports the new version. A move to another
+series is a decision of its own.
+
 ## ☁️ Continuous integration
 
 `.github/workflows/repository-integrity.yml` runs `python tools/check.py --ci`
@@ -347,6 +358,8 @@ on every pull request into `main` or `release/**`, on every push to them and
 on manual dispatch. It has no path filter, so its `Repository integrity` job
 reports on every pull request and can be made a required check.
 
+- A newer run of the same pull request cancels the older one; a push or a
+  manual run is never cancelled, so every pushed commit keeps its result.
 - The job checks out the exact commit under review without persisting
   credentials and verifies that `HEAD` is that commit. For a pull request this
   is GitHub's test merge of the head into the base.
