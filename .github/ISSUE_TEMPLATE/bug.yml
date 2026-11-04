@@ -110,6 +110,21 @@ body:
       required: true
 
   - type: textarea
+    id: evidence
+    attributes:
+      label: "🩹 Evidence, workaround or recovery"
+      description: Optional. Logs or screenshots with synthetic data only (never a workbook), any workaround, and how to recover from the defect.
+
+  - type: input
+    id: target_end_date
+    attributes:
+      label: "📅 Target end date"
+      description: ISO date YYYY-MM-DD, not after the milestone's due date; triage checks it.
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+
+  - type: textarea
     id: dependencies
     attributes:
       label: "🔗 Dependencies and blocking status"

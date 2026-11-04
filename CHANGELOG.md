@@ -124,6 +124,12 @@ to v1.0.0.
   still do; clones stay in the history, the badge and the alert's table.
 - `CODE_OF_CONDUCT.md` states the expected behaviour, what is not accepted
   and how to report a problem privately (#282).
+- Issue triage (#278) also runs on milestone events and reports an open
+  issue in a closed milestone, or without a real target completion date on
+  or before its milestone's due date (the *Schedule* line, else the new
+  required *Target end date* form field). The Bug report gains an optional
+  *Evidence, workaround or recovery* field and the Enhancement form an
+  optional *Alternatives considered* field.
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop

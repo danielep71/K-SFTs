@@ -229,8 +229,10 @@ evidence, whenever a control is configured, verified or changed.
 Open issues with a form: **Bug report**, **Enhancement** or **Documentation**
 ([.github/ISSUE_TEMPLATE](../.github/ISSUE_TEMPLATE)); blank issues are
 disabled. Each form asks for the scope, the reproduction or requested
-behavior, checkable acceptance criteria, the validation evidence required and
-the dependency status. Pull requests follow
+behavior, checkable acceptance criteria, the validation evidence required,
+the target end date and the dependency status; the Bug report also offers an
+optional *Evidence, workaround or recovery* field and the Enhancement form an
+optional *Alternatives considered* field. Pull requests follow
 [.github/PULL_REQUEST_TEMPLATE.md](../.github/PULL_REQUEST_TEMPLATE.md).
 
 Every issue has:
@@ -239,7 +241,12 @@ Every issue has:
 - exactly one priority, `P1`, `P2` or `P3`, and the appropriate type labels
   from [.github/labels.json](../.github/labels.json), as the tables below
   explain;
-- the milestone of the work it belongs to.
+- the milestone of the work it belongs to, which is open;
+- a target completion date, a real calendar date written `YYYY-MM-DD` and not
+  after its milestone's due date. The line
+  `Target completion: **YYYY-MM-DD**` of the issue's *Schedule* section states
+  it; without that line, the form's *Target end date* field does. The line
+  takes precedence, so update it, not the form field, when the plan changes.
 
 Milestones belong only to issues, so milestone progress counts tasks rather
 than counting their implementation pull requests again. All pull requests
@@ -328,11 +335,20 @@ Issue forms cannot set a milestone or enforce the rules above, so the
 read-only **Issue triage** workflow
 ([.github/workflows/issue-triage.yml](../.github/workflows/issue-triage.yml))
 audits every open issue whenever an issue is opened, edited, closed,
-reopened, labelled, assigned or given a milestone, and on manual dispatch.
-It fails, and GitHub notifies me, when an open issue:
+reopened, labelled, assigned or given a milestone, whenever a milestone is
+created, edited, opened, closed or deleted (so a changed due date or a closed
+milestone re-audits the open issues), and on manual dispatch. Issue and
+milestone events run the workflow from the default branch. It fails, and
+GitHub notifies me, when an open issue:
 
 - is not assigned to danielep71, has no milestone, or does not have exactly
   one priority;
+- is in a closed milestone (rule `milestone-closed`);
+- states no target completion date (`target-date-missing`), states one that
+  is not a real `YYYY-MM-DD` calendar date, such as `2026-02-30`
+  (`target-date-invalid`), or states one after the date of its milestone's
+  due date (`target-date-after-due`; not checked when the milestone has no
+  due date);
 - has `P1` without `bug`;
 - carries a label that is not in the catalogue;
 - has no dependency section, or names a number that is neither an issue
@@ -344,10 +360,11 @@ It fails, and GitHub notifies me, when an open issue:
 The workflow never changes an issue: it does not assign, label or set a
 milestone. On each new issue, and whenever the audit fails, I:
 
-1. set the milestone of the work the issue belongs to;
+1. set the milestone of the work the issue belongs to, an open one;
 2. confirm or change the priority;
-3. add or remove `blocked` as the dependency section requires;
-4. re-run the workflow, or make the next issue change, and check that it
+3. set or correct the target completion date in the *Schedule* section;
+4. add or remove `blocked` as the dependency section requires;
+5. re-run the workflow, or make the next issue change, and check that it
    passes.
 
 The same rules run locally with
