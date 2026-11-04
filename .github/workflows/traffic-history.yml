@@ -12,13 +12,13 @@ run-name: "Traffic history — ${{ github.event_name }}"
 # docs/TRAFFIC.md.
 #
 # Credentials
-#   TRAFFIC_TOKEN, a fine-grained personal access token limited to this
-#   repository with Administration: read (the traffic API needs it; the
-#   workflow token cannot read traffic), stored in the `analytics`
-#   environment, whose deployment branches are limited to the default branch.
-#   Only the fetch step receives it; that step runs curl and no repository
-#   code. The workflow token pushes the history, with contents: write; the
-#   alert job, which never sees TRAFFIC_TOKEN, opens issues with issues: write.
+#   The analytics environment holds TRAFFIC_APP_CLIENT_ID (variable) and
+#   TRAFFIC_APP_PRIVATE_KEY (secret); only the default branch may use it.
+#   The configuration check sees only whether the key is set. Only the token
+#   step receives the key and creates an installation token for this repository
+#   with Administration: read. Only the curl fetch step receives that token.
+#   The workflow token pushes history with contents: write; the alert job
+#   receives neither App credential and opens issues with issues: write.
 
 on:
   schedule:
@@ -72,17 +72,31 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Check the traffic App configuration
+        env:
+          CLIENT_ID: ${{ vars.TRAFFIC_APP_CLIENT_ID }}
+          HAS_KEY: ${{ secrets.TRAFFIC_APP_PRIVATE_KEY != '' }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ "$HAS_KEY" != "true" ]; then
+            echo "::error::TRAFFIC_APP_CLIENT_ID or TRAFFIC_APP_PRIVATE_KEY is not set in the analytics environment (docs/TRAFFIC.md)"
+            exit 1
+          fi
+
+      - name: Create the traffic App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.TRAFFIC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.TRAFFIC_APP_PRIVATE_KEY }}
+          permission-administration: read
+
       - name: Fetch traffic from the GitHub API
         id: fetch
         env:
-          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+          TRAFFIC_TOKEN: ${{ steps.app-token.outputs.token }}
           API: ${{ github.api_url }}/repos/${{ github.repository }}
         run: |
           set -euo pipefail
-          if [ -z "${TRAFFIC_TOKEN:-}" ]; then
-            echo "::error::TRAFFIC_TOKEN is not set in the analytics environment (docs/TRAFFIC.md)"
-            exit 1
-          fi
           echo "collected_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
           RAW="$RUNNER_TEMP/traffic-raw"
           echo "RAW=$RAW" >> "$GITHUB_ENV"
@@ -157,7 +171,7 @@ jobs:
     needs: collect
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    # No environment: this job never receives TRAFFIC_TOKEN.
+    # No environment: this job never receives the App's key or token.
     permissions:
       contents: read
       issues: write

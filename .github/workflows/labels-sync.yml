@@ -4,7 +4,10 @@ name: Sync issue labels
 # or an explicit manual dispatch on main can reconcile the live repository
 # taxonomy; a dispatch on any other branch skips reconciliation.
 # The job runs the script's self-test, then reconciles; the script validates
-# before the first API mutation and verifies an exact post-run match.
+# before the first API mutation and verifies an exact post-run match. Before
+# any mutation it also refuses to prune a label that an issue or pull request,
+# open or closed, still carries (pull-requests: read lets the issues list
+# include pull requests).
 
 on:
   pull_request:
@@ -62,6 +65,7 @@ jobs:
     permissions:
       contents: read
       issues: write
+      pull-requests: read
 
     steps:
       - name: Check out the exact SHA to apply

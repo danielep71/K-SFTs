@@ -61,6 +61,11 @@ to v1.0.0.
 
 ### Changed
 
+- Traffic collection uses a repository-scoped GitHub App installation token
+  instead of a personal token. Configure `TRAFFIC_APP_CLIENT_ID` and
+  `TRAFFIC_APP_PRIVATE_KEY` in `analytics` before integration; retire the old
+  personal token only after a successful collection. Tests enforce that the
+  key and installation token stay in their respective steps (#272).
 - The active release branch is `release/0.3.0`, created from the `v0.2.0`
   commit; task branches start from it, and Dependabot targets it (#228).
   The closed `release/0.1.0` and `release/0.2.0` are deleted; `main` keeps
@@ -110,7 +115,36 @@ to v1.0.0.
   no longer checks the default branch, a change to the milestone workflow's
   shape, or a Dependabot update that is duplicated, sets a milestone or is
   not `P3`. PyYAML 6.0.3 joins the hash-locked tool requirements.
-
+- CI hardening (#279): the required check pins Python 3.13.17 and Node.js
+  22.23.4, and a newer run of the same pull request cancels only that pull
+  request's older run, while each push keeps its own run.
+  `tools/check.py --ci` reads the working tree again after the gates and
+  fails if a gate left a change behind; mypy also reports unreachable code
+  (`warn_unreachable`), which `mypy-strict-probe` proves active.
+  *Keep milestones issue-only* queues each pull request's events separately
+  from its scans. `workflow-invariants` checks the exact versions and both
+  concurrency settings.
+- A clones spike no longer raises a traffic alert (#282): clones include
+  every CI checkout. Views spikes, more stars or forks and new referrers
+  still do; clones stay in the history, the badge and the alert's table.
+- `CODE_OF_CONDUCT.md` states the expected behaviour, what is not accepted
+  and how to report a problem privately (#282).
+- Issue triage (#278) also runs on milestone events and reports an open
+  issue in a closed milestone, or without a real target completion date on
+  or before its milestone's due date (the *Schedule* line, else the new
+  required *Target end date* form field). The Bug report gains an optional
+  *Evidence, workaround or recovery* field and the Enhancement form an
+  optional *Alternatives considered* field.
+- Documentation links are checked (#280): a new offline gate, `links`
+  (`tools/check_links.py`), fails on a relative link to a missing, empty,
+  untracked or out-of-repository file, or to a heading or anchor that does
+  not exist; the weekly *External link check* workflow reports every
+  external URL as verified, not verifiable or broken, and is not a required
+  check.
+- CodeQL is configured in `.github/workflows/codeql.yml` (#281): Actions,
+  JavaScript/TypeScript and Python, `security-extended` queries, on pull
+  requests and pushes to `main` and `release/**` and weekly. It replaces
+  GitHub's default setup, which is switched off in the settings.
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
   the run; a `BCBS` netting set and the `QCCP` counterparty class make the
@@ -124,8 +158,18 @@ to v1.0.0.
   the 0.2.0 template fails the layout check: build it again from the new
   template.
 
+- The CCR framework diagram (`docs/assets/CCR_framework.svg` and `.png`)
+  uses the project names K-SACCR and K-SFTs, and its CCP capital box names no
+  project, as in the K-Risk Engines copy it now matches byte for byte;
+  `NOTICE.md` describes the names (#289).
+
 ### Fixed
 
+- Label reconciliation never deletes a label still in use (#277): before
+  any change it checks every label planned for deletion against issues and
+  pull requests, open or closed, and fails with nothing changed if one is in
+  use or its name cannot be queried (a comma). The label summaries render
+  names, colours and errors with backticks, pipes or line breaks safely.
 - The traffic history no longer lets an older collection, merged after a
   newer one, overwrite the newer one's data when the newer one left the
   values unchanged (#265). `daily.csv` gains `views_observed_at` and
@@ -136,6 +180,10 @@ to v1.0.0.
   `traffic-history`. Files in the earlier layouts are read with the
   observation time equal to the collection time and rewritten on the next
   merge, with no stored value changed.
+- A run that stops before its parameters are checked no longer ends its
+  closing message with an empty "Run class: ." (#220); the run class is
+  shown when it is set, and the result line of `RunSFT_Silent` is
+  unchanged.
 
 <a id="020"></a>
 

@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
 import re
 import subprocess
 import sys
@@ -315,11 +316,18 @@ def windows_name(product: str, display_version: str, build: str, revision: str) 
     return f"{product}, version {display_version}, OS build {build}.{revision}"
 
 
+def on_windows() -> bool:
+    return sys.platform == "win32"
+
+
 def local_windows() -> str | None:
     """The Windows build of this machine, or None when it is not Windows or cannot be read."""
-    if sys.platform != "win32":
+    if not on_windows():
         return None
-    import winreg
+    # mypy narrows sys.platform to the platform it runs on: the check is a
+    # call and winreg is imported by name, so this function is still checked
+    # off Windows rather than reported unreachable.
+    winreg = importlib.import_module("winreg")
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion") as key:
             values = [str(winreg.QueryValueEx(key, name)[0])
