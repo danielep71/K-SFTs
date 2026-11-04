@@ -37,7 +37,8 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 
-FENCE = re.compile(r"^[ \t>]*(`{3,}|~{3,})(.*)$")
+# A fence may follow blockquote and list-item markers on its line.
+FENCE = re.compile(r"^(?:[ \t>]|[-*+](?=[ \t])|\d{1,9}[.)](?=[ \t]))*(`{3,}|~{3,})(.*)$")
 COMMENT = re.compile(r"<!--.*?-->", re.S)
 BACKTICKS = re.compile(r"`+")
 PARAGRAPH_BREAK = re.compile(r"\n[ \t>]*\n")
@@ -144,9 +145,10 @@ def opens(text: str, close: int) -> bool:
     return False
 
 
-def destination(text: str, start: int) -> tuple[int, str] | None:
-    """The offset and destination of an inline link whose `(` ends at start, or
-    None when what follows is not a destination, optional title and `)`."""
+def destination(text: str, start: int) -> tuple[int, str, int] | None:
+    """The offset and destination of an inline link whose `(` ends at start,
+    and the offset of its closing `)`; None when what follows is not a
+    destination, optional title and `)`."""
     i = start
     while i < len(text) and text[i] in " \t\n":
         i += 1
@@ -178,7 +180,7 @@ def destination(text: str, start: int) -> tuple[int, str] | None:
         i = end + 1
         while i < len(text) and text[i] in " \t\n":
             i += 1
-    return (begin, target) if i < len(text) and text[i] == ")" else None
+    return (begin, target, i) if i < len(text) and text[i] == ")" else None
 
 
 def line_of(newlines: Sequence[int], offset: int) -> int:
@@ -190,22 +192,28 @@ def extract_links(text: str) -> list[Link]:
     clean = visible(text)
     newlines = [i for i, char in enumerate(clean) if char == "\n"]
     found: dict[int, str] = {}
+    # Link titles are not links: no bare URL is taken from inside one.
+    titles: list[tuple[int, int]] = []
     for match in re.finditer(r"\]\(", clean):
         if match.start() > 0 and clean[match.start() - 1] == "\\":
             continue
         inline = destination(clean, match.end())
         if inline is not None and inline[1] and opens(clean, match.start()):
             found[inline[0]] = rendered_destination(inline[1])
+            titles.append((inline[0] + len(inline[1]), inline[2]))
     for match in REFERENCE.finditer(clean):
         if not match.group(1).startswith("^"):
             found[match.start(2)] = rendered_destination(match.group(2).strip("<>"))
+            line_end = clean.find("\n", match.end())
+            titles.append((match.end(), len(clean) if line_end < 0 else line_end))
     for pattern in (HTML_LINK, AUTOLINK):
         for match in pattern.finditer(clean):
             group = 1 if match.group(1) is not None else 2
             if match.group(group):
                 found[match.start(group)] = html.unescape(match.group(group))
     for match in BARE_URL.finditer(clean):
-        found.setdefault(match.start(), trim_bare(match.group()))
+        if not any(start <= match.start() < end for start, end in titles):
+            found.setdefault(match.start(), trim_bare(match.group()))
     return [Link(line_of(newlines, offset), target) for offset, target in sorted(found.items())]
 
 

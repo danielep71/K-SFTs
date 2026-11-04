@@ -93,8 +93,10 @@ social preview in **Settings → General**, by hand.
 `check_links.py` reads every Markdown file that Git tracks, staged ones
 included, and extracts inline links and images, reference definitions
 (`[id]: target`), the `href` and `src` of `<a>`, `<img>` and `<source>`
-tags, autolinks and bare URLs. Fenced code blocks, code spans and HTML
-comments are skipped; indented code blocks are not recognized.
+tags, autolinks and bare URLs. Destinations are read as GitHub renders
+them, with backslash escapes and character references decoded. Fenced code
+blocks, code spans and HTML comments are skipped; a link title is not a
+link.
 
 - A relative target is resolved against the file's directory, or against the
   repository root when it starts with `/`. It fails when it leaves the
@@ -104,13 +106,23 @@ comments are skipped; indented code blocks are not recognized.
   heading slug of that file as GitHub computes it, or an explicit
   `<a id="...">` or `<a name="...">` anchor. The slug is the heading's text
   in lowercase, with letters, marks, digits, `_`, `-` and spaces kept and
-  each space turned into `-`; a repeated slug is suffixed `-1`, `-2`. An
+  each space turned into `-`; a slug already taken gets the next free
+  suffix of its base, `-1`, `-2`, as on GitHub. An
   emoji is removed but its variation selector, a mark, is kept, so
   `## ⚙️ Settings` becomes `#%EF%B8%8F-settings`: link such a heading
   through an explicit anchor. A fragment on any other file, such as `#L10`
   on a script, is not checked.
 - Links with a scheme (`https:`, `mailto:`) or starting with `//` are not
-  checked here.
+  checked here; the [weekly check](#external-links) requests the `http`,
+  `https` and `//` ones.
+
+The parser is not a full CommonMark implementation. It supports the
+Markdown this repository writes: ATX and setext headings, also after
+blockquote or list-item markers on the same line; fences, also opened after
+those markers; inline, reference, HTML and bare links. It does not
+recognize indented code blocks, list items continued by indentation alone
+or other container nesting that the repository does not use. Before writing
+such a construct, extend the parser and its tests in the same change.
 
 Each finding is printed as `path:line: message`; exit code 0 means no
 findings, 1 findings. `test_check_links.py`, in `tool-tests`, has a fixture

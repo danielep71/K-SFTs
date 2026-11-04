@@ -154,6 +154,12 @@ class CodeTests(Fixture):
                    "[g](#not-a-heading) [h](missing7.md)\n")
         self.assertFindings("README.md:18: `#not-a-heading`", "README.md:18: `missing7.md`")
 
+    def test_fence_opened_on_a_list_item_line(self) -> None:
+        self.write("README.md", "- ```md\n  [example](missing1.md)\n  ```\n\n"
+                   "1. > ~~~\n   > [quoted](missing2.md)\n   > ~~~\n\n"
+                   "[real](missing3.md)\n")
+        self.assertFindings("README.md:9: `missing3.md`")
+
     def test_unclosed_backticks_do_not_hide_links(self) -> None:
         self.write("README.md", "A ` lone backtick [x](missing.md)\n")
         self.assertFindings("`missing.md`")
@@ -191,6 +197,21 @@ class ExtractionTests(unittest.TestCase):
                 "[t](a_(b).md 'x') [u](c.md (y)) \\[not](d.md) [broken](e.md f g)\n")
         self.assertEqual([link.target for link in cl.extract_links(text)],
                          ["https://img.example/b.svg", "#validation", "a_(b).md", "c.md"])
+
+    def test_link_titles_are_not_links(self) -> None:
+        text = ('[a](https://a.test/ "See https://title.test/x") '
+                "[b](<https://b.test/> 'https://title.test/y')\n"
+                '[r]: https://r.test/ "https://title.test/z"\n'
+                "After https://bare.test/.\n")
+        self.assertEqual([link.target for link in cl.extract_links(text)],
+                         ["https://a.test/", "https://b.test/", "https://r.test/",
+                          "https://bare.test/"])
+
+    def test_long_marker_lines_stay_linear(self) -> None:
+        # Guards the fence and container patterns against backtracking.
+        for line in (" " * 5000 + "x", " -" * 3000 + "x", "1. " * 3000 + "x", "> " * 3000):
+            self.assertEqual(cl.extract_links(line + "\n"), [])
+            self.assertEqual(list(cl.headings(line + "\n")), [])
 
     def test_bare_urls_are_trimmed(self) -> None:
         text = "See https://example.invalid/a. And (https://example.invalid/b).\n"
