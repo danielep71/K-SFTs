@@ -18,8 +18,9 @@ from typing import Any
 
 SCOPE = (
     "Repository tooling, label and issue-form configuration, test-case and changelog format, "
-    "static VBA source and workflow checks only; these checks compile and run no VBA in Excel and "
-    "check no SFT calculation."
+    "documentation links within the repository, static VBA source and workflow checks only; "
+    "these checks compile and run no VBA in Excel, request no external link and check no SFT "
+    "calculation."
 )
 
 
@@ -102,6 +103,7 @@ def default_gates() -> list[Gate]:
              (python, "tools/check_issues.py", "--check-config")),
         Gate("test-cases", "python", (python, "tools/check_test_cases.py")),
         Gate("changelog", "python", (python, "tools/check_changelog.py")),
+        Gate("links", "python", (python, "tools/check_links.py")),
         Gate("vba-source", "python", (python, "tools/check_vba_source.py")),
         Gate("vba-conditionals", "python", (python, "tools/check_vba_conditionals.py")),
         Gate("vba-jumps", "python", (python, "tools/check_vba_jumps.py")),

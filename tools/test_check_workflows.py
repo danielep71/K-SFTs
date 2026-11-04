@@ -184,6 +184,25 @@ class WorkflowInvariantTests(unittest.TestCase):
         self.assertFinding("the inline code contains `${{`")
 
     # Dependabot
+    # The external link check
+    def test_link_check_on_pull_request(self) -> None:
+        self.repo.on("link-check.yml")["pull_request"] = {"branches": ["main"]}
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_without_schedule(self) -> None:
+        del self.repo.on("link-check.yml")["schedule"]
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_permissions(self) -> None:
+        self.repo.workflows["link-check.yml"]["permissions"] = {"issues": "read"}
+        self.assertFinding("link-check.yml: workflow-level permissions must be")
+        self.repo.job("link-check.yml", "external-links")["permissions"]["issues"] = "read"
+        self.assertFinding("link-check.yml: job external-links's permissions must be")
+
+    def test_link_check_missing(self) -> None:
+        del self.repo.workflows["link-check.yml"]
+        self.assertFinding("link-check.yml: not found")
+
     def test_dependabot_duplicate_ecosystem(self) -> None:
         self.repo.dependabot["updates"].append(copy.deepcopy(self.repo.dependabot["updates"][1]))
         self.assertFinding("`pip` is covered 2 times")

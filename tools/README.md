@@ -2,9 +2,9 @@
 
 `check.py` is the single entry point for the repository's checks. The same
 command runs locally and in the `Repository integrity` workflow. It checks the
-repository tooling, the label and issue-form configuration and the workflows.
-It also checks the format of the numerical test-case files and, statically,
-the exported VBA source. It never compiles or runs VBA in Excel and never
+repository tooling, the label and issue-form configuration, the workflows and
+the links within the documentation. It also checks the format of the
+numerical test-case files and, statically, the exported VBA source. It never compiles or runs VBA in Excel and never
 validates an SFT calculation ([VBA static checks](#vba-static-checks)).
 
 ## ▶️ Running the checks
@@ -44,6 +44,7 @@ versions; each gate also writes `<gate>.log`.
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |
 | `changelog` | `CHANGELOG.md` follows its [date and version rules](../CHANGELOG.md#date-and-version-rules): `## [Unreleased]` first, release headings `## [X.Y.Z] - YYYY-MM-DD` with real dates, newest first by version and date, a link reference for each, a release's pointing to its tag; `VERSION` absent before the first dated release, then equal to the newest one (`check_changelog.py`). Nothing is tagged or published. |
+| `links` | Every relative link and image of the Markdown files that Git tracks, outside code, points to a tracked, non-empty file or a tracked directory inside the repository, and every fragment on a Markdown target matches a GitHub heading slug or an `<a id>` or `<a name>` anchor of that file (`check_links.py`); see [Documentation links](#documentation-links). Offline: external URLs are left to the [weekly check](#external-links). |
 | `vba-source` | VBA components only in their homes, named with their role's prefix, `VB_Name` equal to the file name; ASCII only; `Option Explicit`, and `Option Private Module` in `src/core/` and `tests/modules/`; no `Option Base 1`, tab, trailing white space or unclosed string literal; each form beside its `.frx`; stored with LF and checked out with CRLF; no committed workbook (`check_vba_source.py`). |
 | `vba-conditionals` | Every `#If` block evaluates in each modeled host; a project `#Const`, an unknown symbol or an unbalanced block fails; a `Declare` reachable under VBA7 is `PtrSafe` (`check_vba_conditionals.py`). |
 | `vba-jumps` | Every `GoTo`, `GoSub` and `Resume` target is a label of the same procedure, labels are unique per procedure and every procedure is closed, in each modeled host (`check_vba_jumps.py`). |
@@ -84,6 +85,67 @@ node tools/render_social_preview.mjs
 The page loads its fonts from Google Fonts, so rendering needs the network;
 the same HTML renders to the same PNG. A changed PNG is uploaded again as the
 social preview in **Settings → General**, by hand.
+
+<a id="documentation-links"></a>
+
+## 🔗 Documentation links
+
+`check_links.py` reads every Markdown file that Git tracks, staged ones
+included, and extracts inline links and images, reference definitions
+(`[id]: target`), the `href` and `src` of `<a>`, `<img>` and `<source>`
+tags, autolinks and bare URLs. Fenced code blocks, code spans and HTML
+comments are skipped; indented code blocks are not recognized.
+
+- A relative target is resolved against the file's directory, or against the
+  repository root when it starts with `/`. It fails when it leaves the
+  repository, is not tracked by Git, is missing from the working tree or is
+  an empty file; a tracked directory is a valid target.
+- A fragment on a Markdown target, or a same-file `#fragment`, must equal a
+  heading slug of that file as GitHub computes it, or an explicit
+  `<a id="...">` or `<a name="...">` anchor. The slug is the heading's text
+  in lowercase, with letters, marks, digits, `_`, `-` and spaces kept and
+  each space turned into `-`; a repeated slug is suffixed `-1`, `-2`. An
+  emoji is removed but its variation selector, a mark, is kept, so
+  `## ⚙️ Settings` becomes `#%EF%B8%8F-settings`: link such a heading
+  through an explicit anchor. A fragment on any other file, such as `#L10`
+  on a script, is not checked.
+- Links with a scheme (`https:`, `mailto:`) or starting with `//` are not
+  checked here.
+
+Each finding is printed as `path:line: message`; exit code 0 means no
+findings, 1 findings. `test_check_links.py`, in `tool-tests`, has a fixture
+repository for each rule.
+
+<a id="external-links"></a>
+
+## 🌐 External links
+
+`check_external_links.py` checks the external URLs of the same Markdown
+files over the network. It is not a gate: the `External link check`
+workflow (`.github/workflows/link-check.yml`) runs it every Monday at 04:23
+UTC and on manual dispatch, never on pull requests, and it is not a required
+check. The job has `contents: read` only and no secret.
+
+```sh
+python tools/check_external_links.py --summary test-results/external-links.md
+```
+
+It collects every `http` and `https` URL, skips those of this repository,
+its raw files and its website, drops fragments and duplicates, and requests
+each with GET, following up to 10 redirects within a 25-second budget per
+attempt, at most three at a time. A timeout, a network failure, 429 or a
+5xx answer is retried twice, after 5 and 10 seconds. Each URL is then:
+
+| Class | Answer | Effect |
+| --- | --- | --- |
+| Verified | 2xx | none |
+| Not verifiable | 403, 429, 5xx, a timeout, a network failure or too many redirects | a warning, never a pass |
+| Broken | any other answer, such as 404 or 410 | an error: exit code 1 |
+
+The Markdown report, on standard output, in the file given with `--summary`
+and in the workflow's job summary, lists each class with its count. Its
+classification, retries, redirects and skipped URLs are tested against a
+fake fetcher, without network, by `test_check_external_links.py`.
 
 <a id="vba-static-checks"></a>
 
@@ -280,6 +342,9 @@ its last value and could hide, say, a second `issues:` entry.
   `reconcile` job with `pull-requests: write` and its default-branch
   condition are fixed; the job has one inline `run` step and no `${{` in its
   code.
+- **`link-check.yml`:** its only events are `schedule` and
+  `workflow_dispatch`, so it never runs on a pull request, and its workflow
+  and job permissions are `{}` or `contents: read`.
 - **Dependabot:** `github-actions` (`/`) and `pip` (`/tools`), the pinned
   ecosystems, are each covered exactly once; no update sets a milestone;
   each update's only priority label is `P3`.

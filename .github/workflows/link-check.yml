@@ -1,0 +1,57 @@
+name: External link check
+run-name: External link check — ${{ github.ref_name }} @ ${{ github.sha }}
+
+# Requests every external URL of the tracked Markdown files and reports each
+# as verified, not verifiable (a warning) or broken (an error); see
+# tools/README.md (External links). Weekly and on manual dispatch only: it
+# depends on other sites, so it never runs on pull requests and is not a
+# required check. Read-only: no secret and no write permission.
+
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: link-check-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  external-links:
+    name: External link check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    steps:
+      - name: Check out the exact SHA to inspect
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Check external links
+        run: python tools/check_external_links.py --summary test-results/external-links.md
+
+      - name: Publish the report
+        if: always()
+        run: |
+          if [[ -f test-results/external-links.md ]]; then
+            cat test-results/external-links.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report was produced; inspect the failed step." >> "$GITHUB_STEP_SUMMARY"
+          fi

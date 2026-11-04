@@ -47,6 +47,11 @@ MILESTONES_IF = ("github.event_name == 'pull_request_target' || "
                  "github.event_name == 'schedule' || " + DEFAULT_BRANCH_REF)
 SCRIPT = re.compile(r"<<'PY'\n(.*)\nPY\s*$", re.S)
 
+# The external link check depends on other sites: never on pull requests, read-only.
+LINK_CHECK_FILE = "link-check.yml"
+LINK_CHECK_EVENTS = {"schedule", "workflow_dispatch"}
+READ_ONLY: tuple[dict[str, str], ...] = ({}, {"contents": "read"})
+
 # Ecosystems whose versions are pinned here, and where Dependabot must look.
 PINNED_ECOSYSTEMS = {"github-actions": "/", "pip": "/tools"}
 PRIORITY = re.compile(r"^P\d$")
@@ -229,6 +234,25 @@ def milestone_findings(workflows: Mapping[str, Workflow]) -> list[str]:
     return findings
 
 
+def link_check_findings(workflows: Mapping[str, Workflow]) -> list[str]:
+    workflow = workflows.get(LINK_CHECK_FILE)
+    if workflow is None:
+        return [f"{LINK_CHECK_FILE}: not found"]
+    findings = []
+    on = triggers(workflow)
+    if not isinstance(on, Mapping) or set(on) != LINK_CHECK_EVENTS:
+        findings.append(f"{LINK_CHECK_FILE}: events must be exactly "
+                        f"{sorted(LINK_CHECK_EVENTS)}, not {on!r}")
+    if workflow.get("permissions") not in READ_ONLY:
+        findings.append(f"{LINK_CHECK_FILE}: workflow-level permissions must be {{}} "
+                        "or contents: read")
+    for job_id, job in jobs(workflow):
+        if job.get("permissions") not in READ_ONLY:
+            findings.append(f"{LINK_CHECK_FILE}: job {job_id}'s permissions must be {{}} "
+                            "or contents: read")
+    return findings
+
+
 def dependabot_findings(config: Any) -> list[str]:
     updates = config.get("updates") if isinstance(config, Mapping) else None
     if not isinstance(updates, list):
@@ -261,6 +285,7 @@ def findings_for(workflows: Mapping[str, Workflow], dependabot: Any, governance:
         findings += action_findings(name, workflow) + permission_findings(name, workflow)
     findings += integrity_findings(workflows, governance, settings)
     findings += labels_sync_findings(workflows) + milestone_findings(workflows)
+    findings += link_check_findings(workflows)
     findings += dependabot_findings(dependabot)
     return findings
 
