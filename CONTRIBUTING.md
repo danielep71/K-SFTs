@@ -15,7 +15,8 @@ fixtures, regression tests and workbook integrity, with tooling and
 documentation around them.
 
 Never disclose a suspected vulnerability in an issue or pull request; follow
-[SECURITY.md](SECURITY.md).
+[SECURITY.md](SECURITY.md). Every exchange follows the
+[code of conduct](CODE_OF_CONDUCT.md).
 
 <a id="reporting-a-problem"></a>
 
@@ -125,6 +126,7 @@ were not checked in a commit message.
 | Branches, review, protection, issues | [docs/GOVERNANCE.md](docs/GOVERNANCE.md) |
 | Pull request checklist | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 | Vulnerabilities and data | [SECURITY.md](SECURITY.md) |
+| Expected behaviour and how to report a problem | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 | Versions, changelog and releases | [CHANGELOG.md](CHANGELOG.md), [RELEASING.md](RELEASING.md); the first release is 0.2.0. |
 
 ## 📄 Licensing

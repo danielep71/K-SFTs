@@ -119,6 +119,11 @@ to v1.0.0.
   *Keep milestones issue-only* queues each pull request's events separately
   from its scans. `workflow-invariants` checks the exact versions and both
   concurrency settings.
+- A clones spike no longer raises a traffic alert (#282): clones include
+  every CI checkout. Views spikes, more stars or forks and new referrers
+  still do; clones stay in the history, the badge and the alert's table.
+- `CODE_OF_CONDUCT.md` states the expected behaviour, what is not accepted
+  and how to report a problem privately (#282).
 
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop

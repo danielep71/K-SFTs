@@ -151,8 +151,8 @@ After each collection the **Traffic alert** job compares the latest snapshot
 with the one before (`traffic_history.py alert`) and opens one issue, titled
 `Traffic alert: <snapshot date>`, when any of these holds:
 
-- **Views or clones spike:** the 14-day total at least doubles and grows by
-  at least 100 views or 10 clones;
+- **Views spike:** the 14-day views total at least doubles and grows by at
+  least 100 views;
 - **Stars or forks increase;**
 - **New referrer:** a referrer never stored before brings at least 5 views.
 
@@ -162,7 +162,10 @@ closed. Like every issue it is assigned to me, labelled `P3` and
 `repository`, and filed under the open milestone with the earliest due date,
 so it passes *Issue triage*. Its *Schedule* starts on the snapshot date and
 targets a week later. The thresholds are those of my other engine's traffic
-workflow.
+workflow. Clones are not a cause, by my decision of 2026-11-04
+([#282](https://github.com/danielep71/K-SFTs/issues/282)): they include every
+CI checkout, so their spikes are mostly noise. They stay in the history, the
+`clones` badge and the alert's table.
 
 The job uses the workflow token with `issues: write` and `contents: read`. It
 has no environment, so it never receives `TRAFFIC_TOKEN`, and it runs only
