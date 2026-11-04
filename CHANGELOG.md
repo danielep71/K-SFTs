@@ -66,7 +66,6 @@ to v1.0.0.
   `TRAFFIC_APP_PRIVATE_KEY` in `analytics` before integration; retire the old
   personal token only after a successful collection. Tests enforce that the
   key and installation token stay in their respective steps (#272).
-
 - The active release branch is `release/0.3.0`, created from the `v0.2.0`
   commit; task branches start from it, and Dependabot targets it (#228).
   The closed `release/0.1.0` and `release/0.2.0` are deleted; `main` keeps
