@@ -217,7 +217,9 @@ function canonicalRows(stdout) {
   if (!countMatch) throw new Error("Canonical plan summary has no planned-change count");
   const rows = [];
   for (const line of stdout.split("\n")) {
-    const match = line.match(/^\| (update|create|delete) \| `([^`]*)` \| ([^|]*) \|$/);
+    // The label cell is a markdownCode span and may hold escaped pipes; the
+    // detail cell is fixed text without pipes.
+    const match = line.match(/^\| (update|create|delete) \| (.+) \| ([^|]*) \|$/);
     if (match) {
       rows.push({ action: match[1], name: match[2], detail: match[3].trim() });
     }
@@ -228,7 +230,7 @@ function canonicalRows(stdout) {
 function localRows(changes) {
   return changes.map(change => ({
     action: change.action,
-    name: change.name,
+    name: markdownCode(change.name),
     detail: change.action === "update"
       ? change.fields.join(", ")
       : change.action === "delete"
@@ -301,13 +303,27 @@ function buildReport({ repository, manifestPath, manifest, desiredLabels, liveLa
   };
 }
 
-function markdownEscape(value) {
-  return String(value).replaceAll("|", "\\|").replaceAll("\n", " ");
+// A Markdown code span for one dynamic value: the fence is longer than any
+// backtick run inside it, a value at a backtick or both-ends space is padded,
+// "|" is escaped for table cells and every line break becomes a space.
+// Identical to markdownCode in labels-sync.mjs, whose plan rows are compared.
+function markdownCode(value) {
+  const text = String(value).replace(/\r\n|\r|\n/g, " ").replaceAll("|", "\\|");
+  if (text.length === 0) return "` `";
+  const longest = Math.max(0, ...Array.from(text.matchAll(/`+/g), match => match[0].length));
+  const fence = "`".repeat(longest + 1);
+  const pad = /^`|`$/.test(text) || (/^ .* $/s.test(text) && text.trim().length > 0) ? " " : "";
+  return `${fence}${pad}${text}${pad}${fence}`;
 }
 
 function compactLabel(label) {
   if (label === null) return "—";
-  return `\`${markdownEscape(label.name)}\` / \`${label.color}\` / ${markdownEscape(label.description)}`;
+  return `${markdownCode(label.name)} / ${markdownCode(label.color)} / ${markdownCode(label.description)}`;
+}
+
+// Cells of one Markdown table row, split at unescaped pipes.
+function tableCells(row) {
+  return row.replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map(cell => cell.trim());
 }
 
 function markdownReport(report) {
@@ -315,8 +331,8 @@ function markdownReport(report) {
     "# Repository label drift",
     "",
     `- Status: **${String(report.status).toUpperCase()}**`,
-    `- Repository: \`${report.repository ?? "fixture"}\``,
-    `- Manifest: \`${report.manifest}\``,
+    `- Repository: ${markdownCode(report.repository ?? "fixture")}`,
+    `- Manifest: ${markdownCode(report.manifest)}`,
     `- Desired / observed: **${report.counts.desired} / ${report.counts.observed}**`,
     `- Differences: **${report.counts.differences}**`,
     `- Create / update / delete: **${report.counts.create} / ${report.counts.update} / ${report.counts.delete}**`,
@@ -332,7 +348,7 @@ function markdownReport(report) {
     );
     for (const difference of report.differences) {
       lines.push(
-        `| ${difference.action} | \`${markdownEscape(difference.name)}\` | `
+        `| ${difference.action} | ${markdownCode(difference.name)} | `
         + `${difference.fields.length > 0 ? difference.fields.join(", ") : "—"} | `
         + `${compactLabel(difference.observed)} | ${compactLabel(difference.desired)} |`
       );
@@ -433,8 +449,45 @@ async function runSelfTest(manifestPath) {
   assert.match(markdownReport(driftFirst), /simulated out-of-band change/);
   assert.match(markdownReport(driftFirst), new RegExp(missing.name));
 
+  // Hostile values: each stays one table cell, in this report and in the
+  // canonical plan rows it is cross-checked against.
+  assert.equal(markdownCode("plain"), "`plain`");
+  assert.equal(markdownCode("a`b"), "``a`b``");
+  assert.equal(markdownCode("``x`"), "``` ``x` ```");
+  assert.equal(markdownCode("a|b"), "`a\\|b`");
+  assert.equal(markdownCode("one\r\ntwo\rthree\nfour"), "`one two three four`");
+  assert.equal(markdownCode(" padded "), "`  padded  `");
+  assert.equal(markdownCode(""), "` `");
+  const hostileName = "odd `x` | y\r\nz``";
+  const hostileLive = structuredClone(desiredLabels);
+  hostileLive[0].description = "pipe | and `tick`\nnext line";
+  hostileLive.push({ name: hostileName, color: "abcdef", description: "a|b\r\nc" });
+  const hostile = await checkedReport({
+    repository: "fixture/hostile|`repo`",
+    manifestPath,
+    manifest,
+    desiredLabels,
+    liveLabels: hostileLive
+  });
+  assert.deepEqual(hostile.differences.map(item => item.action), ["update", "delete"]);
+  const hostileMarkdown = markdownReport(hostile);
+  assert.doesNotMatch(hostileMarkdown, /\r/);
+  assert.match(hostileMarkdown, /Repository: `` fixture\/hostile\\\|`repo` ``\n/);
+  const rows = hostileMarkdown.split("\n").filter(line => /^\| (update|create|delete) \|/.test(line));
+  assert.equal(rows.length, 2);
+  for (const row of rows) assert.equal(tableCells(row).length, 5, row);
+  assert.deepEqual(tableCells(rows[1]), [
+    "delete",
+    "``` odd `x` \\| y z`` ```",
+    "—",
+    "``` odd `x` \\| y z`` ``` / `ABCDEF` / `a\\|b c`",
+    "—"
+  ]);
+  assert.match(tableCells(rows[0])[3], / \/ ``pipe \\\| and `tick` next line``$/);
+
   process.stdout.write(
     "SELF-TEST PASS: retry delays and deterministic no-drift and create/update/delete drift fixtures are read-only and match the canonical reconciler.\n"
+    + "SELF-TEST PASS: summary code spans for values with backticks, pipes and line breaks, cross-checked with the canonical plan rows.\n"
   );
 }
 
