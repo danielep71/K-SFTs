@@ -7,6 +7,7 @@ import copy
 import io
 import os
 import re
+import subprocess
 import unittest
 from collections.abc import Callable
 from pathlib import Path
@@ -151,6 +152,27 @@ class WorkflowInvariantTests(unittest.TestCase):
             "| Required status context | `Integrity` |")
         self.assertFinding("the rulesets require ['Integrity', 'Repository integrity']")
 
+    def test_required_runtime_not_exact(self) -> None:
+        steps = self.repo.job("repository-integrity.yml", "repository-integrity")["steps"]
+        python = next(step for step in steps
+                      if str(step.get("uses", "")).startswith("actions/setup-python@"))
+        python["with"]["python-version"] = "3.13"
+        self.assertFinding("actions/setup-python `python-version` is '3.13'")
+        node = next(step for step in steps
+                    if str(step.get("uses", "")).startswith("actions/setup-node@"))
+        node["with"]["node-version"] = "22"
+        self.assertFinding("actions/setup-node `node-version` is '22'")
+
+    def test_required_concurrency_per_ref(self) -> None:
+        self.repo.workflows["repository-integrity.yml"]["concurrency"] = {
+            "group": "repository-integrity-${{ github.ref }}", "cancel-in-progress": True}
+        self.assertFinding("repository-integrity.yml: concurrency must group pull requests")
+
+    def test_milestones_single_queue(self) -> None:
+        self.repo.workflows["pr-milestones.yml"]["concurrency"] = {
+            "group": "pr-milestones", "cancel-in-progress": False}
+        self.assertFinding("pr-milestones.yml: concurrency must queue each pull request")
+
     # labels-sync and pr-milestones
     def test_labels_sync_condition(self) -> None:
         self.repo.job("labels-sync.yml", "reconcile")["if"] = "github.event_name != 'pull_request'"
@@ -183,7 +205,88 @@ class WorkflowInvariantTests(unittest.TestCase):
         step["run"] = step["run"].replace("import json", "import json  # ${{ github.head_ref }}")
         self.assertFinding("the inline code contains `${{`")
 
+    def test_traffic_app_credentials_stay_in_their_steps(self) -> None:
+        workflow = self.repo.workflows["traffic-history.yml"]
+        jobs = workflow["jobs"]
+        collect = jobs["collect"]
+        steps = collect["steps"]
+        key = "${{ secrets.TRAFFIC_APP_PRIVATE_KEY }}"
+        token = "${{ steps.app-token.outputs.token }}"
+        with_key = [step for step in steps if "TRAFFIC_APP_PRIVATE_KEY" in str(step)]
+        self.assertEqual([step["name"] for step in with_key],
+                         ["Check the traffic App configuration", "Create the traffic App token"])
+        config, mint = with_key
+        self.assertEqual(config["env"], {
+            "CLIENT_ID": "${{ vars.TRAFFIC_APP_CLIENT_ID }}",
+            "HAS_KEY": "${{ secrets.TRAFFIC_APP_PRIVATE_KEY != '' }}",
+        })
+        self.assertNotIn(key, str(config))
+        self.assertEqual(mint["id"], "app-token")
+        self.assertTrue(mint["uses"].startswith("actions/create-github-app-token@"))
+        self.assertEqual(mint["with"], {
+            "client-id": "${{ vars.TRAFFIC_APP_CLIENT_ID }}",
+            "private-key": key,
+            "permission-administration": "read",
+        })
+        with_token = [step for step in steps if token in str(step)]
+        self.assertEqual([step["name"] for step in with_token],
+                         ["Fetch traffic from the GitHub API"])
+        fetch = with_token[0]
+        self.assertEqual(fetch["env"]["TRAFFIC_TOKEN"], token)
+        self.assertNotRegex(fetch["run"], r"\bpython|\.py\b|source/")
+        self.assertNotRegex(fetch["run"], r"TRAFFIC_TOKEN.*GITHUB_(ENV|OUTPUT)")
+        self.assertLess(steps.index(config), steps.index(mint))
+        self.assertLess(steps.index(mint), steps.index(fetch))
+        self.assertEqual(collect["environment"], "analytics")
+        self.assertNotIn("secrets.TRAFFIC_TOKEN", str(workflow))
+        # Removing the three authorized steps also checks workflow/job-level
+        # env, outputs and any other job for accidental credential exposure.
+        outside = copy.deepcopy(workflow)
+        outside["jobs"]["collect"]["steps"] = [
+            step for step in steps if step not in (config, mint, fetch)]
+        self.assertNotIn("TRAFFIC_APP_PRIVATE_KEY", str(outside))
+        self.assertNotIn("app-token.outputs", str(outside))
+        self.assertNotIn("environment", jobs["alert"])
+        self.assertNotIn("secrets.", str(jobs["alert"]))
+
+    def test_traffic_app_configuration_missing_values_fail_clearly(self) -> None:
+        steps = self.repo.job("traffic-history.yml", "collect")["steps"]
+        config = next(step for step in steps
+                      if step["name"] == "Check the traffic App configuration")
+        for client_id, has_key in (("", "false"), ("", "true"),
+                                   ("test-client", "false"), ("test-client", "true")):
+            with self.subTest(client_id=client_id, has_key=has_key):
+                result = subprocess.run(
+                    ["bash", "-e", "-c", config["run"]], capture_output=True, text=True,
+                    env={"CLIENT_ID": client_id, "HAS_KEY": has_key}, check=False)
+                if client_id and has_key == "true":
+                    self.assertEqual(result.returncode, 0)
+                    self.assertEqual(result.stdout, "")
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("::error::TRAFFIC_APP_CLIENT_ID or TRAFFIC_APP_PRIVATE_KEY "
+                                  "is not set in the analytics environment", result.stdout)
+
     # Dependabot
+    # The external link check
+    def test_link_check_on_pull_request(self) -> None:
+        self.repo.on("link-check.yml")["pull_request"] = {"branches": ["main"]}
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_without_schedule(self) -> None:
+        del self.repo.on("link-check.yml")["schedule"]
+        self.assertFinding("link-check.yml: events must be exactly")
+
+    def test_link_check_permissions(self) -> None:
+        self.repo.workflows["link-check.yml"]["permissions"] = {"issues": "read"}
+        self.assertFinding("link-check.yml: workflow-level permissions must be")
+        self.repo.job("link-check.yml", "external-links")["permissions"]["issues"] = "read"
+        self.assertFinding("link-check.yml: job external-links's permissions must be")
+
+    def test_link_check_missing(self) -> None:
+        del self.repo.workflows["link-check.yml"]
+        self.assertFinding("link-check.yml: not found")
+
     def test_dependabot_duplicate_ecosystem(self) -> None:
         self.repo.dependabot["updates"].append(copy.deepcopy(self.repo.dependabot["updates"][1]))
         self.assertFinding("`pip` is covered 2 times")

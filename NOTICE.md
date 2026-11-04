@@ -31,7 +31,8 @@ holder, I publish every adapted file here under MPL-2.0.
 | --- | --- | --- | --- |
 | `.github/workflows/traffic-history.yml`, `tools/traffic_history.py`, `docs/TRAFFIC.md` | [K-Risk-Engines](https://github.com/danielep71/K-Risk-Engines) `docs/TRAFFIC.md` (design) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository ([#36](https://github.com/danielep71/K-SFTs/issues/36)): merge logic moved into a tested script with validation and all-or-nothing writes; data branch created with a fixed layout; zero and unavailable days distinguished; token limited to the fetch step. |
 | `.github/PULL_REQUEST_TEMPLATE.md`; parts of `docs/GOVERNANCE.md` (Branches, Integration, Review) | K-Risk-Engines (structure) | `8942d070c80097762534ad6fb09e9c38b101da83` | Rewritten for this repository's branches, sync procedure and checks ([#1](https://github.com/danielep71/K-SFTs/issues/1), [#11](https://github.com/danielep71/K-SFTs/issues/11)). |
-| `.github/workflows/pr-milestones.yml` | [K-FRTB-SA](https://github.com/danielep71/K-FRTB-SA) `.github/workflows/pr-milestones.yml`, published there under the MIT License; relicensed here under MPL-2.0 by me, its copyright holder | `faa5799af271b32aff8f2034125e2f3915180f5d` | A header comment, and a condition on the `reconcile` job so that a push or a manual run executes only the default branch's copy ([#261](https://github.com/danielep71/K-SFTs/issues/261)); the inline script, the permissions and the triggers are unchanged. |
+| `.github/workflows/pr-milestones.yml` | [K-FRTB-SA](https://github.com/danielep71/K-FRTB-SA) `.github/workflows/pr-milestones.yml`, published there under the MIT License; relicensed here under MPL-2.0 by me, its copyright holder | `faa5799af271b32aff8f2034125e2f3915180f5d` | A header comment, and a condition on the `reconcile` job so that a push or a manual run executes only the default branch's copy ([#261](https://github.com/danielep71/K-SFTs/issues/261)); a concurrency group per pull request, separate from the scans ([#279](https://github.com/danielep71/K-SFTs/issues/279)); the inline script, the permissions and the triggers are unchanged. |
+| App credential steps in `.github/workflows/traffic-history.yml`, setup and rotation guidance in `docs/TRAFFIC.md`, credential-isolation test in `tools/test_check_workflows.py` | [MyTemplate](https://github.com/danielep71/MyTemplate): `.github/workflows/traffic-history.yml`, `docs/repo_governance/TRAFFIC.md`, `tests/test_workflow_controls.py` (MPL-2.0) | `5de949bd58b4b8b2a31d3486d7bd25c1edd697e9` | Adapted for this repository's documentation path, existing analytics schedule and test suite; extended isolation and configuration-failure checks (#272). |
 
 The other files were written for, or adapted by me into, this
 repository. Revisions are full commit SHAs on the source repository's `main`
@@ -45,7 +46,7 @@ copied into the repository; each keeps its own licence.
 
 | Tool | Version | Licence | Use |
 | --- | --- | --- | --- |
-| `actions/checkout`, `actions/setup-python`, `actions/setup-node`, `actions/upload-artifact` | Pinned by full SHA in the workflows | MIT | GitHub Actions steps |
+| `actions/checkout`, `actions/setup-python`, `actions/setup-node`, `actions/upload-artifact`, `actions/create-github-app-token` | Pinned by full SHA in the workflows | MIT | GitHub Actions steps |
 | Ruff | 0.17.1 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
 | mypy | 2.4.0 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
 | actionlint | 1.7.12 | MIT | Workflow check, downloaded and verified by SHA-256 |
@@ -55,7 +56,8 @@ copied into the repository; each keeps its own licence.
 The licences were checked on 2026-10-24 against the upstream licence files and
 package metadata, again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
 against their package metadata, and for PyYAML 6.0.3 on 2026-10-31 against
-its package metadata.
+its package metadata. The `actions/create-github-app-token` licence was
+checked at the pinned revision on 2026-10-31.
 
 ## 🚫 Data
 
@@ -113,8 +115,9 @@ README sheet (#167).
 authored on 2026-10-26 at my request (#151), and the same
 pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
 vector shapes; the PNG is its rendered export, at twice the SVG's size and
-reduced to 256 colours. The diagram names the sister calculators K-SA-CCR,
-K-CCP and K-CVA by my decision of 2026-10-26: an explicit
-exception, for this diagram, to the rule of #137 that no file names
-K-SACCR. It is an architecture illustration, not evidence of an implemented
-or validated calculation.
+reduced to 256 colours. The diagram names the sister calculators K-SACCR
+and K-CVA, and this project as K-SFTs, by my decision of 2026-10-26, revised
+on 2026-11-04 to match the K-Risk Engines copy (#289): an explicit exception,
+for this diagram, to the rule of #137 that no file names K-SACCR. Its CCP
+capital box names no project. It is an architecture illustration, not
+evidence of an implemented or validated calculation.
