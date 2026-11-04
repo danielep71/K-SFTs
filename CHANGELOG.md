@@ -145,7 +145,6 @@ to v1.0.0.
   JavaScript/TypeScript and Python, `security-extended` queries, on pull
   requests and pushes to `main` and `release/**` and weekly. It replaces
   GitHub's default setup, which is switched off in the settings.
-
 - The workbook follows the support matrix (#248): a `BCBS` regime on
   Params or in a table row, and a reporting date before 2025-01-01, stop
   the run; a `BCBS` netting set and the `QCCP` counterparty class make the
@@ -181,6 +180,10 @@ to v1.0.0.
   `traffic-history`. Files in the earlier layouts are read with the
   observation time equal to the collection time and rewritten on the next
   merge, with no stored value changed.
+- A run that stops before its parameters are checked no longer ends its
+  closing message with an empty "Run class: ." (#220); the run class is
+  shown when it is set, and the result line of `RunSFT_Silent` is
+  unchanged.
 
 <a id="020"></a>
 
