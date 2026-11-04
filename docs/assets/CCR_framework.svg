@@ -19,7 +19,7 @@
 <text x="84" y="208" font-size="19" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="start">CALCULATE EXPOSURES — two engines by transaction type</text>
 <text x="1560" y="207" font-size="15" font-weight="normal" font-style="italic" fill="#DCE7F5" text-anchor="end">one exposure per netting set</text>
 <rect x="30" y="234" width="760" height="214" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
-<text x="48" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SA-CCR | DERIVATIVES</text>
+<text x="48" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SACCR | DERIVATIVES</text>
 <text x="772" y="268" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE52; CRR Art. 274-280f</text>
 <text x="48" y="302" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Transactions, netting sets, margin and collateral</text>
 <text x="48" y="328" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">EAD = α × (RC + PFE), with α = 1.4</text>
@@ -29,7 +29,7 @@
 <rect x="112" y="409" width="191" height="28" rx="14" fill="#1F4E8C"/>
 <text x="207.5" y="428" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">EAD per netting set</text>
 <rect x="810" y="234" width="760" height="214" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
-<text x="828" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SFT | SECURITIES FINANCING</text>
+<text x="828" y="270" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-SFTs | SECURITIES FINANCING</text>
 <text x="1552" y="268" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE22; CRR Art. 220-227</text>
 <text x="828" y="302" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Repos, reverse repos, securities lending and margin lending</text>
 <text x="828" y="328" font-size="16.5" font-weight="normal" font-style="normal" fill="#2B3A4E" text-anchor="start">Financial collateral comprehensive method, supervisory haircuts</text>
@@ -84,7 +84,7 @@
 <rect x="112" y="1099" width="182" height="28" rx="14" fill="#1F4E8C"/>
 <text x="203.0" y="1118" font-size="14.5" font-weight="bold" font-style="normal" fill="#FFFFFF" text-anchor="middle">RWA and K ordinary</text>
 <rect x="810" y="846" width="760" height="292" rx="6" fill="#EAF1FA" stroke="#A9C1E3" stroke-width="1.5"/>
-<text x="828" y="882" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">K-CCP | CCP CAPITAL</text>
+<text x="828" y="882" font-size="21" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">CCP CAPITAL</text>
 <text x="1552" y="880" font-size="14" font-weight="normal" font-style="italic" fill="#5B6B80" text-anchor="end">CRE54; CRR Art. 306-309</text>
 <rect x="822" y="892" width="736" height="28" rx="3" fill="#D6E3F4"/>
 <text x="1110" y="912" font-size="15" font-weight="bold" font-style="normal" fill="#0B2A5B" text-anchor="start">Qualifying CCP</text>

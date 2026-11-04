@@ -154,6 +154,11 @@ to v1.0.0.
   the 0.2.0 template fails the layout check: build it again from the new
   template.
 
+- The CCR framework diagram (`docs/assets/CCR_framework.svg` and `.png`)
+  uses the project names K-SACCR and K-SFTs, and its CCP capital box names no
+  project, as in the K-Risk Engines copy it now matches byte for byte;
+  `NOTICE.md` describes the names (#289).
+
 ### Fixed
 
 - Label reconciliation never deletes a label still in use (#277): before

@@ -113,8 +113,9 @@ README sheet (#167).
 authored on 2026-10-26 at my request (#151), and the same
 pair is used in K-SACCR and K-Risk Engines. The SVG holds editable text and
 vector shapes; the PNG is its rendered export, at twice the SVG's size and
-reduced to 256 colours. The diagram names the sister calculators K-SA-CCR,
-K-CCP and K-CVA by my decision of 2026-10-26: an explicit
-exception, for this diagram, to the rule of #137 that no file names
-K-SACCR. It is an architecture illustration, not evidence of an implemented
-or validated calculation.
+reduced to 256 colours. The diagram names the sister calculators K-SACCR
+and K-CVA, and this project as K-SFTs, by my decision of 2026-10-26, revised
+on 2026-11-04 to match the K-Risk Engines copy (#289): an explicit exception,
+for this diagram, to the rule of #137 that no file names K-SACCR. Its CCP
+capital box names no project. It is an architecture illustration, not
+evidence of an implemented or validated calculation.
