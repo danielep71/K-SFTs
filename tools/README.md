@@ -38,9 +38,9 @@ versions; each gate also writes `<gate>.log`.
 | Gate | Checks |
 | --- | --- |
 | `tool-tests` | Unit tests of the tooling (`tools/test_*.py`), including this runner's status, report and missing-tool rules. |
-| `labels-sync-self-test` | The label synchronizer's validation and reconciliation fixtures. |
+| `labels-sync-self-test` | The label synchronizer's validation and reconciliation fixtures, including the pruning guard against a fake GitHub (a label on an open issue or only on a closed pull request is never deleted, a name with a comma is refused, nothing is changed when the guard fails, an unused extra label is deleted) and the summary's code spans for values with backticks, pipes and line breaks. |
 | `labels-manifest` | `.github/labels.json` is valid. |
-| `labels-drift-self-test` | The read-only drift detector's fixtures. |
+| `labels-drift-self-test` | The read-only drift detector's fixtures, including summary values with backticks, pipes and line breaks. |
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |
 | `changelog` | `CHANGELOG.md` follows its [date and version rules](../CHANGELOG.md#date-and-version-rules): `## [Unreleased]` first, release headings `## [X.Y.Z] - YYYY-MM-DD` with real dates, newest first by version and date, a link reference for each, a release's pointing to its tag; `VERSION` absent before the first dated release, then equal to the newest one (`check_changelog.py`). Nothing is tagged or published. |
@@ -58,7 +58,10 @@ versions; each gate also writes `<gate>.log`.
 
 The label gates run on every pull request here, although the label workflows
 run on a pull request only when it changes label files. Live label
-reconciliation and drift detection stay in those workflows.
+reconciliation and drift detection stay in those workflows. Pruning never
+deletes a label still in use: reconciliation first checks every label planned
+for deletion against issues and pull requests in every state, and fails with
+nothing changed if one is in use or cannot be queried reliably.
 
 ## 🧪 Prototype scripts
 

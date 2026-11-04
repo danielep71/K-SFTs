@@ -126,6 +126,11 @@ to v1.0.0.
 
 ### Fixed
 
+- Label reconciliation never deletes a label still in use (#277): before
+  any change it checks every label planned for deletion against issues and
+  pull requests, open or closed, and fails with nothing changed if one is in
+  use or its name cannot be queried (a comma). The label summaries render
+  names, colours and errors with backticks, pipes or line breaks safely.
 - The traffic history no longer lets an older collection, merged after a
   newer one, overwrite the newer one's data when the newer one left the
   values unchanged (#265). `daily.csv` gains `views_observed_at` and
