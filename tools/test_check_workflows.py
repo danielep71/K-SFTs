@@ -151,6 +151,27 @@ class WorkflowInvariantTests(unittest.TestCase):
             "| Required status context | `Integrity` |")
         self.assertFinding("the rulesets require ['Integrity', 'Repository integrity']")
 
+    def test_required_runtime_not_exact(self) -> None:
+        steps = self.repo.job("repository-integrity.yml", "repository-integrity")["steps"]
+        python = next(step for step in steps
+                      if str(step.get("uses", "")).startswith("actions/setup-python@"))
+        python["with"]["python-version"] = "3.13"
+        self.assertFinding("actions/setup-python `python-version` is '3.13'")
+        node = next(step for step in steps
+                    if str(step.get("uses", "")).startswith("actions/setup-node@"))
+        node["with"]["node-version"] = "22"
+        self.assertFinding("actions/setup-node `node-version` is '22'")
+
+    def test_required_concurrency_per_ref(self) -> None:
+        self.repo.workflows["repository-integrity.yml"]["concurrency"] = {
+            "group": "repository-integrity-${{ github.ref }}", "cancel-in-progress": True}
+        self.assertFinding("repository-integrity.yml: concurrency must group pull requests")
+
+    def test_milestones_single_queue(self) -> None:
+        self.repo.workflows["pr-milestones.yml"]["concurrency"] = {
+            "group": "pr-milestones", "cancel-in-progress": False}
+        self.assertFinding("pr-milestones.yml: concurrency must queue each pull request")
+
     # labels-sync and pr-milestones
     def test_labels_sync_condition(self) -> None:
         self.repo.job("labels-sync.yml", "reconcile")["if"] = "github.event_name != 'pull_request'"

@@ -77,15 +77,22 @@ def ruff_complexity_probe(root: Path, scratch: Path) -> tuple[int, str]:
 
 
 def mypy_strict_probe(root: Path, scratch: Path) -> tuple[int, str]:
-    """Prove strict mode is active: an unannotated function is rejected."""
+    """Prove strict mode and warn_unreachable are active: an unannotated function
+    and a statement made unreachable by narrowing are both rejected."""
     probe = scratch / "strict_probe.py"
+    command = ["mypy", "--no-pretty", "--no-incremental", str(probe)]
     probe.write_text("def probe(value: int) -> int:\n    return value\n", encoding="utf-8")
-    ok_code, ok_log = run(["mypy", "--no-pretty", "--no-incremental", str(probe)], root)
+    ok_code, ok_log = run(command, root)
     probe.write_text("def probe(value):\n    return value\n", encoding="utf-8")
-    bad_code, bad_log = run(["mypy", "--no-pretty", "--no-incremental", str(probe)], root)
-    log = f"annotated (expected pass):\n{ok_log}\nunannotated (expected fail):\n{bad_log}"
+    bad_code, bad_log = run(command, root)
+    probe.write_text("def probe(value: int) -> int:\n    if isinstance(value, int):\n"
+                     "        return value\n    return 0\n", encoding="utf-8")
+    dead_code, dead_log = run(command, root)
+    log = (f"annotated (expected pass):\n{ok_log}\nunannotated (expected fail):\n{bad_log}\n"
+           f"unreachable (expected fail):\n{dead_log}")
     rejected = bad_code != 0 and "[no-untyped-def]" in bad_log
-    return (0 if ok_code == 0 and rejected else 1), log
+    unreachable = dead_code != 0 and "[unreachable]" in dead_log
+    return (0 if ok_code == 0 and rejected and unreachable else 1), log
 
 
 def default_gates() -> list[Gate]:
@@ -179,6 +186,10 @@ def git(root: Path, *args: str) -> str:
                           text=True, check=True).stdout
 
 
+def worktree_dirty(root: Path) -> bool:
+    return bool(git(root, "status", "--porcelain", "--untracked-files=normal"))
+
+
 def render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Repository integrity",
@@ -220,15 +231,22 @@ def main(argv: Sequence[str] | None = None, gates: Sequence[Gate] | None = None)
     output.mkdir(parents=True, exist_ok=True)
     selected = list(default_gates() if gates is None else gates)
     sha = git(root, "rev-parse", "HEAD").strip()
-    dirty = bool(git(root, "status", "--porcelain", "--untracked-files=normal"))
+    dirty_before = worktree_dirty(root)
     results = run_gates(selected, root, output)
+    # Read the tree again: a gate must not leave a tracked change or an
+    # untracked, unignored file behind.
+    dirty_after = worktree_dirty(root)
+    dirty = dirty_before or dirty_after
     status = overall_status(results, ci=args.ci, dirty=dirty, allow_missing=args.allow_missing)
-    if args.ci and dirty:
+    if args.ci and dirty_before:
         print("working tree is dirty: --ci requires a clean checkout", flush=True)
+    elif args.ci and dirty_after:
+        print("working tree changed during the gates: --ci requires it to stay clean", flush=True)
     report: dict[str, Any] = {
         "schema_version": 1,
         "candidate_sha": sha,
         "dirty": dirty,
+        "dirty_after_gates": dirty_after,
         "mode": "ci" if args.ci else "local",
         "status": status,
         "scope": SCOPE,

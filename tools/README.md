@@ -23,7 +23,7 @@ python tools/check.py
 | --- | --- |
 | *(default)* | Runs every gate. A gate whose tool is missing is **NOT RUN** and fails the run. |
 | `--allow-missing` | Reports missing tools as **NOT RUN** and exits 0 with status **INCOMPLETE**. An incomplete run is never a pass; use it only to iterate locally. |
-| `--ci` | Requires every tool and a clean checkout (no modified or untracked files). Used by the workflow. |
+| `--ci` | Requires every tool and a clean checkout (no modified or untracked files), before the gates and again after them, so a gate that leaves a file behind fails the run. Used by the workflow. |
 
 Exit code 0 means PASS (or INCOMPLETE with `--allow-missing`); 1 means a gate
 failed, a tool was missing, or `--ci` found a dirty tree.
@@ -38,9 +38,9 @@ versions; each gate also writes `<gate>.log`.
 | Gate | Checks |
 | --- | --- |
 | `tool-tests` | Unit tests of the tooling (`tools/test_*.py`), including this runner's status, report and missing-tool rules. |
-| `labels-sync-self-test` | The label synchronizer's validation and reconciliation fixtures. |
+| `labels-sync-self-test` | The label synchronizer's validation and reconciliation fixtures, including the pruning guard against a fake GitHub (a label on an open issue or only on a closed pull request is never deleted, a name with a comma is refused, nothing is changed when the guard fails, an unused extra label is deleted) and the summary's code spans for values with backticks, pipes and line breaks. |
 | `labels-manifest` | `.github/labels.json` is valid. |
-| `labels-drift-self-test` | The read-only drift detector's fixtures. |
+| `labels-drift-self-test` | The read-only drift detector's fixtures, including summary values with backticks, pipes and line breaks. |
 | `issue-config` | The issue forms set the assignee and exactly their default priority (bug `P2`, enhancement and documentation `P3`), use only catalogue labels and have a dependencies field; blank issues are disabled; `blocked` is the catalogue's only dependency status label (`check_issues.py --check-config`). |
 | `test-cases` | The numerical test-case files under `tests/fixtures/` and `tests/expected/` follow [docs/methodology/TEST_CASES.md](../docs/methodology/TEST_CASES.md): envelopes, identifiers and references, unit suffixes, output forms, rule IDs, the regime and calculation date against the version applicability table, reference classes, register sources and tolerances (`check_test_cases.py`). Format only: no value is computed or compared. |
 | `changelog` | `CHANGELOG.md` follows its [date and version rules](../CHANGELOG.md#date-and-version-rules): `## [Unreleased]` first, release headings `## [X.Y.Z] - YYYY-MM-DD` with real dates, newest first by version and date, a link reference for each, a release's pointing to its tag; `VERSION` absent before the first dated release, then equal to the newest one (`check_changelog.py`). Nothing is tagged or published. |
@@ -52,14 +52,17 @@ versions; each gate also writes `<gate>.log`.
 | `vba-public-api` | Every procedure, and every module-level declaration that VBA would otherwise make public (`Enum`, `Type`, `Event`, `Declare`), states its visibility; the public declarations of `src/modules/` and [docs/PUBLIC_API.txt](../docs/PUBLIC_API.txt) match one to one with their signatures; no public name collides (`check_vba_public_api.py`). |
 | `ruff` | Lint of `tools/` with the rules in `pyproject.toml`. |
 | `ruff-complexity-probe` | The complexity ceiling is active: a synthetic complexity-15 function passes and one at 16 is rejected. |
-| `mypy` | `mypy --strict` over `tools/`, tests included. |
-| `mypy-strict-probe` | Strict mode is active: an annotated function passes and the same function without annotations is rejected. |
+| `mypy` | `mypy --strict` with `warn_unreachable` over `tools/`, tests included. |
+| `mypy-strict-probe` | Strict mode and `warn_unreachable` are active: an annotated function passes, while the same function without annotations, and a statement made unreachable by an `isinstance` check, are rejected. |
 | `actionlint` | Syntax, expressions and shell scripts (through shellcheck, when installed) of every workflow. |
 | `workflow-invariants` | The security and governance invariants of `.github/workflows/*.yml` and `.github/dependabot.yml`, read with PyYAML (`check_workflows.py`); see [Workflow invariants](#workflow-invariants). |
 
 The label gates run on every pull request here, although the label workflows
 run on a pull request only when it changes label files. Live label
-reconciliation and drift detection stay in those workflows.
+reconciliation and drift detection stay in those workflows. Pruning never
+deletes a label still in use: reconciliation first checks every label planned
+for deletion against issues and pull requests in every state, and fails with
+nothing changed if one is in use or cannot be queried reliably.
 
 ## 🧪 Prototype scripts
 
@@ -297,7 +300,8 @@ in Windows PowerShell 5.1
 
 `check_issues.py` applies the issue rules of `docs/GOVERNANCE.md` (Triage) to
 every open issue and reports findings; it never changes an issue. The
-`Issue triage` workflow runs it on issue events with a read-only token.
+`Issue triage` workflow runs it on issue and milestone events with a
+read-only token.
 Pull requests are not audited, but their numbers are loaded so that a
 dependency section may name one as a reference; it never counts as a
 prerequisite. The token therefore needs `pull-requests: read` as well:
@@ -309,6 +313,21 @@ python tools/check_issues.py --input issues.json --repo-name danielep71/K-SFTs  
 python tools/check_issues.py --check-config        # configuration only: forms, catalogue, label guide, Dependabot
 ```
 
+Each open issue's milestone must be open (`milestone-closed`), and its target
+completion date present (`target-date-missing`), a real calendar date
+(`target-date-invalid`) and not after the date part of the milestone's
+`due_on` (`target-date-after-due`, skipped when the milestone has no due
+date). The date is the bold value of the line
+`Target completion: **YYYY-MM-DD**` in the body's *Schedule* section (the
+first level-2 or level-3 heading whose first word is *Schedule*, such as
+`## Schedule — baseline 2026-10-29`); without
+it, the first line under the issue form's `### 📅 Target end date` heading,
+where `_No response_` counts as missing. A value is valid only if it matches
+`^\d{4}-\d{2}-\d{2}$` and `date.fromisoformat` accepts it, so `2026-02-30`
+fails. The milestone's state and due date come from the REST issue object, so
+an export read with `--input` must keep the `milestone` objects whole; a
+malformed `due_on` stops the audit (exit code 2).
+
 Exit code 0 means no findings, 1 means findings, 2 means the audit could not
 run. Offline exports require `--repo-name owner/name`; the required assignee
 is read from the bug form and checked for consistency across all forms.
@@ -317,7 +336,10 @@ field the manifest schema does not define is an error. `--check-config` also
 checks that the label tables of `docs/GOVERNANCE.md` (Issues) explain every
 catalogue label exactly once and no other, and that the labels and assignees
 of `.github/dependabot.yml` are in the catalogue and equal to the forms'
-assignee; it reads that file line by line, without a YAML library. Its rules
+assignee; it reads that file line by line, without a YAML library. It also
+requires each of the three forms to have a required `input` with
+`id: target_end_date` and the label *Target end date*, the heading that the
+audit reads, reading the forms line by line as well. Its rules
 are tested by `test_check_issues.py` in `tool-tests`.
 
 <a id="workflow-invariants"></a>
@@ -347,13 +369,17 @@ its last value and could hide, say, a second `issues:` entry.
   and of the rulesets in
   [docs/REPOSITORY_SETTINGS.md](../docs/REPOSITORY_SETTINGS.md), have no
   `if` and no `strategy`, and filter `pull_request` and `push` only by the
-  protected branches, `main` and `release/**`, with no path filter.
+  protected branches, `main` and `release/**`, with no path filter. It
+  pins Python and Node.js to exact `X.Y.Z` versions, and its concurrency
+  groups a pull request's runs by number, cancelling only an older run of the
+  same pull request, while every push or manual run has a group of its own.
 - **Default-branch writes:** the condition of `labels-sync.yml`'s
   `reconcile` job must check the default branch.
 - **`pr-milestones.yml`:** its events, its `permissions: {}`, its single
   `reconcile` job with `pull-requests: write` and its default-branch
   condition are fixed; the job has one inline `run` step and no `${{` in its
-  code.
+  code. Its concurrency queues each pull request's events separately from
+  the scans, and never cancels.
 - **`link-check.yml`:** its only events are `schedule` and
   `workflow_dispatch`, so it never runs on a pull request, and its workflow
   and job permissions are `{}` or `contents: read`.
@@ -397,8 +423,8 @@ badge, alert and data rules are in [docs/TRAFFIC.md](../docs/TRAFFIC.md);
 
 | Tool | Version | Source |
 | --- | --- | --- |
-| Python | 3.13 in CI; 3.12 or later locally | `actions/setup-python` |
-| Node.js | 22 | `actions/setup-node` |
+| Python | 3.13.17 in CI; 3.12 or later locally | `actions/setup-python`, exact version in `repository-integrity.yml` |
+| Node.js | 22.23.4 in CI; 22 locally | `actions/setup-node`, exact version in `repository-integrity.yml` |
 | Ruff, mypy, PyYAML | 0.17.1, 2.4.0, 6.0.3 | `tools/requirements-quality-ci.txt`, hash-locked for CPython 3.13 on Linux x86_64 |
 | actionlint | 1.7.12 | Release archive verified by SHA-256 in the workflow |
 
@@ -414,6 +440,13 @@ reference run.
 actionlint is available from its
 [1.7.12 release](https://github.com/rhysd/actionlint/releases/tag/v1.7.12).
 
+The Python and Node.js versions of the required check are exact, so the
+runtime changes only through a reviewed pull request; Dependabot does not
+update them. To move to a newer patch of the same series, change both
+`python-version` and `node-version` in `repository-integrity.yml` and check
+that the runner's setup step reports the new version. A move to another
+series is a decision of its own.
+
 ## ☁️ Continuous integration
 
 `.github/workflows/repository-integrity.yml` runs `python tools/check.py --ci`
@@ -421,6 +454,8 @@ on every pull request into `main` or `release/**`, on every push to them and
 on manual dispatch. It has no path filter, so its `Repository integrity` job
 reports on every pull request and can be made a required check.
 
+- A newer run of the same pull request cancels the older one; a push or a
+  manual run is never cancelled, so every pushed commit keeps its result.
 - The job checks out the exact commit under review without persisting
   credentials and verifies that `HEAD` is that commit. For a pull request this
   is GitHub's test merge of the head into the base.

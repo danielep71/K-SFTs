@@ -381,6 +381,7 @@ Collateral Simple Method, and other prudential measures
 | [`docs/TRAFFIC.md`](docs/TRAFFIC.md) | Repository traffic history |
 | [`CHANGELOG.md`](CHANGELOG.md), [`RELEASING.md`](RELEASING.md) | Changes by version; preparing and publishing a release |
 | [`SECURITY.md`](SECURITY.md) | Reporting vulnerabilities; synthetic data only |
+| [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Expected behaviour and how to report a problem |
 | [`NOTICE.md`](NOTICE.md), [`LICENSE`](LICENSE) | Copyright, provenance and the MPL-2.0 licence |
 
 ---
