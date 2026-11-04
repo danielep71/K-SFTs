@@ -61,6 +61,11 @@ to v1.0.0.
 
 ### Changed
 
+- Traffic collection uses a repository-scoped GitHub App installation token
+  instead of a personal token. Configure `TRAFFIC_APP_CLIENT_ID` and
+  `TRAFFIC_APP_PRIVATE_KEY` in `analytics` before integration; retire the old
+  personal token only after a successful collection. Tests enforce that the
+  key and installation token stay in their respective steps (#272).
 - The active release branch is `release/0.3.0`, created from the `v0.2.0`
   commit; task branches start from it, and Dependabot targets it (#228).
   The closed `release/0.1.0` and `release/0.2.0` are deleted; `main` keeps
@@ -152,6 +157,11 @@ to v1.0.0.
   NettingSets class header no longer lists QCCP, so a workbook built from
   the 0.2.0 template fails the layout check: build it again from the new
   template.
+
+- The CCR framework diagram (`docs/assets/CCR_framework.svg` and `.png`)
+  uses the project names K-SACCR and K-SFTs, and its CCP capital box names no
+  project, as in the K-Risk Engines copy it now matches byte for byte;
+  `NOTICE.md` describes the names (#289).
 
 ### Fixed
 
