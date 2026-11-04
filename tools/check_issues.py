@@ -16,8 +16,9 @@ import sys
 import urllib.error
 import urllib.request
 from collections import Counter
-from collections.abc import Collection, Iterable, Mapping, Sequence
+from collections.abc import Callable, Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,13 @@ DEPENDABOT = Path(".github/dependabot.yml")
 # The tables of the Issues section of GOVERNANCE.md that explain the labels.
 LABEL_TABLES = {"| Priority | Use |", "| Label | Use |"}
 TABLE_LABEL = re.compile(r"^\|\s*`([^`]+)`\s*\|")
+# The target completion date: the Schedule section's line takes precedence over
+# the form field, which GitHub renders as a heading followed by the value.
+TARGET_LINE = re.compile(r"Target completion:\s*\*\*([^*\n]*)\*\*", re.I)
+TARGET_FIELD = "target_end_date"
+TARGET_LABEL = "Target end date"
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+NO_RESPONSE = "_No response_"
 API = "https://api.github.com"
 
 
@@ -43,6 +51,8 @@ class Issue:
     assignees: tuple[str, ...]
     milestone: str | None
     body: str
+    milestone_state: str | None = None  # "open" or "closed"; None without a milestone
+    milestone_due: str | None = None  # the milestone's due_on: an ISO timestamp, or None
 
 
 @dataclass(frozen=True)
@@ -53,7 +63,7 @@ class Finding:
 
 
 def issue_from_api(item: Mapping[str, Any]) -> Issue:
-    milestone = item.get("milestone")
+    milestone = item.get("milestone") or {}
     return Issue(
         number=int(item["number"]),
         state=str(item["state"]).lower(),
@@ -61,22 +71,97 @@ def issue_from_api(item: Mapping[str, Any]) -> Issue:
         assignees=tuple(str(user["login"]) for user in item.get("assignees", [])),
         milestone=str(milestone["title"]) if milestone else None,
         body=str(item.get("body") or ""),
+        milestone_state=str(milestone["state"]).lower() if milestone.get("state") else None,
+        milestone_due=str(milestone["due_on"]) if milestone.get("due_on") else None,
     )
+
+
+def section(body: str, matches: Callable[[str], bool]) -> list[str] | None:
+    """The lines under the first level-2 or level-3 heading whose text ``matches``,
+    up to the next such heading, or None if no heading matches."""
+    lines = body.splitlines()
+    for index, line in enumerate(lines):
+        match = HEADING.match(line)
+        if match and matches(match.group(1)):
+            found = []
+            for following in lines[index + 1:]:
+                if HEADING.match(following):
+                    break
+                found.append(following)
+            return found
+    return None
 
 
 def dependency_section(body: str) -> list[str] | None:
     """Return the lines of the issue's dependency section, or None if it has none."""
-    lines = body.splitlines()
-    for index, line in enumerate(lines):
-        match = HEADING.match(line)
-        if match and "dependencies" in match.group(1).lower():
-            section = []
-            for following in lines[index + 1:]:
-                if HEADING.match(following):
-                    break
-                section.append(following)
-            return section
-    return None
+    return section(body, lambda heading: "dependencies" in heading.lower())
+
+
+def heading_words(heading: str) -> str:
+    """The heading without leading emoji or punctuation, in lower case."""
+    return re.sub(r"^\W+", "", heading).strip().lower()
+
+
+def target_date(body: str) -> str | None:
+    """The issue's target completion date as written, or None if it states none.
+
+    The line ``Target completion: **YYYY-MM-DD**`` of the Schedule section (the
+    first heading whose first word is "Schedule", such as "Schedule — baseline
+    2026-10-29") takes precedence; otherwise the first non-blank line under the
+    form field's heading, unless GitHub rendered it as unanswered.
+    """
+    schedule = section(body, lambda heading: re.match(r"schedule\b", heading_words(heading)) is not None)
+    if schedule is not None:
+        for line in schedule:
+            if match := TARGET_LINE.search(line):
+                return match.group(1).strip()
+    field = section(body, lambda heading: heading_words(heading) == TARGET_LABEL.lower())
+    value = next((line.strip() for line in field or () if line.strip()), None)
+    return None if value in (None, NO_RESPONSE) else value
+
+
+def calendar_date(text: str) -> date | None:
+    """``text`` as a real calendar date in strict ISO form, or None."""
+    if not ISO_DATE.match(text):
+        return None
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def milestone_due_date(issue: Issue) -> date | None:
+    """The date part of the milestone's due date, or None if it has none."""
+    if issue.milestone_due is None:
+        return None
+    due = calendar_date(issue.milestone_due[:10])
+    if due is None:
+        raise ValueError(f"#{issue.number}: milestone due date {issue.milestone_due!r} is not ISO 8601")
+    return due
+
+
+def schedule_findings(issue: Issue) -> list[Finding]:
+    """The milestone must be open, and the target date real and not after its due date."""
+    findings = []
+    if issue.milestone and issue.milestone_state == "closed":
+        findings.append(Finding(issue.number, "milestone-closed",
+                                f"is in the closed milestone {issue.milestone!r}"))
+    written = target_date(issue.body)
+    if written is None:
+        return findings + [Finding(issue.number, "target-date-missing",
+                                   "states no target completion date: add "
+                                   "`Target completion: **YYYY-MM-DD**` under Schedule")]
+    target = calendar_date(written)
+    if target is None:
+        return findings + [Finding(issue.number, "target-date-invalid",
+                                   f"has target completion date {written!r}, "
+                                   "which is not a real YYYY-MM-DD date")]
+    due = milestone_due_date(issue)
+    if due is not None and target > due:
+        findings.append(Finding(issue.number, "target-date-after-due",
+                                f"has target completion date {target.isoformat()}, after the "
+                                f"due date {due.isoformat()} of its milestone"))
+    return findings
 
 
 def references(lines: Iterable[str], repository: str, own: int) -> set[int]:
@@ -143,6 +228,7 @@ def audit(issues: Sequence[Issue], states: Mapping[int, str], repository: str,
         if issue.state != "open":
             continue
         findings += metadata_findings(issue, assignee)
+        findings += schedule_findings(issue)
         findings += dependency_findings(issue, states, repository, pulls)
         if catalogue is not None:
             findings += [Finding(issue.number, "catalogue", f"has label {label!r}, "
@@ -256,6 +342,7 @@ def config_findings(root: Path) -> list[str]:
             problems.append(f"{name} must assign {assignee}")
         if not re.search(r"^\s*id:\s*dependencies\s*$", text, re.M):
             problems.append(f"{name} has no dependencies field")
+        problems += target_field_problems(name, text)
     config = forms / "config.yml"
     if not config.is_file() or not re.search(r"^blank_issues_enabled:\s*false\s*$",
                                              config.read_text(encoding="utf-8"), re.M):
@@ -278,6 +365,36 @@ def config_findings(root: Path) -> list[str]:
                      for found in block_lists(text, "assignees") for person in found if person != assignee]
     else:
         problems.append(f"{DEPENDABOT.as_posix()} is missing")
+    return problems
+
+
+def form_field(text: str, field_id: str) -> list[str] | None:
+    """The lines of the body element of an issue form whose ``id`` is ``field_id``,
+    read line by line: from its ``- type:`` line to the next one, or None."""
+    lines = text.splitlines()
+    starts = [index for index, line in enumerate(lines) if re.match(r"^\s*-\s+type:", line)]
+    for start, end in zip(starts, starts[1:] + [len(lines)], strict=True):
+        element = lines[start:end]
+        if any(re.match(rf"^\s*id:\s*{re.escape(field_id)}\s*(?:#.*)?$", line) for line in element):
+            return element
+    return None
+
+
+def target_field_problems(name: str, text: str) -> list[str]:
+    """The form must ask for the target end date as a required input whose label
+    is the heading ``target_date`` reads."""
+    element = form_field(text, TARGET_FIELD)
+    if element is None:
+        return [f"{name} has no {TARGET_FIELD} field"]
+    joined = "\n".join(element)
+    problems = []
+    if not re.match(r"^\s*-\s+type:\s*input\s*$", element[0]):
+        problems.append(f"{name}: {TARGET_FIELD} must be an input")
+    label = re.search(r"^\s*label:\s*(.*?)\s*$", joined, re.M)
+    if not label or heading_words(label.group(1).strip("\"'")) != TARGET_LABEL.lower():
+        problems.append(f"{name}: {TARGET_FIELD} must have the label {TARGET_LABEL!r}")
+    if not re.search(r"^\s*validations:\s*\n\s*required:\s*true\s*$", joined, re.M):
+        problems.append(f"{name}: {TARGET_FIELD} must be required")
     return problems
 
 

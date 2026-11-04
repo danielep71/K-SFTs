@@ -11,7 +11,7 @@ body:
 
         **Accurate · Current · Traceable to its source**
 
-        Documentation must match the code, the recorded decisions and the cited regulatory texts. Triage sets the milestone and confirms the priority (`P3` by default).
+        Documentation must match the code, the recorded decisions and the cited regulatory texts. Triage sets the milestone and confirms the priority (`P3` by default; `P1` only for a confirmed calculation bug, reported as a bug).
 
   - type: input
     id: location
@@ -74,6 +74,15 @@ body:
     attributes:
       label: "🧪 Validation evidence required"
       description: How the correction will be checked, for example `python tools/check.py`, a rendered review or a link check.
+    validations:
+      required: true
+
+  - type: input
+    id: target_end_date
+    attributes:
+      label: "📅 Target end date"
+      description: ISO date YYYY-MM-DD, not after the milestone's due date; triage checks it.
+      placeholder: YYYY-MM-DD
     validations:
       required: true
 

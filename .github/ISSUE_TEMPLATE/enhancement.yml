@@ -11,7 +11,7 @@ body:
 
         **Outcome first · Cited rule · Checkable acceptance · Explicit boundaries**
 
-        Describe the result you need and how it will be proved before any implementation. A calculation change cites its regulatory source and states units and valid input domains. Triage sets the milestone and confirms the priority (`P3` by default).
+        Describe the result you need and how it will be proved before any implementation. A calculation change cites its regulatory source and states units and valid input domains. Triage sets the milestone and confirms the priority (`P3` by default; `P1` only for a confirmed calculation bug, reported as a bug).
 
         > [!NOTE]
         > Synthetic data only: no real trades, counterparties, collateral, credentials or private links.
@@ -77,6 +77,21 @@ body:
     attributes:
       label: "💥 Compatibility impact"
       description: Effect on the public API, computed results, input or output layouts and supported hosts. Write "None" if there is none.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔀 Alternatives considered"
+      description: Optional. Other approaches, and why the requested behavior is preferred.
+
+  - type: input
+    id: target_end_date
+    attributes:
+      label: "📅 Target end date"
+      description: ISO date YYYY-MM-DD, not after the milestone's due date; triage checks it.
+      placeholder: YYYY-MM-DD
     validations:
       required: true
 

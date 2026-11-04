@@ -11,7 +11,7 @@ body:
 
         **Reproducible · Exact commit · Sourced expected value · Synthetic data only**
 
-        Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug.
+        Name the exact commit, give steps anyone can repeat, and state where the expected value comes from. Triage sets the milestone and confirms the priority: `P2` by default, `P1` only for a confirmed calculation bug: wrong results for valid inputs.
 
         > [!CAUTION]
         > Synthetic data only: never paste real trades, counterparties, collateral, credentials or private workbooks. Report a vulnerability privately as [`SECURITY.md`](https://github.com/danielep71/K-SFTs/blob/main/SECURITY.md) describes, never in an issue.
@@ -106,6 +106,21 @@ body:
     attributes:
       label: "🧪 Validation evidence required"
       description: The checks and evidence that will prove the fix, for example `python tools/check.py`, a regression case, or an Excel run on the exact commit.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "🩹 Evidence, workaround or recovery"
+      description: Optional. Logs or screenshots with synthetic data only (never a workbook), any workaround, and how to recover from the defect.
+
+  - type: input
+    id: target_end_date
+    attributes:
+      label: "📅 Target end date"
+      description: ISO date YYYY-MM-DD, not after the milestone's due date; triage checks it.
+      placeholder: YYYY-MM-DD
     validations:
       required: true
 

@@ -53,7 +53,7 @@ review. -->
 ## ☑️ Checklist
 
 - [ ] The base follows docs/GOVERNANCE.md: active release branch for tasks; main only for an approved integration.
-- [ ] Each linked issue has the assignee, exactly one priority label and a milestone; this PR has no milestone, links the relevant issues and carries appropriate labels.
+- [ ] Each linked issue has the assignee, exactly one priority label (`P1` only for a confirmed calculation bug) and a milestone; this PR has no milestone, links the relevant issues and carries appropriate labels.
 - [ ] Scope is focused: no unrelated changes, local artifacts or generated output.
 - [ ] Documentation affected by the change is updated, and a material change is recorded under `[Unreleased]` in CHANGELOG.md.
 - [ ] No tokens, credentials, real portfolio or client data.

@@ -20,7 +20,7 @@
     {
       "name": "ci",
       "color": "24292F",
-      "description": "Automated quality checks, workflow maintenance, or release certification"
+      "description": "Automated quality checks, workflow maintenance, or dependency updates"
     },
     {
       "name": "documentation",

@@ -17,8 +17,13 @@ on:
 
 permissions: {}
 
+# One queue per pull request for its events, and a separate one for the
+# daily and manual scans, so events of different pull requests never replace
+# each other while waiting.
 concurrency:
-  group: pr-milestones
+  group: >-
+    pr-milestones-${{ github.event_name == 'pull_request_target'
+    && format('pr-{0}', github.event.pull_request.number) || 'scan' }}
   cancel-in-progress: false
 
 jobs:
