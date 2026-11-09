@@ -47,7 +47,7 @@ copied into the repository; each keeps its own licence.
 | Tool | Version | Licence | Use |
 | --- | --- | --- | --- |
 | `actions/checkout`, `actions/setup-python`, `actions/setup-node`, `actions/upload-artifact`, `actions/create-github-app-token` | Pinned by full SHA in the workflows | MIT | GitHub Actions steps |
-| Ruff | 0.17.1 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
+| Ruff | 0.17.2 | MIT | Python lint (`tools/requirements-quality-ci.txt`) |
 | mypy | 2.4.0 | MIT | Python type check (`tools/requirements-quality-ci.txt`) |
 | actionlint | 1.7.12 | MIT | Workflow check, downloaded and verified by SHA-256 |
 | PyYAML | 6.0.3 | MIT | Workflow invariant check (`tools/requirements-quality-ci.txt`) |
@@ -57,7 +57,8 @@ The licences were checked on 2026-10-24 against the upstream licence files and
 package metadata, again for Ruff 0.17.1 and mypy 2.4.0 on 2026-10-29
 against their package metadata, and for PyYAML 6.0.3 on 2026-10-31 against
 its package metadata. The `actions/create-github-app-token` licence was
-checked at the pinned revision on 2026-10-31.
+checked at the pinned revision on 2026-10-31, and Ruff 0.17.2's on
+2026-11-09 against its package metadata.
 
 ## 🚫 Data
 
