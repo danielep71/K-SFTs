@@ -162,6 +162,10 @@ to v1.0.0.
   uses the project names K-SACCR and K-SFTs, and its CCP capital box names no
   project, as in the K-Risk Engines copy it now matches byte for byte;
   `NOTICE.md` describes the names (#289).
+- A sync pull request needs no new Codex review only when its head is the
+  integration's merge commit, its diff against the release branch is empty,
+  and the integration's final-head review covered the same tree; its record
+  names that review (#300). `Repository integrity` still runs on it.
 
 ### Fixed
 
