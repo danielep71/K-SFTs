@@ -62,7 +62,8 @@ release will be published (see [Releases](#-releases)).
 5. After the integration commit passes its checks on `main`, bring the
    release branch level with `main` through a sync pull request from `main`
    into the release branch, merged with a merge commit once its checks pass.
-   A sync pull request whose diff is empty needs CI only, no Codex review
+   A sync pull request whose head is the integration's merge commit and
+   whose diff is empty needs CI only, no new Codex review
    (see [Review](#-review)). No task pull request merges into the release
    branch between the integration and its sync: the release branch would
    gain a commit that `main` lacks, and the up-to-date rule would then refuse
@@ -121,13 +122,22 @@ coverage when it was skipped. If review fails or is unavailable, leave the
 pull request open and record the blocker.
 
 **Sync pull requests.** A sync pull request from `main` into the release
-branch (Integration, step 5) whose diff is empty changes no file: it only adds
-the integration commit, whose content was reviewed on its own pull requests.
-It needs CI only: `Repository integrity` must pass on its head, and no Codex
-review is required. Before merging, confirm that the diff is empty (`git diff`
-between the release branch and `main` shows nothing) and record that and the
-CI result in the pull request. A sync pull request that changes any file is
-reviewed like any other pull request, Codex included.
+branch (Integration, step 5) needs no new Codex review when all three hold:
+
+1. its head is the integration's merge commit;
+2. its diff against the release branch is empty (`git diff` between the
+   release branch and the head shows nothing); and
+3. the integration pull request's final-head review covered the same tree,
+   the release branch head that the integration merged.
+
+It then only adds the integration commit, whose content was reviewed there.
+It needs CI only: `Repository integrity` must pass on its head. Its record
+gives the head SHA and the empty diff, and names the integration's reviewed
+SHA and review link instead of a new review. A Codex review that starts on its
+own when the pull request opens is not waited for; if it has finished, its
+result is recorded too. A sync pull request that changes any file, or whose
+head is another commit, is reviewed like any other pull request, Codex
+included.
 
 ## 🔐 Protection policy
 
