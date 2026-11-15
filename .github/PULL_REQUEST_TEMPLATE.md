@@ -34,8 +34,9 @@ with the current head (docs/GOVERNANCE.md, Review). Write the reviewed SHA
 and the result here as text: the Codex summary comment is edited in place, so
 its link later shows another commit. For a bot-authored PR,
 record my review of the final head and that Codex was skipped.
-A sync PR whose diff is empty needs CI only: record the empty diff instead of a
-review. -->
+A sync PR whose head is the integration merge commit and whose diff is empty
+needs CI only: record the empty diff and name the integration's final-head
+review (SHA and link) instead of a new review (docs/GOVERNANCE.md, Review). -->
 
 - Final PR head SHA:
 - Review type (Codex / my review of a bot-authored PR / not required: empty-diff sync PR):
