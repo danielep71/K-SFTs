@@ -1151,14 +1151,13 @@ Private Function ReadPairs( _
                 Exit Function
             End If
             'Convert the elements; blank cells and empty strings stay 0
-            'CDbl stays unqualified: tools/lo_regression.py fails with VBA.CDbl
             If Not IsEmpty(PositionValues(ElementIndex)) And _
                 VarType(PositionValues(ElementIndex)) <> vbString Then
-                Positions(ElementIndex) = CDbl(PositionValues(ElementIndex))
+                Positions(ElementIndex) = VBA.CDbl(PositionValues(ElementIndex))
             End If
             If Not IsEmpty(HaircutValues(ElementIndex)) And _
                 VarType(HaircutValues(ElementIndex)) <> vbString Then
-                Haircuts(ElementIndex) = CDbl(HaircutValues(ElementIndex))
+                Haircuts(ElementIndex) = VBA.CDbl(HaircutValues(ElementIndex))
             End If
             'Return #NUM! for a negative haircut unless any sign is accepted
             If Haircuts(ElementIndex) < 0# And Not AnySign Then
