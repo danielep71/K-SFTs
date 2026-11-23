@@ -357,7 +357,9 @@ it must not be edited by hand.
 ## 🧾 Statements
 
 - Qualify VBA library calls with `VBA.` (`VBA.Len`, `VBA.Trim$`,
-  `VBA.CStr`) and prefer the `$` string functions.
+  `VBA.CStr`) and prefer the `$` string functions. LibreOffice Basic does
+  not know the `VBA` library name, so `tools/lo_regression.py` strips the
+  qualifier from its in-memory copy; the source keeps it.
 - Write `vbNullString` instead of `""`, and test emptiness with
   `VBA.Len(Text) = 0`.
 - Give `InStr` and `StrComp` an explicit compare mode (`vbBinaryCompare` or
