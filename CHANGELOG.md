@@ -166,6 +166,16 @@ to v1.0.0.
   integration's merge commit, its diff against the release branch is empty,
   and the integration's final-head review covered the same tree; its record
   names that review (#300). `Repository integrity` still runs on it.
+- Every VBA module follows one house layout (#307), described in
+  `docs/VBA_HOUSE_STYLE.md`: a nine-field header on every module and
+  procedure, section banners, intent comments, `VBA.`-qualified library
+  calls, `vbNullString`, explicit compare modes, `Case Else` in every
+  `Select Case` and spelled-out names instead of single-letter locals. New
+  procedures take their module's role prefix; new constants, enums and
+  types take `SFT_`. The calculation is unchanged: the LibreOffice
+  regression gives the same 118 figures, and `tools/lo_regression.py`
+  removes the `VBA.` qualifier, which LibreOffice Basic does not know, from
+  its in-memory copy.
 
 ### Fixed
 
