@@ -11,8 +11,10 @@ Harness-only shims, applied to an in-memory copy of the source, never to the
 files: `Attribute VB_*` lines are dropped, `vbObjectError + n` constants are
 replaced by their value (LibreOffice does not accept that constant
 expression), `Option Private Module` is removed,
-`Application.CalculationState <> xlDone` becomes False and `Debug.Print` is
-dropped (neither exists in LibreOffice).
+`Application.CalculationState <> xlDone` becomes False, `Debug.Print` is
+dropped (neither exists in LibreOffice) and the `VBA.` qualifier of a library
+call is removed outside string literals (LibreOffice does not define `VBA` as
+a library name; the bare name calls the same function).
 
 Usage: python tools/lo_regression.py [--keep OUT.xlsx]
 Needs LibreOffice (soffice), its Python UNO bridge and openpyxl.
@@ -43,6 +45,10 @@ RESULT_COLUMNS = {7: "holding_bd", 10: "sum_e", 11: "sum_c", 12: "net", 13: "gro
 ERROR_CODES = {"#NUM!": 2036, "#VALUE!": 2015}  # CVErr numbers of the worksheet errors a FormulaTest row expects
 
 
+STRING_LITERAL = re.compile(r'("(?:[^"\n]|"")*")')
+VBA_QUALIFIER = re.compile(r"(?<![\w.])VBA\.(?=[A-Za-z])")
+
+
 def prop(name: str, value: Any) -> Any:
     p = PropertyValue()
     p.Name, p.Value = name, value
@@ -56,6 +62,8 @@ def shim(source: str) -> str:
     source = source.replace("Option Private Module", "")
     source = source.replace("Application.CalculationState <> xlDone", "False")
     source = re.sub(r"^\s*Debug\.Print .*$", "", source, flags=re.M)
+    source = "".join(part if part.startswith('"') else VBA_QUALIFIER.sub("", part)
+                     for part in STRING_LITERAL.split(source))
     return "Option VBASupport 1\n" + source
 
 
