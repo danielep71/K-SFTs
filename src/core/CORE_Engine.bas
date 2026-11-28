@@ -29,15 +29,15 @@ Option Private Module
 '   back to its netting set, transactions and legs.
 '
 ' INPUTS
-'   None at module level. The engine reads the Params, NettingSets and
-'   Transactions sheets (see STATE OWNERSHIP).
+'   None at module level
 '
 ' RETURNS
 '   Nothing at module level. Calculate reports whether the run completed;
 '   the results are written to Results, Positions, LegCalc and Checks.
 '
 ' BEHAVIOR
-'   Calculate runs, in order:
+'   Calculate reads the Params, NettingSets and Transactions sheets (see
+'   STATE OWNERSHIP) and runs, in order:
 '     - ClearOutputSheets, ValidateSchema: clear old results, check the
 '       layout;
 '     - LoadParams, LoadFXTable, LoadHaircutTable, LoadRiskWeightTable,

@@ -1689,17 +1689,17 @@ Private Function EnvironmentSummary() As String
 ' DESCRIBE
 '------------------------------------------------------------------------------
     'Name the Office bitness
-        #If Win64 Then
-            Bitness = "64-bit"
-        #Else
-            Bitness = "32-bit"
-        #End If
+    #If Win64 Then
+        Bitness = "64-bit"
+    #Else
+        Bitness = "32-bit"
+    #End If
     'Name the VBA generation
-        #If VBA7 Then
-            Runtime = "VBA7"
-        #Else
-            Runtime = "VBA6"
-        #End If
+    #If VBA7 Then
+        Runtime = "VBA7"
+    #Else
+        Runtime = "VBA6"
+    #End If
     'Join the host and environment fields
         EnvironmentSummary = "host=" & Application.Name & "; version=" & Application.Version & _
             "; build=" & VBA.CStr(Application.Build) & "; os=" & Application.OperatingSystem & _

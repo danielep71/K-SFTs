@@ -1138,11 +1138,11 @@ Private Sub RunExampleOperation( _
 '     leaving Excel changed.
 '
 '   CleanupDetails
-'     Receives the cleanup failures; see RETURNS.
+'     Receives the cleanup failures joined by "; ", empty on success; set
+'     also when an error is raised.
 '
 ' RETURNS
-'   CleanupDetails: the cleanup failures joined by "; ", empty on success;
-'   set also when an error is raised.
+'   Nothing
 '
 ' BEHAVIOR
 '   1. Clears CleanupDetails.
