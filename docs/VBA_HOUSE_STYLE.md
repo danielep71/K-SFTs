@@ -6,12 +6,17 @@ source presentation. Where a component lives is owned by
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md); the supported hosts and
 the import and export steps by [INSTALLATION.md](../INSTALLATION.md).
 
-**Status on 2026-10-25:** the VBA components are the test modules in
+**Status on 2026-11-23:** the VBA components are the test modules in
 `tests/modules/` and the five prototype modules in `src/`
 ([PROTOTYPE.md](methodology/PROTOTYPE.md)), which pass the gates below but
 depart from the module rules where PROTOTYPE.md lists it: `src/core`
-modules read and write sheets. These rules apply to every component. The
-`vba-*` gates of `python tools/check.py` enforce the mechanical ones: component names and `VB_Name`, module options, ASCII,
+modules read and write sheets. These rules apply to every component. By my
+decision of 2026-11-23 ([#307](https://github.com/danielep71/K-SFTs/issues/307)),
+the naming, procedure contract, layout and statement rules below follow my
+`vba-house-style` conventions, and every module was reformatted to them
+without a change of behaviour; names that existed before that date keep
+their spelling. The `vba-*` gates of `python tools/check.py` enforce the
+mechanical rules: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 of whatever VBA would otherwise make public, and the public API inventory.
 Everything else is enforced by review
@@ -34,25 +39,28 @@ carries its role in an upper-case prefix.
 | Test module (`tests/modules/`) | `TEST_` + subject | `TEST_Harness` |
 | Example module (`examples/modules/`) | `Example` + subject | `ExampleSingleNettingSet` |
 | Worksheet function (`src/modules/`) | `SFT_` + quantity | `SFT_ExposureAmount` |
-| Procedure | PascalCase verb phrase | `ValidateCollateral` |
-| Parameter, local variable | PascalCase noun, spelled out | `MarketValue` |
-| Loop counter | one lower-case letter | `i`, `j`, `r`, `c` |
+| Procedure in a standard module | role prefix of its module + `_` + area + `_` + verb and object | `CORE_Collateral_ValidateHaircut` |
+| Class member, event handler | PascalCase; event handlers keep the name VBA requires | `MarketValue`, `Workbook_Open` |
+| Parameter, local variable, loop counter | PascalCase noun, spelled out | `MarketValue`, `RowIndex` |
 | Module-level variable | `m` + PascalCase | `mRunState` |
-| Public variable | `g` + PascalCase | `gLastError` |
-| Constant | UPPER_SNAKE_CASE | `MAX_NETTING_SETS` |
-| Error number constant | `ERR_` + UPPER_SNAKE_CASE | `ERR_INVALID_INPUT` |
-| Enum type / member | `Sft` + noun / short prefix + PascalCase | `SftProductType` / `ptRepo` |
+| Public variable | `gSFT_` + PascalCase | `gSFT_LastError` |
+| Constant | `SFT_` + UPPER_SNAKE_CASE | `SFT_MAX_NETTING_SETS` |
+| Error number constant | `SFT_ERR_` + UPPER_SNAKE_CASE | `SFT_ERR_INVALID_INPUT` |
+| Enum or user-defined type / member | `SFT_` + PascalCase / `SFT_` + PascalCase | `SFT_ProductType` / `SFT_ProductRepo` |
 
 The examples show the form of a name only; none of these components exists,
-and no product, quantity or parameter is decided by them.
+and no product, quantity or parameter is decided by them. The role prefix of
+a module is the part before its first underscore (`CORE`, `M`, `TEST`);
+`SFT_` is the project prefix. Procedures, constants and variables that
+existed on 2026-11-23 keep their names: renaming a public name is a contract
+change, and the reformatting of #307 renamed none.
 
 - Names are English and spelled out. Abbreviations are limited to
   established terms of the documented method, written in full in the
   procedure's comment the first time they appear.
-- A single letter is reserved for a loop counter: the variable a `For` loop,
-  or a `Do` loop stepping through positions, counts with. Every other
-  variable and parameter names what it holds, also in a short helper
-  (`Formatted`, not `s`).
+- No single-letter names and no type prefixes (`strName`, `lngCount`),
+  loop counters included: every variable and parameter names what it holds
+  (`RowIndex`, `Formatted`), also in a short helper.
 - Worksheet function arguments use the terms of the documented method once
   the framework is chosen ([D1](REPOSITORY_STRUCTURE.md#-open-product-and-methodology-decisions)).
 - VBA names are case-insensitive and the VBE shows one spelling per name
@@ -82,19 +90,35 @@ and no product, quantity or parameter is decided by them.
 
 ## 📜 Procedure contracts
 
-Every procedure documents its contract in a banner immediately after its
-signature. Omit sections that are empty.
+Every procedure documents its contract in a header immediately after its
+signature, and every module in its component header. Both use the same nine
+fields, in this order, none omitted: a field with nothing to say holds
+`None`.
 
-| Section | Explain |
+| Field | Explain |
 | --- | --- |
-| `PURPOSE` | The responsibility the procedure owns |
-| `INPUTS` | Meaning, **unit**, **valid domain** and ownership of each argument |
-| `RETURNS` | Meaning and unit of the result and of any output parameter |
+| `PURPOSE` | The responsibility it owns, in one or two sentences |
+| `WHY THIS EXISTS` | The problem it solves, or why it is shaped this way |
+| `INPUTS` | Each argument on its own line, then its meaning, **unit**, **valid domain** and ownership; `None` when there is none (`None at module level` in a component header) |
+| `RETURNS` | Meaning and unit of the result and of any output parameter; `Nothing` for a `Sub` |
+| `BEHAVIOR` | What happens, in order |
 | `ERROR POLICY` | Errors raised, propagated or contained, and cleanup |
-| `DEPENDENCIES` | Boundaries that matter to callers or maintainers |
-| `STATE OWNERSHIP` | Excel or module state read, changed or restored |
-| `REFERENCE` | The methodology entry, by source ID and locator, that the procedure implements |
-| `UPDATED` | Date the procedure was last revised |
+| `DEPENDENCIES` | Object models, components and procedures it relies on |
+| `NOTES` | Design decisions, caveats and call examples |
+| `UPDATED` | Date of the last substantive change, `YYYY-MM-DD` |
+
+- **Extra sections** that this repository needs come after `NOTES` and
+  before `UPDATED`, which is always last: `STATE OWNERSHIP` (Excel or module
+  state read, changed or restored), `REFERENCE` (the methodology entry, by
+  source ID and locator, that the procedure implements), and in a component
+  header `PUBLIC SURFACE`, `COMPATIBILITY` and `AUTHOR`.
+- **Compact header.** A `Private` procedure of at most 15 code lines may
+  keep only `PURPOSE`, `UPDATED` and the fields that say something. `Public`,
+  `Friend` and event procedures always carry all nine.
+- **Facts only.** A field states what the code and the methodology show;
+  where the reason for a choice is unknown, it says so rather than guessing.
+- A change of behaviour sets `UPDATED` to its date; a formatting-only change
+  keeps the existing date.
 
 ### Units and domains
 
@@ -119,7 +143,7 @@ signature. Omit sections that are empty.
 
 ### Return values and errors
 
-- **Error numbers** are named `ERR_` constants in the range
+- **Error numbers** are named error constants (`SFT_ERR_` for new ones) in the range
   `vbObjectError + 2048` to `vbObjectError + 4095`, defined once in a core
   module and re-exposed by the facade when callers need them. The test
   modules use `vbObjectError + 4064` to `vbObjectError + 4095`; production
@@ -174,7 +198,8 @@ it.
    failed. A helper per setting contains its own error and returns what
    failed as text, empty on success. The failures are returned to the
    caller, also when the primary error is re-raised. When only cleanup
-   failed, the procedure raises `ERR_CLEANUP_FAILED`, never success.
+   failed, the procedure raises its cleanup-failure error (`SFT_ERR_CLEANUP_FAILED`
+   in the sketch), never success.
 
 The reference implementation is `RunExampleOperation` in
 [tests/modules/TEST_Examples.bas](../tests/modules/TEST_Examples.bas), with
@@ -182,104 +207,169 @@ cases for the success path, a primary error with failed cleanup, and a
 cleanup-only failure. The sketch below shows the pattern.
 
 ```vb
-'In a standard module named M_Example
-Private Const ERR_CLEANUP_FAILED As Long = vbObjectError + 2049  'Sketch only
+'In a standard module named M_Example (sketch only)
+Private Const SFT_ERR_CLEANUP_FAILED     As Long = vbObjectError + 2049   'Only cleanup failed
 
+Public Sub M_Example_RunOperation( _
+    ByRef CleanupDetails As String)
+'
+'------------------------------------------------------------------------------
+'                         RUN AN OPERATION AND RESTORE
+'------------------------------------------------------------------------------
+' PURPOSE ... (the nine fields) ... UPDATED
+'------------------------------------------------------------------------------
 
-Public Sub RunOperation(ByRef CleanupDetails As String)
-    Dim SavedCalculation   As XlCalculation    'Calculation mode before the operation
-    Dim SavedScreen        As Boolean          'ScreenUpdating before the operation
-    Dim StateCaptured      As Boolean          'True once both were read
-    Dim ErrNumber          As Long             'Primary error number; 0 for none
-    Dim ErrSource          As String           'Primary error source
-    Dim ErrDescription     As String           'Primary error description
+'------------------------------------------------------------------------------
+' DECLARE
+'------------------------------------------------------------------------------
+    Const PROC_NAME             As String = "M_Example.M_Example_RunOperation"
 
+    Dim SavedCalculation        As XlCalculation    'Calculation mode before the operation
+    Dim SavedScreen             As Boolean          'ScreenUpdating before the operation
+    Dim StateCaptured           As Boolean          'True once both were read
+    Dim ErrNumber               As Long             'Primary error number; 0 for none
+    Dim ErrSource               As String           'Primary error source
+    Dim ErrDescription          As String           'Primary error description
+
+'------------------------------------------------------------------------------
+' INITIALIZE
+'------------------------------------------------------------------------------
+    'Start with no cleanup failure and route errors to the handler
         CleanupDetails = vbNullString
-        On Error GoTo Failed
+        On Error GoTo ErrorHandler
+
+'------------------------------------------------------------------------------
+' CHANGE APPLICATION STATE
+'------------------------------------------------------------------------------
+    'Capture what this procedure will change, then change it
         SavedCalculation = Application.Calculation
         SavedScreen = Application.ScreenUpdating
         StateCaptured = True
         Application.ScreenUpdating = False
         Application.Calculation = xlCalculationManual
 
-        '... work ...
+    '... work ...
 
+'------------------------------------------------------------------------------
+' EXIT PROCEDURE
+'------------------------------------------------------------------------------
 CleanUp:
+    'Restore only what this procedure changed, keeping each failure
         On Error GoTo 0
         If StateCaptured Then
             CleanupDetails = AppendDetail(RestoreCalculation(SavedCalculation), _
-                                          RestoreScreenUpdating(SavedScreen))
+                RestoreScreenUpdating(SavedScreen))
         End If
+    'Re-raise the primary error, else report a cleanup-only failure
         If ErrNumber <> 0 Then Err.Raise ErrNumber, ErrSource, ErrDescription
-        If Len(CleanupDetails) > 0 Then
-            Err.Raise ERR_CLEANUP_FAILED, "M_Example.RunOperation", CleanupDetails
+        If VBA.Len(CleanupDetails) > 0 Then
+            Err.Raise SFT_ERR_CLEANUP_FAILED, PROC_NAME, CleanupDetails
         End If
         Exit Sub
 
-Failed:
+'------------------------------------------------------------------------------
+' ERROR HANDLER
+'------------------------------------------------------------------------------
+ErrorHandler:
+    'Capture the primary error before cleanup can replace it
         ErrNumber = Err.Number
         ErrSource = Err.Source
         ErrDescription = Err.Description
+    'Restore state on the error path too
         Resume CleanUp
+
 End Sub
-
-
-Private Function RestoreCalculation( _
-    ByVal SavedCalculation As XlCalculation) _
-    As String
-
-        On Error GoTo Failed
-        Application.Calculation = SavedCalculation
-        Exit Function
-
-Failed:
-        RestoreCalculation = "Calculation not restored: " & Err.Description
-End Function
 ```
 
-`RestoreScreenUpdating` follows `RestoreCalculation`, and `AppendDetail` joins
-two failure texts with `"; "`, skipping empty ones.
+`RestoreCalculation` and `RestoreScreenUpdating` each contain their own error
+and return the failure as text, empty on success; `AppendDetail` joins two
+failure texts with `"; "`, skipping empty ones.
 
 Core procedures never change Excel state, so they need none of this.
 
 ## 🧱 Module layout
 
-1. `Attribute VB_Name` on the first line of a `.bas` export.
-2. A full-width module banner: name, purpose, public surface, dependencies,
-   state ownership, error policy, compatibility, updated date and author.
-3. `MODULE SETTINGS`: `Option Explicit`, plus `Option Private Module` where
-   required.
-4. `MODULE CONSTANTS`, and `MODULE STATE` when needed (never in
-   `src/core/`).
-5. Centered, uppercase procedure-group headings, then the procedures.
+1. The `Attribute` lines of the export, as the VBE writes them.
+2. One blank line, `Option Explicit` and, where required,
+   `Option Private Module`; one blank line.
+3. The component header: a lone `'` line, a banner, `' MODULE: <Name>`
+   (`' CLASS: <Name>` for a class; forms and document modules use
+   `MODULE:`), a banner, the nine fields with any extra sections, and a
+   closing banner.
+4. The declarations, each kind under its own section banner, in this order
+   and only when present: `PRIVATE TYPES`, `WINDOWS API DECLARATIONS`,
+   `PRIVATE CONSTANTS`, `PUBLIC CONSTANTS`, `PUBLIC ENUMS`, `PUBLIC TYPES`,
+   `PUBLIC STATE`, `PRIVATE STATE`. A module may add a section named for
+   what it holds (for example `SHEET NAMES`). Module state is never allowed
+   in `src/core/`.
+5. The procedures, families of them separated by group banners.
 
-Banners use an apostrophe and 78 `=`; section rules an apostrophe and 78 `-`.
-Source decorations are ASCII only.
+A banner is an apostrophe followed by 78 dashes, 79 columns in all. A test
+module may draw its component header with `=` instead. Three kinds:
 
-A generated module is exempt from the banner rules; its header says it is
-generated, names the generator and says it must not be edited by hand.
+- a **section banner**: a banner, `' ` and an upper-case title, a banner;
+- a **procedure title**: a banner, an upper-case verb phrase centred in the
+  78 columns after the apostrophe, a banner;
+- a **group banner**: a lone `'`, a banner, a lone `'`, a centred
+  upper-case title, a lone `'`, a banner, a lone `'`.
 
-## 📐 Indentation and wrapping
+Source decorations are ASCII only. A generated module is exempt from the
+banner rules; its header says it is generated, names the generator and says
+it must not be edited by hand.
 
-- Four-space levels; no tabs, no trailing whitespace.
-- Local declarations at four spaces with `As` aligned in each group; body
-  statements at eight spaces, nested blocks adding four.
-- Procedure declarations, `End Sub` / `End Function`, labels and `#If`
-  directives at column one.
-- A signature with parameters puts one parameter per continuation line, and
-  a function's return type on its own continuation line:
+## 📐 Procedure layout
 
-  ```vb
-  Public Function ValidateCollateral( _
-      ByVal MarketValue As Double, _
-      ByVal Haircut As Double) _
-      As Boolean
-  ```
+- **Signature:** explicit `Public`, `Private` or `Friend`; `ByVal` or `ByRef`
+  and an `As` type on every parameter; an `As` type on every function. A
+  signature too long for one line puts each parameter on its own line,
+  indented four, ending in `, _`; the closing parenthesis and the function's
+  `As` type follow the last parameter.
+- **Header:** after the signature, one blank line (none after a multi-line
+  signature), a lone `'`, the procedure title, the contract fields, a
+  closing banner, one blank line.
+- **Body:** section banners in this order, each only when it has content:
+  `DECLARE` (first `Const PROC_NAME As String = "<Module>.<Procedure>"`, used
+  as the source of every error raised, then each `Dim` with `As` and a
+  trailing comment aligned), `INITIALIZE` (`On Error GoTo ErrorHandler` and
+  initial state), task sections named by a short upper-case verb phrase
+  (`VALIDATE INPUTS`, `CALCULATE EXPOSURE`), `EXIT PROCEDURE` (cleanup and
+  the clean `Exit Sub` or `Exit Function`), `ERROR HANDLER` (the label, then
+  capture, cleanup and re-raise).
+- **Statements:** each statement, or small group of related statements, is
+  preceded by a one-line intent comment at four spaces (sentence case, no
+  space after the apostrophe, no final period); the code sits at eight
+  spaces and each nested block adds four. Labels (`ErrorHandler:`,
+  `CleanUp:`) sit at column one.
+- **Declarations:** everything under a module-level section banner is
+  indented four; within a block, `As` and the trailing comment fall in
+  aligned columns on multiples of four, and every declaration has a trailing
+  comment stating its role or unit.
+- **Spacing:** one blank line between `End Sub`, `End Function` or
+  `End Property` and what follows; two between the declarations and the
+  first group banner. Four-space indent unit, no tabs, no trailing white
+  space.
+- **Lines:** aim for 100 columns, never more than 120; a string literal's
+  content and an aligned trailing comment do not count. A continuation line
+  breaks after an operator or comma and is indented four more than its
+  statement; `Err.Raise` keeps number and source on the first line and the
+  message on the next.
 
-- Two empty lines between procedures. Aim for 79-column comments and about
-  100 columns of code.
-- Comments explain intent and invariants, not assignments. Each declaration
-  carries a short trailing comment stating its role or unit.
+## 🧾 Statements
+
+- Qualify VBA library calls with `VBA.` (`VBA.Len`, `VBA.Trim$`,
+  `VBA.CStr`) and prefer the `$` string functions. LibreOffice Basic does
+  not know the `VBA` library name, so `tools/lo_regression.py` strips the
+  qualifier from its in-memory copy; the source keeps it.
+- Write `vbNullString` instead of `""`, and test emptiness with
+  `VBA.Len(Text) = 0`.
+- Give `InStr` and `StrComp` an explicit compare mode (`vbBinaryCompare` or
+  `vbTextCompare`).
+- Name the counter after every `Next`.
+- One statement per line: no `:` separators. A one-line `If ... Then` is
+  allowed for a guard or an `Exit`.
+- Every `Select Case` has a `Case Else`, empty with a comment when no other
+  value can occur.
+- Release object variables with `Set ... = Nothing` on the exit path.
 
 <a id="export-compatibility"></a>
 
@@ -309,8 +399,11 @@ generated, names the generator and says it must not be edited by hand.
 ## 🔎 Review and validation
 
 - A formatting-only change leaves names, signatures, visibility, constants,
-  calculations, tests and error behavior unchanged; a defect found on the way
-  goes in a separate change.
+  string literals, calculations, tests and error behavior unchanged; it may
+  qualify library calls with `VBA.`, write `vbNullString`, name a `Next`
+  counter, add an empty `Case Else` or an explicit binary compare mode, and
+  rename local variables. A defect found on the way goes in a separate
+  change.
 - Comments are kept true. A change updates every module header, procedure
   header, `INPUTS` entry and line comment it makes stale, and the `UPDATED`
   date of each procedure and module it touches.
