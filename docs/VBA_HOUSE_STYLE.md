@@ -6,7 +6,7 @@ source presentation. Where a component lives is owned by
 [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md); the supported hosts and
 the import and export steps by [INSTALLATION.md](../INSTALLATION.md).
 
-**Status on 2026-11-23:** the VBA components are the test modules in
+**Status on 2026-11-28:** the VBA components are the test modules in
 `tests/modules/` and the five prototype modules in `src/`
 ([PROTOTYPE.md](methodology/PROTOTYPE.md)), which pass the gates below but
 depart from the module rules where PROTOTYPE.md lists it: `src/core`
@@ -15,7 +15,9 @@ decision of 2026-11-23 ([#307](https://github.com/danielep71/K-SFTs/issues/307))
 the naming, procedure contract, layout and statement rules below follow my
 `vba-house-style` conventions, and every module was reformatted to them
 without a change of behaviour; names that existed before that date keep
-their spelling. The `vba-*` gates of `python tools/check.py` enforce the
+their spelling. On 2026-11-28 the modules and this guide were aligned with
+the skill's updated checks
+([#311](https://github.com/danielep71/K-SFTs/issues/311)). The `vba-*` gates of `python tools/check.py` enforce the
 mechanical rules: component names and `VB_Name`, module options, ASCII,
 tabs and trailing white space, `PtrSafe`, jump targets, explicit visibility
 of whatever VBA would otherwise make public, and the public API inventory.
@@ -99,8 +101,8 @@ fields, in this order, none omitted: a field with nothing to say holds
 | --- | --- |
 | `PURPOSE` | The responsibility it owns, in one or two sentences |
 | `WHY THIS EXISTS` | The problem it solves, or why it is shaped this way |
-| `INPUTS` | Each argument on its own line, then its meaning, **unit**, **valid domain** and ownership; `None` when there is none (`None at module level` in a component header) |
-| `RETURNS` | Meaning and unit of the result and of any output parameter; `Nothing` for a `Sub` |
+| `INPUTS` | Each argument on its own line, named as in the signature, then its meaning, **unit**, **valid domain** and ownership; `None` when there is none; exactly `None at module level` in a component header |
+| `RETURNS` | Meaning and unit of the result; exactly `Nothing` for a `Sub`, whose output parameters are described under `INPUTS` |
 | `BEHAVIOR` | What happens, in order |
 | `ERROR POLICY` | Errors raised, propagated or contained, and cleanup |
 | `DEPENDENCIES` | Object models, components and procedures it relies on |
@@ -334,19 +336,26 @@ it must not be edited by hand.
   initial state), task sections named by a short upper-case verb phrase
   (`VALIDATE INPUTS`, `CALCULATE EXPOSURE`), `EXIT PROCEDURE` (cleanup and
   the clean `Exit Sub` or `Exit Function`), `ERROR HANDLER` (the label, then
-  capture, cleanup and re-raise).
+  capture, cleanup and re-raise). One blank line goes above a section banner
+  and none below it: the first line of the section follows the closing
+  banner line directly.
 - **Statements:** each statement, or small group of related statements, is
   preceded by a one-line intent comment at four spaces (sentence case, no
   space after the apostrophe, no final period); the code sits at eight
-  spaces and each nested block adds four. Labels (`ErrorHandler:`,
-  `CleanUp:`) sit at column one.
+  spaces and each nested block adds four. `Else`, `ElseIf` and `End If` sit
+  at the column of their `If`; `Next`, `Loop`, `End With` and `End Select`
+  at the column of their opening statement; each `Case` is indented four
+  from `Select Case` and its statements four more. A conditional-compilation
+  directive (`#If`, `#Else`, `#End If`) opens no block: the statements it
+  encloses stay at the level of the code around it. Labels
+  (`ErrorHandler:`, `CleanUp:`) sit at column one.
 - **Declarations:** everything under a module-level section banner is
   indented four; within a block, `As` and the trailing comment fall in
   aligned columns on multiples of four, and every declaration has a trailing
   comment stating its role or unit.
 - **Spacing:** one blank line between `End Sub`, `End Function` or
-  `End Property` and what follows; two between the declarations and the
-  first group banner. Four-space indent unit, no tabs, no trailing white
+  `End Property` and what follows, a group banner included; two between the
+  declarations and the first group banner. Four-space indent unit, no tabs, no trailing white
   space.
 - **Lines:** aim for 100 columns, never more than 120; a string literal's
   content and an aligned trailing comment do not count. A continuation line
@@ -356,10 +365,14 @@ it must not be edited by hand.
 
 ## 🧾 Statements
 
-- Qualify VBA library calls with `VBA.` (`VBA.Len`, `VBA.Trim$`,
-  `VBA.CStr`) and prefer the `$` string functions. LibreOffice Basic does
-  not know the `VBA` library name, so `tools/lo_regression.py` strips the
-  qualifier from its in-memory copy; the source keeps it.
+- The `VBA.` qualifier on library calls (`VBA.Len`, `VBA.Trim$`,
+  `VBA.CStr`) is optional. Write it where a reference may be lost (a bare
+  `Len` then stops compiling with "Can't find project or library", while
+  `VBA.Len` still compiles) or where a project name collides with a library
+  function (`Format`, `Replace`); otherwise follow the file you edit. The
+  modules of this repository use it. LibreOffice Basic does not know the
+  `VBA` library name, so `tools/lo_regression.py` strips the qualifier from
+  its in-memory copy; the source keeps it. Prefer the `$` string functions.
 - Write `vbNullString` instead of `""`, and test emptiness with
   `VBA.Len(Text) = 0`.
 - Give `InStr` and `StrComp` an explicit compare mode (`vbBinaryCompare` or
