@@ -102,7 +102,7 @@ class HarnessTest(unittest.TestCase):
     def test_error_values_are_not_compared_with_operators(self) -> None:
         # Comparing an error Variant with "=" or "<>" raises Type mismatch.
         self.assertNotRegex(self.text, r"\bActual\s*(?:=|<>)\s*CVErr\(")
-        self.assertIn("CStr(Actual) = CStr(CVErr(ExpectedCode))", self.text)
+        self.assertRegex(self.text, r"\b(?:VBA\.)?CStr\(Actual\) = (?:VBA\.)?CStr\(CVErr\(ExpectedCode\)\)")
 
     def test_documented_failure_ids_are_written(self) -> None:
         for failure in ("harness.case-id", "harness.no-case", "harness.completeness",
